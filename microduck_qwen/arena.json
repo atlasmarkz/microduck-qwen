@@ -1,0 +1,10 @@
+{
+  "bounds": [-0.6, 1.8, -1.2, 1.2],
+  "objects": {
+    "red_ball": {"label": "红球", "x": 1.2, "y": 0.25, "radius": 0.055, "collidable": true, "path_margin": 0.035},
+    "blue_marker": {"label": "蓝色标记", "x": 1.1, "y": -0.65, "radius": 0.075, "collidable": false}
+  },
+  "obstacles": [
+    {"name": "obstacle_1", "x": 0.6, "y": 0.12, "radius": 0.14, "height": 0.3}
+  ]
+}
