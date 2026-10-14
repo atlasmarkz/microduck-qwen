@@ -1,0 +1,137 @@
+{
+  "purpose": "memory_probe_only_not_deployable",
+  "status": "completed",
+  "fixture_sha256": "50c8aa41e068d259512106ecd93f26b341fea6fe13ba02b02bf21d672cf7ba35",
+  "image_sha256": "1f2ba5e17714f564dcc789f708a127bbed99ae5cf87f4147416d96bd8884dd7e",
+  "fixture_provenance": "Manually visually reviewed MuJoCo image from seed 42, runs/vision/20261014-183735-451128/initial-candidates.png. Blue ball with label 3 is image-left; red 2 is center; green 1 is right. This historical smoke-test frame is now development data and must never enter an independent held-out test. No VLM-generated answer was used as ground truth.",
+  "swap_before": "vm.swapusage: total = 12288.00M  used = 11842.44M  free = 445.56M  (encrypted)",
+  "steps": [
+    {
+      "step": 1,
+      "loss": 1.2190648317337036,
+      "elapsed_s": 6.6443271660245955
+    },
+    {
+      "step": 2,
+      "loss": 1.111086368560791,
+      "elapsed_s": 3.9953027500014286
+    },
+    {
+      "step": 3,
+      "loss": 0.8447550535202026,
+      "elapsed_s": 4.280814708006801
+    }
+  ],
+  "snapshots": [
+    {
+      "stage": "base_loaded",
+      "elapsed_s": 5.507550042006187,
+      "mlx_active_bytes": 1781947400,
+      "mlx_cache_bytes": 11196,
+      "mlx_peak_active_bytes": 1781947400,
+      "process_peak_rss_bytes": 844087296
+    },
+    {
+      "stage": "prepared",
+      "elapsed_s": 7.429630458995234,
+      "mlx_active_bytes": 1789204964,
+      "mlx_cache_bytes": 5426056,
+      "mlx_peak_active_bytes": 1794609672,
+      "process_peak_rss_bytes": 844087296
+    },
+    {
+      "stage": "update_1",
+      "elapsed_s": 14.074398750002729,
+      "mlx_active_bytes": 1795306872,
+      "mlx_cache_bytes": 268123652,
+      "mlx_peak_active_bytes": 5211041764,
+      "process_peak_rss_bytes": 844087296
+    },
+    {
+      "stage": "update_2",
+      "elapsed_s": 18.07348970900057,
+      "mlx_active_bytes": 1794714212,
+      "mlx_cache_bytes": 272650303,
+      "mlx_peak_active_bytes": 5217554415,
+      "process_peak_rss_bytes": 844087296
+    },
+    {
+      "stage": "update_3",
+      "elapsed_s": 22.356081083999015,
+      "mlx_active_bytes": 1794718192,
+      "mlx_cache_bytes": 271356199,
+      "mlx_peak_active_bytes": 5217584355,
+      "process_peak_rss_bytes": 844087296
+    },
+    {
+      "stage": "final",
+      "elapsed_s": 22.41715970900259,
+      "mlx_active_bytes": 1794718192,
+      "mlx_cache_bytes": 271356199,
+      "mlx_peak_active_bytes": 5217584355,
+      "process_peak_rss_bytes": 844087296
+    }
+  ],
+  "model": "mlx-community/Qwen3-VL-2B-Instruct-4bit",
+  "revision": "9c4f5209e57b31f4b9dfba735de3fb983739c9cc",
+  "device": {
+    "device_name": "Apple M4",
+    "max_recommended_working_set_size": 12713115648,
+    "memory_size": 17179869184,
+    "architecture": "applegpu_g16g",
+    "max_buffer_length": 9534832640,
+    "resource_limit": 499000
+  },
+  "versions": {
+    "mlx": "0.32.3",
+    "mlx-vlm": "0.7.8",
+    "transformers": "5.19.0"
+  },
+  "config": {
+    "batch_size": 1,
+    "rank": 8,
+    "last_layers": 8,
+    "target_modules": [
+      "q_proj",
+      "v_proj"
+    ],
+    "alpha": 16,
+    "gradient_checkpointing": true,
+    "learning_rate": 0.0001,
+    "max_seq_length": 768,
+    "seed": 42,
+    "base_quantization": "pre-existing MLX 4-bit, not bitsandbytes NF4",
+    "loss": "assistant completion only",
+    "vision_tower_frozen": true
+  },
+  "trainable_parameters": 458752,
+  "batch_shapes": {
+    "input_ids": [
+      1,
+      352
+    ],
+    "attention_mask": [
+      1,
+      352
+    ],
+    "completion_mask": [
+      1,
+      352
+    ],
+    "image_grid_thw": [
+      1,
+      3
+    ],
+    "pixel_values": [
+      1,
+      880,
+      1536
+    ]
+  },
+  "input_tokens": 336,
+  "supervised_tokens": 15,
+  "image_tokens": 220,
+  "changed_adapter_tensors": 32,
+  "elapsed_s": 22.41751770899282,
+  "swap_after": "vm.swapusage: total = 15360.00M  used = 14093.06M  free = 1266.94M  (encrypted)"
+}

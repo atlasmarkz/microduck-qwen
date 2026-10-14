@@ -2,7 +2,7 @@
 
 ## 项目目标与当前状态
 
-研究目标是后训练 Qwen-VL，使其根据视觉、自然语言和历史反馈产生高层决策，结合 MicroDuck 已有 RL 步态完成仿真控制。当前提交包含 **Qwen3-0.6B 文本 LoRA SFT** 和 **冻结 Qwen3-VL-2B 的视觉工程基线**；Qwen-VL 图文后训练和高层闭环 RL 尚未实现，不能把已有安全规则或文本指标当成视觉后训练成果。
+研究目标是后训练 Qwen-VL，使其根据视觉、自然语言和历史反馈产生高层决策，结合 MicroDuck 已有 RL 步态完成仿真控制。当前提交包含 **Qwen3-0.6B 文本 LoRA SFT**、**冻结 Qwen3-VL-2B 的视觉工程基线**和 **3 步真实图文 LoRA 内存探针**。任务级图文 SFT、训练后适配器接入控制和高层闭环 RL 尚未完成，不能把已有安全规则或文本指标当成视觉后训练成果。Mac 实测与 RTX 3060 8GB 的后续训练计划见 [TRAINING_PLAN.md](TRAINING_PLAN.md)。
 
 获取源码：
 
@@ -132,7 +132,7 @@ python3 -m unittest discover -s tests -v
 
 ## 后续研究
 
-模型选型、Qwen-VL 的适用边界和视觉闭环实验设计见 [ANALYSIS.md](ANALYSIS.md)。当前仍使用 Qwen3-0.6B，尚未接入或训练 VLM。
+模型选型、Qwen-VL 的适用边界和视觉闭环实验设计见 [ANALYSIS.md](ANALYSIS.md)。文本分支使用 Qwen3-0.6B；视觉分支已接入冻结 Qwen3-VL-2B，独立图文 LoRA 内存探针已跑通，正式任务训练与控制接入仍待实现，详见 [TRAINING_PLAN.md](TRAINING_PLAN.md)。
 
 1. 收集真实中文表达与失败案例，扩大独立测试集；比较原始模型、SFT 模型及规则/更大模型基线。
 2. 将仿真真实状态替换为视觉检测与状态估计，评测感知误差下的任务成功率。

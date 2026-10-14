@@ -1,0 +1,7 @@
+{
+  "purpose": "memory_probe_only",
+  "image": "vision_lora_probe.png",
+  "provenance": "Manually visually reviewed MuJoCo image from seed 42, runs/vision/20261014-183735-451128/initial-candidates.png. Blue ball with label 3 is image-left; red 2 is center; green 1 is right. This historical smoke-test frame is now development data and must never enter an independent held-out test. No VLM-generated answer was used as ground truth.",
+  "prompt": "Which ball does the user mean? Read its color and the number directly ABOVE it in the image. Left/right means image left/right, never number order. User: 走到画面左边的球旁边. Return ONLY JSON with keys status (visible/partial/not_visible/ambiguous/stop/unsupported), color (red/blue/green or null), id (integer or null). If occluded, absent or ambiguous, use null color and id.",
+  "answer": {"status": "visible", "color": "blue", "id": 3}
+}
