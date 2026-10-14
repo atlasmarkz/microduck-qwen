@@ -28,6 +28,13 @@ def main():
         original_dispatch = body_server.Handler.dispatch
 
         def dispatch(handler, body, request):
+            if request.get("op") in ("collection_frame", "collection_stats"):
+                if os.environ.get("MICRODUCK_COLLECT_GT") != "1":
+                    raise RuntimeError("ground truth endpoint disabled outside collection")
+                if request["op"] == "collection_frame":
+                    return body.camera.collection_packet()
+                with body.world.lock:
+                    return dict(body.world.collection_stats)
             if request.get("op") == "vision":
                 if body.camera is None:
                     raise RuntimeError("camera disabled")
@@ -114,6 +121,10 @@ def main():
             self.bam = MujocoController(
                 motor, names, self.model, self.data, vin_drop_gain=0.0, vin_min=6.0
             )
+            self.collection_stats = {"steps_with_scene_contact": 0, "minimum_contact_distance_m": None}
+            self.scene_geoms = {i for i in range(self.model.ngeom)
+                                if (self.model.geom(i).name or "").startswith("goal_")
+                                or (self.model.geom(i).name or "") in {o["name"] for o in scene["obstacles"]}}
 
         def step(self, times=1):
             with self.lock:
@@ -123,6 +134,15 @@ def main():
                     else:
                         self.data.ctrl[:] = 0.0
                     mujoco.mj_step(self.model, self.data)
+                    if os.environ.get("MICRODUCK_COLLECT_GT") == "1":
+                        contacts = [float(contact.dist) for contact in self.data.contact
+                                    if ((contact.geom1 in self.scene_geoms and self.model.geom_bodyid[contact.geom2] > 0)
+                                        or (contact.geom2 in self.scene_geoms and self.model.geom_bodyid[contact.geom1] > 0))
+                                    and contact.dist <= 0]
+                        if contacts:
+                            self.collection_stats["steps_with_scene_contact"] += 1
+                            previous = self.collection_stats["minimum_contact_distance_m"]
+                            self.collection_stats["minimum_contact_distance_m"] = min(contacts + ([previous] if previous is not None else []))
                     for body in self.bodies:
                         if not body.released or time.monotonic() < getattr(
                             body, "hold_until", 0.0

@@ -10,6 +10,7 @@ from contextlib import ExitStack
 from dataclasses import dataclass
 from datetime import datetime
 import fcntl
+import hashlib
 import json
 import math
 from pathlib import Path
@@ -235,8 +236,31 @@ def validate_answer(raw, candidates):
     return answer
 
 
+def visual_prompt(instruction):
+    return (
+        "Which ball does the user mean? Read its color and the number directly ABOVE it in the image. "
+        "Left/right means image left/right, never number order. User: "
+        + instruction
+        + ". Return ONLY JSON with keys status (visible/partial/not_visible/ambiguous/stop/unsupported), "
+        "color (red/blue/green or null), id (integer or null). "
+        "If occluded, absent or ambiguous, use null color and id."
+    )
+
+
+def adapter_metadata(adapter):
+    path = (ROOT / adapter).resolve()
+    report = json.loads((path / "training_report.json").read_text())
+    weights = path / "adapters.safetensors"
+    checksum = hashlib.sha256(weights.read_bytes()).hexdigest()
+    if (report.get("format"), report.get("status"), report.get("model"), report.get("revision")) != (
+        "vision_sft_v1", "completed", MODEL, REVISION
+    ) or checksum != report.get("adapter_sha256"):
+        raise ValueError("Adapter must be a completed compatible vision SFT run with matching weights hash")
+    return {"path": str(path), "sha256": checksum, "training_manifest_sha256": report["dataset_manifest_sha256"]}
+
+
 class VisionPlanner:
-    def __init__(self):
+    def __init__(self, adapter=None):
         from mlx_vlm import load
         from mlx_vlm.utils import load_config
 
@@ -249,7 +273,9 @@ class VisionPlanner:
         )
         if not self.path.exists():
             raise FileNotFoundError("先执行 vision download 获取固定版本视觉模型")
-        self.model, self.processor = load(str(self.path), trust_remote_code=False)
+        self.adapter = adapter_metadata(adapter) if adapter is not None else None
+        self.model, self.processor = load(str(self.path), trust_remote_code=False,
+                                          adapter_path=self.adapter["path"] if self.adapter else None)
         self.config = load_config(str(self.path))
 
     def predict(self, instruction, image, candidates):
@@ -259,14 +285,7 @@ class VisionPlanner:
         # A short visual question preserves spatial reading better than the long
         # action/schema prompt used in the initial failed experiment. The VLM only
         # selects a referent; controller actions are deliberately outside its job.
-        prompt = (
-            "Which ball does the user mean? Read its color and the number directly ABOVE it in the image. "
-            "Left/right means image left/right, never number order. User: "
-            + instruction
-            + ". Return ONLY JSON with keys status (visible/partial/not_visible/ambiguous/stop/unsupported), "
-            "color (red/blue/green or null), id (integer or null). "
-            "If occluded, absent or ambiguous, use null color and id."
-        )
+        prompt = visual_prompt(instruction)
         formatted = apply_chat_template(
             self.processor, self.config, prompt, num_images=1
         )
@@ -288,7 +307,8 @@ class VisionPlanner:
             "latency_s": time.perf_counter() - started,
             "model": MODEL,
             "revision": REVISION,
-            "fine_tuned": False,
+            "fine_tuned": bool(self.adapter),
+            "adapter": self.adapter,
             "input_image": str(image),
             "peak_memory_gb": getattr(output, "peak_memory", None),
             "prompt_tokens": output.prompt_tokens,
@@ -459,6 +479,14 @@ class VisualGuard:
         return self.last
 
 
+def explicit_stop_instruction(instruction):
+    # A hallucinated stop is safe nonexecution, not successful navigation.
+    return bool(re.fullmatch(
+        r"(?:请|马上|立刻)?(?:停(?:一下|下来|下|止(?:移动|行走)?)?|别走了?|不要动|暂停)|(?:please )?(?:stop|halt)(?: moving| walking| now)?",
+        instruction.strip().lower().rstrip("。！! ."),
+    ))
+
+
 def run_instruction(planner, instruction, info, preview=False, timeout=60):
     directory = ROOT / "runs/vision" / datetime.now().strftime("%Y%m%d-%H%M%S-%f")
     directory.mkdir(parents=True)
@@ -483,7 +511,9 @@ def run_instruction(planner, instruction, info, preview=False, timeout=60):
             print(json.dumps(result["answer"], ensure_ascii=False), flush=True)
             answer = result["answer"]
             if answer["status"] == "stop":
-                result.update(success=True, stopped=True)
+                result.update(success=explicit_stop_instruction(instruction), stopped=True)
+                if not result["success"]:
+                    result["stopped_reason"] = "model requested stop for a non-stop instruction"
             elif answer["status"] != "ok":
                 result["stopped_reason"] = answer["status"] + ": " + answer["reason"]
             else:
@@ -570,6 +600,8 @@ def main():
     )
     parser.add_argument("instruction", nargs="?")
     parser.add_argument("--timeout", type=float, default=60)
+    parser.add_argument("--adapter", type=Path, help="explicit completed vision SFT adapter; default remains frozen")
+    parser.add_argument("--manifest", type=Path, help="explicit isolated simulator metadata")
     args = parser.parse_args()
     if args.command == "download":
         from huggingface_hub import snapshot_download
@@ -589,7 +621,7 @@ def main():
         )
         print(path)
         return
-    info = json.loads((ROOT / "runs/vision-simulator.json").read_text())
+    info = json.loads((args.manifest or ROOT / "runs/vision-simulator.json").read_text())
     if not info.get("vision") or not Path(info["socket"]).exists():
         raise RuntimeError(
             "视觉实例未运行，请先执行 python -m microduck_qwen.sim --vision"
@@ -611,7 +643,7 @@ def main():
         return
     if args.command in ("plan", "run") and not args.instruction:
         parser.error("需要提供自然语言指令")
-    planner = VisionPlanner()
+    planner = VisionPlanner(args.adapter)
     if args.command == "chat":
         print("第一视角视觉导航：输入指令，exit退出；Ctrl+C停止。")
         while True:

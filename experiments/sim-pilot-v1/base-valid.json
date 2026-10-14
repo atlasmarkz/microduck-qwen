@@ -1,0 +1,386 @@
+{
+  "split": "valid",
+  "dataset_manifest_sha256": "47f4cbc170261610421eb799c2a1ae2f0b2188b4ec0355aec79a8e82ba890b44",
+  "model": "mlx-community/Qwen3-VL-2B-Instruct-4bit",
+  "revision": "9c4f5209e57b31f4b9dfba735de3fb983739c9cc",
+  "adapter": null,
+  "sampling_seed": 42,
+  "results": [
+    {
+      "id": "valid-20000-0-0",
+      "scene_seed": 20000,
+      "expected": {
+        "status": "visible",
+        "color": "red",
+        "id": 1
+      },
+      "task_type": "color",
+      "predicted": {
+        "status": "visible",
+        "color": "red",
+        "id": 1
+      },
+      "raw": "```json\n{\n  \"status\": \"visible\",\n  \"color\": \"red\",\n  \"id\": 1\n}\n```",
+      "latency_s": 1.255786875000922,
+      "correct": true
+    },
+    {
+      "id": "valid-20000-0-1",
+      "scene_seed": 20000,
+      "expected": {
+        "status": "visible",
+        "color": "blue",
+        "id": 3
+      },
+      "task_type": "color",
+      "predicted": {
+        "status": "visible",
+        "color": "blue",
+        "id": 3
+      },
+      "raw": "```json\n{\n  \"status\": \"visible\",\n  \"color\": \"blue\",\n  \"id\": 3\n}\n```",
+      "latency_s": 0.982148540992057,
+      "correct": true
+    },
+    {
+      "id": "valid-20000-0-2",
+      "scene_seed": 20000,
+      "expected": {
+        "status": "visible",
+        "color": "green",
+        "id": 2
+      },
+      "task_type": "color",
+      "predicted": {
+        "status": "visible",
+        "color": "green",
+        "id": 2
+      },
+      "raw": "```json\n{\n  \"status\": \"visible\",\n  \"color\": \"green\",\n  \"id\": 2\n}\n```",
+      "latency_s": 1.0020059999951627,
+      "correct": true
+    },
+    {
+      "id": "valid-20000-0-3",
+      "scene_seed": 20000,
+      "expected": {
+        "status": "visible",
+        "color": "red",
+        "id": 1
+      },
+      "task_type": "side",
+      "predicted": {
+        "status": "visible",
+        "color": "red",
+        "id": 1
+      },
+      "raw": "```json\n{\n  \"status\": \"visible\",\n  \"color\": \"red\",\n  \"id\": 1\n}\n```",
+      "latency_s": 0.9847912910045125,
+      "correct": true
+    },
+    {
+      "id": "valid-20000-0-4",
+      "scene_seed": 20000,
+      "expected": {
+        "status": "visible",
+        "color": "blue",
+        "id": 3
+      },
+      "task_type": "side",
+      "predicted": {
+        "status": "visible",
+        "color": "blue",
+        "id": 3
+      },
+      "raw": "```json\n{\n  \"status\": \"visible\",\n  \"color\": \"blue\",\n  \"id\": 3\n}\n```",
+      "latency_s": 0.9809355000033975,
+      "correct": true
+    },
+    {
+      "id": "valid-20000-0-5",
+      "scene_seed": 20000,
+      "expected": {
+        "status": "stop",
+        "color": null,
+        "id": null
+      },
+      "task_type": "stop",
+      "predicted": {
+        "status": "visible",
+        "color": "red",
+        "id": 1
+      },
+      "raw": "```json\n{\n  \"status\": \"visible\",\n  \"color\": \"red\",\n  \"id\": 1\n}\n```",
+      "latency_s": 0.9813173750007991,
+      "correct": false
+    },
+    {
+      "id": "valid-20000-0-6",
+      "scene_seed": 20000,
+      "expected": {
+        "status": "unsupported",
+        "color": null,
+        "id": null
+      },
+      "task_type": "unsupported",
+      "predicted": {
+        "status": "visible",
+        "color": "red",
+        "id": 1
+      },
+      "raw": "```json\n{\n  \"status\": \"visible\",\n  \"color\": \"red\",\n  \"id\": 1\n}\n```",
+      "latency_s": 0.9954297909862362,
+      "correct": false
+    },
+    {
+      "id": "valid-20001-0-0",
+      "scene_seed": 20001,
+      "expected": {
+        "status": "partial",
+        "color": null,
+        "id": null
+      },
+      "task_type": "color",
+      "correct": false,
+      "error": "VLM color/number binding disagrees with RGB proposals",
+      "raw": "```json\n{\n  \"status\": \"visible\",\n  \"color\": \"red\",\n  \"id\": 1\n}\n```"
+    },
+    {
+      "id": "valid-20001-0-1",
+      "scene_seed": 20001,
+      "expected": {
+        "status": "visible",
+        "color": "blue",
+        "id": 2
+      },
+      "task_type": "color",
+      "predicted": {
+        "status": "visible",
+        "color": "blue",
+        "id": 2
+      },
+      "raw": "```json\n{\n  \"status\": \"visible\",\n  \"color\": \"blue\",\n  \"id\": 2\n}\n```",
+      "latency_s": 0.9842515829950571,
+      "correct": true
+    },
+    {
+      "id": "valid-20001-0-2",
+      "scene_seed": 20001,
+      "expected": {
+        "status": "visible",
+        "color": "green",
+        "id": 1
+      },
+      "task_type": "color",
+      "predicted": {
+        "status": "visible",
+        "color": "green",
+        "id": 1
+      },
+      "raw": "```json\n{\n  \"status\": \"visible\",\n  \"color\": \"green\",\n  \"id\": 1\n}\n```",
+      "latency_s": 0.9824529580073431,
+      "correct": true
+    },
+    {
+      "id": "valid-20001-0-3",
+      "scene_seed": 20001,
+      "expected": {
+        "status": "partial",
+        "color": null,
+        "id": null
+      },
+      "task_type": "side",
+      "predicted": {
+        "status": "visible",
+        "color": "red",
+        "id": 3
+      },
+      "raw": "```json\n{\n  \"status\": \"visible\",\n  \"color\": \"red\",\n  \"id\": 3\n}\n```",
+      "latency_s": 1.0179266250052024,
+      "correct": false
+    },
+    {
+      "id": "valid-20001-0-4",
+      "scene_seed": 20001,
+      "expected": {
+        "status": "visible",
+        "color": "blue",
+        "id": 2
+      },
+      "task_type": "side",
+      "predicted": {
+        "status": "visible",
+        "color": "blue",
+        "id": 2
+      },
+      "raw": "```json\n{\n  \"status\": \"visible\",\n  \"color\": \"blue\",\n  \"id\": 2\n}\n```",
+      "latency_s": 0.9739160830213223,
+      "correct": true
+    },
+    {
+      "id": "valid-20001-0-5",
+      "scene_seed": 20001,
+      "expected": {
+        "status": "stop",
+        "color": null,
+        "id": null
+      },
+      "task_type": "stop",
+      "predicted": {
+        "status": "visible",
+        "color": "green",
+        "id": 1
+      },
+      "raw": "```json\n{\n  \"status\": \"visible\",\n  \"color\": \"green\",\n  \"id\": 1\n}\n```",
+      "latency_s": 0.9767586659872904,
+      "correct": false
+    },
+    {
+      "id": "valid-20001-0-6",
+      "scene_seed": 20001,
+      "expected": {
+        "status": "unsupported",
+        "color": null,
+        "id": null
+      },
+      "task_type": "unsupported",
+      "predicted": {
+        "status": "visible",
+        "color": "green",
+        "id": 1
+      },
+      "raw": "```json\n{\n  \"status\": \"visible\",\n  \"color\": \"green\",\n  \"id\": 1\n}\n```",
+      "latency_s": 0.9775442919926718,
+      "correct": false
+    },
+    {
+      "id": "valid-20002-0-0",
+      "scene_seed": 20002,
+      "expected": {
+        "status": "not_visible",
+        "color": null,
+        "id": null
+      },
+      "task_type": "color",
+      "predicted": {
+        "status": "visible",
+        "color": "green",
+        "id": 1
+      },
+      "raw": "```json\n{\n  \"status\": \"visible\",\n  \"color\": \"green\",\n  \"id\": 1\n}\n```",
+      "latency_s": 0.9985900000028778,
+      "correct": false
+    },
+    {
+      "id": "valid-20002-0-1",
+      "scene_seed": 20002,
+      "expected": {
+        "status": "visible",
+        "color": "blue",
+        "id": 2
+      },
+      "task_type": "color",
+      "predicted": {
+        "status": "visible",
+        "color": "blue",
+        "id": 2
+      },
+      "raw": "```json\n{\n  \"status\": \"visible\",\n  \"color\": \"blue\",\n  \"id\": 2\n}\n```",
+      "latency_s": 0.9747254580142908,
+      "correct": true
+    },
+    {
+      "id": "valid-20002-0-2",
+      "scene_seed": 20002,
+      "expected": {
+        "status": "visible",
+        "color": "green",
+        "id": 1
+      },
+      "task_type": "color",
+      "predicted": {
+        "status": "visible",
+        "color": "green",
+        "id": 1
+      },
+      "raw": "```json\n{\n  \"status\": \"visible\",\n  \"color\": \"green\",\n  \"id\": 1\n}\n```",
+      "latency_s": 0.9745664999936707,
+      "correct": true
+    },
+    {
+      "id": "valid-20002-0-3",
+      "scene_seed": 20002,
+      "expected": {
+        "status": "visible",
+        "color": "green",
+        "id": 1
+      },
+      "task_type": "side",
+      "predicted": {
+        "status": "visible",
+        "color": "green",
+        "id": 1
+      },
+      "raw": "```json\n{\n  \"status\": \"visible\",\n  \"color\": \"green\",\n  \"id\": 1\n}\n```",
+      "latency_s": 0.9679812079994008,
+      "correct": true
+    },
+    {
+      "id": "valid-20002-0-4",
+      "scene_seed": 20002,
+      "expected": {
+        "status": "visible",
+        "color": "blue",
+        "id": 2
+      },
+      "task_type": "side",
+      "predicted": {
+        "status": "visible",
+        "color": "blue",
+        "id": 2
+      },
+      "raw": "```json\n{\n  \"status\": \"visible\",\n  \"color\": \"blue\",\n  \"id\": 2\n}\n```",
+      "latency_s": 0.9916798749763984,
+      "correct": true
+    },
+    {
+      "id": "valid-20002-0-5",
+      "scene_seed": 20002,
+      "expected": {
+        "status": "stop",
+        "color": null,
+        "id": null
+      },
+      "task_type": "stop",
+      "predicted": {
+        "status": "visible",
+        "color": "green",
+        "id": 1
+      },
+      "raw": "```json\n{\n  \"status\": \"visible\",\n  \"color\": \"green\",\n  \"id\": 1\n}\n```",
+      "latency_s": 0.978227625018917,
+      "correct": false
+    },
+    {
+      "id": "valid-20002-0-6",
+      "scene_seed": 20002,
+      "expected": {
+        "status": "unsupported",
+        "color": null,
+        "id": null
+      },
+      "task_type": "unsupported",
+      "predicted": {
+        "status": "visible",
+        "color": "green",
+        "id": 1
+      },
+      "raw": "```json\n{\n  \"status\": \"visible\",\n  \"color\": \"green\",\n  \"id\": 1\n}\n```",
+      "latency_s": 0.9750728340004571,
+      "correct": false
+    }
+  ],
+  "correct": 12,
+  "total": 21,
+  "note": "Raw visual decisions before controller safety guards; development pilot, not publication benchmark"
+}

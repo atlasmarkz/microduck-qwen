@@ -19,6 +19,7 @@ def main():
     parser.add_argument("--viewer", action="store_true")
     parser.add_argument("--port", type=int)
     parser.add_argument("--vision", action="store_true")
+    parser.add_argument("--collect-gt", action="store_true", help="isolated collection-only segmentation/verification endpoint")
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument(
         "--occlusion", choices=["none", "partial", "full", "absent"], default="none"
@@ -39,6 +40,8 @@ def main():
     )
     parser.add_argument("--walking-policy", default="alpha_walking.onnx")
     args = parser.parse_args()
+    if args.collect_gt and not args.vision:
+        parser.error("--collect-gt requires --vision")
     args.port = args.port or (7822 if args.vision else 7821)
     with socket.socket() as check:
         check.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -84,6 +87,10 @@ def main():
         ORT_DYLIB_PATH=str(ort[0]),
     )
     scene_path = None
+    if args.collect_gt:
+        env["MICRODUCK_COLLECT_GT"] = "1"
+    else:
+        env.pop("MICRODUCK_COLLECT_GT", None)
     if args.vision:
         from .vision_scene import make_scene
 
@@ -213,6 +220,7 @@ def main():
             "body_pid": children[0].pid,
             "robotd_pid": children[1].pid,
             "vision": args.vision,
+            "collection_ground_truth": args.collect_gt,
             "scene_file": str(scene_path) if scene_path else None,
             "seed": args.seed if args.vision else None,
             "occlusion": args.occlusion if args.vision else None,

@@ -5,6 +5,7 @@ localization; extrinsics currently use MuJoCo pose (explicit oracle localization
 """
 
 import base64
+import os
 import threading
 import time
 import zlib
@@ -43,6 +44,8 @@ class RGBDCamera:
         self.lock = threading.Lock()
         self.latest = None
         self.latest_uyvy = None
+        self.collect_gt = os.environ.get("MICRODUCK_COLLECT_GT") == "1"
+        self.latest_gt = None
 
     def render(self, world):
         from mjlab_microduck.sim.camera import to_uyvy
@@ -58,6 +61,31 @@ class RGBDCamera:
                 .tolist(),
             }
         self.renderer.disable_depth_rendering()
+        ground_truth = None
+        if self.collect_gt:
+            # Same renderer scene as RGB/depth. Never included in packet().
+            self.renderer.enable_segmentation_rendering()
+            segmentation = self.renderer.render().copy()
+            self.renderer.disable_segmentation_rendering()
+            objects = {}
+            import mujoco
+
+            for ident in range(self.model.ngeom):
+                name = self.model.geom(ident).name or ""
+                if not name.startswith("goal_"):
+                    continue
+                mask = (segmentation[:, :, 0] == ident) & (
+                    segmentation[:, :, 1] == int(mujoco.mjtObj.mjOBJ_GEOM)
+                )
+                yy, xx = np.nonzero(mask)
+                objects[name.removeprefix("goal_")] = {
+                    "visible_pixels": int(mask.sum()),
+                    "bbox": [int(xx.min()), int(yy.min()), int(xx.max()) + 1, int(yy.max()) + 1]
+                    if len(xx) else None,
+                    "pixel": [float(xx.mean()), float(yy.mean())] if len(xx) else None,
+                }
+            ground_truth = {"sim_time": metadata["sim_time"], "objects": objects,
+                            "source": "MuJoCo geom segmentation; collection/scoring only"}
         rgb = self.renderer.render().copy()
         self.renderer.enable_depth_rendering()
         depth = self.renderer.render().copy().astype("<f4")
@@ -79,6 +107,13 @@ class RGBDCamera:
         with self.lock:
             self.latest = metadata
             self.latest_uyvy = to_uyvy(rgb)
+            self.latest_gt = ground_truth
+
+    def collection_packet(self):
+        with self.lock:
+            if self.latest is None or self.latest_gt is None:
+                raise RuntimeError("collection ground truth unavailable")
+            return {"sensor": dict(self.latest), "ground_truth": self.latest_gt}
 
     def packet(self):
         with self.lock:

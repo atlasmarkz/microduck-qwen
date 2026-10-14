@@ -1,0 +1,395 @@
+{
+  "split": "valid",
+  "dataset_manifest_sha256": "47f4cbc170261610421eb799c2a1ae2f0b2188b4ec0355aec79a8e82ba890b44",
+  "model": "mlx-community/Qwen3-VL-2B-Instruct-4bit",
+  "revision": "9c4f5209e57b31f4b9dfba735de3fb983739c9cc",
+  "adapter": {
+    "path": "/Users/mark/Code/microduck-qwen/adapters/vision-sim-pilot-v1",
+    "sha256": "ee711e48146b1163d0cca89b4cab8d14321c635c9c54752c8b8a637b7347ddbe",
+    "training_manifest_sha256": "47f4cbc170261610421eb799c2a1ae2f0b2188b4ec0355aec79a8e82ba890b44"
+  },
+  "sampling_seed": 42,
+  "results": [
+    {
+      "id": "valid-20000-0-0",
+      "scene_seed": 20000,
+      "expected": {
+        "status": "visible",
+        "color": "red",
+        "id": 1
+      },
+      "task_type": "color",
+      "predicted": {
+        "status": "visible",
+        "color": "red",
+        "id": 1
+      },
+      "raw": "{\"status\":\"visible\",\"color\":\"red\",\"id\":1}",
+      "latency_s": 0.8587407500017434,
+      "correct": true
+    },
+    {
+      "id": "valid-20000-0-1",
+      "scene_seed": 20000,
+      "expected": {
+        "status": "visible",
+        "color": "blue",
+        "id": 3
+      },
+      "task_type": "color",
+      "predicted": {
+        "status": "stop",
+        "color": "blue",
+        "id": 3
+      },
+      "raw": "{\"status\":\"stop\",\"color\":\"blue\",\"id\":3}",
+      "latency_s": 0.811903167021228,
+      "correct": false
+    },
+    {
+      "id": "valid-20000-0-2",
+      "scene_seed": 20000,
+      "expected": {
+        "status": "visible",
+        "color": "green",
+        "id": 2
+      },
+      "task_type": "color",
+      "predicted": {
+        "status": "visible",
+        "color": "green",
+        "id": 2
+      },
+      "raw": "{\"status\":\"visible\",\"color\":\"green\",\"id\":2}",
+      "latency_s": 0.8030777499952819,
+      "correct": true
+    },
+    {
+      "id": "valid-20000-0-3",
+      "scene_seed": 20000,
+      "expected": {
+        "status": "visible",
+        "color": "red",
+        "id": 1
+      },
+      "task_type": "side",
+      "predicted": {
+        "status": "visible",
+        "color": "red",
+        "id": 1
+      },
+      "raw": "{\"status\":\"visible\",\"color\":\"red\",\"id\":1}",
+      "latency_s": 0.8008584589988459,
+      "correct": true
+    },
+    {
+      "id": "valid-20000-0-4",
+      "scene_seed": 20000,
+      "expected": {
+        "status": "visible",
+        "color": "blue",
+        "id": 3
+      },
+      "task_type": "side",
+      "predicted": {
+        "status": "stop",
+        "color": null,
+        "id": null
+      },
+      "raw": "{\"status\":\"stop\",\"color\":null,\"id\":null}",
+      "latency_s": 0.803294499986805,
+      "correct": false
+    },
+    {
+      "id": "valid-20000-0-5",
+      "scene_seed": 20000,
+      "expected": {
+        "status": "stop",
+        "color": null,
+        "id": null
+      },
+      "task_type": "stop",
+      "predicted": {
+        "status": "stop",
+        "color": null,
+        "id": null
+      },
+      "raw": "{\"status\":\"stop\",\"color\":null,\"id\":null}",
+      "latency_s": 0.8153007090149913,
+      "correct": true
+    },
+    {
+      "id": "valid-20000-0-6",
+      "scene_seed": 20000,
+      "expected": {
+        "status": "unsupported",
+        "color": null,
+        "id": null
+      },
+      "task_type": "unsupported",
+      "predicted": {
+        "status": "not_visible",
+        "color": null,
+        "id": null
+      },
+      "raw": "{\"status\":\"not_visible\",\"color\":null,\"id\":null}",
+      "latency_s": 0.8231355829921085,
+      "correct": false
+    },
+    {
+      "id": "valid-20001-0-0",
+      "scene_seed": 20001,
+      "expected": {
+        "status": "partial",
+        "color": null,
+        "id": null
+      },
+      "task_type": "color",
+      "predicted": {
+        "status": "visible",
+        "color": "red",
+        "id": 3
+      },
+      "raw": "{\"status\":\"visible\",\"color\":\"red\",\"id\":3}",
+      "latency_s": 0.8117761249886826,
+      "correct": false
+    },
+    {
+      "id": "valid-20001-0-1",
+      "scene_seed": 20001,
+      "expected": {
+        "status": "visible",
+        "color": "blue",
+        "id": 2
+      },
+      "task_type": "color",
+      "predicted": {
+        "status": "visible",
+        "color": "blue",
+        "id": 2
+      },
+      "raw": "{\"status\":\"visible\",\"color\":\"blue\",\"id\":2}",
+      "latency_s": 0.8115910000051372,
+      "correct": true
+    },
+    {
+      "id": "valid-20001-0-2",
+      "scene_seed": 20001,
+      "expected": {
+        "status": "visible",
+        "color": "green",
+        "id": 1
+      },
+      "task_type": "color",
+      "predicted": {
+        "status": "visible",
+        "color": "green",
+        "id": 1
+      },
+      "raw": "{\"status\":\"visible\",\"color\":\"green\",\"id\":1}",
+      "latency_s": 0.8118273330037482,
+      "correct": true
+    },
+    {
+      "id": "valid-20001-0-3",
+      "scene_seed": 20001,
+      "expected": {
+        "status": "partial",
+        "color": null,
+        "id": null
+      },
+      "task_type": "side",
+      "predicted": {
+        "status": "visible",
+        "color": "green",
+        "id": 1
+      },
+      "raw": "{\"status\":\"visible\",\"color\":\"green\",\"id\":1}",
+      "latency_s": 0.81694191598217,
+      "correct": false
+    },
+    {
+      "id": "valid-20001-0-4",
+      "scene_seed": 20001,
+      "expected": {
+        "status": "visible",
+        "color": "blue",
+        "id": 2
+      },
+      "task_type": "side",
+      "predicted": {
+        "status": "visible",
+        "color": "blue",
+        "id": 2
+      },
+      "raw": "{\"status\":\"visible\",\"color\":\"blue\",\"id\":2}",
+      "latency_s": 0.8054163329943549,
+      "correct": true
+    },
+    {
+      "id": "valid-20001-0-5",
+      "scene_seed": 20001,
+      "expected": {
+        "status": "stop",
+        "color": null,
+        "id": null
+      },
+      "task_type": "stop",
+      "predicted": {
+        "status": "stop",
+        "color": null,
+        "id": null
+      },
+      "raw": "{\"status\":\"stop\",\"color\":null,\"id\":null}",
+      "latency_s": 0.8250822919944767,
+      "correct": true
+    },
+    {
+      "id": "valid-20001-0-6",
+      "scene_seed": 20001,
+      "expected": {
+        "status": "unsupported",
+        "color": null,
+        "id": null
+      },
+      "task_type": "unsupported",
+      "predicted": {
+        "status": "not_visible",
+        "color": null,
+        "id": null
+      },
+      "raw": "{\"status\":\"not_visible\",\"color\":null,\"id\":null}",
+      "latency_s": 0.8179962920257822,
+      "correct": false
+    },
+    {
+      "id": "valid-20002-0-0",
+      "scene_seed": 20002,
+      "expected": {
+        "status": "not_visible",
+        "color": null,
+        "id": null
+      },
+      "task_type": "color",
+      "predicted": {
+        "status": "not_visible",
+        "color": null,
+        "id": null
+      },
+      "raw": "{\"status\":\"not_visible\",\"color\":null,\"id\":null}",
+      "latency_s": 0.8265293749864213,
+      "correct": true
+    },
+    {
+      "id": "valid-20002-0-1",
+      "scene_seed": 20002,
+      "expected": {
+        "status": "visible",
+        "color": "blue",
+        "id": 2
+      },
+      "task_type": "color",
+      "predicted": {
+        "status": "visible",
+        "color": "blue",
+        "id": 2
+      },
+      "raw": "{\"status\":\"visible\",\"color\":\"blue\",\"id\":2}",
+      "latency_s": 0.8125846250040922,
+      "correct": true
+    },
+    {
+      "id": "valid-20002-0-2",
+      "scene_seed": 20002,
+      "expected": {
+        "status": "visible",
+        "color": "green",
+        "id": 1
+      },
+      "task_type": "color",
+      "predicted": {
+        "status": "visible",
+        "color": "green",
+        "id": 1
+      },
+      "raw": "{\"status\":\"visible\",\"color\":\"green\",\"id\":1}",
+      "latency_s": 0.8147785420005675,
+      "correct": true
+    },
+    {
+      "id": "valid-20002-0-3",
+      "scene_seed": 20002,
+      "expected": {
+        "status": "visible",
+        "color": "green",
+        "id": 1
+      },
+      "task_type": "side",
+      "predicted": {
+        "status": "visible",
+        "color": "green",
+        "id": 1
+      },
+      "raw": "{\"status\":\"visible\",\"color\":\"green\",\"id\":1}",
+      "latency_s": 0.8111190829949919,
+      "correct": true
+    },
+    {
+      "id": "valid-20002-0-4",
+      "scene_seed": 20002,
+      "expected": {
+        "status": "visible",
+        "color": "blue",
+        "id": 2
+      },
+      "task_type": "side",
+      "predicted": {
+        "status": "not_visible",
+        "color": null,
+        "id": null
+      },
+      "raw": "{\"status\":\"not_visible\",\"color\":null,\"id\":null}",
+      "latency_s": 0.8205397919809911,
+      "correct": false
+    },
+    {
+      "id": "valid-20002-0-5",
+      "scene_seed": 20002,
+      "expected": {
+        "status": "stop",
+        "color": null,
+        "id": null
+      },
+      "task_type": "stop",
+      "predicted": {
+        "status": "stop",
+        "color": null,
+        "id": null
+      },
+      "raw": "{\"status\":\"stop\",\"color\":null,\"id\":null}",
+      "latency_s": 0.8156017079891171,
+      "correct": true
+    },
+    {
+      "id": "valid-20002-0-6",
+      "scene_seed": 20002,
+      "expected": {
+        "status": "unsupported",
+        "color": null,
+        "id": null
+      },
+      "task_type": "unsupported",
+      "predicted": {
+        "status": "not_visible",
+        "color": null,
+        "id": null
+      },
+      "raw": "{\"status\":\"not_visible\",\"color\":null,\"id\":null}",
+      "latency_s": 0.8243593749939464,
+      "correct": false
+    }
+  ],
+  "correct": 13,
+  "total": 21,
+  "note": "Raw visual decisions before controller safety guards; development pilot, not publication benchmark"
+}

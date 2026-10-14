@@ -1,0 +1,426 @@
+{
+  "format": "simulation_visual_v1",
+  "status": "completed",
+  "episodes": [
+    {
+      "split": "train",
+      "seed": 10000,
+      "scenario": "none",
+      "frames": [
+        {
+          "frame": 0,
+          "sim_time": 5.919999999999896,
+          "examples": 7
+        },
+        {
+          "frame": 1,
+          "sim_time": 8.239999999999888,
+          "examples": 7
+        },
+        {
+          "frame": 2,
+          "sim_time": 10.30000000000021,
+          "examples": 7
+        },
+        {
+          "frame": 3,
+          "sim_time": 12.34000000000053,
+          "examples": 5
+        },
+        {
+          "frame": 4,
+          "sim_time": 15.020000000000948,
+          "examples": 7
+        }
+      ],
+      "status": "completed",
+      "startup_failures": [],
+      "expert": {
+        "target": "ball_0",
+        "plan": {
+          "status": "ok",
+          "goals": [
+            {
+              "target": "point",
+              "x": 1.1895295792142628,
+              "y": 0.3809151773389935,
+              "speed": "slow",
+              "stop_distance_m": 0.3
+            }
+          ]
+        },
+        "execution": {
+          "success": true,
+          "goals": [
+            {
+              "goal": {
+                "target": "point",
+                "x": 1.1895295792142628,
+                "y": 0.3809151773389935,
+                "speed": "slow",
+                "stop_distance_m": 0.3
+              },
+              "distance_m": 0.32059859602003365,
+              "elapsed_s": 8.804171708005015,
+              "path_length_m": 1.28368026466256,
+              "min_clearance_m": 0.11059859602003363,
+              "position": [
+                0.87349597725213,
+                0.32700578853836854
+              ]
+            }
+          ],
+          "observation": "oracle expert demonstration"
+        },
+        "distance_m": 0.32059859602003365,
+        "contacts": {
+          "steps_with_scene_contact": 0,
+          "minimum_contact_distance_m": null
+        },
+        "verified_success": true
+      }
+    },
+    {
+      "split": "train",
+      "seed": 10001,
+      "scenario": "partial",
+      "frames": [
+        {
+          "frame": 0,
+          "sim_time": 5.7199999999999,
+          "examples": 7
+        }
+      ],
+      "status": "completed",
+      "startup_failures": []
+    },
+    {
+      "split": "train",
+      "seed": 10002,
+      "scenario": "full",
+      "frames": [
+        {
+          "frame": 0,
+          "sim_time": 5.759999999999899,
+          "examples": 7
+        }
+      ],
+      "status": "completed",
+      "startup_failures": []
+    },
+    {
+      "split": "train",
+      "seed": 10003,
+      "scenario": "absent",
+      "frames": [
+        {
+          "frame": 0,
+          "sim_time": 5.6599999999999016,
+          "examples": 7
+        }
+      ],
+      "status": "completed",
+      "startup_failures": []
+    },
+    {
+      "split": "train",
+      "seed": 10004,
+      "scenario": "none",
+      "frames": [
+        {
+          "frame": 0,
+          "sim_time": 5.879999999999897,
+          "examples": 7
+        },
+        {
+          "frame": 1,
+          "sim_time": 7.999999999999852,
+          "examples": 7
+        },
+        {
+          "frame": 2,
+          "sim_time": 10.060000000000173,
+          "examples": 7
+        },
+        {
+          "frame": 3,
+          "sim_time": 12.180000000000504,
+          "examples": 7
+        },
+        {
+          "frame": 4,
+          "sim_time": 13.960000000000782,
+          "examples": 7
+        }
+      ],
+      "status": "completed",
+      "startup_failures": [],
+      "expert": {
+        "target": "ball_0",
+        "plan": {
+          "status": "ok",
+          "goals": [
+            {
+              "target": "point",
+              "x": 1.092008428658543,
+              "y": 0.4147784711394922,
+              "speed": "slow",
+              "stop_distance_m": 0.3
+            }
+          ]
+        },
+        "execution": {
+          "success": true,
+          "goals": [
+            {
+              "goal": {
+                "target": "point",
+                "x": 1.092008428658543,
+                "y": 0.4147784711394922,
+                "speed": "slow",
+                "stop_distance_m": 0.3
+              },
+              "distance_m": 0.32133634010948686,
+              "elapsed_s": 8.024986750009703,
+              "path_length_m": 1.1819685477916988,
+              "min_clearance_m": 0.11133634010948684,
+              "position": [
+                0.7832950498710972,
+                0.32559835433872286
+              ]
+            }
+          ],
+          "observation": "oracle expert demonstration"
+        },
+        "distance_m": 0.32133634010948686,
+        "contacts": {
+          "steps_with_scene_contact": 0,
+          "minimum_contact_distance_m": null
+        },
+        "verified_success": true
+      }
+    },
+    {
+      "split": "train",
+      "seed": 10005,
+      "scenario": "none",
+      "frames": [
+        {
+          "frame": 0,
+          "sim_time": 5.6599999999999016,
+          "examples": 7
+        },
+        {
+          "frame": 1,
+          "sim_time": 7.699999999999858,
+          "examples": 7
+        },
+        {
+          "frame": 2,
+          "sim_time": 9.760000000000126,
+          "examples": 7
+        },
+        {
+          "frame": 3,
+          "sim_time": 11.800000000000445,
+          "examples": 7
+        },
+        {
+          "frame": 4,
+          "sim_time": 12.380000000000535,
+          "examples": 7
+        }
+      ],
+      "status": "completed",
+      "startup_failures": [],
+      "expert": {
+        "target": "ball_0",
+        "plan": {
+          "status": "ok",
+          "goals": [
+            {
+              "target": "point",
+              "x": 0.9278228788256379,
+              "y": 0.35683519625090854,
+              "speed": "slow",
+              "stop_distance_m": 0.3
+            }
+          ]
+        },
+        "execution": {
+          "success": true,
+          "goals": [
+            {
+              "goal": {
+                "target": "point",
+                "x": 0.9278228788256379,
+                "y": 0.35683519625090854,
+                "speed": "slow",
+                "stop_distance_m": 0.3
+              },
+              "distance_m": 0.3119516885184104,
+              "elapsed_s": 6.757798250007909,
+              "path_length_m": 0.9442539747510085,
+              "min_clearance_m": 0.10195168851841035,
+              "position": [
+                0.6403242812254742,
+                0.23576326578217216
+              ]
+            }
+          ],
+          "observation": "oracle expert demonstration"
+        },
+        "distance_m": 0.3119516885184104,
+        "contacts": {
+          "steps_with_scene_contact": 0,
+          "minimum_contact_distance_m": null
+        },
+        "verified_success": true
+      }
+    },
+    {
+      "split": "valid",
+      "seed": 20000,
+      "scenario": "none",
+      "frames": [
+        {
+          "frame": 0,
+          "sim_time": 5.579999999999903,
+          "examples": 7
+        }
+      ],
+      "status": "completed",
+      "startup_failures": []
+    },
+    {
+      "split": "valid",
+      "seed": 20001,
+      "scenario": "partial",
+      "frames": [
+        {
+          "frame": 0,
+          "sim_time": 5.479999999999905,
+          "examples": 7
+        }
+      ],
+      "status": "completed",
+      "startup_failures": []
+    },
+    {
+      "split": "valid",
+      "seed": 20002,
+      "scenario": "full",
+      "frames": [
+        {
+          "frame": 0,
+          "sim_time": 5.679999999999901,
+          "examples": 7
+        }
+      ],
+      "status": "completed",
+      "startup_failures": []
+    },
+    {
+      "split": "test",
+      "seed": 30000,
+      "scenario": "none",
+      "frames": [
+        {
+          "frame": 0,
+          "sim_time": 5.599999999999903,
+          "examples": 7
+        }
+      ],
+      "status": "completed",
+      "startup_failures": []
+    },
+    {
+      "split": "test",
+      "seed": 30001,
+      "scenario": "partial",
+      "frames": [
+        {
+          "frame": 0,
+          "sim_time": 5.599999999999903,
+          "examples": 7
+        }
+      ],
+      "status": "completed",
+      "startup_failures": []
+    },
+    {
+      "split": "test",
+      "seed": 30002,
+      "scenario": "full",
+      "frames": [
+        {
+          "frame": 0,
+          "sim_time": 5.7199999999999,
+          "examples": 7
+        }
+      ],
+      "status": "completed",
+      "startup_failures": []
+    }
+  ],
+  "splits": {
+    "train": {
+      "examples": 124,
+      "scene_seeds": [
+        10000,
+        10001,
+        10002,
+        10003,
+        10004,
+        10005
+      ],
+      "sha256": "cc598f297de5361cae4197c6964a1c62817217fd0447365533d38e60899d0bdb",
+      "statuses": {
+        "visible": 68,
+        "stop": 18,
+        "unsupported": 18,
+        "not_visible": 14,
+        "partial": 6
+      }
+    },
+    "valid": {
+      "examples": 21,
+      "scene_seeds": [
+        20000,
+        20001,
+        20002
+      ],
+      "sha256": "9188024922fb4191b82d9450dbf07a9afc24384b6ff53d501a3458fcfe3147cd",
+      "statuses": {
+        "visible": 12,
+        "stop": 3,
+        "unsupported": 3,
+        "partial": 2,
+        "not_visible": 1
+      }
+    },
+    "test": {
+      "examples": 21,
+      "scene_seeds": [
+        30000,
+        30001,
+        30002
+      ],
+      "sha256": "d41740e82ec5f07671e4c89747a8d1c1a14bc05986c9df7c4738c880f701ed64",
+      "statuses": {
+        "visible": 12,
+        "stop": 3,
+        "unsupported": 3,
+        "partial": 2,
+        "not_visible": 1
+      }
+    }
+  },
+  "model_inputs": [
+    "annotated_rgb",
+    "instruction"
+  ],
+  "supervision": "MuJoCo segmentation and scene truth; per-frame grounding, not joint imitation",
+  "navigate": true,
+  "seed_offset": 0
+}

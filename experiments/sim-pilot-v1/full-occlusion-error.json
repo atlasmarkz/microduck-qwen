@@ -1,0 +1,23 @@
+{
+  "instruction": "走到红色球旁边",
+  "executed": false,
+  "success": false,
+  "directory": "/Users/mark/Code/microduck-qwen/runs/vision/20261014-231913-580693",
+  "observation": "RGB-D target; oracle robot pose and safety map; RGB color proposals + VLM selection",
+  "raw": "{\"status\":\"visible\",\"color\":null,\"id\":null}",
+  "prompt": "Which ball does the user mean? Read its color and the number directly ABOVE it in the image. Left/right means image left/right, never number order. User: 走到红色球旁边. Return ONLY JSON with keys status (visible/partial/not_visible/ambiguous/stop/unsupported), color (red/blue/green or null), id (integer or null). If occluded, absent or ambiguous, use null color and id.",
+  "latency_s": 0.8736412910220679,
+  "model": "mlx-community/Qwen3-VL-2B-Instruct-4bit",
+  "revision": "9c4f5209e57b31f4b9dfba735de3fb983739c9cc",
+  "fine_tuned": true,
+  "adapter": {
+    "path": "/Users/mark/Code/microduck-qwen/adapters/vision-sim-pilot-epoch1",
+    "sha256": "683e4107860787c812776f49de2e88bb878b79f77c62f705a6fed875bd260869",
+    "training_manifest_sha256": "47f4cbc170261610421eb799c2a1ae2f0b2188b4ec0355aec79a8e82ba890b44"
+  },
+  "input_image": "/Users/mark/Code/microduck-qwen/runs/vision/20261014-231913-580693/initial-candidates.png",
+  "peak_memory_gb": 2.461381232,
+  "prompt_tokens": 319,
+  "generation_tokens": 14,
+  "error": "VLM color/number binding disagrees with RGB proposals"
+}

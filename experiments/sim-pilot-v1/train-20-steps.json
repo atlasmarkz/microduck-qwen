@@ -1,0 +1,232 @@
+{
+  "format": "vision_sft_v1",
+  "status": "completed",
+  "model": "mlx-community/Qwen3-VL-2B-Instruct-4bit",
+  "revision": "9c4f5209e57b31f4b9dfba735de3fb983739c9cc",
+  "dataset_manifest_sha256": "47f4cbc170261610421eb799c2a1ae2f0b2188b4ec0355aec79a8e82ba890b44",
+  "dataset": "/Users/mark/Code/microduck-qwen/data/sim-pilot-v1",
+  "split_counts": {
+    "train": 124,
+    "valid": 21,
+    "test": 21
+  },
+  "seed": 42,
+  "config": {
+    "rank": 8,
+    "last_layers": 8,
+    "alpha": 16,
+    "targets": [
+      "q_proj",
+      "v_proj"
+    ],
+    "optimizer_steps": 20,
+    "gradient_accumulation": 1,
+    "microbatch": 1,
+    "learning_rate": 5e-05,
+    "max_seq_length": 768,
+    "vision_frozen": true,
+    "gradient_checkpointing": true,
+    "loss": "assistant completion only",
+    "base": "MLX 4-bit"
+  },
+  "swap_before": "vm.swapusage: total = 8192.00M  used = 6928.69M  free = 1263.31M  (encrypted)",
+  "steps": [
+    {
+      "step": 1,
+      "loss": 1.3128913640975952,
+      "row_ids": [
+        "train-10000-1-2"
+      ],
+      "elapsed_s": 1.63141474997974,
+      "mlx_peak_bytes": 5227741884
+    },
+    {
+      "step": 2,
+      "loss": 2.9067187309265137,
+      "row_ids": [
+        "train-10004-4-6"
+      ],
+      "elapsed_s": 1.3696637910034042,
+      "mlx_peak_bytes": 5239154056
+    },
+    {
+      "step": 3,
+      "loss": 2.9860076904296875,
+      "row_ids": [
+        "train-10005-1-2"
+      ],
+      "elapsed_s": 1.326129791996209,
+      "mlx_peak_bytes": 5244582012
+    },
+    {
+      "step": 4,
+      "loss": 2.6379520893096924,
+      "row_ids": [
+        "train-10004-2-6"
+      ],
+      "elapsed_s": 1.3192063329915982,
+      "mlx_peak_bytes": 5250000344
+    },
+    {
+      "step": 5,
+      "loss": 2.3110899925231934,
+      "row_ids": [
+        "train-10004-1-5"
+      ],
+      "elapsed_s": 1.4084532919805497,
+      "mlx_peak_bytes": 5255410692
+    },
+    {
+      "step": 6,
+      "loss": 1.438026785850525,
+      "row_ids": [
+        "train-10000-2-2"
+      ],
+      "elapsed_s": 1.3548363749869168,
+      "mlx_peak_bytes": 5255410692
+    },
+    {
+      "step": 7,
+      "loss": 0.4455064833164215,
+      "row_ids": [
+        "train-10004-2-4"
+      ],
+      "elapsed_s": 1.303334124997491,
+      "mlx_peak_bytes": 5255411764
+    },
+    {
+      "step": 8,
+      "loss": 1.8634355068206787,
+      "row_ids": [
+        "train-10004-3-1"
+      ],
+      "elapsed_s": 1.2971106670156587,
+      "mlx_peak_bytes": 5255411764
+    },
+    {
+      "step": 9,
+      "loss": 1.0613412857055664,
+      "row_ids": [
+        "train-10005-1-4"
+      ],
+      "elapsed_s": 1.3445856659964193,
+      "mlx_peak_bytes": 5255411764
+    },
+    {
+      "step": 10,
+      "loss": 1.180153250694275,
+      "row_ids": [
+        "train-10004-3-4"
+      ],
+      "elapsed_s": 1.3796201669902075,
+      "mlx_peak_bytes": 5255411764
+    },
+    {
+      "step": 11,
+      "loss": 0.012009645812213421,
+      "row_ids": [
+        "train-10005-0-1"
+      ],
+      "elapsed_s": 1.4685209580056835,
+      "mlx_peak_bytes": 5255411764
+    },
+    {
+      "step": 12,
+      "loss": 0.011041726917028427,
+      "row_ids": [
+        "train-10000-3-0"
+      ],
+      "elapsed_s": 1.3471783330023754,
+      "mlx_peak_bytes": 5255411764
+    },
+    {
+      "step": 13,
+      "loss": 0.019075488671660423,
+      "row_ids": [
+        "train-10000-4-4"
+      ],
+      "elapsed_s": 1.354761958005838,
+      "mlx_peak_bytes": 5255411764
+    },
+    {
+      "step": 14,
+      "loss": 0.018594911321997643,
+      "row_ids": [
+        "train-10005-1-0"
+      ],
+      "elapsed_s": 1.3439965420111548,
+      "mlx_peak_bytes": 5255411764
+    },
+    {
+      "step": 15,
+      "loss": 0.5485249161720276,
+      "row_ids": [
+        "train-10000-4-6"
+      ],
+      "elapsed_s": 1.3503857090254314,
+      "mlx_peak_bytes": 5255411764
+    },
+    {
+      "step": 16,
+      "loss": 0.0735396221280098,
+      "row_ids": [
+        "train-10003-0-0"
+      ],
+      "elapsed_s": 1.3946227499982342,
+      "mlx_peak_bytes": 5255411764
+    },
+    {
+      "step": 17,
+      "loss": 0.3500714898109436,
+      "row_ids": [
+        "train-10004-1-6"
+      ],
+      "elapsed_s": 1.3868341670022346,
+      "mlx_peak_bytes": 5255411764
+    },
+    {
+      "step": 18,
+      "loss": 0.13753755390644073,
+      "row_ids": [
+        "train-10005-4-1"
+      ],
+      "elapsed_s": 1.344989874982275,
+      "mlx_peak_bytes": 5255411764
+    },
+    {
+      "step": 19,
+      "loss": 0.1052430123090744,
+      "row_ids": [
+        "train-10005-0-3"
+      ],
+      "elapsed_s": 1.361740042018937,
+      "mlx_peak_bytes": 5255411764
+    },
+    {
+      "step": 20,
+      "loss": 0.1506301909685135,
+      "row_ids": [
+        "train-10004-0-5"
+      ],
+      "elapsed_s": 1.3656010830018204,
+      "mlx_peak_bytes": 5255459483
+    }
+  ],
+  "trainable_parameters": 458752,
+  "versions": {
+    "mlx": "0.32.3",
+    "mlx-vlm": "0.7.8",
+    "transformers": "5.19.0"
+  },
+  "valid_loss_first_3_before": 1.177048683166504,
+  "valid_loss_first_3_after": 0.11775873104731242,
+  "changed_adapter_tensors": 32,
+  "adapter_sha256": "ee711e48146b1163d0cca89b4cab8d14321c635c9c54752c8b8a637b7347ddbe",
+  "observed_token_lengths": {
+    "min": 331,
+    "max": 336
+  },
+  "elapsed_s": 34.178397084004246,
+  "mlx_peak_bytes": 5255459483,
+  "swap_after": "vm.swapusage: total = 9216.00M  used = 8400.69M  free = 815.31M  (encrypted)"
+}

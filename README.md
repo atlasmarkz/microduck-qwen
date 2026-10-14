@@ -2,7 +2,7 @@
 
 ## 项目目标与当前状态
 
-研究目标是后训练 Qwen-VL，使其根据视觉、自然语言和历史反馈产生高层决策，结合 MicroDuck 已有 RL 步态完成仿真控制。当前提交包含 **Qwen3-0.6B 文本 LoRA SFT**、**冻结 Qwen3-VL-2B 的视觉工程基线**和 **3 步真实图文 LoRA 内存探针**。任务级图文 SFT、训练后适配器接入控制和高层闭环 RL 尚未完成，不能把已有安全规则或文本指标当成视觉后训练成果。Mac 实测与 RTX 3060 8GB 的后续训练计划见 [TRAINING_PLAN.md](TRAINING_PLAN.md)。
+研究目标是后训练 Qwen-VL，使其根据视觉、自然语言和历史反馈产生高层决策，结合 MicroDuck 已有 RL 步态完成仿真控制。已实现 **Qwen3-0.6B 文本 SFT**、**冻结 Qwen3-VL-2B 视觉基线**、内存探针，以及 **直接从 MuJoCo 采集图文数据、LoRA 训练和显式适配器控制的初轮 pilot**。步骤与结果见 [SIM_TRAINING.md](SIM_TRAINING.md)。多轮自改进、学习型 RM、多步策略和高层 RL 尚未实现；不把安全规则或文本指标当成视觉训练成果。硬件与后续计划见 [TRAINING_PLAN.md](TRAINING_PLAN.md)。
 
 获取源码：
 
@@ -21,7 +21,7 @@ GitHub 只同步源码、依赖配置、测试及说明，不包含本机虚拟�
 
 这会新建一组适配器，不等同于历史 900 步权重；已有同名权重时训练器会拒绝覆盖。MicroDuck 仿真仓库与策略需另行准备，路径可通过 `sim --microduck PATH --rl PATH --policies PATH` 指定。本机默认路径不是跨机器安装保证。
 
-视觉分支已独立实现：看图选择左右球、随机布局、RGB-D 定位和遮挡保护。启动与限制见 [VISION.md](VISION.md)。视觉使用冻结的 Qwen3-VL-2B，本页下面的训练与 61.25% 指标仍专指 Qwen3-0.6B 文本 SFT，不是视觉训练结果。
+视觉分支已独立实现：看图选择左右球、随机布局、RGB-D 定位和遮挡保护。默认仍为冻结 Qwen3-VL-2B，可用 `vision chat --adapter PATH` 显式加载本机图文 SFT 权重，见 [VISION.md](VISION.md) 与 [SIM_TRAINING.md](SIM_TRAINING.md)。本页下面的训练与 61.25% 指标仍专指 Qwen3-0.6B 文本 SFT，不是视觉训练结果。
 
 在 Apple Silicon Mac 上对 Qwen3-0.6B 做 LoRA 监督微调，输入中文导航指令，输出目标及速度、停靠距离；导航器使用 MuJoCo 位姿与场景地图规划避障路径，向官方 `robotd` 发送速度命令，既有 ONNX 步态策略在 50 Hz 控制机器人。
 
@@ -132,7 +132,7 @@ python3 -m unittest discover -s tests -v
 
 ## 后续研究
 
-模型选型、Qwen-VL 的适用边界和视觉闭环实验设计见 [ANALYSIS.md](ANALYSIS.md)。文本分支使用 Qwen3-0.6B；视觉分支已接入冻结 Qwen3-VL-2B，独立图文 LoRA 内存探针已跑通，正式任务训练与控制接入仍待实现，详见 [TRAINING_PLAN.md](TRAINING_PLAN.md)。
+模型选型与边界见 [ANALYSIS.md](ANALYSIS.md)。初轮仿真采集与图文 LoRA pilot 已实现，详见 [SIM_TRAINING.md](SIM_TRAINING.md)；仍需扩大数据、独立评测与多轮探索，不把初轮结果视为可靠通用策略。
 
 1. 收集真实中文表达与失败案例，扩大独立测试集；比较原始模型、SFT 模型及规则/更大模型基线。
 2. 将仿真真实状态替换为视觉检测与状态估计，评测感知误差下的任务成功率。

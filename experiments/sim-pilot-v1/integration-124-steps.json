@@ -1,0 +1,128 @@
+{
+  "results": [
+    {
+      "seed": 20000,
+      "scenario": "none",
+      "passed": true,
+      "startup_failures": [],
+      "result_file": "/Users/mark/Code/microduck-qwen/runs/vision/20261014-231822-826515/result.json",
+      "executed": true,
+      "vlm_answer": {
+        "status": "ok",
+        "target_id": 1,
+        "visibility": "visible",
+        "reason": "VLM visual choice: red"
+      },
+      "latency_s": 1.1044455420051236,
+      "peak_memory_gb": 2.436117033,
+      "expected_target": "ball_0",
+      "vlm_grounding_correct": true,
+      "localization_error_m": 0.016605496504233166,
+      "physical_navigation_success": true,
+      "true_final_distance_m": 0.30780955474691496,
+      "navigation_elapsed_s": 7.206234292010777
+    },
+    {
+      "seed": 20003,
+      "scenario": "none",
+      "passed": true,
+      "startup_failures": [],
+      "result_file": "/Users/mark/Code/microduck-qwen/runs/vision/20261014-231837-787433/result.json",
+      "executed": true,
+      "vlm_answer": {
+        "status": "ok",
+        "target_id": 3,
+        "visibility": "visible",
+        "reason": "VLM visual choice: blue"
+      },
+      "latency_s": 0.867675000015879,
+      "peak_memory_gb": 2.461381232,
+      "expected_target": "ball_0",
+      "vlm_grounding_correct": true,
+      "localization_error_m": 0.0176126210536963,
+      "physical_navigation_success": true,
+      "true_final_distance_m": 0.3026807264677252,
+      "navigation_elapsed_s": 6.892343334009638
+    },
+    {
+      "seed": 20004,
+      "scenario": "none",
+      "passed": true,
+      "startup_failures": [],
+      "result_file": "/Users/mark/Code/microduck-qwen/runs/vision/20261014-231852-098463/result.json",
+      "executed": true,
+      "vlm_answer": {
+        "status": "ok",
+        "target_id": 3,
+        "visibility": "visible",
+        "reason": "VLM visual choice: blue"
+      },
+      "latency_s": 0.8611056669906247,
+      "peak_memory_gb": 2.461381232,
+      "expected_target": "ball_0",
+      "vlm_grounding_correct": true,
+      "localization_error_m": 0.01731589526774248,
+      "physical_navigation_success": true,
+      "true_final_distance_m": 0.3028602689656194,
+      "navigation_elapsed_s": 6.882110542006558
+    },
+    {
+      "seed": 20000,
+      "scenario": "partial",
+      "passed": true,
+      "startup_failures": [],
+      "result_file": "/Users/mark/Code/microduck-qwen/runs/vision/20261014-231906-398406/result.json",
+      "executed": false,
+      "vlm_answer": {
+        "status": "ok",
+        "target_id": 2,
+        "visibility": "visible",
+        "reason": "VLM visual choice: red"
+      },
+      "latency_s": 0.9216361250146292,
+      "peak_memory_gb": 2.461381232,
+      "vlm_abstained": false,
+      "safe_nonexecution": true,
+      "stopped_reason": "partial visibility: depth/RGB guard refuses movement"
+    },
+    {
+      "seed": 20000,
+      "scenario": "full",
+      "passed": false,
+      "startup_failures": [],
+      "error": "VLM color/number binding disagrees with RGB proposals"
+    },
+    {
+      "seed": 20000,
+      "scenario": "absent",
+      "passed": true,
+      "startup_failures": [],
+      "result_file": "/Users/mark/Code/microduck-qwen/runs/vision/20261014-231920-736813/result.json",
+      "executed": false,
+      "vlm_answer": {
+        "status": "unsupported",
+        "target_id": null,
+        "visibility": "uncertain",
+        "reason": "VLM visual choice: unsupported"
+      },
+      "latency_s": 0.8863751250028145,
+      "peak_memory_gb": 2.461381232,
+      "vlm_abstained": false,
+      "safe_nonexecution": true,
+      "stopped_reason": "unsupported: VLM visual choice: unsupported"
+    }
+  ],
+  "navigation_requested": true,
+  "adapter": {
+    "path": "/Users/mark/Code/microduck-qwen/adapters/vision-sim-pilot-epoch1",
+    "sha256": "683e4107860787c812776f49de2e88bb878b79f77c62f705a6fed875bd260869",
+    "training_manifest_sha256": "47f4cbc170261610421eb799c2a1ae2f0b2188b4ec0355aec79a8e82ba890b44"
+  },
+  "versions": {
+    "mlx-vlm": "0.7.8",
+    "mlx": "0.32.3",
+    "transformers": "5.19.0",
+    "opencv-python": "5.0.0.93"
+  },
+  "note": "Development smoke battery. Robot pose and safety map are oracle. Explicit task-level vision LoRA loaded. Paired memory test resets scenes; not an uninterrupted temporal trial."
+}

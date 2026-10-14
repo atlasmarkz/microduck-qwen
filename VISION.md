@@ -2,7 +2,7 @@
 
 已完成的 6 场景 smoke tests 与保留失败记录见 [VISION_RESULTS.md](VISION_RESULTS.md)。其中 3 个随机布局完成了正确左球接近，3 个遮挡/缺失案例由安全层拒绝动作；这不等于 VLM 自身正确拒答。
 
-这是可运行的视觉分支，不替换已有 Qwen3-0.6B 文本 SFT。当前导航仍使用本地 Qwen3-VL-2B-Instruct 的 4-bit MLX 冻结基线。另已完成独立的 3 步图文 LoRA 内存探针，不接入导航，也不代表任务级后训练完成；实测与计划见 [TRAINING_PLAN.md](TRAINING_PLAN.md)。
+这是可运行的视觉分支，不替换已有 Qwen3-0.6B 文本 SFT。默认仍使用 Qwen3-VL-2B-Instruct 4-bit MLX 冻结基线；现可通过 `--adapter` 显式加载仿真采集数据训练的图文 LoRA。采集、训练、验证与限制见 [SIM_TRAINING.md](SIM_TRAINING.md)，历史内存探针见 [TRAINING_PLAN.md](TRAINING_PLAN.md)。
 
 ## 已实现的链路
 
@@ -31,6 +31,14 @@ cd /Users/mark/Code/microduck-qwen
 ```bash
 .venv-vlm/bin/python -m microduck_qwen.vision chat
 ```
+
+本机使用新图文训练权重（不会自动切换默认模型）：
+
+```bash
+.venv-vlm/bin/python -m microduck_qwen.vision chat --adapter adapters/vision-sim-pilot-epoch1
+```
+
+权重仅保存在本机；GitHub 新克隆需要重新采集与训练。初轮训练规模很小，仍需查看模型原始输出，不保证任意表达可靠。
 
 示例：“走到画面左边的球旁边”“走到最右边的球旁边”“走到蓝色球旁边”。当前固定以 slow 步态接近，停靠距离 0.30 米，加 0.025 米执行容差；还没有把任意速度/距离语言参数接入视觉接口。
 
@@ -95,6 +103,6 @@ uv pip install --python .venv-vlm/bin/python -r requirements-vision.txt
 - 目标在一次指令的初始画面中确定并锁定；跟踪不重新选择别的同色球。当前静态布局，不保证动态球、复杂指代、强遮挡或未知光照。
 - VLM 推理时机器人先停下；执行阶段使用轻量 RGB-D 跟踪，不让慢速模型堵塞步态。渲染在主线程、50 Hz 物理循环在独立线程，避免 RGB-D 渲染暂停物理时间。
 - 视觉实例从 HOME 开始，固定通过原生控制器的初始化渐变，平衡策略接管后释放；只是一种仿真初始化方式，不是额外训练出的起身技能。
-- 当前控制分支没有加载后训练 VLM；只有独立的图文 LoRA 内存探针。已有图像/指令/错误记录可用于下一步构建按场景隔离的数据集，但不能直接拿模型自己的输出当正确标签。
+- 控制默认仍为冻结基线；显式 `--adapter` 可加载初轮图文 SFT。内存探针不能当任务权重加载。图文标签来自独立仿真核验，不能直接拿模型自己的输出当正确标签。
 
 源码入口：`vision.py`（感知/模型/执行）、`vision_sensor.py`（RGB-D/实时循环）、`vision_scene.py`（随机场景）、`vision_eval.py`（集成测试）。已有文本导航说明仍在 `README.md`。

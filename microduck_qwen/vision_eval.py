@@ -44,7 +44,7 @@ def load_saved_frame(directory):
     )
 
 
-def start_scene(case_directory, seed, occlusion, port):
+def start_scene(case_directory, seed, occlusion, port, collect_gt=False):
     failures = []
     for attempt in range(2):
         manifest = case_directory / f"simulator-{attempt}.json"
@@ -65,7 +65,7 @@ def start_scene(case_directory, seed, occlusion, port):
                 str(port),
                 "--manifest",
                 str(manifest),
-            ],
+            ] + (["--collect-gt"] if collect_gt else []),
             cwd=ROOT,
             stdout=log,
             stderr=subprocess.STDOUT,
@@ -108,10 +108,11 @@ def main():
     parser.add_argument("--seeds", type=int, nargs="+", default=[42, 43, 44])
     parser.add_argument("--port", type=int, default=7832)
     parser.add_argument("--navigate", action="store_true")
+    parser.add_argument("--adapter", type=Path, help="explicit completed task-level vision LoRA")
     args = parser.parse_args()
     output = ROOT / "runs/vision-eval" / datetime.now().strftime("%Y%m%d-%H%M%S")
     output.mkdir(parents=True)
-    planner = VisionPlanner()
+    planner = VisionPlanner(args.adapter)
     cases = [(seed, "none") for seed in args.seeds] + [
         (args.seeds[0], kind) for kind in ("partial", "full", "absent")
     ]
@@ -217,11 +218,14 @@ def main():
                 {
                     "results": results,
                     "navigation_requested": args.navigate,
+                    "adapter": planner.adapter,
                     "versions": {
                         p: importlib.metadata.version(p)
                         for p in ("mlx-vlm", "mlx", "transformers", "opencv-python")
                     },
-                    "note": "Development smoke battery. Robot pose and safety map are oracle. No VLM fine-tuning. Paired memory test resets scenes; not an uninterrupted temporal trial.",
+                    "note": "Development smoke battery. Robot pose and safety map are oracle. "
+                    + ("Explicit task-level vision LoRA loaded. " if planner.adapter else "Frozen VLM baseline. ")
+                    + "Paired memory test resets scenes; not an uninterrupted temporal trial.",
                 },
                 ensure_ascii=False,
                 indent=2,
