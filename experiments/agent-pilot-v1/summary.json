@@ -1,0 +1,319 @@
+{
+  "status": "completed",
+  "cycle_sha256": "4133d38ac83c7b4d297b455fd12960f9ad8b8999a21a323e2d643d5188a1de43",
+  "selected_adapter": "/Users/mark/Code/microduck-qwen/adapters/agent-pilot-v1-r1",
+  "models": {
+    "base": {
+      "strict_correct": 1,
+      "semantic_correct_after_fence_removal": 6,
+      "total": 19,
+      "per_action": {
+        "move": {
+          "correct": 0,
+          "semantic_correct": 4,
+          "total": 4
+        },
+        "return_home": {
+          "correct": 0,
+          "semantic_correct": 0,
+          "total": 3
+        },
+        "done": {
+          "correct": 0,
+          "semantic_correct": 0,
+          "total": 6
+        },
+        "turn": {
+          "correct": 0,
+          "semantic_correct": 0,
+          "total": 2
+        },
+        "approach": {
+          "correct": 0,
+          "semantic_correct": 1,
+          "total": 1
+        },
+        "stop": {
+          "correct": 1,
+          "semantic_correct": 1,
+          "total": 1
+        },
+        "unsupported": {
+          "correct": 0,
+          "semantic_correct": 0,
+          "total": 1
+        },
+        "clarify": {
+          "correct": 0,
+          "semantic_correct": 0,
+          "total": 1
+        }
+      }
+    },
+    "r0": {
+      "strict_correct": 12,
+      "semantic_correct_after_fence_removal": 12,
+      "total": 19,
+      "per_action": {
+        "move": {
+          "correct": 2,
+          "semantic_correct": 2,
+          "total": 4
+        },
+        "return_home": {
+          "correct": 0,
+          "semantic_correct": 0,
+          "total": 3
+        },
+        "done": {
+          "correct": 6,
+          "semantic_correct": 6,
+          "total": 6
+        },
+        "turn": {
+          "correct": 0,
+          "semantic_correct": 0,
+          "total": 2
+        },
+        "approach": {
+          "correct": 1,
+          "semantic_correct": 1,
+          "total": 1
+        },
+        "stop": {
+          "correct": 1,
+          "semantic_correct": 1,
+          "total": 1
+        },
+        "unsupported": {
+          "correct": 1,
+          "semantic_correct": 1,
+          "total": 1
+        },
+        "clarify": {
+          "correct": 1,
+          "semantic_correct": 1,
+          "total": 1
+        }
+      },
+      "adapter_sha256": "23e09134b2c72ea5c09138074e666234d94247341a6b174aa2ac09ad77657141",
+      "optimizer_steps": 120,
+      "unique_training_rows": 42,
+      "mlx_peak_bytes": 5255646260,
+      "elapsed_s": 266.49715650000144,
+      "swap_before": "vm.swapusage: total = 6144.00M  used = 5520.69M  free = 623.31M  (encrypted)",
+      "swap_after": "vm.swapusage: total = 9216.00M  used = 8003.94M  free = 1212.06M  (encrypted)",
+      "changed_adapter_tensors": 32,
+      "parent_adapter": null,
+      "token_lengths": {
+        "min": 502,
+        "max": 541
+      },
+      "rollout": {
+        "correct": 0,
+        "total": 4,
+        "scene_seed": 91010
+      }
+    },
+    "r1": {
+      "strict_correct": 18,
+      "semantic_correct_after_fence_removal": 18,
+      "total": 19,
+      "per_action": {
+        "move": {
+          "correct": 4,
+          "semantic_correct": 4,
+          "total": 4
+        },
+        "return_home": {
+          "correct": 3,
+          "semantic_correct": 3,
+          "total": 3
+        },
+        "done": {
+          "correct": 6,
+          "semantic_correct": 6,
+          "total": 6
+        },
+        "turn": {
+          "correct": 1,
+          "semantic_correct": 1,
+          "total": 2
+        },
+        "approach": {
+          "correct": 1,
+          "semantic_correct": 1,
+          "total": 1
+        },
+        "stop": {
+          "correct": 1,
+          "semantic_correct": 1,
+          "total": 1
+        },
+        "unsupported": {
+          "correct": 1,
+          "semantic_correct": 1,
+          "total": 1
+        },
+        "clarify": {
+          "correct": 1,
+          "semantic_correct": 1,
+          "total": 1
+        }
+      },
+      "adapter_sha256": "5a664ebe8a2461565fc9f1dc83e88067ffd15dced385658623ea75fdef3f4045",
+      "optimizer_steps": 120,
+      "unique_training_rows": 61,
+      "mlx_peak_bytes": 5255582592,
+      "elapsed_s": 383.4621989580046,
+      "swap_before": "vm.swapusage: total = 9216.00M  used = 7723.94M  free = 1492.06M  (encrypted)",
+      "swap_after": "vm.swapusage: total = 9216.00M  used = 7842.75M  free = 1373.25M  (encrypted)",
+      "changed_adapter_tensors": 32,
+      "parent_adapter": {
+        "path": "/Users/mark/Code/microduck-qwen/adapters/agent-pilot-v1-r0",
+        "sha256": "23e09134b2c72ea5c09138074e666234d94247341a6b174aa2ac09ad77657141"
+      },
+      "token_lengths": {
+        "min": 502,
+        "max": 541
+      },
+      "rollout": {
+        "correct": 4,
+        "total": 4,
+        "scene_seed": 91010
+      }
+    }
+  },
+  "datasets": {
+    "r0": {
+      "sha256": "86dc2496ab4473d74156e0ebbcf2f31545144b34e6c15527aa57f1f460ed82f4",
+      "splits": {
+        "train": {
+          "sha256": "9c165f1ca8176b748dcff41146b3a79234738681e71e885402fd9f32854ff23b",
+          "examples": 42,
+          "scene_seeds": [
+            61010,
+            61011,
+            61012
+          ],
+          "actions": {
+            "move": 8,
+            "return_home": 7,
+            "done": 14,
+            "turn": 6,
+            "approach": 3,
+            "stop": 1,
+            "unsupported": 1,
+            "clarify": 2
+          }
+        },
+        "valid": {
+          "sha256": "c752b289516b3299ff99ab9b7a0d7a3c3d5e33b87d8e7e13ff7ee85b9d197413",
+          "examples": 19,
+          "scene_seeds": [
+            71010
+          ],
+          "actions": {
+            "move": 4,
+            "return_home": 3,
+            "done": 6,
+            "turn": 2,
+            "approach": 1,
+            "stop": 1,
+            "unsupported": 1,
+            "clarify": 1
+          }
+        },
+        "test": {
+          "sha256": "43010e2fe9adc5d3d10f4d15d2cc346fbd3ea3c9c31e3639b801c42cccf68837",
+          "examples": 14,
+          "scene_seeds": [
+            81010
+          ],
+          "actions": {
+            "move": 3,
+            "return_home": 3,
+            "done": 5,
+            "turn": 2,
+            "approach": 1
+          }
+        }
+      },
+      "template_paraphrase_rows": 0,
+      "unique_training_images": 32,
+      "episodes": 45,
+      "failed_episodes": 13,
+      "expert_interventions": 0
+    },
+    "r1": {
+      "sha256": "7651764addf0dc232b5a3b85f5b41fee6238c544311c212670e013b280a07b7b",
+      "splits": {
+        "train": {
+          "sha256": "801754d385c1bc2cf9f75174424b513b47f17c995f5c2db67da1ab6da81d089a",
+          "examples": 61,
+          "scene_seeds": [
+            61010,
+            61011,
+            61012,
+            61200
+          ],
+          "actions": {
+            "move": 12,
+            "return_home": 10,
+            "done": 20,
+            "turn": 8,
+            "approach": 4,
+            "stop": 2,
+            "unsupported": 2,
+            "clarify": 3
+          }
+        },
+        "valid": {
+          "sha256": "f162cd27df2d47f5b501f0f6020fc50bf3ecd40dea1d251839b73cff8db79cac",
+          "examples": 19,
+          "scene_seeds": [
+            71010
+          ],
+          "actions": {
+            "move": 4,
+            "return_home": 3,
+            "done": 6,
+            "turn": 2,
+            "approach": 1,
+            "stop": 1,
+            "unsupported": 1,
+            "clarify": 1
+          }
+        },
+        "test": {
+          "sha256": "503b15a7ba9219e6a907cb040b1e76517348c90fe134f21e0b8d0d5ed530b4ef",
+          "examples": 14,
+          "scene_seeds": [
+            81010
+          ],
+          "actions": {
+            "move": 3,
+            "return_home": 3,
+            "done": 5,
+            "turn": 2,
+            "approach": 1
+          }
+        }
+      },
+      "template_paraphrase_rows": 0,
+      "unique_training_images": 51,
+      "episodes": 9,
+      "failed_episodes": 0,
+      "expert_interventions": 8
+    }
+  },
+  "limitations": [
+    "finite task DSL and few scenes",
+    "development-set pilot, no final test score",
+    "privileged own pose and known safety map",
+    "expert intervention is not unrestricted DAgger",
+    "row counts can include template paraphrases; these are not independent physical trajectories",
+    "no learned reward model or online high-level RL",
+    "MLX peak is not total system RAM; swap recorded separately"
+  ]
+}

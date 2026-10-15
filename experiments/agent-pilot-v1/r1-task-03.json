@@ -1,0 +1,228 @@
+{
+  "instruction": "靠近照片里最左侧的球，之后返回起点",
+  "teacher_specs": [
+    {
+      "teacher_target": "left"
+    },
+    {
+      "action": "return_home"
+    }
+  ],
+  "steps": [
+    {
+      "expected": {
+        "action": "approach",
+        "color": "blue",
+        "id": 2
+      },
+      "memory": {
+        "home_recorded": true,
+        "odometry_relative_home": {
+          "x": -0.06,
+          "y": 0.01,
+          "yaw_deg": 6.2
+        },
+        "completed": []
+      },
+      "prediction": {
+        "raw": "{\"action\":\"approach\",\"color\":\"blue\",\"id\":2}",
+        "latency_s": 2.131470624997746,
+        "prompt_tokens": 506,
+        "peak_memory_gb": 2.5264866,
+        "adapter": {
+          "path": "/Users/mark/Code/microduck-qwen/adapters/agent-pilot-v1-r1",
+          "sha256": "5a664ebe8a2461565fc9f1dc83e88067ffd15dced385658623ea75fdef3f4045"
+        },
+        "action": {
+          "action": "approach",
+          "color": "blue",
+          "id": 2
+        }
+      },
+      "semantic_match": true,
+      "teacher_intervened": false,
+      "execution": {
+        "action": {
+          "action": "approach",
+          "color": "blue",
+          "id": 2
+        },
+        "success": true,
+        "observation": "oracle robot odometry and known safety map",
+        "navigation": {
+          "success": true,
+          "goals": [
+            {
+              "goal": {
+                "target": "point",
+                "x": 0.9740194005107677,
+                "y": 0.33550945353409334,
+                "speed": "slow",
+                "stop_distance_m": 0.3
+              },
+              "distance_m": 0.317700416253463,
+              "elapsed_s": 7.387695415993221,
+              "path_length_m": 1.0503143253438167,
+              "min_clearance_m": 0.08933864157346416,
+              "position": [
+                0.6733241813449627,
+                0.23296219780068927
+              ]
+            }
+          ],
+          "observation": "MuJoCo ground-truth pose and fixed scene map"
+        }
+      },
+      "true_goal_distance_m": 0.2993386415734642
+    },
+    {
+      "expected": {
+        "action": "return_home"
+      },
+      "memory": {
+        "home_recorded": true,
+        "odometry_relative_home": {
+          "x": 0.67,
+          "y": 0.24,
+          "yaw_deg": 25.1
+        },
+        "completed": [
+          {
+            "action": "approach",
+            "color": "blue",
+            "id": 2
+          }
+        ]
+      },
+      "prediction": {
+        "raw": "{\"action\":\"return_home\"}",
+        "latency_s": 1.8412694169965107,
+        "prompt_tokens": 519,
+        "peak_memory_gb": 2.5264866,
+        "adapter": {
+          "path": "/Users/mark/Code/microduck-qwen/adapters/agent-pilot-v1-r1",
+          "sha256": "5a664ebe8a2461565fc9f1dc83e88067ffd15dced385658623ea75fdef3f4045"
+        },
+        "action": {
+          "action": "return_home"
+        }
+      },
+      "semantic_match": true,
+      "teacher_intervened": false,
+      "execution": {
+        "action": {
+          "action": "return_home"
+        },
+        "success": true,
+        "observation": "oracle robot odometry and known safety map",
+        "navigation": {
+          "success": true,
+          "goals": [
+            {
+              "goal": {
+                "target": "point",
+                "x": 0.0020022963842826064,
+                "y": 0.00017911532925965132,
+                "speed": "slow",
+                "stop_distance_m": 0.1
+              },
+              "distance_m": 0.0866395593997773,
+              "elapsed_s": 9.991620582994074,
+              "path_length_m": 1.3162279786513835,
+              "min_clearance_m": 0.04377935948541689,
+              "position": [
+                0.0886383581909681,
+                0.0009576059301731764
+              ]
+            }
+          ],
+          "observation": "MuJoCo ground-truth pose and fixed scene map"
+        },
+        "distance_home_m": 0.09489738600177051,
+        "home_yaw_error_deg": 1.4413595258286764
+      }
+    },
+    {
+      "expected": {
+        "action": "done"
+      },
+      "memory": {
+        "home_recorded": true,
+        "odometry_relative_home": {
+          "x": 0.09,
+          "y": -0.02,
+          "yaw_deg": -1.7
+        },
+        "completed": [
+          {
+            "action": "approach",
+            "color": "blue",
+            "id": 2
+          },
+          {
+            "action": "return_home"
+          }
+        ]
+      },
+      "prediction": {
+        "raw": "{\"action\":\"done\"}",
+        "latency_s": 2.0781757079821546,
+        "prompt_tokens": 523,
+        "peak_memory_gb": 2.5264866,
+        "adapter": {
+          "path": "/Users/mark/Code/microduck-qwen/adapters/agent-pilot-v1-r1",
+          "sha256": "5a664ebe8a2461565fc9f1dc83e88067ffd15dced385658623ea75fdef3f4045"
+        },
+        "action": {
+          "action": "done"
+        }
+      },
+      "semantic_match": true,
+      "teacher_intervened": false,
+      "execution": {
+        "action": {
+          "action": "done"
+        },
+        "success": false,
+        "observation": "oracle robot odometry and known safety map",
+        "no_motion": true
+      }
+    }
+  ],
+  "verified": true,
+  "intervene": false,
+  "mode": "independent_actor",
+  "reset": {
+    "action": {
+      "action": "return_home"
+    },
+    "success": true,
+    "observation": "oracle robot odometry and known safety map",
+    "navigation": {
+      "success": true,
+      "goals": [
+        {
+          "goal": {
+            "target": "point",
+            "x": 0.0020022963842826064,
+            "y": 0.00017911532925965132,
+            "speed": "slow",
+            "stop_distance_m": 0.1
+          },
+          "distance_m": 0.06093752834210986,
+          "elapsed_s": 9.580107871443033e-07,
+          "path_length_m": 0.0,
+          "min_clearance_m": 0.7285885207667957,
+          "position": [
+            -0.05758980802785263,
+            0.01291345677978682
+          ]
+        }
+      ],
+      "observation": "MuJoCo ground-truth pose and fixed scene map"
+    },
+    "distance_home_m": 0.0599248907462029,
+    "home_yaw_error_deg": 5.512594972878569
+  },
+  "scene_contact_steps_delta": 0
+}

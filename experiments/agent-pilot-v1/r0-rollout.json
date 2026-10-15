@@ -1,0 +1,40 @@
+{
+  "mode": "independent_actor_rollout",
+  "adapter": {
+    "path": "/Users/mark/Code/microduck-qwen/adapters/agent-pilot-v1-r0",
+    "sha256": "23e09134b2c72ea5c09138074e666234d94247341a6b174aa2ac09ad77657141"
+  },
+  "split": "valid",
+  "dataset_manifest_sha256": "86dc2496ab4473d74156e0ebbcf2f31545144b34e6c15527aa57f1f460ed82f4",
+  "results": [
+    {
+      "task_id": 0,
+      "correct": false,
+      "error": "failed physical skill or wrong task action (scored AFTER execution)",
+      "episode": "/Users/mark/Code/microduck-qwen/runs/agent-cycle/agent-pilot-v1/r0-rollout/task-00/episode.json"
+    },
+    {
+      "task_id": 1,
+      "correct": false,
+      "error": "failed physical skill or wrong task action (scored AFTER execution)",
+      "episode": "/Users/mark/Code/microduck-qwen/runs/agent-cycle/agent-pilot-v1/r0-rollout/task-01/episode.json"
+    },
+    {
+      "task_id": 2,
+      "correct": false,
+      "error": "failed physical skill or wrong task action (scored AFTER execution)",
+      "episode": "/Users/mark/Code/microduck-qwen/runs/agent-cycle/agent-pilot-v1/r0-rollout/task-02/episode.json"
+    },
+    {
+      "task_id": 3,
+      "correct": false,
+      "error": "failed physical skill or wrong task action (scored AFTER execution)",
+      "episode": "/Users/mark/Code/microduck-qwen/runs/agent-cycle/agent-pilot-v1/r0-rollout/task-03/episode.json"
+    }
+  ],
+  "correct": 0,
+  "total": 4,
+  "note": "Development pilot. Rollout teacher is scorer AFTER execution, never a semantic intervention.",
+  "scene_seed": 91010,
+  "startup_failures": []
+}

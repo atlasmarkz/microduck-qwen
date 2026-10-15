@@ -1,0 +1,461 @@
+{
+  "mode": "offline_action_exact_match",
+  "adapter": {
+    "path": "/Users/mark/Code/microduck-qwen/adapters/agent-pilot-v1-r1",
+    "sha256": "5a664ebe8a2461565fc9f1dc83e88067ffd15dced385658623ea75fdef3f4045"
+  },
+  "split": "valid",
+  "dataset_manifest_sha256": "7651764addf0dc232b5a3b85f5b41fee6238c544311c212670e013b280a07b7b",
+  "results": [
+    {
+      "id": "valid-71010-task-00-0",
+      "task_type": "move",
+      "expected": {
+        "action": "move",
+        "direction": "forward",
+        "distance_m": 0.2
+      },
+      "prediction": {
+        "raw": "{\"action\":\"move\",\"direction\":\"forward\",\"distance_m\":0.2}",
+        "latency_s": 2.379054749995703,
+        "prompt_tokens": 503,
+        "peak_memory_gb": 2.5264866,
+        "adapter": {
+          "path": "/Users/mark/Code/microduck-qwen/adapters/agent-pilot-v1-r1",
+          "sha256": "5a664ebe8a2461565fc9f1dc83e88067ffd15dced385658623ea75fdef3f4045"
+        },
+        "action": {
+          "action": "move",
+          "direction": "forward",
+          "distance_m": 0.2
+        }
+      },
+      "correct": true,
+      "semantic_correct_after_fence_removal": true
+    },
+    {
+      "id": "valid-71010-task-00-1",
+      "task_type": "return_home",
+      "expected": {
+        "action": "return_home"
+      },
+      "prediction": {
+        "raw": "{\"action\":\"return_home\"}",
+        "latency_s": 1.767567583010532,
+        "prompt_tokens": 517,
+        "peak_memory_gb": 2.5264866,
+        "adapter": {
+          "path": "/Users/mark/Code/microduck-qwen/adapters/agent-pilot-v1-r1",
+          "sha256": "5a664ebe8a2461565fc9f1dc83e88067ffd15dced385658623ea75fdef3f4045"
+        },
+        "action": {
+          "action": "return_home"
+        }
+      },
+      "correct": true,
+      "semantic_correct_after_fence_removal": true
+    },
+    {
+      "id": "valid-71010-task-00-2",
+      "task_type": "done",
+      "expected": {
+        "action": "done"
+      },
+      "prediction": {
+        "raw": "{\"action\":\"done\"}",
+        "latency_s": 1.784041167004034,
+        "prompt_tokens": 524,
+        "peak_memory_gb": 2.5264866,
+        "adapter": {
+          "path": "/Users/mark/Code/microduck-qwen/adapters/agent-pilot-v1-r1",
+          "sha256": "5a664ebe8a2461565fc9f1dc83e88067ffd15dced385658623ea75fdef3f4045"
+        },
+        "action": {
+          "action": "done"
+        }
+      },
+      "correct": true,
+      "semantic_correct_after_fence_removal": true
+    },
+    {
+      "id": "valid-71010-task-01-0",
+      "task_type": "move",
+      "expected": {
+        "action": "move",
+        "direction": "backward",
+        "distance_m": 0.2
+      },
+      "prediction": {
+        "raw": "{\"action\":\"move\",\"direction\":\"backward\",\"distance_m\":0.2}",
+        "latency_s": 2.0977251250005793,
+        "prompt_tokens": 507,
+        "peak_memory_gb": 2.5264866,
+        "adapter": {
+          "path": "/Users/mark/Code/microduck-qwen/adapters/agent-pilot-v1-r1",
+          "sha256": "5a664ebe8a2461565fc9f1dc83e88067ffd15dced385658623ea75fdef3f4045"
+        },
+        "action": {
+          "action": "move",
+          "direction": "backward",
+          "distance_m": 0.2
+        }
+      },
+      "correct": true,
+      "semantic_correct_after_fence_removal": true
+    },
+    {
+      "id": "valid-71010-task-01-1",
+      "task_type": "return_home",
+      "expected": {
+        "action": "return_home"
+      },
+      "prediction": {
+        "raw": "{\"action\":\"return_home\"}",
+        "latency_s": 1.8122127079986967,
+        "prompt_tokens": 521,
+        "peak_memory_gb": 2.5264866,
+        "adapter": {
+          "path": "/Users/mark/Code/microduck-qwen/adapters/agent-pilot-v1-r1",
+          "sha256": "5a664ebe8a2461565fc9f1dc83e88067ffd15dced385658623ea75fdef3f4045"
+        },
+        "action": {
+          "action": "return_home"
+        }
+      },
+      "correct": true,
+      "semantic_correct_after_fence_removal": true
+    },
+    {
+      "id": "valid-71010-task-01-2",
+      "task_type": "done",
+      "expected": {
+        "action": "done"
+      },
+      "prediction": {
+        "raw": "{\"action\":\"done\"}",
+        "latency_s": 1.8375635420088656,
+        "prompt_tokens": 526,
+        "peak_memory_gb": 2.5264866,
+        "adapter": {
+          "path": "/Users/mark/Code/microduck-qwen/adapters/agent-pilot-v1-r1",
+          "sha256": "5a664ebe8a2461565fc9f1dc83e88067ffd15dced385658623ea75fdef3f4045"
+        },
+        "action": {
+          "action": "done"
+        }
+      },
+      "correct": true,
+      "semantic_correct_after_fence_removal": true
+    },
+    {
+      "id": "valid-71010-task-02-0",
+      "task_type": "turn",
+      "expected": {
+        "action": "turn",
+        "direction": "left",
+        "degrees": 45
+      },
+      "prediction": {
+        "raw": "{\"action\":\"turn\",\"direction\":\"right\",\"degrees\":45}",
+        "latency_s": 1.994044874998508,
+        "prompt_tokens": 508,
+        "peak_memory_gb": 2.5264866,
+        "adapter": {
+          "path": "/Users/mark/Code/microduck-qwen/adapters/agent-pilot-v1-r1",
+          "sha256": "5a664ebe8a2461565fc9f1dc83e88067ffd15dced385658623ea75fdef3f4045"
+        },
+        "action": {
+          "action": "turn",
+          "direction": "right",
+          "degrees": 45
+        }
+      },
+      "correct": false,
+      "semantic_correct_after_fence_removal": false
+    },
+    {
+      "id": "valid-71010-task-02-1",
+      "task_type": "turn",
+      "expected": {
+        "action": "turn",
+        "direction": "right",
+        "degrees": 45
+      },
+      "prediction": {
+        "raw": "{\"action\":\"turn\",\"direction\":\"right\",\"degrees\":45}",
+        "latency_s": 2.000986750004813,
+        "prompt_tokens": 520,
+        "peak_memory_gb": 2.5264866,
+        "adapter": {
+          "path": "/Users/mark/Code/microduck-qwen/adapters/agent-pilot-v1-r1",
+          "sha256": "5a664ebe8a2461565fc9f1dc83e88067ffd15dced385658623ea75fdef3f4045"
+        },
+        "action": {
+          "action": "turn",
+          "direction": "right",
+          "degrees": 45
+        }
+      },
+      "correct": true,
+      "semantic_correct_after_fence_removal": true
+    },
+    {
+      "id": "valid-71010-task-02-2",
+      "task_type": "done",
+      "expected": {
+        "action": "done"
+      },
+      "prediction": {
+        "raw": "{\"action\":\"done\"}",
+        "latency_s": 1.832881707989145,
+        "prompt_tokens": 533,
+        "peak_memory_gb": 2.5264866,
+        "adapter": {
+          "path": "/Users/mark/Code/microduck-qwen/adapters/agent-pilot-v1-r1",
+          "sha256": "5a664ebe8a2461565fc9f1dc83e88067ffd15dced385658623ea75fdef3f4045"
+        },
+        "action": {
+          "action": "done"
+        }
+      },
+      "correct": true,
+      "semantic_correct_after_fence_removal": true
+    },
+    {
+      "id": "valid-71010-task-03-0",
+      "task_type": "approach",
+      "expected": {
+        "action": "approach",
+        "color": "green",
+        "id": 3
+      },
+      "prediction": {
+        "raw": "{\"action\":\"approach\",\"color\":\"green\",\"id\":3}",
+        "latency_s": 1.9918047079991084,
+        "prompt_tokens": 506,
+        "peak_memory_gb": 2.5264866,
+        "adapter": {
+          "path": "/Users/mark/Code/microduck-qwen/adapters/agent-pilot-v1-r1",
+          "sha256": "5a664ebe8a2461565fc9f1dc83e88067ffd15dced385658623ea75fdef3f4045"
+        },
+        "action": {
+          "action": "approach",
+          "color": "green",
+          "id": 3
+        }
+      },
+      "correct": true,
+      "semantic_correct_after_fence_removal": true
+    },
+    {
+      "id": "valid-71010-task-03-1",
+      "task_type": "return_home",
+      "expected": {
+        "action": "return_home"
+      },
+      "prediction": {
+        "raw": "{\"action\":\"return_home\"}",
+        "latency_s": 1.7305319999868516,
+        "prompt_tokens": 518,
+        "peak_memory_gb": 2.5264866,
+        "adapter": {
+          "path": "/Users/mark/Code/microduck-qwen/adapters/agent-pilot-v1-r1",
+          "sha256": "5a664ebe8a2461565fc9f1dc83e88067ffd15dced385658623ea75fdef3f4045"
+        },
+        "action": {
+          "action": "return_home"
+        }
+      },
+      "correct": true,
+      "semantic_correct_after_fence_removal": true
+    },
+    {
+      "id": "valid-71010-task-03-2",
+      "task_type": "done",
+      "expected": {
+        "action": "done"
+      },
+      "prediction": {
+        "raw": "{\"action\":\"done\"}",
+        "latency_s": 1.7561695829790551,
+        "prompt_tokens": 522,
+        "peak_memory_gb": 2.5264866,
+        "adapter": {
+          "path": "/Users/mark/Code/microduck-qwen/adapters/agent-pilot-v1-r1",
+          "sha256": "5a664ebe8a2461565fc9f1dc83e88067ffd15dced385658623ea75fdef3f4045"
+        },
+        "action": {
+          "action": "done"
+        }
+      },
+      "correct": true,
+      "semantic_correct_after_fence_removal": true
+    },
+    {
+      "id": "valid-71010-task-04-0",
+      "task_type": "move",
+      "expected": {
+        "action": "move",
+        "direction": "forward",
+        "distance_m": 0.2
+      },
+      "prediction": {
+        "raw": "{\"action\":\"move\",\"direction\":\"forward\",\"distance_m\":0.2}",
+        "latency_s": 2.0634527090005577,
+        "prompt_tokens": 499,
+        "peak_memory_gb": 2.5264866,
+        "adapter": {
+          "path": "/Users/mark/Code/microduck-qwen/adapters/agent-pilot-v1-r1",
+          "sha256": "5a664ebe8a2461565fc9f1dc83e88067ffd15dced385658623ea75fdef3f4045"
+        },
+        "action": {
+          "action": "move",
+          "direction": "forward",
+          "distance_m": 0.2
+        }
+      },
+      "correct": true,
+      "semantic_correct_after_fence_removal": true
+    },
+    {
+      "id": "valid-71010-task-04-1",
+      "task_type": "done",
+      "expected": {
+        "action": "done"
+      },
+      "prediction": {
+        "raw": "{\"action\":\"done\"}",
+        "latency_s": 1.7555809170007706,
+        "prompt_tokens": 514,
+        "peak_memory_gb": 2.5264866,
+        "adapter": {
+          "path": "/Users/mark/Code/microduck-qwen/adapters/agent-pilot-v1-r1",
+          "sha256": "5a664ebe8a2461565fc9f1dc83e88067ffd15dced385658623ea75fdef3f4045"
+        },
+        "action": {
+          "action": "done"
+        }
+      },
+      "correct": true,
+      "semantic_correct_after_fence_removal": true
+    },
+    {
+      "id": "valid-71010-task-05-0",
+      "task_type": "move",
+      "expected": {
+        "action": "move",
+        "direction": "backward",
+        "distance_m": 0.2
+      },
+      "prediction": {
+        "raw": "{\"action\":\"move\",\"direction\":\"backward\",\"distance_m\":0.2}",
+        "latency_s": 2.0857389999728184,
+        "prompt_tokens": 501,
+        "peak_memory_gb": 2.5264866,
+        "adapter": {
+          "path": "/Users/mark/Code/microduck-qwen/adapters/agent-pilot-v1-r1",
+          "sha256": "5a664ebe8a2461565fc9f1dc83e88067ffd15dced385658623ea75fdef3f4045"
+        },
+        "action": {
+          "action": "move",
+          "direction": "backward",
+          "distance_m": 0.2
+        }
+      },
+      "correct": true,
+      "semantic_correct_after_fence_removal": true
+    },
+    {
+      "id": "valid-71010-task-05-1",
+      "task_type": "done",
+      "expected": {
+        "action": "done"
+      },
+      "prediction": {
+        "raw": "{\"action\":\"done\"}",
+        "latency_s": 1.7509644170058891,
+        "prompt_tokens": 515,
+        "peak_memory_gb": 2.5264866,
+        "adapter": {
+          "path": "/Users/mark/Code/microduck-qwen/adapters/agent-pilot-v1-r1",
+          "sha256": "5a664ebe8a2461565fc9f1dc83e88067ffd15dced385658623ea75fdef3f4045"
+        },
+        "action": {
+          "action": "done"
+        }
+      },
+      "correct": true,
+      "semantic_correct_after_fence_removal": true
+    },
+    {
+      "id": "valid-71010-task-06-0",
+      "task_type": "stop",
+      "expected": {
+        "action": "stop"
+      },
+      "prediction": {
+        "raw": "{\"action\":\"stop\"}",
+        "latency_s": 1.712730917002773,
+        "prompt_tokens": 498,
+        "peak_memory_gb": 2.5264866,
+        "adapter": {
+          "path": "/Users/mark/Code/microduck-qwen/adapters/agent-pilot-v1-r1",
+          "sha256": "5a664ebe8a2461565fc9f1dc83e88067ffd15dced385658623ea75fdef3f4045"
+        },
+        "action": {
+          "action": "stop"
+        }
+      },
+      "correct": true,
+      "semantic_correct_after_fence_removal": true
+    },
+    {
+      "id": "valid-71010-task-07-0",
+      "task_type": "unsupported",
+      "expected": {
+        "action": "unsupported"
+      },
+      "prediction": {
+        "raw": "{\"action\":\"unsupported\"}",
+        "latency_s": 1.6931462500069756,
+        "prompt_tokens": 500,
+        "peak_memory_gb": 2.5264866,
+        "adapter": {
+          "path": "/Users/mark/Code/microduck-qwen/adapters/agent-pilot-v1-r1",
+          "sha256": "5a664ebe8a2461565fc9f1dc83e88067ffd15dced385658623ea75fdef3f4045"
+        },
+        "action": {
+          "action": "unsupported"
+        }
+      },
+      "correct": true,
+      "semantic_correct_after_fence_removal": true
+    },
+    {
+      "id": "valid-71010-task-08-0",
+      "task_type": "clarify",
+      "expected": {
+        "action": "clarify"
+      },
+      "prediction": {
+        "raw": "{\"action\":\"clarify\"}",
+        "latency_s": 2.0206124169926625,
+        "prompt_tokens": 499,
+        "peak_memory_gb": 2.5264866,
+        "adapter": {
+          "path": "/Users/mark/Code/microduck-qwen/adapters/agent-pilot-v1-r1",
+          "sha256": "5a664ebe8a2461565fc9f1dc83e88067ffd15dced385658623ea75fdef3f4045"
+        },
+        "action": {
+          "action": "clarify"
+        }
+      },
+      "correct": true,
+      "semantic_correct_after_fence_removal": true
+    }
+  ],
+  "correct": 18,
+  "total": 19,
+  "note": "Development pilot. Rollout teacher is scorer AFTER execution, never a semantic intervention.",
+  "semantic_correct_after_fence_removal": 18
+}

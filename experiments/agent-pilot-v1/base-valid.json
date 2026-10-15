@@ -1,0 +1,335 @@
+{
+  "mode": "offline_action_exact_match",
+  "adapter": null,
+  "split": "valid",
+  "dataset_manifest_sha256": "86dc2496ab4473d74156e0ebbcf2f31545144b34e6c15527aa57f1f460ed82f4",
+  "results": [
+    {
+      "id": "valid-71010-task-00-0",
+      "task_type": "move",
+      "expected": {
+        "action": "move",
+        "direction": "forward",
+        "distance_m": 0.2
+      },
+      "prediction": {
+        "raw": "```json\n{\n  \"action\": \"move\",\n  \"direction\": \"forward\",\n  \"distance_m\": 0.2\n}\n```",
+        "latency_s": 1.5438518750015646,
+        "prompt_tokens": 503,
+        "peak_memory_gb": 2.459549247,
+        "adapter": null,
+        "error": "Expecting value: line 1 column 1 (char 0)"
+      },
+      "correct": false
+    },
+    {
+      "id": "valid-71010-task-00-1",
+      "task_type": "return_home",
+      "expected": {
+        "action": "return_home"
+      },
+      "prediction": {
+        "raw": "```json\n{\n  \"action\": \"move\",\n  \"direction\": \"forward\",\n  \"distance_m\": 0.2\n}\n```",
+        "latency_s": 1.2921622910071164,
+        "prompt_tokens": 517,
+        "peak_memory_gb": 2.459552756,
+        "adapter": null,
+        "error": "Expecting value: line 1 column 1 (char 0)"
+      },
+      "correct": false
+    },
+    {
+      "id": "valid-71010-task-00-2",
+      "task_type": "done",
+      "expected": {
+        "action": "done"
+      },
+      "prediction": {
+        "raw": "```json\n{\n  \"action\": \"move\",\n  \"direction\": \"forward\",\n  \"distance_m\": 0.2\n}\n```",
+        "latency_s": 1.2627914159966167,
+        "prompt_tokens": 524,
+        "peak_memory_gb": 2.459552812,
+        "adapter": null,
+        "error": "Expecting value: line 1 column 1 (char 0)"
+      },
+      "correct": false
+    },
+    {
+      "id": "valid-71010-task-01-0",
+      "task_type": "move",
+      "expected": {
+        "action": "move",
+        "direction": "backward",
+        "distance_m": 0.2
+      },
+      "prediction": {
+        "raw": "```json\n{\n  \"action\": \"move\",\n  \"direction\": \"backward\",\n  \"distance_m\": 0.2\n}\n```",
+        "latency_s": 1.2499775420001242,
+        "prompt_tokens": 507,
+        "peak_memory_gb": 2.459552812,
+        "adapter": null,
+        "error": "Expecting value: line 1 column 1 (char 0)"
+      },
+      "correct": false
+    },
+    {
+      "id": "valid-71010-task-01-1",
+      "task_type": "return_home",
+      "expected": {
+        "action": "return_home"
+      },
+      "prediction": {
+        "raw": "```json\n{\n  \"action\": \"move\",\n  \"direction\": \"backward\",\n  \"distance_m\": 0.2\n}\n```",
+        "latency_s": 1.2616780840035062,
+        "prompt_tokens": 521,
+        "peak_memory_gb": 2.459552812,
+        "adapter": null,
+        "error": "Expecting value: line 1 column 1 (char 0)"
+      },
+      "correct": false
+    },
+    {
+      "id": "valid-71010-task-01-2",
+      "task_type": "done",
+      "expected": {
+        "action": "done"
+      },
+      "prediction": {
+        "raw": "```json\n{\n  \"action\": \"move\",\n  \"direction\": \"backward\",\n  \"distance_m\": 0.2\n}\n```",
+        "latency_s": 1.3407253749901429,
+        "prompt_tokens": 526,
+        "peak_memory_gb": 2.459552828,
+        "adapter": null,
+        "error": "Expecting value: line 1 column 1 (char 0)"
+      },
+      "correct": false
+    },
+    {
+      "id": "valid-71010-task-02-0",
+      "task_type": "turn",
+      "expected": {
+        "action": "turn",
+        "direction": "left",
+        "degrees": 45
+      },
+      "prediction": {
+        "raw": "```json\n{\n  \"action\": \"turn\",\n  \"direction\": \"right\",\n  \"degrees\": 45\n}\n```",
+        "latency_s": 1.1917807499994524,
+        "prompt_tokens": 508,
+        "peak_memory_gb": 2.459552828,
+        "adapter": null,
+        "error": "Expecting value: line 1 column 1 (char 0)"
+      },
+      "correct": false
+    },
+    {
+      "id": "valid-71010-task-02-1",
+      "task_type": "turn",
+      "expected": {
+        "action": "turn",
+        "direction": "right",
+        "degrees": 45
+      },
+      "prediction": {
+        "raw": "```json\n{\n  \"action\": \"turn\",\n  \"direction\": \"left\",\n  \"degrees\": 45\n}\n```",
+        "latency_s": 1.2072394160204567,
+        "prompt_tokens": 520,
+        "peak_memory_gb": 2.459552828,
+        "adapter": null,
+        "error": "Expecting value: line 1 column 1 (char 0)"
+      },
+      "correct": false
+    },
+    {
+      "id": "valid-71010-task-02-2",
+      "task_type": "done",
+      "expected": {
+        "action": "done"
+      },
+      "prediction": {
+        "raw": "```json\n{\n  \"action\": \"turn\",\n  \"direction\": \"left\",\n  \"degrees\": 45\n}\n```",
+        "latency_s": 1.2286505830124952,
+        "prompt_tokens": 533,
+        "peak_memory_gb": 2.459552884,
+        "adapter": null,
+        "error": "Expecting value: line 1 column 1 (char 0)"
+      },
+      "correct": false
+    },
+    {
+      "id": "valid-71010-task-03-0",
+      "task_type": "approach",
+      "expected": {
+        "action": "approach",
+        "color": "green",
+        "id": 3
+      },
+      "prediction": {
+        "raw": "```json\n{\n  \"action\": \"approach\",\n  \"color\": \"green\",\n  \"id\": 3\n}\n```",
+        "latency_s": 1.2240044159989338,
+        "prompt_tokens": 506,
+        "peak_memory_gb": 2.459552884,
+        "adapter": null,
+        "error": "Expecting value: line 1 column 1 (char 0)"
+      },
+      "correct": false
+    },
+    {
+      "id": "valid-71010-task-03-1",
+      "task_type": "return_home",
+      "expected": {
+        "action": "return_home"
+      },
+      "prediction": {
+        "raw": "```json\n{\n  \"action\": \"move\",\n  \"direction\": \"left或right\",\n  \"degrees\": 90\n}\n```",
+        "latency_s": 1.2407964580052067,
+        "prompt_tokens": 518,
+        "peak_memory_gb": 2.459552884,
+        "adapter": null,
+        "error": "Expecting value: line 1 column 1 (char 0)"
+      },
+      "correct": false
+    },
+    {
+      "id": "valid-71010-task-03-2",
+      "task_type": "done",
+      "expected": {
+        "action": "done"
+      },
+      "prediction": {
+        "raw": "```json\n{\n  \"action\": \"approach\",\n  \"color\": \"green\",\n  \"id\": 1\n}\n```",
+        "latency_s": 1.2192071250174195,
+        "prompt_tokens": 522,
+        "peak_memory_gb": 2.459552884,
+        "adapter": null,
+        "error": "Expecting value: line 1 column 1 (char 0)"
+      },
+      "correct": false
+    },
+    {
+      "id": "valid-71010-task-04-0",
+      "task_type": "move",
+      "expected": {
+        "action": "move",
+        "direction": "forward",
+        "distance_m": 0.2
+      },
+      "prediction": {
+        "raw": "```json\n{\n  \"action\": \"move\",\n  \"direction\": \"forward\",\n  \"distance_m\": 0.2\n}\n```",
+        "latency_s": 1.2095914169913158,
+        "prompt_tokens": 499,
+        "peak_memory_gb": 2.459552884,
+        "adapter": null,
+        "error": "Expecting value: line 1 column 1 (char 0)"
+      },
+      "correct": false
+    },
+    {
+      "id": "valid-71010-task-04-1",
+      "task_type": "done",
+      "expected": {
+        "action": "done"
+      },
+      "prediction": {
+        "raw": "```json\n{\n  \"action\": \"move\",\n  \"direction\": \"forward\",\n  \"distance_m\": 0.2\n}\n```",
+        "latency_s": 1.2410255419963505,
+        "prompt_tokens": 514,
+        "peak_memory_gb": 2.459552884,
+        "adapter": null,
+        "error": "Expecting value: line 1 column 1 (char 0)"
+      },
+      "correct": false
+    },
+    {
+      "id": "valid-71010-task-05-0",
+      "task_type": "move",
+      "expected": {
+        "action": "move",
+        "direction": "backward",
+        "distance_m": 0.2
+      },
+      "prediction": {
+        "raw": "```json\n{\n  \"action\": \"move\",\n  \"direction\": \"backward\",\n  \"distance_m\": 0.2\n}\n```",
+        "latency_s": 1.2128797920013312,
+        "prompt_tokens": 501,
+        "peak_memory_gb": 2.459552884,
+        "adapter": null,
+        "error": "Expecting value: line 1 column 1 (char 0)"
+      },
+      "correct": false
+    },
+    {
+      "id": "valid-71010-task-05-1",
+      "task_type": "done",
+      "expected": {
+        "action": "done"
+      },
+      "prediction": {
+        "raw": "```json\n{\n  \"action\": \"move\",\n  \"direction\": \"backward\",\n  \"distance_m\": 0.2\n}\n```",
+        "latency_s": 1.239276875014184,
+        "prompt_tokens": 515,
+        "peak_memory_gb": 2.459552884,
+        "adapter": null,
+        "error": "Expecting value: line 1 column 1 (char 0)"
+      },
+      "correct": false
+    },
+    {
+      "id": "valid-71010-task-06-0",
+      "task_type": "stop",
+      "expected": {
+        "action": "stop"
+      },
+      "prediction": {
+        "raw": "{\"action\":\"stop\"}",
+        "latency_s": 0.9141545829770621,
+        "prompt_tokens": 498,
+        "peak_memory_gb": 2.459552884,
+        "adapter": null,
+        "action": {
+          "action": "stop"
+        }
+      },
+      "correct": true
+    },
+    {
+      "id": "valid-71010-task-07-0",
+      "task_type": "unsupported",
+      "expected": {
+        "action": "unsupported"
+      },
+      "prediction": {
+        "raw": "```json\n{\n  \"action\": \"approach\",\n  \"color\": \"green\",\n  \"id\": 3\n}\n```",
+        "latency_s": 1.1799608749861363,
+        "prompt_tokens": 500,
+        "peak_memory_gb": 2.459552884,
+        "adapter": null,
+        "error": "Expecting value: line 1 column 1 (char 0)"
+      },
+      "correct": false
+    },
+    {
+      "id": "valid-71010-task-08-0",
+      "task_type": "clarify",
+      "expected": {
+        "action": "clarify"
+      },
+      "prediction": {
+        "raw": "{\"action\":\"approach\",\"color\":\"green\",\"id\":1}",
+        "latency_s": 1.025466666003922,
+        "prompt_tokens": 499,
+        "peak_memory_gb": 2.459552884,
+        "adapter": null,
+        "action": {
+          "action": "approach",
+          "color": "green",
+          "id": 1
+        }
+      },
+      "correct": false
+    }
+  ],
+  "correct": 1,
+  "total": 19,
+  "note": "Development pilot. Rollout teacher is scorer AFTER execution, never a semantic intervention."
+}

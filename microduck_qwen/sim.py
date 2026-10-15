@@ -211,7 +211,13 @@ def main():
             setup.connection.receive()
             time.sleep(1.0)
             setup.close()
+        home_observer = Observer(args.port)
+        try:
+            home_state = home_observer.read()
+        finally:
+            home_observer.close()
         metadata = {
+            "home_pose": {"x": home_state["trunk"][0], "y": home_state["trunk"][1], "yaw": home_state["yaw"]},
             "socket": str(socket_path),
             "port": args.port,
             "state_dir": str(state),

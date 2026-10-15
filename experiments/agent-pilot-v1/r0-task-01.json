@@ -1,0 +1,91 @@
+{
+  "instruction": "先向后退20厘米，随后回到出发点",
+  "teacher_specs": [
+    {
+      "action": "move",
+      "direction": "backward",
+      "distance_m": 0.2
+    },
+    {
+      "action": "return_home"
+    }
+  ],
+  "steps": [
+    {
+      "expected": {
+        "action": "move",
+        "direction": "backward",
+        "distance_m": 0.2
+      },
+      "memory": {
+        "home_recorded": true,
+        "odometry_relative_home": {
+          "x": 0.11,
+          "y": 0.03,
+          "yaw_deg": -0.9
+        },
+        "completed": []
+      },
+      "prediction": {
+        "raw": "{\"action\":\"done\"}",
+        "latency_s": 2.6449607079848647,
+        "prompt_tokens": 507,
+        "peak_memory_gb": 2.5264866,
+        "adapter": {
+          "path": "/Users/mark/Code/microduck-qwen/adapters/agent-pilot-v1-r0",
+          "sha256": "23e09134b2c72ea5c09138074e666234d94247341a6b174aa2ac09ad77657141"
+        },
+        "action": {
+          "action": "done"
+        }
+      },
+      "semantic_match": false,
+      "teacher_intervened": false,
+      "execution": {
+        "action": {
+          "action": "done"
+        },
+        "success": false,
+        "observation": "oracle robot odometry and known safety map",
+        "no_motion": true
+      }
+    }
+  ],
+  "verified": false,
+  "intervene": false,
+  "mode": "independent_actor",
+  "reset": {
+    "action": {
+      "action": "return_home"
+    },
+    "success": true,
+    "observation": "oracle robot odometry and known safety map",
+    "navigation": {
+      "success": true,
+      "goals": [
+        {
+          "goal": {
+            "target": "point",
+            "x": 0.0019936620712772708,
+            "y": 0.00016156876701359823,
+            "speed": "slow",
+            "stop_distance_m": 0.1
+          },
+          "distance_m": 0.0953427411411815,
+          "elapsed_s": 5.3866195419977885,
+          "path_length_m": 0.5797286158182887,
+          "min_clearance_m": 0.5844745591090384,
+          "position": [
+            0.09727035024647844,
+            -0.0033868081407888943
+          ]
+        }
+      ],
+      "observation": "MuJoCo ground-truth pose and fixed scene map"
+    },
+    "distance_home_m": 0.11639869848119613,
+    "home_yaw_error_deg": 1.4576713704042208
+  },
+  "error": "failed physical skill or wrong task action (scored AFTER execution)",
+  "scene_contact_steps_delta": 0
+}

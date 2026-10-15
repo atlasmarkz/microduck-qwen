@@ -1,0 +1,114 @@
+{
+  "instruction": "先左转45度，再右转45度",
+  "teacher_specs": [
+    {
+      "action": "turn",
+      "direction": "left",
+      "degrees": 45
+    },
+    {
+      "action": "turn",
+      "direction": "right",
+      "degrees": 45
+    }
+  ],
+  "steps": [
+    {
+      "expected": {
+        "action": "turn",
+        "direction": "left",
+        "degrees": 45
+      },
+      "memory": {
+        "home_recorded": true,
+        "odometry_relative_home": {
+          "x": 0.08,
+          "y": 0.09,
+          "yaw_deg": 1.3
+        },
+        "completed": []
+      },
+      "prediction": {
+        "raw": "{\"action\":\"turn\",\"direction\":\"right\",\"degrees\":45}",
+        "latency_s": 2.950455874990439,
+        "prompt_tokens": 508,
+        "peak_memory_gb": 2.5264866,
+        "adapter": {
+          "path": "/Users/mark/Code/microduck-qwen/adapters/agent-pilot-v1-r0",
+          "sha256": "23e09134b2c72ea5c09138074e666234d94247341a6b174aa2ac09ad77657141"
+        },
+        "action": {
+          "action": "turn",
+          "direction": "right",
+          "degrees": 45
+        }
+      },
+      "semantic_match": false,
+      "teacher_intervened": false,
+      "execution": {
+        "action": {
+          "action": "turn",
+          "direction": "right",
+          "degrees": 45
+        },
+        "success": true,
+        "observation": "oracle robot odometry and known safety map",
+        "achieved": 0.7901981499518539,
+        "requested": 0.7853981633974483,
+        "units": "radians",
+        "lateral_m": 0.013549342702812887,
+        "start": {
+          "position": [
+            0.07616475342196213,
+            0.08988179341287537
+          ],
+          "yaw": 0.04983407617084766
+        },
+        "end": {
+          "position": [
+            0.0921728236676258,
+            0.07711401725943759
+          ],
+          "yaw": -0.7403640737810062
+        }
+      }
+    }
+  ],
+  "verified": false,
+  "intervene": false,
+  "mode": "independent_actor",
+  "reset": {
+    "action": {
+      "action": "return_home"
+    },
+    "success": true,
+    "observation": "oracle robot odometry and known safety map",
+    "navigation": {
+      "success": true,
+      "goals": [
+        {
+          "goal": {
+            "target": "point",
+            "x": 0.0019936620712772708,
+            "y": 0.00016156876701359823,
+            "speed": "slow",
+            "stop_distance_m": 0.1
+          },
+          "distance_m": 0.0841915725077617,
+          "elapsed_s": 4.468363416992361,
+          "path_length_m": 0.4292263076639652,
+          "min_clearance_m": 0.5993264185227333,
+          "position": [
+            0.07319937587243917,
+            0.04508335861778332
+          ]
+        }
+      ],
+      "observation": "MuJoCo ground-truth pose and fixed scene map"
+    },
+    "distance_home_m": 0.1210871076737864,
+    "home_yaw_error_deg": 0.8772898186827469
+  },
+  "error": "failed physical skill or wrong task action (scored AFTER execution)",
+  "scene_contact_steps_delta": 0
+}

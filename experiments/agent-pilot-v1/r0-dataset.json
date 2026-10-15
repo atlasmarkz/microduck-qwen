@@ -1,0 +1,472 @@
+{
+  "format": "simulation_agent_v1",
+  "status": "completed",
+  "episodes": [
+    {
+      "seed": 61010,
+      "split": "train",
+      "task": 0,
+      "verified": true,
+      "rows": 3,
+      "error": null,
+      "interventions": 0
+    },
+    {
+      "seed": 61010,
+      "split": "train",
+      "task": 1,
+      "verified": true,
+      "rows": 3,
+      "error": null,
+      "interventions": 0
+    },
+    {
+      "seed": 61010,
+      "split": "train",
+      "task": 2,
+      "verified": true,
+      "rows": 3,
+      "error": null,
+      "interventions": 0
+    },
+    {
+      "seed": 61010,
+      "split": "train",
+      "task": 3,
+      "verified": true,
+      "rows": 3,
+      "error": null,
+      "interventions": 0
+    },
+    {
+      "seed": 61010,
+      "split": "train",
+      "task": 4,
+      "verified": true,
+      "rows": 2,
+      "error": null,
+      "interventions": 0
+    },
+    {
+      "seed": 61010,
+      "split": "train",
+      "task": 5,
+      "verified": true,
+      "rows": 2,
+      "error": null,
+      "interventions": 0
+    },
+    {
+      "seed": 61010,
+      "split": "train",
+      "task": 6,
+      "verified": true,
+      "rows": 1,
+      "error": null,
+      "interventions": 0
+    },
+    {
+      "seed": 61010,
+      "split": "train",
+      "task": 7,
+      "verified": true,
+      "rows": 1,
+      "error": null,
+      "interventions": 0
+    },
+    {
+      "seed": 61010,
+      "split": "train",
+      "task": 8,
+      "verified": true,
+      "rows": 1,
+      "error": null,
+      "interventions": 0
+    },
+    {
+      "seed": 61011,
+      "split": "train",
+      "task": 0,
+      "verified": true,
+      "rows": 3,
+      "error": null,
+      "interventions": 0
+    },
+    {
+      "seed": 61011,
+      "split": "train",
+      "task": 1,
+      "verified": true,
+      "rows": 3,
+      "error": null,
+      "interventions": 0
+    },
+    {
+      "seed": 61011,
+      "split": "train",
+      "task": 2,
+      "verified": true,
+      "rows": 3,
+      "error": null,
+      "interventions": 0
+    },
+    {
+      "seed": 61011,
+      "split": "train",
+      "task": 3,
+      "verified": true,
+      "rows": 3,
+      "error": null,
+      "interventions": 0
+    },
+    {
+      "seed": 61011,
+      "split": "train",
+      "task": 4,
+      "verified": true,
+      "rows": 2,
+      "error": null,
+      "interventions": 0
+    },
+    {
+      "seed": 61011,
+      "split": "train",
+      "task": 5,
+      "verified": false,
+      "rows": 0,
+      "error": "RuntimeError: cannot restore task start",
+      "interventions": 0
+    },
+    {
+      "seed": 61011,
+      "split": "train",
+      "task": 6,
+      "verified": false,
+      "rows": 0,
+      "error": "RuntimeError: cannot restore task start",
+      "interventions": 0
+    },
+    {
+      "seed": 61011,
+      "split": "train",
+      "task": 7,
+      "verified": false,
+      "rows": 0,
+      "error": "RuntimeError: cannot restore task start",
+      "interventions": 0
+    },
+    {
+      "seed": 61011,
+      "split": "train",
+      "task": 8,
+      "verified": false,
+      "rows": 0,
+      "error": "RuntimeError: cannot restore task start",
+      "interventions": 0
+    },
+    {
+      "seed": 61012,
+      "split": "train",
+      "task": 0,
+      "verified": false,
+      "rows": 0,
+      "error": "failed physical skill or wrong task action (scored AFTER execution)",
+      "interventions": 0
+    },
+    {
+      "seed": 61012,
+      "split": "train",
+      "task": 1,
+      "verified": false,
+      "rows": 0,
+      "error": "RuntimeError: cannot restore task start",
+      "interventions": 0
+    },
+    {
+      "seed": 61012,
+      "split": "train",
+      "task": 2,
+      "verified": true,
+      "rows": 3,
+      "error": null,
+      "interventions": 0
+    },
+    {
+      "seed": 61012,
+      "split": "train",
+      "task": 3,
+      "verified": true,
+      "rows": 3,
+      "error": null,
+      "interventions": 0
+    },
+    {
+      "seed": 61012,
+      "split": "train",
+      "task": 4,
+      "verified": true,
+      "rows": 2,
+      "error": null,
+      "interventions": 0
+    },
+    {
+      "seed": 61012,
+      "split": "train",
+      "task": 5,
+      "verified": false,
+      "rows": 0,
+      "error": "RuntimeError: cannot restore task start",
+      "interventions": 0
+    },
+    {
+      "seed": 61012,
+      "split": "train",
+      "task": 6,
+      "verified": false,
+      "rows": 0,
+      "error": "RuntimeError: cannot restore task start",
+      "interventions": 0
+    },
+    {
+      "seed": 61012,
+      "split": "train",
+      "task": 7,
+      "verified": false,
+      "rows": 0,
+      "error": "RuntimeError: cannot restore task start",
+      "interventions": 0
+    },
+    {
+      "seed": 61012,
+      "split": "train",
+      "task": 8,
+      "verified": true,
+      "rows": 1,
+      "error": null,
+      "interventions": 0
+    },
+    {
+      "seed": 71010,
+      "split": "valid",
+      "task": 0,
+      "verified": true,
+      "rows": 3,
+      "error": null,
+      "interventions": 0
+    },
+    {
+      "seed": 71010,
+      "split": "valid",
+      "task": 1,
+      "verified": true,
+      "rows": 3,
+      "error": null,
+      "interventions": 0
+    },
+    {
+      "seed": 71010,
+      "split": "valid",
+      "task": 2,
+      "verified": true,
+      "rows": 3,
+      "error": null,
+      "interventions": 0
+    },
+    {
+      "seed": 71010,
+      "split": "valid",
+      "task": 3,
+      "verified": true,
+      "rows": 3,
+      "error": null,
+      "interventions": 0
+    },
+    {
+      "seed": 71010,
+      "split": "valid",
+      "task": 4,
+      "verified": true,
+      "rows": 2,
+      "error": null,
+      "interventions": 0
+    },
+    {
+      "seed": 71010,
+      "split": "valid",
+      "task": 5,
+      "verified": true,
+      "rows": 2,
+      "error": null,
+      "interventions": 0
+    },
+    {
+      "seed": 71010,
+      "split": "valid",
+      "task": 6,
+      "verified": true,
+      "rows": 1,
+      "error": null,
+      "interventions": 0
+    },
+    {
+      "seed": 71010,
+      "split": "valid",
+      "task": 7,
+      "verified": true,
+      "rows": 1,
+      "error": null,
+      "interventions": 0
+    },
+    {
+      "seed": 71010,
+      "split": "valid",
+      "task": 8,
+      "verified": true,
+      "rows": 1,
+      "error": null,
+      "interventions": 0
+    },
+    {
+      "seed": 81010,
+      "split": "test",
+      "task": 0,
+      "verified": true,
+      "rows": 3,
+      "error": null,
+      "interventions": 0
+    },
+    {
+      "seed": 81010,
+      "split": "test",
+      "task": 1,
+      "verified": true,
+      "rows": 3,
+      "error": null,
+      "interventions": 0
+    },
+    {
+      "seed": 81010,
+      "split": "test",
+      "task": 2,
+      "verified": true,
+      "rows": 3,
+      "error": null,
+      "interventions": 0
+    },
+    {
+      "seed": 81010,
+      "split": "test",
+      "task": 3,
+      "verified": true,
+      "rows": 3,
+      "error": null,
+      "interventions": 0
+    },
+    {
+      "seed": 81010,
+      "split": "test",
+      "task": 4,
+      "verified": true,
+      "rows": 2,
+      "error": null,
+      "interventions": 0
+    },
+    {
+      "seed": 81010,
+      "split": "test",
+      "task": 5,
+      "verified": false,
+      "rows": 0,
+      "error": "RuntimeError: cannot restore task start",
+      "interventions": 0
+    },
+    {
+      "seed": 81010,
+      "split": "test",
+      "task": 6,
+      "verified": false,
+      "rows": 0,
+      "error": "RuntimeError: cannot restore task start",
+      "interventions": 0
+    },
+    {
+      "seed": 81010,
+      "split": "test",
+      "task": 7,
+      "verified": false,
+      "rows": 0,
+      "error": "RuntimeError: cannot restore task start",
+      "interventions": 0
+    },
+    {
+      "seed": 81010,
+      "split": "test",
+      "task": 8,
+      "verified": false,
+      "rows": 0,
+      "error": "RuntimeError: cannot restore task start",
+      "interventions": 0
+    }
+  ],
+  "splits": {
+    "train": {
+      "sha256": "9c165f1ca8176b748dcff41146b3a79234738681e71e885402fd9f32854ff23b",
+      "examples": 42,
+      "scene_seeds": [
+        61010,
+        61011,
+        61012
+      ],
+      "actions": {
+        "move": 8,
+        "return_home": 7,
+        "done": 14,
+        "turn": 6,
+        "approach": 3,
+        "stop": 1,
+        "unsupported": 1,
+        "clarify": 2
+      }
+    },
+    "valid": {
+      "sha256": "c752b289516b3299ff99ab9b7a0d7a3c3d5e33b87d8e7e13ff7ee85b9d197413",
+      "examples": 19,
+      "scene_seeds": [
+        71010
+      ],
+      "actions": {
+        "move": 4,
+        "return_home": 3,
+        "done": 6,
+        "turn": 2,
+        "approach": 1,
+        "stop": 1,
+        "unsupported": 1,
+        "clarify": 1
+      }
+    },
+    "test": {
+      "sha256": "43010e2fe9adc5d3d10f4d15d2cc346fbd3ea3c9c31e3639b801c42cccf68837",
+      "examples": 14,
+      "scene_seeds": [
+        81010
+      ],
+      "actions": {
+        "move": 3,
+        "return_home": 3,
+        "done": 5,
+        "turn": 2,
+        "approach": 1
+      }
+    }
+  },
+  "inputs": [
+    "numbered RGB",
+    "instruction",
+    "own oracle odometry",
+    "completed actions"
+  ],
+  "method": "expert-intervened data aggregation; not unrestricted DAgger or learned reward model",
+  "seed_offset": 10,
+  "startup_failures": []
+}

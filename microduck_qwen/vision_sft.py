@@ -37,10 +37,14 @@ def train(args):
     from mlx_vlm.trainer.vlm.sft.runtime import collate_vlm_batch, vlm_sft_loss
     from mlx_vlm.utils import load_config
 
-    manifest, splits = load_splits(args.data)
-    output = (args.output or ROOT / "adapters" / ("vision-sim-" + datetime.now().strftime("%Y%m%d-%H%M%S"))).resolve()
+    agent_task = getattr(args, "task", "vision") == "agent"
+    data_loader, row_builder = load_splits, model_rows
+    if agent_task:
+        from .agent_data import load_splits as data_loader, model_rows as row_builder
+    manifest, splits = data_loader(args.data)
+    output = (args.output or ROOT / "adapters" / (("agent-sim-" if agent_task else "vision-sim-") + datetime.now().strftime("%Y%m%d-%H%M%S"))).resolve()
     output.mkdir(parents=True, exist_ok=False)
-    report = {"format": "vision_sft_v1", "status": "started", "model": MODEL, "revision": REVISION,
+    report = {"format": "agent_sft_v1" if agent_task else "vision_sft_v1", "status": "started", "model": MODEL, "revision": REVISION,
               "dataset_manifest_sha256": digest(args.data / "manifest.json"), "dataset": str(args.data),
               "split_counts": {k: len(v) for k, v in splits.items()}, "seed": args.seed,
               "config": {"rank": args.rank, "last_layers": args.layers, "alpha": 2 * args.rank,
@@ -50,6 +54,8 @@ def train(args):
                          "vision_frozen": True, "gradient_checkpointing": True,
                          "loss": "assistant completion only", "base": "MLX 4-bit"},
               "swap_before": swap_snapshot(), "steps": []}
+    report["source_sha256"] = {name: digest(ROOT / "microduck_qwen" / name)
+                               for name in (["vision_sft.py", "agent.py", "agent_data.py", "skills.py"] if agent_task else ["vision_sft.py", "vision_data.py", "vision.py"])}
     started = time.perf_counter()
     mx.random.seed(args.seed)
     mx.set_memory_limit(8 * 1024**3)
@@ -71,7 +77,19 @@ def train(args):
                    and any(name.startswith(prefix + ".") for prefix in prefixes)]
         if len(targets) != 2 * args.layers:
             raise ValueError("unexpected attention module layout")
-        model = get_peft_model(model, targets, rank=args.rank, alpha=2 * args.rank, dropout=0.0)
+        if getattr(args, "resume_adapter", None):
+            if not agent_task:
+                raise ValueError("resume supported for agent task only")
+            from .agent import adapter_metadata
+            from mlx_vlm.trainer.peft.utils import load_adapters
+            parent = adapter_metadata(args.resume_adapter)
+            parent_report = json.loads((Path(parent["path"]) / "training_report.json").read_text())
+            if parent_report["config"]["rank"] != args.rank or parent_report["config"]["last_layers"] != args.layers:
+                raise ValueError("resume LoRA config mismatch")
+            model = load_adapters(model, parent["path"])
+            report.update(parent_adapter=parent, optimizer_resume=False)
+        else:
+            model = get_peft_model(model, targets, rank=args.rank, alpha=2 * args.rank, dropout=0.0)
         parameters = dict(tree_flatten(model.trainable_parameters()))
         if not parameters or any(not name.endswith(("lora_a", "lora_b")) for name in parameters):
             raise ValueError("only selected LoRA parameters may be trained")
@@ -79,7 +97,7 @@ def train(args):
         before = {name: np.array(value).copy() for name, value in parameters.items()}
         report["trainable_parameters"] = sum(value.size for value in parameters.values())
         report["versions"] = {p: importlib.metadata.version(p) for p in ("mlx", "mlx-vlm", "transformers")}
-        datasets = {split: VisionDataset(model_rows(splits[split], args.data), config, processor,
+        datasets = {split: VisionDataset(row_builder(splits[split], args.data), config, processor,
                                         {"train_on_completions": True}) for split in ("train", "valid")}
         image_id = image_token_id(config)
         cache = OrderedDict()
@@ -153,6 +171,7 @@ def train(args):
         report["changed_adapter_tensors"] = len(changed)
         save_trainable_weights(model, output / "adapters.safetensors")
         report.update(status="completed", adapter_sha256=digest(output / "adapters.safetensors"),
+                      adapter_config_sha256=digest(output / "adapter_config.json"),
                       observed_token_lengths={"min": min(token_lengths), "max": max(token_lengths)})
     except BaseException as error:
         report.update(status="failed_or_interrupted", error=f"{type(error).__name__}: {error}")
@@ -207,6 +226,8 @@ def main():
         command.add_argument("--output", type=Path)
         command.add_argument("--seed", type=int, default=42)
     trainer = sub.choices["train"]
+    trainer.add_argument("--task", choices=("vision", "agent"), default="vision")
+    trainer.add_argument("--resume-adapter", type=Path)
     trainer.add_argument("--steps", type=int, default=100)
     trainer.add_argument("--rank", type=int, default=8)
     trainer.add_argument("--layers", type=int, default=8)

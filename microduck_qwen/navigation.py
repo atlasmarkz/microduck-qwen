@@ -250,7 +250,10 @@ def execute(
     cancel_file=None,
     guard=None,
     observation_label=None,
+    arrival_tolerance_m=0.025,
 ):
+    if not math.isfinite(arrival_tolerance_m) or not 0 <= arrival_tolerance_m <= 0.025:
+        raise ValueError("arrival tolerance must be 0..0.025m")
     scene = scene or arena()
     validate(plan, scene)
     if plan["status"] == "unsupported":
@@ -306,7 +309,7 @@ def execute(
                             "视觉保护停止："
                             + str(visual_check.get("status", "unknown"))
                         )
-                    if distance <= goal["stop_distance_m"] + 0.025:
+                    if distance <= goal["stop_distance_m"] + arrival_tolerance_m:
                         connection.stop()
                         summary["goals"].append(
                             {

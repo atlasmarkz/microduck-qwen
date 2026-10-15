@@ -1,0 +1,227 @@
+{
+  "instruction": "先左转45度，再右转45度",
+  "teacher_specs": [
+    {
+      "action": "turn",
+      "direction": "left",
+      "degrees": 45
+    },
+    {
+      "action": "turn",
+      "direction": "right",
+      "degrees": 45
+    }
+  ],
+  "steps": [
+    {
+      "expected": {
+        "action": "turn",
+        "direction": "left",
+        "degrees": 45
+      },
+      "memory": {
+        "home_recorded": true,
+        "odometry_relative_home": {
+          "x": -0.07,
+          "y": 0.0,
+          "yaw_deg": 6.3
+        },
+        "completed": []
+      },
+      "prediction": {
+        "raw": "{\"action\":\"turn\",\"direction\":\"left\",\"degrees\":45}",
+        "latency_s": 2.4227821249805856,
+        "prompt_tokens": 507,
+        "peak_memory_gb": 2.5264866,
+        "adapter": {
+          "path": "/Users/mark/Code/microduck-qwen/adapters/agent-pilot-v1-r1",
+          "sha256": "5a664ebe8a2461565fc9f1dc83e88067ffd15dced385658623ea75fdef3f4045"
+        },
+        "action": {
+          "action": "turn",
+          "direction": "left",
+          "degrees": 45
+        }
+      },
+      "semantic_match": true,
+      "teacher_intervened": false,
+      "execution": {
+        "action": {
+          "action": "turn",
+          "direction": "left",
+          "degrees": 45
+        },
+        "success": true,
+        "observation": "oracle robot odometry and known safety map",
+        "achieved": 0.8310785979643609,
+        "requested": 0.7853981633974483,
+        "units": "radians",
+        "lateral_m": 0.012964050926388752,
+        "start": {
+          "position": [
+            -0.07446752040214288,
+            0.00042297715182990244
+          ],
+          "yaw": 0.19480745272346606
+        },
+        "end": {
+          "position": [
+            -0.07536390481957851,
+            0.013460105908480364
+          ],
+          "yaw": 1.025886050687827
+        }
+      }
+    },
+    {
+      "expected": {
+        "action": "turn",
+        "direction": "right",
+        "degrees": 45
+      },
+      "memory": {
+        "home_recorded": true,
+        "odometry_relative_home": {
+          "x": -0.08,
+          "y": 0.01,
+          "yaw_deg": 59.1
+        },
+        "completed": [
+          {
+            "action": "turn",
+            "direction": "left",
+            "degrees": 45
+          }
+        ]
+      },
+      "prediction": {
+        "raw": "{\"action\":\"turn\",\"direction\":\"right\",\"degrees\":45}",
+        "latency_s": 2.2754685829859227,
+        "prompt_tokens": 521,
+        "peak_memory_gb": 2.5264866,
+        "adapter": {
+          "path": "/Users/mark/Code/microduck-qwen/adapters/agent-pilot-v1-r1",
+          "sha256": "5a664ebe8a2461565fc9f1dc83e88067ffd15dced385658623ea75fdef3f4045"
+        },
+        "action": {
+          "action": "turn",
+          "direction": "right",
+          "degrees": 45
+        }
+      },
+      "semantic_match": true,
+      "teacher_intervened": false,
+      "execution": {
+        "action": {
+          "action": "turn",
+          "direction": "right",
+          "degrees": 45
+        },
+        "success": true,
+        "observation": "oracle robot odometry and known safety map",
+        "achieved": 0.7861032041621091,
+        "requested": 0.7853981633974483,
+        "units": "radians",
+        "lateral_m": 0.01584188309844876,
+        "start": {
+          "position": [
+            -0.0719657693888709,
+            0.005419552477084496
+          ],
+          "yaw": 1.031772101796468
+        },
+        "end": {
+          "position": [
+            -0.05227285426424658,
+            0.007482235365058106
+          ],
+          "yaw": 0.245668897634359
+        }
+      }
+    },
+    {
+      "expected": {
+        "action": "done"
+      },
+      "memory": {
+        "home_recorded": true,
+        "odometry_relative_home": {
+          "x": -0.06,
+          "y": 0.01,
+          "yaw_deg": 13.4
+        },
+        "completed": [
+          {
+            "action": "turn",
+            "direction": "left",
+            "degrees": 45
+          },
+          {
+            "action": "turn",
+            "direction": "right",
+            "degrees": 45
+          }
+        ]
+      },
+      "prediction": {
+        "raw": "{\"action\":\"done\"}",
+        "latency_s": 1.9992815839941613,
+        "prompt_tokens": 534,
+        "peak_memory_gb": 2.5264866,
+        "adapter": {
+          "path": "/Users/mark/Code/microduck-qwen/adapters/agent-pilot-v1-r1",
+          "sha256": "5a664ebe8a2461565fc9f1dc83e88067ffd15dced385658623ea75fdef3f4045"
+        },
+        "action": {
+          "action": "done"
+        }
+      },
+      "semantic_match": true,
+      "teacher_intervened": false,
+      "execution": {
+        "action": {
+          "action": "done"
+        },
+        "success": false,
+        "observation": "oracle robot odometry and known safety map",
+        "no_motion": true
+      }
+    }
+  ],
+  "verified": true,
+  "intervene": false,
+  "mode": "independent_actor",
+  "reset": {
+    "action": {
+      "action": "return_home"
+    },
+    "success": true,
+    "observation": "oracle robot odometry and known safety map",
+    "navigation": {
+      "success": true,
+      "goals": [
+        {
+          "goal": {
+            "target": "point",
+            "x": 0.0020022963842826064,
+            "y": 0.00017911532925965132,
+            "speed": "slow",
+            "stop_distance_m": 0.1
+          },
+          "distance_m": 0.07651102616518837,
+          "elapsed_s": 7.500057108700275e-07,
+          "path_length_m": 0.0,
+          "min_clearance_m": 0.74846845016135,
+          "position": [
+            -0.07450498349736108,
+            0.0009362480534105092
+          ]
+        }
+      ],
+      "observation": "MuJoCo ground-truth pose and fixed scene map"
+    },
+    "distance_home_m": 0.07443803653750493,
+    "home_yaw_error_deg": 5.27857855091958
+  },
+  "scene_contact_steps_delta": 0
+}

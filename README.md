@@ -2,7 +2,7 @@
 
 ## 项目目标与当前状态
 
-研究目标是后训练 Qwen-VL，使其根据视觉、自然语言和历史反馈产生高层决策，结合 MicroDuck 已有 RL 步态完成仿真控制。已实现 **Qwen3-0.6B 文本 SFT**、**冻结 Qwen3-VL-2B 视觉基线**、内存探针，以及 **直接从 MuJoCo 采集图文数据、LoRA 训练和显式适配器控制的初轮 pilot**。步骤与结果见 [SIM_TRAINING.md](SIM_TRAINING.md)。多轮自改进、学习型 RM、多步策略和高层 RL 尚未实现；不把安全规则或文本指标当成视觉训练成果。硬件与后续计划见 [TRAINING_PLAN.md](TRAINING_PLAN.md)。
+研究目标是后训练 Qwen-VL，使其根据视觉、自然语言和历史反馈产生高层决策，结合 MicroDuck 已有 RL 步态完成仿真控制。已实现文本 SFT、视觉选球 SFT，以及新的**逐步技能 agent、仿真专家采集、专家接管式纠错回流和有预算的迭代 LoRA 流程**。新入口与边界见 [AGENT_TRAINING.md](AGENT_TRAINING.md)，旧视觉实验见 [SIM_TRAINING.md](SIM_TRAINING.md)。学习型 RM、无限制自主探索和高层 RL 尚未实现；不把安全规则当成模型学会的能力。硬件与后续计划见 [TRAINING_PLAN.md](TRAINING_PLAN.md)。
 
 获取源码：
 

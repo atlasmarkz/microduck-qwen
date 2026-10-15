@@ -1,0 +1,40 @@
+{
+  "mode": "independent_actor_rollout",
+  "adapter": {
+    "path": "/Users/mark/Code/microduck-qwen/adapters/agent-pilot-v1-r1",
+    "sha256": "5a664ebe8a2461565fc9f1dc83e88067ffd15dced385658623ea75fdef3f4045"
+  },
+  "split": "valid",
+  "dataset_manifest_sha256": "7651764addf0dc232b5a3b85f5b41fee6238c544311c212670e013b280a07b7b",
+  "results": [
+    {
+      "task_id": 0,
+      "correct": true,
+      "error": null,
+      "episode": "/Users/mark/Code/microduck-qwen/runs/agent-cycle/agent-pilot-v1/r1-rollout/task-00/episode.json"
+    },
+    {
+      "task_id": 1,
+      "correct": true,
+      "error": null,
+      "episode": "/Users/mark/Code/microduck-qwen/runs/agent-cycle/agent-pilot-v1/r1-rollout/task-01/episode.json"
+    },
+    {
+      "task_id": 2,
+      "correct": true,
+      "error": null,
+      "episode": "/Users/mark/Code/microduck-qwen/runs/agent-cycle/agent-pilot-v1/r1-rollout/task-02/episode.json"
+    },
+    {
+      "task_id": 3,
+      "correct": true,
+      "error": null,
+      "episode": "/Users/mark/Code/microduck-qwen/runs/agent-cycle/agent-pilot-v1/r1-rollout/task-03/episode.json"
+    }
+  ],
+  "correct": 4,
+  "total": 4,
+  "note": "Development pilot. Rollout teacher is scorer AFTER execution, never a semantic intervention.",
+  "scene_seed": 91010,
+  "startup_failures": []
+}

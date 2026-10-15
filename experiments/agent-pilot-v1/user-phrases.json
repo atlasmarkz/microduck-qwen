@@ -1,0 +1,148 @@
+{
+  "adapter": {
+    "path": "/Users/mark/Code/microduck-qwen/adapters/agent-pilot-v1-r1",
+    "sha256": "5a664ebe8a2461565fc9f1dc83e88067ffd15dced385658623ea75fdef3f4045"
+  },
+  "frame": "data/agent-pilot-v1-r1-corrections/base/episodes/valid-71010/task-00/step-000-candidates.png",
+  "results": [
+    {
+      "instruction": "后退",
+      "expected": {
+        "action": "move",
+        "direction": "backward",
+        "distance_m": 0.2
+      },
+      "prediction": {
+        "raw": "{\"action\":\"move\",\"direction\":\"backward\",\"distance_m\":0.2}",
+        "latency_s": 2.182781791983871,
+        "prompt_tokens": 495,
+        "peak_memory_gb": 2.494476032,
+        "adapter": {
+          "path": "/Users/mark/Code/microduck-qwen/adapters/agent-pilot-v1-r1",
+          "sha256": "5a664ebe8a2461565fc9f1dc83e88067ffd15dced385658623ea75fdef3f4045"
+        },
+        "action": {
+          "action": "move",
+          "direction": "backward",
+          "distance_m": 0.2
+        }
+      },
+      "correct": true
+    },
+    {
+      "instruction": "后退20厘米",
+      "expected": {
+        "action": "move",
+        "direction": "backward",
+        "distance_m": 0.2
+      },
+      "prediction": {
+        "raw": "{\"action\":\"move\",\"direction\":\"backward\",\"distance_m\":0.2}",
+        "latency_s": 2.001717875013128,
+        "prompt_tokens": 498,
+        "peak_memory_gb": 2.494476032,
+        "adapter": {
+          "path": "/Users/mark/Code/microduck-qwen/adapters/agent-pilot-v1-r1",
+          "sha256": "5a664ebe8a2461565fc9f1dc83e88067ffd15dced385658623ea75fdef3f4045"
+        },
+        "action": {
+          "action": "move",
+          "direction": "backward",
+          "distance_m": 0.2
+        }
+      },
+      "correct": true
+    },
+    {
+      "instruction": "前进",
+      "expected": {
+        "action": "move",
+        "direction": "forward",
+        "distance_m": 0.2
+      },
+      "prediction": {
+        "raw": "{\"action\":\"move\",\"direction\":\"forward\",\"distance_m\":0.2}",
+        "latency_s": 1.969036667025648,
+        "prompt_tokens": 494,
+        "peak_memory_gb": 2.494476032,
+        "adapter": {
+          "path": "/Users/mark/Code/microduck-qwen/adapters/agent-pilot-v1-r1",
+          "sha256": "5a664ebe8a2461565fc9f1dc83e88067ffd15dced385658623ea75fdef3f4045"
+        },
+        "action": {
+          "action": "move",
+          "direction": "forward",
+          "distance_m": 0.2
+        }
+      },
+      "correct": true
+    },
+    {
+      "instruction": "左转45度",
+      "expected": {
+        "action": "turn",
+        "direction": "left",
+        "degrees": 45
+      },
+      "prediction": {
+        "raw": "{\"action\":\"turn\",\"direction\":\"left\",\"degrees\":45}",
+        "latency_s": 1.898707457992714,
+        "prompt_tokens": 498,
+        "peak_memory_gb": 2.494476032,
+        "adapter": {
+          "path": "/Users/mark/Code/microduck-qwen/adapters/agent-pilot-v1-r1",
+          "sha256": "5a664ebe8a2461565fc9f1dc83e88067ffd15dced385658623ea75fdef3f4045"
+        },
+        "action": {
+          "action": "turn",
+          "direction": "left",
+          "degrees": 45
+        }
+      },
+      "correct": true
+    },
+    {
+      "instruction": "停下来",
+      "expected": {
+        "action": "stop"
+      },
+      "prediction": {
+        "raw": "{\"action\":\"stop\"}",
+        "latency_s": 1.6642647910048254,
+        "prompt_tokens": 494,
+        "peak_memory_gb": 2.494476032,
+        "adapter": {
+          "path": "/Users/mark/Code/microduck-qwen/adapters/agent-pilot-v1-r1",
+          "sha256": "5a664ebe8a2461565fc9f1dc83e88067ffd15dced385658623ea75fdef3f4045"
+        },
+        "action": {
+          "action": "stop"
+        }
+      },
+      "correct": true
+    },
+    {
+      "instruction": "跳舞",
+      "expected": {
+        "action": "unsupported"
+      },
+      "prediction": {
+        "raw": "{\"action\":\"unsupported\"}",
+        "latency_s": 1.701060041988967,
+        "prompt_tokens": 494,
+        "peak_memory_gb": 2.494476032,
+        "adapter": {
+          "path": "/Users/mark/Code/microduck-qwen/adapters/agent-pilot-v1-r1",
+          "sha256": "5a664ebe8a2461565fc9f1dc83e88067ffd15dced385658623ea75fdef3f4045"
+        },
+        "action": {
+          "action": "unsupported"
+        }
+      },
+      "correct": true
+    }
+  ],
+  "note": "No execution. Six development phrases, not a benchmark or final test.",
+  "correct": 6,
+  "total": 6
+}

@@ -1,0 +1,154 @@
+{
+  "format": "simulation_agent_v1",
+  "status": "completed",
+  "episodes": [
+    {
+      "seed": 61200,
+      "split": "train",
+      "task": 0,
+      "verified": true,
+      "rows": 3,
+      "error": null,
+      "interventions": 1
+    },
+    {
+      "seed": 61200,
+      "split": "train",
+      "task": 1,
+      "verified": true,
+      "rows": 3,
+      "error": null,
+      "interventions": 2
+    },
+    {
+      "seed": 61200,
+      "split": "train",
+      "task": 2,
+      "verified": true,
+      "rows": 3,
+      "error": null,
+      "interventions": 1
+    },
+    {
+      "seed": 61200,
+      "split": "train",
+      "task": 3,
+      "verified": true,
+      "rows": 3,
+      "error": null,
+      "interventions": 2
+    },
+    {
+      "seed": 61200,
+      "split": "train",
+      "task": 4,
+      "verified": true,
+      "rows": 2,
+      "error": null,
+      "interventions": 0
+    },
+    {
+      "seed": 61200,
+      "split": "train",
+      "task": 5,
+      "verified": true,
+      "rows": 2,
+      "error": null,
+      "interventions": 1
+    },
+    {
+      "seed": 61200,
+      "split": "train",
+      "task": 6,
+      "verified": true,
+      "rows": 1,
+      "error": null,
+      "interventions": 0
+    },
+    {
+      "seed": 61200,
+      "split": "train",
+      "task": 7,
+      "verified": true,
+      "rows": 1,
+      "error": null,
+      "interventions": 1
+    },
+    {
+      "seed": 61200,
+      "split": "train",
+      "task": 8,
+      "verified": true,
+      "rows": 1,
+      "error": null,
+      "interventions": 0
+    }
+  ],
+  "splits": {
+    "train": {
+      "sha256": "801754d385c1bc2cf9f75174424b513b47f17c995f5c2db67da1ab6da81d089a",
+      "examples": 61,
+      "scene_seeds": [
+        61010,
+        61011,
+        61012,
+        61200
+      ],
+      "actions": {
+        "move": 12,
+        "return_home": 10,
+        "done": 20,
+        "turn": 8,
+        "approach": 4,
+        "stop": 2,
+        "unsupported": 2,
+        "clarify": 3
+      }
+    },
+    "valid": {
+      "sha256": "f162cd27df2d47f5b501f0f6020fc50bf3ecd40dea1d251839b73cff8db79cac",
+      "examples": 19,
+      "scene_seeds": [
+        71010
+      ],
+      "actions": {
+        "move": 4,
+        "return_home": 3,
+        "done": 6,
+        "turn": 2,
+        "approach": 1,
+        "stop": 1,
+        "unsupported": 1,
+        "clarify": 1
+      }
+    },
+    "test": {
+      "sha256": "503b15a7ba9219e6a907cb040b1e76517348c90fe134f21e0b8d0d5ed530b4ef",
+      "examples": 14,
+      "scene_seeds": [
+        81010
+      ],
+      "actions": {
+        "move": 3,
+        "return_home": 3,
+        "done": 5,
+        "turn": 2,
+        "approach": 1
+      }
+    }
+  },
+  "inputs": [
+    "numbered RGB",
+    "instruction",
+    "own oracle odometry",
+    "completed actions"
+  ],
+  "method": "expert-intervened data aggregation; not unrestricted DAgger or learned reward model",
+  "seed_offset": 200,
+  "parent_manifest_sha256": "86dc2496ab4473d74156e0ebbcf2f31545144b34e6c15527aa57f1f460ed82f4",
+  "actor": {
+    "path": "/Users/mark/Code/microduck-qwen/adapters/agent-pilot-v1-r0",
+    "sha256": "23e09134b2c72ea5c09138074e666234d94247341a6b174aa2ac09ad77657141"
+  },
+  "startup_failures": []
+}

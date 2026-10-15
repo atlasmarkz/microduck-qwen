@@ -1,0 +1,198 @@
+{
+  "info": {
+    "home_pose": {
+      "x": 0.002000997571030381,
+      "y": 0.00016710644295681468,
+      "yaw": -0.000482335599859807
+    },
+    "socket": "/private/tmp/mdq-ajvy7fqa/duck.sock",
+    "port": 7852,
+    "state_dir": "/private/tmp/mdq-ajvy7fqa",
+    "manager_pid": 95895,
+    "viewer": false,
+    "body_pid": 95896,
+    "robotd_pid": 95901,
+    "vision": true,
+    "collection_ground_truth": true,
+    "scene_file": "/private/tmp/mdq-ajvy7fqa/scene.json",
+    "seed": 61001,
+    "occlusion": "none",
+    "startup": "held HOME until balancing policy ready"
+  },
+  "startup_failures": [],
+  "results": [
+    {
+      "action": {
+        "action": "move",
+        "direction": "forward",
+        "distance_m": 0.2
+      },
+      "success": true,
+      "observation": "oracle robot odometry and known safety map",
+      "achieved": 0.20453797938453405,
+      "requested": 0.2,
+      "units": "meters",
+      "lateral_m": 0.00949185007202377,
+      "start": {
+        "position": [
+          0.001992204224694915,
+          0.00018300843617245996
+        ],
+        "yaw": -0.00023982329203193573
+      },
+      "end": {
+        "position": [
+          0.2065279013604965,
+          -0.009357894333979775
+        ],
+        "yaw": -0.02177792327158128
+      }
+    },
+    {
+      "action": {
+        "action": "move",
+        "direction": "backward",
+        "distance_m": 0.2
+      },
+      "success": true,
+      "observation": "oracle robot odometry and known safety map",
+      "achieved": 0.22511302253611046,
+      "requested": 0.2,
+      "units": "meters",
+      "lateral_m": 0.010594645742547346,
+      "start": {
+        "position": [
+          0.2065279013604965,
+          -0.009357894333979775
+        ],
+        "yaw": -0.02177792327158128
+      },
+      "end": {
+        "position": [
+          -0.01876245135911672,
+          -0.01504792115515726
+        ],
+        "yaw": -0.007441069809460715
+      }
+    },
+    {
+      "action": {
+        "action": "turn",
+        "direction": "left",
+        "degrees": 45
+      },
+      "success": true,
+      "observation": "oracle robot odometry and known safety map",
+      "achieved": 0.8022787809593463,
+      "requested": 0.7853981633974483,
+      "units": "radians",
+      "lateral_m": 0.01372630194597619,
+      "start": {
+        "position": [
+          -0.01876245135911672,
+          -0.01504792115515726
+        ],
+        "yaw": -0.007441069809460715
+      },
+      "end": {
+        "position": [
+          -0.024431047840458058,
+          -0.0012790579903795701
+        ],
+        "yaw": 0.7948377111498857
+      }
+    },
+    {
+      "action": {
+        "action": "turn",
+        "direction": "right",
+        "degrees": 45
+      },
+      "success": true,
+      "observation": "oracle robot odometry and known safety map",
+      "achieved": 0.7194803302071247,
+      "requested": 0.7853981633974483,
+      "units": "radians",
+      "lateral_m": 0.02760020639954264,
+      "start": {
+        "position": [
+          -0.024431047840458058,
+          -0.0012790579903795701
+        ],
+        "yaw": 0.7948377111498857
+      },
+      "end": {
+        "position": [
+          0.0009397097882004919,
+          -0.014831058606375826
+        ],
+        "yaw": 0.07535738094276105
+      }
+    },
+    {
+      "action": {
+        "action": "move",
+        "direction": "forward",
+        "distance_m": 0.3
+      },
+      "success": true,
+      "observation": "oracle robot odometry and known safety map",
+      "achieved": 0.3028593590239548,
+      "requested": 0.3,
+      "units": "meters",
+      "lateral_m": 0.010630611472777437,
+      "start": {
+        "position": [
+          0.0009397097882004919,
+          -0.014831058606375826
+        ],
+        "yaw": 0.07535738094276105
+      },
+      "end": {
+        "position": [
+          0.30373988372986893,
+          -0.002630406591781026
+        ],
+        "yaw": 0.09879138421308839
+      }
+    },
+    {
+      "action": {
+        "action": "return_home"
+      },
+      "success": true,
+      "observation": "oracle robot odometry and known safety map",
+      "navigation": {
+        "success": true,
+        "goals": [
+          {
+            "goal": {
+              "target": "point",
+              "x": 0.002000997571030381,
+              "y": 0.00016710644295681468,
+              "speed": "slow",
+              "stop_distance_m": 0.1
+            },
+            "distance_m": 0.12017127054602043,
+            "elapsed_s": 5.625000041007297,
+            "path_length_m": 0.5935261667053543,
+            "min_clearance_m": 0.4113112316812012,
+            "position": [
+              0.12176894956768514,
+              0.010004379396974059
+            ]
+          }
+        ],
+        "observation": "MuJoCo ground-truth pose and fixed scene map"
+      },
+      "distance_home_m": 0.10303708030546202,
+      "home_yaw_error_deg": 2.2162848907379074
+    }
+  ],
+  "backward_command": 0.4,
+  "contacts": {
+    "steps_with_scene_contact": 0,
+    "minimum_contact_distance_m": null
+  },
+  "passed": true
+}
