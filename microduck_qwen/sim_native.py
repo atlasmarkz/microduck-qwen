@@ -3,6 +3,7 @@
 import argparse
 import json
 import math
+import os
 from pathlib import Path
 import socketserver
 import sys
@@ -109,9 +110,17 @@ def main():
     parser.add_argument("--rl", type=Path, default=DEFAULT_RL)
     parser.add_argument("--policy", type=Path, default=DEFAULT_POLICY)
     parser.add_argument("--port", type=int, default=7821)
-    parser.add_argument("--control-port", type=int, default=7831)
+    parser.add_argument("--control-port", type=int)
+    parser.add_argument("--vision", action="store_true")
+    parser.add_argument("--collect-gt", action="store_true")
+    parser.add_argument("--seed", type=int, default=42)
+    parser.add_argument("--occlusion", choices=["none", "partial", "full", "absent"], default="none")
+    parser.add_argument("--manifest", type=Path, default=ROOT / "runs/simulator.json")
     parser.add_argument("--seconds", type=float, default=0, help="bounded smoke run; 0 keeps running")
     args = parser.parse_args()
+    args.control_port = args.control_port or args.port + 10
+    if args.collect_gt and not args.vision:
+        parser.error("--collect-gt requires --vision")
     if not args.rl.is_dir() or not args.policy.is_file():
         parser.error("Missing upstream source or policy; see README Windows simulation setup")
     if not math.isfinite(args.seconds) or args.seconds < 0:
@@ -121,6 +130,18 @@ def main():
     from .sim_body import configure_body
 
     sys.path.insert(0, str(args.rl / "src"))
+    args.manifest.parent.mkdir(parents=True, exist_ok=True)
+    scene_path = None
+    if args.vision:
+        from .vision_scene import make_scene
+
+        scene_path = args.manifest.with_suffix(".scene.json")
+        scene_path.write_text(json.dumps(make_scene(args.seed, args.occlusion), indent=2), encoding="utf-8")
+        os.environ["MICRODUCK_VISION_SCENE"] = str(scene_path.resolve())
+        if args.collect_gt:
+            os.environ["MICRODUCK_COLLECT_GT"] = "1"
+        else:
+            os.environ.pop("MICRODUCK_COLLECT_GT", None)
     server = configure_body()
     world = server.World(server.DEFAULT_SCENE)
     body = server.Body(world, 0)
@@ -129,8 +150,10 @@ def main():
     mujoco.mj_forward(world.model, world.data)
     commands = Commands()
     gait = Gait(world, body, args.policy, commands, server)
+    if args.vision:
+        body.camera = server.Camera(world.model, "vision_camera")
     servers, viewer = [], None
-    manifest = ROOT / "runs/simulator.json"
+    manifest = args.manifest
     ready = False
     try:
         observer_server = server.Server(("127.0.0.1", args.port), server.Handler)
@@ -151,11 +174,15 @@ def main():
         body.set_torque(True)
         started = time.monotonic()
         tick = started
+        next_image = 0.0
         while args.seconds == 0 or time.monotonic() - started < args.seconds:
             if viewer is not None and not viewer.is_running():
                 break
             gait.update()
             world.step(4)
+            if body.camera is not None and time.monotonic() >= next_image:
+                body.camera.render(world)
+                next_image = time.monotonic() + 0.2
             if viewer is not None:
                 viewer.sync()
             if not ready and world.data.time >= 4.0:
@@ -166,6 +193,9 @@ def main():
                 w, x, y, z = sensor["imu"]["quat"]
                 manifest.write_text(json.dumps({"backend": "native-onnx-bam", "port": args.port,
                     "socket": ["127.0.0.1", args.control_port], "viewer": args.viewer,
+                    "vision": args.vision, "seed": args.seed, "occlusion": args.occlusion,
+                    "scene_file": str(scene_path.resolve()) if scene_path else None,
+                    "collection_ground_truth": args.collect_gt,
                     "policy": args.policy.resolve().relative_to(ROOT).as_posix(),
                     "home_pose": {"x": sensor["trunk"][0], "y": sensor["trunk"][1],
                         "yaw": math.atan2(2 * (w * z + x * y), 1 - 2 * (y * y + z * z))},
@@ -181,6 +211,8 @@ def main():
         commands.set({})
         if viewer is not None:
             viewer.close()
+        if body.camera is not None:
+            body.camera.renderer.close()
         for listener in servers:
             listener.server_close()
         if ready:

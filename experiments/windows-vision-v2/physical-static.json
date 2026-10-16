@@ -1,0 +1,573 @@
+{
+  "status": "completed",
+  "exploration": false,
+  "cases": [
+    {
+      "seed": 230000,
+      "scenario": "none",
+      "instruction": "走到画面左边的球旁边",
+      "proposals": [
+        {
+          "prediction": {
+            "instruction": "走到画面左边的球旁边",
+            "raw": "{\"status\":\"visible\",\"color\":\"red\",\"id\":1}",
+            "latency_s": 2.035222499995143,
+            "model": "Qwen/Qwen3-VL-2B-Instruct",
+            "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+            "answer": {
+              "status": "ok",
+              "target_id": 1,
+              "visibility": "visible",
+              "reason": "VLM visual choice: red"
+            },
+            "visual_choice": {
+              "status": "visible",
+              "color": "red",
+              "id": 1
+            }
+          },
+          "action": {
+            "status": "visible",
+            "color": "red",
+            "id": 1
+          }
+        }
+      ],
+      "verified_success": true,
+      "startup_failures": [],
+      "selected": {
+        "prediction": {
+          "instruction": "走到画面左边的球旁边",
+          "raw": "{\"status\":\"visible\",\"color\":\"red\",\"id\":1}",
+          "latency_s": 2.035222499995143,
+          "model": "Qwen/Qwen3-VL-2B-Instruct",
+          "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+          "answer": {
+            "status": "ok",
+            "target_id": 1,
+            "visibility": "visible",
+            "reason": "VLM visual choice: red"
+          },
+          "visual_choice": {
+            "status": "visible",
+            "color": "red",
+            "id": 1
+          }
+        },
+        "action": {
+          "status": "visible",
+          "color": "red",
+          "id": 1
+        }
+      },
+      "expected": {
+        "status": "visible",
+        "color": "red",
+        "id": 1
+      },
+      "grounding_correct": true,
+      "preflight_visibility": {
+        "safe": true,
+        "status": "visible",
+        "visible_fraction_estimate": 1.0
+      },
+      "execution": {
+        "success": true,
+        "goals": [
+          {
+            "goal": {
+              "target": "point",
+              "x": 0.9695733645842621,
+              "y": 0.33834626135138424,
+              "speed": "slow",
+              "stop_distance_m": 0.3
+            },
+            "distance_m": 0.3231480397542219,
+            "elapsed_s": 6.938000000009197,
+            "path_length_m": 1.0159136980293,
+            "min_clearance_m": 0.09627845066729795,
+            "position": [
+              0.6643026811037044,
+              0.23235350025748072
+            ]
+          }
+        ],
+        "observation": "MuJoCo ground-truth pose and fixed scene map"
+      },
+      "contacts": {
+        "steps_with_scene_contact": 0,
+        "minimum_contact_distance_m": null
+      },
+      "true_target_distance_m": 0.29678595354300236
+    },
+    {
+      "seed": 230004,
+      "scenario": "none",
+      "instruction": "走到画面右边的球旁边",
+      "proposals": [
+        {
+          "prediction": {
+            "instruction": "走到画面右边的球旁边",
+            "raw": "{\"status\":\"visible\",\"color\":\"green\",\"id\":1}",
+            "latency_s": 1.5611249000066891,
+            "model": "Qwen/Qwen3-VL-2B-Instruct",
+            "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+            "answer": {
+              "status": "ok",
+              "target_id": 1,
+              "visibility": "visible",
+              "reason": "VLM visual choice: green"
+            },
+            "visual_choice": {
+              "status": "visible",
+              "color": "green",
+              "id": 1
+            }
+          },
+          "action": {
+            "status": "visible",
+            "color": "green",
+            "id": 1
+          }
+        }
+      ],
+      "verified_success": true,
+      "startup_failures": [],
+      "selected": {
+        "prediction": {
+          "instruction": "走到画面右边的球旁边",
+          "raw": "{\"status\":\"visible\",\"color\":\"green\",\"id\":1}",
+          "latency_s": 1.5611249000066891,
+          "model": "Qwen/Qwen3-VL-2B-Instruct",
+          "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+          "answer": {
+            "status": "ok",
+            "target_id": 1,
+            "visibility": "visible",
+            "reason": "VLM visual choice: green"
+          },
+          "visual_choice": {
+            "status": "visible",
+            "color": "green",
+            "id": 1
+          }
+        },
+        "action": {
+          "status": "visible",
+          "color": "green",
+          "id": 1
+        }
+      },
+      "expected": {
+        "status": "visible",
+        "color": "green",
+        "id": 1
+      },
+      "grounding_correct": true,
+      "preflight_visibility": {
+        "safe": true,
+        "status": "visible",
+        "visible_fraction_estimate": 1.0
+      },
+      "execution": {
+        "success": true,
+        "goals": [
+          {
+            "goal": {
+              "target": "point",
+              "x": 0.978971380628181,
+              "y": -0.36786805382592125,
+              "speed": "slow",
+              "stop_distance_m": 0.3
+            },
+            "distance_m": 0.32241622573327094,
+            "elapsed_s": 7.0939999999973224,
+            "path_length_m": 1.0366137608763357,
+            "min_clearance_m": 0.0958366506155926,
+            "position": [
+              0.6695186230210302,
+              -0.2773627311900815
+            ]
+          }
+        ],
+        "observation": "MuJoCo ground-truth pose and fixed scene map"
+      },
+      "contacts": {
+        "steps_with_scene_contact": 0,
+        "minimum_contact_distance_m": null
+      },
+      "true_target_distance_m": 0.3058366506155926
+    },
+    {
+      "seed": 230005,
+      "scenario": "none",
+      "instruction": "走到红色球旁边",
+      "proposals": [
+        {
+          "prediction": {
+            "instruction": "走到红色球旁边",
+            "raw": "{\"status\":\"visible\",\"color\":\"red\",\"id\":2}",
+            "latency_s": 1.7621549999894341,
+            "model": "Qwen/Qwen3-VL-2B-Instruct",
+            "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+            "answer": {
+              "status": "ok",
+              "target_id": 2,
+              "visibility": "visible",
+              "reason": "VLM visual choice: red"
+            },
+            "visual_choice": {
+              "status": "visible",
+              "color": "red",
+              "id": 2
+            }
+          },
+          "action": {
+            "status": "visible",
+            "color": "red",
+            "id": 2
+          }
+        }
+      ],
+      "verified_success": true,
+      "startup_failures": [],
+      "selected": {
+        "prediction": {
+          "instruction": "走到红色球旁边",
+          "raw": "{\"status\":\"visible\",\"color\":\"red\",\"id\":2}",
+          "latency_s": 1.7621549999894341,
+          "model": "Qwen/Qwen3-VL-2B-Instruct",
+          "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+          "answer": {
+            "status": "ok",
+            "target_id": 2,
+            "visibility": "visible",
+            "reason": "VLM visual choice: red"
+          },
+          "visual_choice": {
+            "status": "visible",
+            "color": "red",
+            "id": 2
+          }
+        },
+        "action": {
+          "status": "visible",
+          "color": "red",
+          "id": 2
+        }
+      },
+      "expected": {
+        "status": "visible",
+        "color": "red",
+        "id": 2
+      },
+      "grounding_correct": true,
+      "preflight_visibility": {
+        "safe": true,
+        "status": "visible",
+        "visible_fraction_estimate": 1.0
+      },
+      "execution": {
+        "success": true,
+        "goals": [
+          {
+            "goal": {
+              "target": "point",
+              "x": 1.007205054639704,
+              "y": -0.036451922198319046,
+              "speed": "slow",
+              "stop_distance_m": 0.3
+            },
+            "distance_m": 0.3247952238238914,
+            "elapsed_s": 7.110000000000582,
+            "path_length_m": 1.005941477153355,
+            "min_clearance_m": 0.09685027896762771,
+            "position": [
+              0.692520720692875,
+              0.043957700280911095
+            ]
+          }
+        ],
+        "observation": "MuJoCo ground-truth pose and fixed scene map"
+      },
+      "contacts": {
+        "steps_with_scene_contact": 0,
+        "minimum_contact_distance_m": null
+      },
+      "true_target_distance_m": 0.30446774392928627
+    },
+    {
+      "seed": 230006,
+      "scenario": "none",
+      "instruction": "走到蓝色球旁边",
+      "proposals": [
+        {
+          "prediction": {
+            "instruction": "走到蓝色球旁边",
+            "raw": "{\"status\":\"visible\",\"color\":\"blue\",\"id\":3}",
+            "latency_s": 1.9497378999949433,
+            "model": "Qwen/Qwen3-VL-2B-Instruct",
+            "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+            "answer": {
+              "status": "ok",
+              "target_id": 3,
+              "visibility": "visible",
+              "reason": "VLM visual choice: blue"
+            },
+            "visual_choice": {
+              "status": "visible",
+              "color": "blue",
+              "id": 3
+            }
+          },
+          "action": {
+            "status": "visible",
+            "color": "blue",
+            "id": 3
+          }
+        }
+      ],
+      "verified_success": true,
+      "startup_failures": [],
+      "selected": {
+        "prediction": {
+          "instruction": "走到蓝色球旁边",
+          "raw": "{\"status\":\"visible\",\"color\":\"blue\",\"id\":3}",
+          "latency_s": 1.9497378999949433,
+          "model": "Qwen/Qwen3-VL-2B-Instruct",
+          "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+          "answer": {
+            "status": "ok",
+            "target_id": 3,
+            "visibility": "visible",
+            "reason": "VLM visual choice: blue"
+          },
+          "visual_choice": {
+            "status": "visible",
+            "color": "blue",
+            "id": 3
+          }
+        },
+        "action": {
+          "status": "visible",
+          "color": "blue",
+          "id": 3
+        }
+      },
+      "expected": {
+        "status": "visible",
+        "color": "blue",
+        "id": 3
+      },
+      "grounding_correct": true,
+      "preflight_visibility": {
+        "safe": true,
+        "status": "visible",
+        "visible_fraction_estimate": 1.0
+      },
+      "execution": {
+        "success": true,
+        "goals": [
+          {
+            "goal": {
+              "target": "point",
+              "x": 0.9542171978909095,
+              "y": 0.33918033517128976,
+              "speed": "slow",
+              "stop_distance_m": 0.3
+            },
+            "distance_m": 0.3234292244409435,
+            "elapsed_s": 6.467999999993481,
+            "path_length_m": 0.9642431348029945,
+            "min_clearance_m": 0.09645415117266076,
+            "position": [
+              0.665217130672471,
+              0.19397212476220776
+            ]
+          }
+        ],
+        "observation": "MuJoCo ground-truth pose and fixed scene map"
+      },
+      "contacts": {
+        "steps_with_scene_contact": 0,
+        "minimum_contact_distance_m": null
+      },
+      "true_target_distance_m": 0.3064541511726608
+    },
+    {
+      "seed": 230001,
+      "scenario": "partial",
+      "instruction": "走到画面左边的球旁边",
+      "proposals": [
+        {
+          "prediction": {
+            "instruction": "走到画面左边的球旁边",
+            "raw": "{\"status\":\"visible\",\"color\":\"green\",\"id\":3}",
+            "latency_s": 1.537172800002736,
+            "model": "Qwen/Qwen3-VL-2B-Instruct",
+            "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+            "answer": {
+              "status": "ok",
+              "target_id": 3,
+              "visibility": "visible",
+              "reason": "VLM visual choice: green"
+            },
+            "visual_choice": {
+              "status": "visible",
+              "color": "green",
+              "id": 3
+            }
+          },
+          "action": {
+            "status": "visible",
+            "color": "green",
+            "id": 3
+          }
+        }
+      ],
+      "verified_success": false,
+      "startup_failures": [],
+      "selected": {
+        "prediction": {
+          "instruction": "走到画面左边的球旁边",
+          "raw": "{\"status\":\"visible\",\"color\":\"green\",\"id\":3}",
+          "latency_s": 1.537172800002736,
+          "model": "Qwen/Qwen3-VL-2B-Instruct",
+          "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+          "answer": {
+            "status": "ok",
+            "target_id": 3,
+            "visibility": "visible",
+            "reason": "VLM visual choice: green"
+          },
+          "visual_choice": {
+            "status": "visible",
+            "color": "green",
+            "id": 3
+          }
+        },
+        "action": {
+          "status": "visible",
+          "color": "green",
+          "id": 3
+        }
+      },
+      "expected": {
+        "status": "partial",
+        "color": null,
+        "id": null
+      },
+      "grounding_correct": false,
+      "preflight_visibility": {
+        "safe": false,
+        "status": "partial",
+        "visible_fraction_estimate": 0.4529064249408133
+      }
+    },
+    {
+      "seed": 230002,
+      "scenario": "full",
+      "instruction": "走到画面左边的球旁边",
+      "proposals": [
+        {
+          "prediction": {
+            "instruction": "走到画面左边的球旁边",
+            "raw": "{\"status\":\"visible\",\"color\":\"blue\",\"id\":1}",
+            "latency_s": 2.054086499992991,
+            "model": "Qwen/Qwen3-VL-2B-Instruct",
+            "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+            "answer": {
+              "status": "ok",
+              "target_id": 1,
+              "visibility": "visible",
+              "reason": "VLM visual choice: blue"
+            },
+            "visual_choice": {
+              "status": "visible",
+              "color": "blue",
+              "id": 1
+            }
+          },
+          "action": {
+            "status": "visible",
+            "color": "blue",
+            "id": 1
+          }
+        }
+      ],
+      "verified_success": true,
+      "startup_failures": [],
+      "selected": {
+        "prediction": {
+          "instruction": "走到画面左边的球旁边",
+          "raw": "{\"status\":\"visible\",\"color\":\"blue\",\"id\":1}",
+          "latency_s": 2.054086499992991,
+          "model": "Qwen/Qwen3-VL-2B-Instruct",
+          "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+          "answer": {
+            "status": "ok",
+            "target_id": 1,
+            "visibility": "visible",
+            "reason": "VLM visual choice: blue"
+          },
+          "visual_choice": {
+            "status": "visible",
+            "color": "blue",
+            "id": 1
+          }
+        },
+        "action": {
+          "status": "visible",
+          "color": "blue",
+          "id": 1
+        }
+      },
+      "expected": {
+        "status": "visible",
+        "color": "blue",
+        "id": 1
+      },
+      "grounding_correct": true,
+      "preflight_visibility": {
+        "safe": true,
+        "status": "visible",
+        "visible_fraction_estimate": 1.0
+      },
+      "execution": {
+        "success": true,
+        "goals": [
+          {
+            "goal": {
+              "target": "point",
+              "x": 1.2108293093805222,
+              "y": 0.03254956983607902,
+              "speed": "slow",
+              "stop_distance_m": 0.3
+            },
+            "distance_m": 0.31806726212511033,
+            "elapsed_s": 8.985000000000582,
+            "path_length_m": 1.33787077614223,
+            "min_clearance_m": 0.06489659224053879,
+            "position": [
+              0.9028513939220829,
+              -0.04692612975592233
+            ]
+          }
+        ],
+        "observation": "MuJoCo ground-truth pose and fixed scene map"
+      },
+      "contacts": {
+        "steps_with_scene_contact": 0,
+        "minimum_contact_distance_m": null
+      },
+      "true_target_distance_m": 0.30015420402536785
+    }
+  ],
+  "actor_sha256": "89d9c163b464a60ea169aae0006e0d70af976891571de9d520d04d8f04b51b3a",
+  "reward_sha256": null,
+  "note": "Three sampled proposals, one retained action; single-action adaptation, not full UI-Genie beam search.",
+  "actor_replay_rows": 0,
+  "reward_replay_rows": 0,
+  "success_count": 5,
+  "total": 6
+}

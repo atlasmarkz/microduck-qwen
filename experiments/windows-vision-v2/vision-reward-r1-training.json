@@ -1,0 +1,292 @@
+{
+  "status": "completed",
+  "task": "reward",
+  "model": "Qwen/Qwen3-VL-2B-Instruct",
+  "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+  "steps": 50,
+  "seed": 42,
+  "batch_size": 1,
+  "learning_rate": 5e-05,
+  "last_layers": 8,
+  "rank": 8,
+  "alpha": 16,
+  "quantization": "NF4 double-quant; BF16 compute",
+  "image_pixels": {
+    "min": 65536,
+    "max": 131072
+  },
+  "max_seq_length": 768,
+  "completion_only_loss": true,
+  "trainable_parameters": 458752,
+  "changed_tensors": 32,
+  "optimizer_state_resumed": false,
+  "elapsed_s": 34.9201286000025,
+  "peak_cuda_allocated_bytes": 2247629312,
+  "valid_loss": 0.34008883245521593,
+  "history": [
+    {
+      "step": 1,
+      "row_id": "replay-410002-outcome",
+      "loss": 0.07509013265371323
+    },
+    {
+      "step": 2,
+      "row_id": "train-210010-0-6",
+      "loss": 3.0013794898986816
+    },
+    {
+      "step": 3,
+      "row_id": "train-210002-0-3",
+      "loss": 0.4877455234527588
+    },
+    {
+      "step": 4,
+      "row_id": "task-210011-early",
+      "loss": 0.9242185354232788
+    },
+    {
+      "step": 5,
+      "row_id": "train-210023-0-6",
+      "loss": 2.8767051696777344
+    },
+    {
+      "step": 6,
+      "row_id": "train-210021-0-5-negative-0",
+      "loss": 0.06398208439350128
+    },
+    {
+      "step": 7,
+      "row_id": "train-210013-0-4",
+      "loss": 0.8510299921035767
+    },
+    {
+      "step": 8,
+      "row_id": "train-210009-0-6-negative-1",
+      "loss": 0.06380065530538559
+    },
+    {
+      "step": 9,
+      "row_id": "replay-410000-outcome",
+      "loss": 0.2555292248725891
+    },
+    {
+      "step": 10,
+      "row_id": "replay-410002-proposal-0",
+      "loss": 0.0024199243634939194
+    },
+    {
+      "step": 11,
+      "row_id": "train-210008-0-3-negative-0",
+      "loss": 0.17472517490386963
+    },
+    {
+      "step": 12,
+      "row_id": "replay-410000-outcome",
+      "loss": 0.25338083505630493
+    },
+    {
+      "step": 13,
+      "row_id": "replay-410004-proposal-0",
+      "loss": 0.48740559816360474
+    },
+    {
+      "step": 14,
+      "row_id": "train-210003-0-0-negative-1",
+      "loss": 0.0448211207985878
+    },
+    {
+      "step": 15,
+      "row_id": "train-210002-0-6-negative-0",
+      "loss": 0.05673438683152199
+    },
+    {
+      "step": 16,
+      "row_id": "train-210009-0-0-negative-1",
+      "loss": 0.5689274668693542
+    },
+    {
+      "step": 17,
+      "row_id": "train-210021-0-2",
+      "loss": 0.007228794973343611
+    },
+    {
+      "step": 18,
+      "row_id": "train-210022-0-4-negative-1",
+      "loss": 0.021689249202609062
+    },
+    {
+      "step": 19,
+      "row_id": "replay-410001-proposal-0",
+      "loss": 0.013303762301802635
+    },
+    {
+      "step": 20,
+      "row_id": "replay-410004-proposal-0",
+      "loss": 0.4873637557029724
+    },
+    {
+      "step": 21,
+      "row_id": "train-210002-0-4",
+      "loss": 0.8509905934333801
+    },
+    {
+      "step": 22,
+      "row_id": "replay-410002-outcome",
+      "loss": 0.05175551399588585
+    },
+    {
+      "step": 23,
+      "row_id": "train-210019-0-2-negative-1",
+      "loss": 0.00037828675704076886
+    },
+    {
+      "step": 24,
+      "row_id": "replay-410005-proposal-0",
+      "loss": 0.28830277919769287
+    },
+    {
+      "step": 25,
+      "row_id": "replay-410003-proposal-0",
+      "loss": 0.07163161784410477
+    },
+    {
+      "step": 26,
+      "row_id": "replay-410001-outcome",
+      "loss": 0.4600081443786621
+    },
+    {
+      "step": 27,
+      "row_id": "train-210021-0-3-negative-0",
+      "loss": 0.23739928007125854
+    },
+    {
+      "step": 28,
+      "row_id": "replay-410007-outcome",
+      "loss": 0.4600061774253845
+    },
+    {
+      "step": 29,
+      "row_id": "replay-410007-proposal-0",
+      "loss": 0.3469661772251129
+    },
+    {
+      "step": 30,
+      "row_id": "task-210017-early",
+      "loss": 0.5804225206375122
+    },
+    {
+      "step": 31,
+      "row_id": "train-210000-0-4-negative-0",
+      "loss": 0.06360958516597748
+    },
+    {
+      "step": 32,
+      "row_id": "train-210015-0-3-negative-1",
+      "loss": 0.0012493605026975274
+    },
+    {
+      "step": 33,
+      "row_id": "replay-410004-outcome",
+      "loss": 0.2711167633533478
+    },
+    {
+      "step": 34,
+      "row_id": "replay-410000-proposal-0",
+      "loss": 0.6567354202270508
+    },
+    {
+      "step": 35,
+      "row_id": "replay-410001-proposal-0",
+      "loss": 0.006311879958957434
+    },
+    {
+      "step": 36,
+      "row_id": "train-210015-0-1",
+      "loss": 0.4131982922554016
+    },
+    {
+      "step": 37,
+      "row_id": "train-210020-0-6-negative-1",
+      "loss": 0.0009880431462079287
+    },
+    {
+      "step": 38,
+      "row_id": "task-210017-early",
+      "loss": 0.4219149947166443
+    },
+    {
+      "step": 39,
+      "row_id": "replay-410004-proposal-0",
+      "loss": 0.7510829567909241
+    },
+    {
+      "step": 40,
+      "row_id": "train-210009-0-0",
+      "loss": 0.05018659308552742
+    },
+    {
+      "step": 41,
+      "row_id": "replay-410001-proposal-0",
+      "loss": 0.0062995790503919125
+    },
+    {
+      "step": 42,
+      "row_id": "train-210009-0-3",
+      "loss": 0.8508211374282837
+    },
+    {
+      "step": 43,
+      "row_id": "replay-410003-outcome",
+      "loss": 0.1280955821275711
+    },
+    {
+      "step": 44,
+      "row_id": "replay-410004-proposal-0",
+      "loss": 0.6567513942718506
+    },
+    {
+      "step": 45,
+      "row_id": "replay-410006-proposal-0",
+      "loss": 0.34678295254707336
+    },
+    {
+      "step": 46,
+      "row_id": "task-210012-early",
+      "loss": 0.45709532499313354
+    },
+    {
+      "step": 47,
+      "row_id": "train-210004-0-1-negative-0",
+      "loss": 0.4131118059158325
+    },
+    {
+      "step": 48,
+      "row_id": "replay-410002-proposal-0",
+      "loss": 0.0011171725345775485
+    },
+    {
+      "step": 49,
+      "row_id": "replay-410001-proposal-0",
+      "loss": 0.0071210963651537895
+    },
+    {
+      "step": 50,
+      "row_id": "train-210012-0-1",
+      "loss": 0.009122448042035103
+    }
+  ],
+  "train_rows": 1400,
+  "dataset_manifest_sha256": "463c2b363f19351a3f9758aba6e470f5f3b6a0f51785660bdc9b7fee0d484108",
+  "training_rows_sha256": "061223e328668b27207dc74cf7a4a3f6e6c0dff8f11a5cdd9e432e5830ef050b",
+  "replay_rows": 16,
+  "replay_repeat": 44,
+  "replay_sha256": "eda8923531b3652e46d32979ec68663c778a9275fec5e50c6979d7425aabba30",
+  "parent_adapter_sha256": "466a6c0bf202c6b5fbed749b8166271d0a7a05516f0829bbde6810654080d2c5",
+  "adapter_sha256": "d075ecf01fbf237abdaf2bdd2cd12891ebea8a2b61981e941b449a5c72dcbba7",
+  "versions": {
+    "torch": "2.11.0+cu128",
+    "transformers": "5.19.0",
+    "peft": "0.21.2",
+    "bitsandbytes": "0.50.2"
+  }
+}

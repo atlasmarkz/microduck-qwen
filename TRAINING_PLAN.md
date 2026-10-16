@@ -1,6 +1,6 @@
 # MicroDuck × Qwen-VL 训练计划
 
-后续进展（2026-10-15）：已在本机完成多技能 agent 的两轮专家纠错 LoRA 与小规模物理评估，见 [AGENT_TRAINING.md](AGENT_TRAINING.md)。本文件保留 10 月 14 日计划与 CUDA 后续路线；学习型 RM、高层在线 RL 仍未实现。
+后续进展：Mac 多技能 agent 两轮专家纠错 LoRA 见 [AGENT_TRAINING.md](AGENT_TRAINING.md)；Windows CUDA 视觉 QLoRA、学习型奖励模型与多场景对照见 [WINDOWS_VISION.md](WINDOWS_VISION.md)。本文件下方保留历史设备探针和计划，未实现项描述以各实验文档为准；高层在线 RL 仍未实现。
 
 更新：2026-10-14（香港时间）。当前先在 M4 Mac 做小模型图文 LoRA；RTX 3060 台式机作为下一阶段训练设备。本文件区分“已实测”“计划”“尚未实现”，不把模型能加载等同于能训练，也不把内存测试当作能力评测。
 
@@ -39,10 +39,10 @@
 
 MLX 的 `set_memory_limit(8 GiB)` 是分配建议值，不是硬性内存上限或防 OOM 保证；缓存上限设置为 256 MiB。原始成功和失败记录均保留在 `experiments/memory/`。首次尝试因上游配置使用 `image_token_id` 而非 `image_token_index`，在更新参数前失败；脚本现已兼容两种字段并增加测试。测试结束后，当前 fixture 增加了图像哈希校验字段；运行时的原始 fixture 单独归档为 `20261014-probe-fixture-at-run.json`，其 SHA-256 与原始报告一致，图片及监督标签没有改变。归档 JSON 仅用于审计，重跑请用 `tests/fixtures/` 的当前文件。
 
-重跑命令（每次自动创建新输出目录，不覆盖历史权重）：
+重跑命令（每次自动创建新输出目录，不覆盖历史权重；cd 从仓库父目录执行，已在根目录则跳过）：
 
 ```bash
-cd /Users/mark/Code/microduck-qwen
+cd microduck-qwen
 .venv-vlm/bin/python -m microduck_qwen.vision_lora_probe --steps 3
 .venv-vlm/bin/python -m unittest discover -s tests -v
 ```

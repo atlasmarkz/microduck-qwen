@@ -1,0 +1,742 @@
+{
+  "status": "completed",
+  "grounding": {
+    "base-valid": {
+      "count": 56,
+      "scene_count": 8,
+      "correct": 34,
+      "accuracy": 0.6071428571428571,
+      "valid_rate": 1,
+      "median_latency_s": 2.605097100000421,
+      "split": "valid",
+      "dataset_manifest_sha256": "463c2b363f19351a3f9758aba6e470f5f3b6a0f51785660bdc9b7fee0d484108",
+      "model": "Qwen/Qwen3-VL-2B-Instruct",
+      "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+      "adapter_sha256": null,
+      "by_task": {
+        "color": {
+          "correct": 20,
+          "total": 24
+        },
+        "side": {
+          "correct": 14,
+          "total": 16
+        },
+        "stop": {
+          "correct": 0,
+          "total": 8
+        },
+        "unsupported": {
+          "correct": 0,
+          "total": 8
+        }
+      },
+      "note": "Synthetic scene grounding; independent seeds; no physical success inferred from JSON accuracy.",
+      "by_expected_status": {
+        "not_visible": {
+          "total": 2,
+          "correct": 0
+        },
+        "partial": {
+          "total": 4,
+          "correct": 0
+        },
+        "stop": {
+          "total": 8,
+          "correct": 0
+        },
+        "unsupported": {
+          "total": 8,
+          "correct": 0
+        },
+        "visible": {
+          "total": 34,
+          "correct": 34
+        }
+      }
+    },
+    "base-test": {
+      "count": 56,
+      "scene_count": 8,
+      "correct": 33,
+      "accuracy": 0.5892857142857143,
+      "valid_rate": 1,
+      "median_latency_s": 2.559522149997065,
+      "split": "test",
+      "dataset_manifest_sha256": "463c2b363f19351a3f9758aba6e470f5f3b6a0f51785660bdc9b7fee0d484108",
+      "model": "Qwen/Qwen3-VL-2B-Instruct",
+      "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+      "adapter_sha256": null,
+      "by_task": {
+        "color": {
+          "correct": 20,
+          "total": 24
+        },
+        "side": {
+          "correct": 13,
+          "total": 16
+        },
+        "stop": {
+          "correct": 0,
+          "total": 8
+        },
+        "unsupported": {
+          "correct": 0,
+          "total": 8
+        }
+      },
+      "note": "Synthetic scene grounding; independent seeds; no physical success inferred from JSON accuracy.",
+      "by_expected_status": {
+        "not_visible": {
+          "total": 2,
+          "correct": 0
+        },
+        "partial": {
+          "total": 4,
+          "correct": 0
+        },
+        "stop": {
+          "total": 8,
+          "correct": 0
+        },
+        "unsupported": {
+          "total": 8,
+          "correct": 0
+        },
+        "visible": {
+          "total": 34,
+          "correct": 33
+        }
+      }
+    },
+    "r0-valid": {
+      "count": 56,
+      "scene_count": 8,
+      "correct": 42,
+      "accuracy": 0.75,
+      "valid_rate": 1,
+      "median_latency_s": 1.378810150003119,
+      "split": "valid",
+      "dataset_manifest_sha256": "463c2b363f19351a3f9758aba6e470f5f3b6a0f51785660bdc9b7fee0d484108",
+      "model": "Qwen/Qwen3-VL-2B-Instruct",
+      "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+      "adapter_sha256": "a1936b2c84f128182462dd8e81801480dc65ea4fab0e398f00f55e100286a8be",
+      "by_task": {
+        "color": {
+          "correct": 20,
+          "total": 24
+        },
+        "side": {
+          "correct": 14,
+          "total": 16
+        },
+        "stop": {
+          "correct": 8,
+          "total": 8
+        },
+        "unsupported": {
+          "correct": 0,
+          "total": 8
+        }
+      },
+      "note": "Synthetic scene grounding; independent seeds; no physical success inferred from JSON accuracy.",
+      "by_expected_status": {
+        "not_visible": {
+          "total": 2,
+          "correct": 0
+        },
+        "partial": {
+          "total": 4,
+          "correct": 0
+        },
+        "stop": {
+          "total": 8,
+          "correct": 8
+        },
+        "unsupported": {
+          "total": 8,
+          "correct": 0
+        },
+        "visible": {
+          "total": 34,
+          "correct": 34
+        }
+      }
+    },
+    "r0-test": {
+      "count": 56,
+      "scene_count": 8,
+      "correct": 41,
+      "accuracy": 0.7321428571428571,
+      "valid_rate": 1,
+      "median_latency_s": 1.3641459999998915,
+      "split": "test",
+      "dataset_manifest_sha256": "463c2b363f19351a3f9758aba6e470f5f3b6a0f51785660bdc9b7fee0d484108",
+      "model": "Qwen/Qwen3-VL-2B-Instruct",
+      "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+      "adapter_sha256": "a1936b2c84f128182462dd8e81801480dc65ea4fab0e398f00f55e100286a8be",
+      "by_task": {
+        "color": {
+          "correct": 20,
+          "total": 24
+        },
+        "side": {
+          "correct": 13,
+          "total": 16
+        },
+        "stop": {
+          "correct": 8,
+          "total": 8
+        },
+        "unsupported": {
+          "correct": 0,
+          "total": 8
+        }
+      },
+      "note": "Synthetic scene grounding; independent seeds; no physical success inferred from JSON accuracy.",
+      "by_expected_status": {
+        "not_visible": {
+          "total": 2,
+          "correct": 0
+        },
+        "partial": {
+          "total": 4,
+          "correct": 0
+        },
+        "stop": {
+          "total": 8,
+          "correct": 8
+        },
+        "unsupported": {
+          "total": 8,
+          "correct": 0
+        },
+        "visible": {
+          "total": 34,
+          "correct": 33
+        }
+      }
+    },
+    "static-valid": {
+      "count": 56,
+      "scene_count": 8,
+      "correct": 50,
+      "accuracy": 0.8928571428571429,
+      "valid_rate": 1,
+      "median_latency_s": 1.3479171500075608,
+      "split": "valid",
+      "dataset_manifest_sha256": "463c2b363f19351a3f9758aba6e470f5f3b6a0f51785660bdc9b7fee0d484108",
+      "model": "Qwen/Qwen3-VL-2B-Instruct",
+      "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+      "adapter_sha256": "89d9c163b464a60ea169aae0006e0d70af976891571de9d520d04d8f04b51b3a",
+      "by_task": {
+        "color": {
+          "correct": 20,
+          "total": 24
+        },
+        "side": {
+          "correct": 14,
+          "total": 16
+        },
+        "stop": {
+          "correct": 8,
+          "total": 8
+        },
+        "unsupported": {
+          "correct": 8,
+          "total": 8
+        }
+      },
+      "note": "Synthetic scene grounding; independent seeds; no physical success inferred from JSON accuracy.",
+      "by_expected_status": {
+        "not_visible": {
+          "total": 2,
+          "correct": 0
+        },
+        "partial": {
+          "total": 4,
+          "correct": 0
+        },
+        "stop": {
+          "total": 8,
+          "correct": 8
+        },
+        "unsupported": {
+          "total": 8,
+          "correct": 8
+        },
+        "visible": {
+          "total": 34,
+          "correct": 34
+        }
+      }
+    },
+    "static-test": {
+      "count": 56,
+      "scene_count": 8,
+      "correct": 49,
+      "accuracy": 0.875,
+      "valid_rate": 1,
+      "median_latency_s": 1.338094849998015,
+      "split": "test",
+      "dataset_manifest_sha256": "463c2b363f19351a3f9758aba6e470f5f3b6a0f51785660bdc9b7fee0d484108",
+      "model": "Qwen/Qwen3-VL-2B-Instruct",
+      "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+      "adapter_sha256": "89d9c163b464a60ea169aae0006e0d70af976891571de9d520d04d8f04b51b3a",
+      "by_task": {
+        "color": {
+          "correct": 20,
+          "total": 24
+        },
+        "side": {
+          "correct": 13,
+          "total": 16
+        },
+        "stop": {
+          "correct": 8,
+          "total": 8
+        },
+        "unsupported": {
+          "correct": 8,
+          "total": 8
+        }
+      },
+      "note": "Synthetic scene grounding; independent seeds; no physical success inferred from JSON accuracy.",
+      "by_expected_status": {
+        "not_visible": {
+          "total": 2,
+          "correct": 0
+        },
+        "partial": {
+          "total": 4,
+          "correct": 0
+        },
+        "stop": {
+          "total": 8,
+          "correct": 8
+        },
+        "unsupported": {
+          "total": 8,
+          "correct": 8
+        },
+        "visible": {
+          "total": 34,
+          "correct": 33
+        }
+      }
+    },
+    "r1-valid": {
+      "count": 56,
+      "scene_count": 8,
+      "correct": 50,
+      "accuracy": 0.8928571428571429,
+      "valid_rate": 1,
+      "median_latency_s": 1.3367899500008207,
+      "split": "valid",
+      "dataset_manifest_sha256": "463c2b363f19351a3f9758aba6e470f5f3b6a0f51785660bdc9b7fee0d484108",
+      "model": "Qwen/Qwen3-VL-2B-Instruct",
+      "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+      "adapter_sha256": "f089aa405a7aac1ec5aa0cb3e842c0f7ea0149958a668eb90a720d1f61de0b69",
+      "by_task": {
+        "color": {
+          "correct": 20,
+          "total": 24
+        },
+        "side": {
+          "correct": 14,
+          "total": 16
+        },
+        "stop": {
+          "correct": 8,
+          "total": 8
+        },
+        "unsupported": {
+          "correct": 8,
+          "total": 8
+        }
+      },
+      "note": "Synthetic scene grounding; independent seeds; no physical success inferred from JSON accuracy.",
+      "by_expected_status": {
+        "not_visible": {
+          "total": 2,
+          "correct": 0
+        },
+        "partial": {
+          "total": 4,
+          "correct": 0
+        },
+        "stop": {
+          "total": 8,
+          "correct": 8
+        },
+        "unsupported": {
+          "total": 8,
+          "correct": 8
+        },
+        "visible": {
+          "total": 34,
+          "correct": 34
+        }
+      }
+    },
+    "r1-test": {
+      "count": 56,
+      "scene_count": 8,
+      "correct": 49,
+      "accuracy": 0.875,
+      "valid_rate": 1,
+      "median_latency_s": 1.3334971000003861,
+      "split": "test",
+      "dataset_manifest_sha256": "463c2b363f19351a3f9758aba6e470f5f3b6a0f51785660bdc9b7fee0d484108",
+      "model": "Qwen/Qwen3-VL-2B-Instruct",
+      "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+      "adapter_sha256": "f089aa405a7aac1ec5aa0cb3e842c0f7ea0149958a668eb90a720d1f61de0b69",
+      "by_task": {
+        "color": {
+          "correct": 20,
+          "total": 24
+        },
+        "side": {
+          "correct": 13,
+          "total": 16
+        },
+        "stop": {
+          "correct": 8,
+          "total": 8
+        },
+        "unsupported": {
+          "correct": 8,
+          "total": 8
+        }
+      },
+      "note": "Synthetic scene grounding; independent seeds; no physical success inferred from JSON accuracy.",
+      "by_expected_status": {
+        "not_visible": {
+          "total": 2,
+          "correct": 0
+        },
+        "partial": {
+          "total": 4,
+          "correct": 0
+        },
+        "stop": {
+          "total": 8,
+          "correct": 8
+        },
+        "unsupported": {
+          "total": 8,
+          "correct": 8
+        },
+        "visible": {
+          "total": 34,
+          "correct": 33
+        }
+      }
+    }
+  },
+  "physical": {
+    "base": {
+      "total": 6,
+      "grounding_correct": 5,
+      "task_successes": 5,
+      "navigation_trials": 5,
+      "navigation_successes": 5,
+      "abstention_trials": 1,
+      "abstention_successes": 0,
+      "executions": 5,
+      "errors": 0,
+      "steps_with_scene_contact": 0
+    },
+    "r0": {
+      "total": 6,
+      "grounding_correct": 4,
+      "task_successes": 4,
+      "navigation_trials": 5,
+      "navigation_successes": 4,
+      "abstention_trials": 1,
+      "abstention_successes": 0,
+      "executions": 5,
+      "errors": 0,
+      "steps_with_scene_contact": 0
+    },
+    "static": {
+      "total": 6,
+      "grounding_correct": 5,
+      "task_successes": 5,
+      "navigation_trials": 5,
+      "navigation_successes": 5,
+      "abstention_trials": 1,
+      "abstention_successes": 0,
+      "executions": 5,
+      "errors": 0,
+      "steps_with_scene_contact": 0
+    },
+    "r1": {
+      "total": 6,
+      "grounding_correct": 5,
+      "task_successes": 5,
+      "navigation_trials": 5,
+      "navigation_successes": 5,
+      "abstention_trials": 1,
+      "abstention_successes": 0,
+      "executions": 5,
+      "errors": 0,
+      "steps_with_scene_contact": 0
+    }
+  },
+  "reward": {
+    "r0": {
+      "split": "test",
+      "count": 168,
+      "accuracy": 0.8273809523809523,
+      "positive_recall": 0.6071428571428571,
+      "false_accept_rate": 0.0625,
+      "adapter_sha256": "466a6c0bf202c6b5fbed749b8166271d0a7a05516f0829bbde6810654080d2c5",
+      "note": "Action reward only; two counterfactual negatives per instruction. Not a held-out task-outcome reward evaluation."
+    },
+    "r1": {
+      "split": "test",
+      "count": 168,
+      "accuracy": 0.8333333333333334,
+      "positive_recall": 0.5357142857142857,
+      "false_accept_rate": 0.017857142857142856,
+      "adapter_sha256": "d075ecf01fbf237abdaf2bdd2cd12891ebea8a2b61981e941b449a5c72dcbba7",
+      "note": "Action reward only; two counterfactual negatives per instruction. Not a held-out task-outcome reward evaluation."
+    }
+  },
+  "training": {
+    "vision-torch-r0": {
+      "status": "completed",
+      "task": "actor",
+      "model": "Qwen/Qwen3-VL-2B-Instruct",
+      "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+      "steps": 100,
+      "seed": 42,
+      "batch_size": 1,
+      "learning_rate": 5e-05,
+      "last_layers": 8,
+      "rank": 8,
+      "alpha": 16,
+      "quantization": "NF4 double-quant; BF16 compute",
+      "image_pixels": {
+        "min": 65536,
+        "max": 131072
+      },
+      "max_seq_length": 768,
+      "completion_only_loss": true,
+      "trainable_parameters": 458752,
+      "changed_tensors": 32,
+      "optimizer_state_resumed": false,
+      "elapsed_s": 64.84011679999821,
+      "peak_cuda_allocated_bytes": 2097890816,
+      "valid_loss": 0.10886345821615707,
+      "train_rows": 486,
+      "dataset_manifest_sha256": "463c2b363f19351a3f9758aba6e470f5f3b6a0f51785660bdc9b7fee0d484108",
+      "replay_sha256": null,
+      "parent_adapter_sha256": null,
+      "adapter_sha256": "a1936b2c84f128182462dd8e81801480dc65ea4fab0e398f00f55e100286a8be",
+      "versions": {
+        "torch": "2.11.0+cu128",
+        "transformers": "5.19.0",
+        "peft": "0.21.2",
+        "bitsandbytes": "0.50.2"
+      }
+    },
+    "vision-torch-static-control": {
+      "status": "completed",
+      "task": "actor",
+      "model": "Qwen/Qwen3-VL-2B-Instruct",
+      "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+      "steps": 100,
+      "seed": 42,
+      "batch_size": 1,
+      "learning_rate": 5e-05,
+      "last_layers": 8,
+      "rank": 8,
+      "alpha": 16,
+      "quantization": "NF4 double-quant; BF16 compute",
+      "image_pixels": {
+        "min": 65536,
+        "max": 131072
+      },
+      "max_seq_length": 768,
+      "completion_only_loss": true,
+      "trainable_parameters": 458752,
+      "changed_tensors": 32,
+      "optimizer_state_resumed": false,
+      "elapsed_s": 62.034329400004935,
+      "peak_cuda_allocated_bytes": 2097890816,
+      "valid_loss": 0.07957528704407325,
+      "train_rows": 486,
+      "dataset_manifest_sha256": "463c2b363f19351a3f9758aba6e470f5f3b6a0f51785660bdc9b7fee0d484108",
+      "training_rows_sha256": "acdb5ba2a8034a6367f6657cf53b3eb5d3c9c2ebd1a466350fcb231c564a178d",
+      "replay_rows": 0,
+      "replay_repeat": 0,
+      "replay_sha256": null,
+      "parent_adapter_sha256": "a1936b2c84f128182462dd8e81801480dc65ea4fab0e398f00f55e100286a8be",
+      "adapter_sha256": "89d9c163b464a60ea169aae0006e0d70af976891571de9d520d04d8f04b51b3a",
+      "versions": {
+        "torch": "2.11.0+cu128",
+        "transformers": "5.19.0",
+        "peft": "0.21.2",
+        "bitsandbytes": "0.50.2"
+      }
+    },
+    "vision-torch-r1": {
+      "status": "completed",
+      "task": "actor",
+      "model": "Qwen/Qwen3-VL-2B-Instruct",
+      "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+      "steps": 100,
+      "seed": 42,
+      "batch_size": 1,
+      "learning_rate": 5e-05,
+      "last_layers": 8,
+      "rank": 8,
+      "alpha": 16,
+      "quantization": "NF4 double-quant; BF16 compute",
+      "image_pixels": {
+        "min": 65536,
+        "max": 131072
+      },
+      "max_seq_length": 768,
+      "completion_only_loss": true,
+      "trainable_parameters": 458752,
+      "changed_tensors": 32,
+      "optimizer_state_resumed": false,
+      "elapsed_s": 59.7307918999868,
+      "peak_cuda_allocated_bytes": 2097890816,
+      "valid_loss": 0.08678321245315601,
+      "train_rows": 974,
+      "dataset_manifest_sha256": "463c2b363f19351a3f9758aba6e470f5f3b6a0f51785660bdc9b7fee0d484108",
+      "training_rows_sha256": "c2fa37393f3a486797e449fac0cbe1ec9c25e1f840e1a17282a3c5fb5682a14d",
+      "replay_rows": 4,
+      "replay_repeat": 122,
+      "replay_sha256": "099dacca8975b68528123c935347f2f1eec763304505e931c8f9b55bbaf7ca4c",
+      "parent_adapter_sha256": "a1936b2c84f128182462dd8e81801480dc65ea4fab0e398f00f55e100286a8be",
+      "adapter_sha256": "f089aa405a7aac1ec5aa0cb3e842c0f7ea0149958a668eb90a720d1f61de0b69",
+      "versions": {
+        "torch": "2.11.0+cu128",
+        "transformers": "5.19.0",
+        "peft": "0.21.2",
+        "bitsandbytes": "0.50.2"
+      }
+    },
+    "vision-reward-r0": {
+      "status": "completed",
+      "task": "reward",
+      "model": "Qwen/Qwen3-VL-2B-Instruct",
+      "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+      "steps": 50,
+      "seed": 42,
+      "batch_size": 1,
+      "learning_rate": 5e-05,
+      "last_layers": 8,
+      "rank": 8,
+      "alpha": 16,
+      "quantization": "NF4 double-quant; BF16 compute",
+      "image_pixels": {
+        "min": 65536,
+        "max": 131072
+      },
+      "max_seq_length": 768,
+      "completion_only_loss": true,
+      "trainable_parameters": 458752,
+      "changed_tensors": 32,
+      "optimizer_state_resumed": false,
+      "elapsed_s": 32.32235599998967,
+      "peak_cuda_allocated_bytes": 2243138048,
+      "valid_loss": 0.3151829520210456,
+      "train_rows": 696,
+      "dataset_manifest_sha256": "463c2b363f19351a3f9758aba6e470f5f3b6a0f51785660bdc9b7fee0d484108",
+      "training_rows_sha256": "7b0168980c9c1db9b2591017b1e5bf038440db4513e618c326bf339b9e5439f1",
+      "replay_rows": 0,
+      "replay_repeat": 0,
+      "replay_sha256": null,
+      "parent_adapter_sha256": null,
+      "adapter_sha256": "466a6c0bf202c6b5fbed749b8166271d0a7a05516f0829bbde6810654080d2c5",
+      "versions": {
+        "torch": "2.11.0+cu128",
+        "transformers": "5.19.0",
+        "peft": "0.21.2",
+        "bitsandbytes": "0.50.2"
+      }
+    },
+    "vision-reward-r1": {
+      "status": "completed",
+      "task": "reward",
+      "model": "Qwen/Qwen3-VL-2B-Instruct",
+      "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+      "steps": 50,
+      "seed": 42,
+      "batch_size": 1,
+      "learning_rate": 5e-05,
+      "last_layers": 8,
+      "rank": 8,
+      "alpha": 16,
+      "quantization": "NF4 double-quant; BF16 compute",
+      "image_pixels": {
+        "min": 65536,
+        "max": 131072
+      },
+      "max_seq_length": 768,
+      "completion_only_loss": true,
+      "trainable_parameters": 458752,
+      "changed_tensors": 32,
+      "optimizer_state_resumed": false,
+      "elapsed_s": 34.9201286000025,
+      "peak_cuda_allocated_bytes": 2247629312,
+      "valid_loss": 0.34008883245521593,
+      "train_rows": 1400,
+      "dataset_manifest_sha256": "463c2b363f19351a3f9758aba6e470f5f3b6a0f51785660bdc9b7fee0d484108",
+      "training_rows_sha256": "061223e328668b27207dc74cf7a4a3f6e6c0dff8f11a5cdd9e432e5830ef050b",
+      "replay_rows": 16,
+      "replay_repeat": 44,
+      "replay_sha256": "eda8923531b3652e46d32979ec68663c778a9275fec5e50c6979d7425aabba30",
+      "parent_adapter_sha256": "466a6c0bf202c6b5fbed749b8166271d0a7a05516f0829bbde6810654080d2c5",
+      "adapter_sha256": "d075ecf01fbf237abdaf2bdd2cd12891ebea8a2b61981e941b449a5c72dcbba7",
+      "versions": {
+        "torch": "2.11.0+cu128",
+        "transformers": "5.19.0",
+        "peft": "0.21.2",
+        "bitsandbytes": "0.50.2"
+      }
+    }
+  },
+  "limits": "Small synthetic benchmark, one training seed; oracle pose/extrinsics/safety map. Actor budgets matched, total compute differs.",
+  "exploration": {
+    "status": "completed",
+    "exploration": true,
+    "actor_sha256": "a1936b2c84f128182462dd8e81801480dc65ea4fab0e398f00f55e100286a8be",
+    "reward_sha256": "466a6c0bf202c6b5fbed749b8166271d0a7a05516f0829bbde6810654080d2c5",
+    "note": "Three sampled proposals, one retained action; single-action adaptation, not full UI-Genie beam search.",
+    "actor_replay_rows": 4,
+    "reward_replay_rows": 16,
+    "success_count": 4,
+    "total": 8,
+    "distinct_proposals_per_case": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+    ],
+    "hard_negatives": 1
+  },
+  "sample_image": {
+    "source": "data/windows-vision-v2/episodes/train-210000-none/frame-000-candidates.png",
+    "asset": "assets/vision-firstperson.png",
+    "sha256": "f3fcd18d16afd49ac070db1a2805d4e586abdc71a6adfaa1144ee7f97e0b9be0"
+  },
+  "validation": {
+    "unit_tests_passed": 59,
+    "deployment_smoke": true,
+    "legacy_evaluator_smoke": true,
+    "git_diff_check": true,
+    "public_path_privacy_check": true,
+    "dataset_and_adapter_hashes": true
+  }
+}

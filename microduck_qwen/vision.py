@@ -12,6 +12,7 @@ from datetime import datetime
 import hashlib
 import json
 import math
+import os
 from pathlib import Path
 import random
 import re
@@ -260,6 +261,13 @@ def adapter_metadata(adapter):
 
 
 class VisionPlanner:
+    def __new__(cls, adapter=None):
+        if os.name == "nt":
+            from .vision_torch import TorchVisionPlanner
+
+            return TorchVisionPlanner(adapter)
+        return super().__new__(cls)
+
     def __init__(self, adapter=None):
         from mlx_vlm import load
         from mlx_vlm.utils import load_config
@@ -605,6 +613,12 @@ def main():
     args = parser.parse_args()
     if args.command == "download":
         from huggingface_hub import snapshot_download
+        if os.name == "nt":
+            from .vision_torch import MODEL as torch_model, REVISION as torch_revision
+
+            print(snapshot_download(torch_model, revision=torch_revision, cache_dir=ROOT / ".cache/vlm-torch-hub",
+                allow_patterns=["*.json", "*.safetensors", "*.jinja", "*.txt"]))
+            return
 
         path = snapshot_download(
             MODEL,
@@ -622,7 +636,7 @@ def main():
         print(path)
         return
     info = json.loads((args.manifest or ROOT / "runs/vision-simulator.json").read_text())
-    if not info.get("vision") or not Path(info["socket"]).exists():
+    if not info.get("vision") or (not isinstance(info["socket"], list) and not Path(info["socket"]).exists()):
         raise RuntimeError(
             "视觉实例未运行，请先执行 python -m microduck_qwen.sim --vision"
         )

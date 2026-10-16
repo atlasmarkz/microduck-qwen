@@ -1,0 +1,1660 @@
+{
+  "summary": {
+    "count": 56,
+    "scene_count": 8,
+    "correct": 41,
+    "accuracy": 0.7321428571428571,
+    "valid_rate": 1,
+    "median_latency_s": 1.3641459999998915,
+    "split": "test",
+    "dataset_manifest_sha256": "463c2b363f19351a3f9758aba6e470f5f3b6a0f51785660bdc9b7fee0d484108",
+    "model": "Qwen/Qwen3-VL-2B-Instruct",
+    "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+    "adapter_sha256": "a1936b2c84f128182462dd8e81801480dc65ea4fab0e398f00f55e100286a8be",
+    "by_task": {
+      "color": {
+        "correct": 20,
+        "total": 24
+      },
+      "side": {
+        "correct": 13,
+        "total": 16
+      },
+      "stop": {
+        "correct": 8,
+        "total": 8
+      },
+      "unsupported": {
+        "correct": 0,
+        "total": 8
+      }
+    },
+    "note": "Synthetic scene grounding; independent seeds; no physical success inferred from JSON accuracy."
+  },
+  "results": [
+    {
+      "id": "test-230000-0-0",
+      "scene_seed": 230000,
+      "scenario": "none",
+      "task_type": "color",
+      "expected": {
+        "status": "visible",
+        "color": "red",
+        "id": 3
+      },
+      "instruction": "走到红色球旁边",
+      "raw": "{\"status\":\"visible\",\"color\":\"red\",\"id\":3}",
+      "latency_s": 1.8584448999899905,
+      "model": "Qwen/Qwen3-VL-2B-Instruct",
+      "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+      "answer": {
+        "status": "ok",
+        "target_id": 3,
+        "visibility": "visible",
+        "reason": "VLM visual choice: red"
+      },
+      "visual_choice": {
+        "status": "visible",
+        "color": "red",
+        "id": 3
+      },
+      "valid": true,
+      "correct": true
+    },
+    {
+      "id": "test-230000-0-1",
+      "scene_seed": 230000,
+      "scenario": "none",
+      "task_type": "color",
+      "expected": {
+        "status": "visible",
+        "color": "blue",
+        "id": 2
+      },
+      "instruction": "走到蓝色球旁边",
+      "raw": "{\"status\":\"visible\",\"color\":\"blue\",\"id\":2}",
+      "latency_s": 1.320164400007343,
+      "model": "Qwen/Qwen3-VL-2B-Instruct",
+      "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+      "answer": {
+        "status": "ok",
+        "target_id": 2,
+        "visibility": "visible",
+        "reason": "VLM visual choice: blue"
+      },
+      "visual_choice": {
+        "status": "visible",
+        "color": "blue",
+        "id": 2
+      },
+      "valid": true,
+      "correct": true
+    },
+    {
+      "id": "test-230000-0-2",
+      "scene_seed": 230000,
+      "scenario": "none",
+      "task_type": "color",
+      "expected": {
+        "status": "visible",
+        "color": "green",
+        "id": 1
+      },
+      "instruction": "走到绿色球旁边",
+      "raw": "{\"status\":\"visible\",\"color\":\"green\",\"id\":1}",
+      "latency_s": 1.3486611000116682,
+      "model": "Qwen/Qwen3-VL-2B-Instruct",
+      "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+      "answer": {
+        "status": "ok",
+        "target_id": 1,
+        "visibility": "visible",
+        "reason": "VLM visual choice: green"
+      },
+      "visual_choice": {
+        "status": "visible",
+        "color": "green",
+        "id": 1
+      },
+      "valid": true,
+      "correct": true
+    },
+    {
+      "id": "test-230000-0-3",
+      "scene_seed": 230000,
+      "scenario": "none",
+      "task_type": "side",
+      "expected": {
+        "status": "visible",
+        "color": "red",
+        "id": 3
+      },
+      "instruction": "走到画面左边的球旁边",
+      "raw": "{\"status\":\"visible\",\"color\":\"red\",\"id\":3}",
+      "latency_s": 1.3381230000086362,
+      "model": "Qwen/Qwen3-VL-2B-Instruct",
+      "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+      "answer": {
+        "status": "ok",
+        "target_id": 3,
+        "visibility": "visible",
+        "reason": "VLM visual choice: red"
+      },
+      "visual_choice": {
+        "status": "visible",
+        "color": "red",
+        "id": 3
+      },
+      "valid": true,
+      "correct": true
+    },
+    {
+      "id": "test-230000-0-4",
+      "scene_seed": 230000,
+      "scenario": "none",
+      "task_type": "side",
+      "expected": {
+        "status": "visible",
+        "color": "blue",
+        "id": 2
+      },
+      "instruction": "走到画面右边的球旁边",
+      "raw": "{\"status\":\"visible\",\"color\":\"blue\",\"id\":2}",
+      "latency_s": 1.2817273999971803,
+      "model": "Qwen/Qwen3-VL-2B-Instruct",
+      "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+      "answer": {
+        "status": "ok",
+        "target_id": 2,
+        "visibility": "visible",
+        "reason": "VLM visual choice: blue"
+      },
+      "visual_choice": {
+        "status": "visible",
+        "color": "blue",
+        "id": 2
+      },
+      "valid": true,
+      "correct": true
+    },
+    {
+      "id": "test-230000-0-5",
+      "scene_seed": 230000,
+      "scenario": "none",
+      "task_type": "stop",
+      "expected": {
+        "status": "stop",
+        "color": null,
+        "id": null
+      },
+      "instruction": "停下来",
+      "raw": "{\"status\":\"stop\",\"color\":null,\"id\":null}",
+      "latency_s": 1.2737435000017285,
+      "model": "Qwen/Qwen3-VL-2B-Instruct",
+      "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+      "answer": {
+        "status": "stop",
+        "target_id": null,
+        "visibility": "uncertain",
+        "reason": "VLM visual choice: stop"
+      },
+      "visual_choice": {
+        "status": "stop",
+        "color": null,
+        "id": null
+      },
+      "valid": true,
+      "correct": true
+    },
+    {
+      "id": "test-230000-0-6",
+      "scene_seed": 230000,
+      "scenario": "none",
+      "task_type": "unsupported",
+      "expected": {
+        "status": "unsupported",
+        "color": null,
+        "id": null
+      },
+      "instruction": "请画一幅画",
+      "raw": "{\"status\":\"not_visible\",\"color\":null,\"id\":null}",
+      "latency_s": 1.360084600004484,
+      "model": "Qwen/Qwen3-VL-2B-Instruct",
+      "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+      "answer": {
+        "status": "observe",
+        "target_id": null,
+        "visibility": "not_visible",
+        "reason": "VLM visual choice: not_visible"
+      },
+      "visual_choice": {
+        "status": "not_visible",
+        "color": null,
+        "id": null
+      },
+      "valid": true,
+      "correct": false
+    },
+    {
+      "id": "test-230001-0-0",
+      "scene_seed": 230001,
+      "scenario": "partial",
+      "task_type": "color",
+      "expected": {
+        "status": "visible",
+        "color": "red",
+        "id": 3
+      },
+      "instruction": "走到红色球旁边",
+      "raw": "{\"status\":\"visible\",\"color\":\"red\",\"id\":3}",
+      "latency_s": 1.2844475000019884,
+      "model": "Qwen/Qwen3-VL-2B-Instruct",
+      "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+      "answer": {
+        "status": "ok",
+        "target_id": 3,
+        "visibility": "visible",
+        "reason": "VLM visual choice: red"
+      },
+      "visual_choice": {
+        "status": "visible",
+        "color": "red",
+        "id": 3
+      },
+      "valid": true,
+      "correct": true
+    },
+    {
+      "id": "test-230001-0-1",
+      "scene_seed": 230001,
+      "scenario": "partial",
+      "task_type": "color",
+      "expected": {
+        "status": "visible",
+        "color": "blue",
+        "id": 2
+      },
+      "instruction": "走到蓝色球旁边",
+      "raw": "{\"status\":\"visible\",\"color\":\"blue\",\"id\":2}",
+      "latency_s": 1.31396750001295,
+      "model": "Qwen/Qwen3-VL-2B-Instruct",
+      "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+      "answer": {
+        "status": "ok",
+        "target_id": 2,
+        "visibility": "visible",
+        "reason": "VLM visual choice: blue"
+      },
+      "visual_choice": {
+        "status": "visible",
+        "color": "blue",
+        "id": 2
+      },
+      "valid": true,
+      "correct": true
+    },
+    {
+      "id": "test-230001-0-2",
+      "scene_seed": 230001,
+      "scenario": "partial",
+      "task_type": "color",
+      "expected": {
+        "status": "partial",
+        "color": null,
+        "id": null
+      },
+      "instruction": "走到绿色球旁边",
+      "raw": "{\"status\":\"visible\",\"color\":\"green\",\"id\":1}",
+      "latency_s": 1.4706334000075003,
+      "model": "Qwen/Qwen3-VL-2B-Instruct",
+      "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+      "answer": {
+        "status": "ok",
+        "target_id": 1,
+        "visibility": "visible",
+        "reason": "VLM visual choice: green"
+      },
+      "visual_choice": {
+        "status": "visible",
+        "color": "green",
+        "id": 1
+      },
+      "valid": true,
+      "correct": false
+    },
+    {
+      "id": "test-230001-0-3",
+      "scene_seed": 230001,
+      "scenario": "partial",
+      "task_type": "side",
+      "expected": {
+        "status": "partial",
+        "color": null,
+        "id": null
+      },
+      "instruction": "走到画面左边的球旁边",
+      "raw": "{\"status\":\"visible\",\"color\":\"green\",\"id\":1}",
+      "latency_s": 1.666970800011768,
+      "model": "Qwen/Qwen3-VL-2B-Instruct",
+      "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+      "answer": {
+        "status": "ok",
+        "target_id": 1,
+        "visibility": "visible",
+        "reason": "VLM visual choice: green"
+      },
+      "visual_choice": {
+        "status": "visible",
+        "color": "green",
+        "id": 1
+      },
+      "valid": true,
+      "correct": false
+    },
+    {
+      "id": "test-230001-0-4",
+      "scene_seed": 230001,
+      "scenario": "partial",
+      "task_type": "side",
+      "expected": {
+        "status": "visible",
+        "color": "red",
+        "id": 3
+      },
+      "instruction": "走到画面右边的球旁边",
+      "raw": "{\"status\":\"visible\",\"color\":\"red\",\"id\":3}",
+      "latency_s": 1.6083974999928614,
+      "model": "Qwen/Qwen3-VL-2B-Instruct",
+      "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+      "answer": {
+        "status": "ok",
+        "target_id": 3,
+        "visibility": "visible",
+        "reason": "VLM visual choice: red"
+      },
+      "visual_choice": {
+        "status": "visible",
+        "color": "red",
+        "id": 3
+      },
+      "valid": true,
+      "correct": true
+    },
+    {
+      "id": "test-230001-0-5",
+      "scene_seed": 230001,
+      "scenario": "partial",
+      "task_type": "stop",
+      "expected": {
+        "status": "stop",
+        "color": null,
+        "id": null
+      },
+      "instruction": "停下来",
+      "raw": "{\"status\":\"stop\",\"color\":null,\"id\":null}",
+      "latency_s": 1.5061420999991242,
+      "model": "Qwen/Qwen3-VL-2B-Instruct",
+      "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+      "answer": {
+        "status": "stop",
+        "target_id": null,
+        "visibility": "uncertain",
+        "reason": "VLM visual choice: stop"
+      },
+      "visual_choice": {
+        "status": "stop",
+        "color": null,
+        "id": null
+      },
+      "valid": true,
+      "correct": true
+    },
+    {
+      "id": "test-230001-0-6",
+      "scene_seed": 230001,
+      "scenario": "partial",
+      "task_type": "unsupported",
+      "expected": {
+        "status": "unsupported",
+        "color": null,
+        "id": null
+      },
+      "instruction": "请画一幅画",
+      "raw": "{\"status\":\"visible\",\"color\":\"blue\",\"id\":2}",
+      "latency_s": 1.3618581000046106,
+      "model": "Qwen/Qwen3-VL-2B-Instruct",
+      "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+      "answer": {
+        "status": "ok",
+        "target_id": 2,
+        "visibility": "visible",
+        "reason": "VLM visual choice: blue"
+      },
+      "visual_choice": {
+        "status": "visible",
+        "color": "blue",
+        "id": 2
+      },
+      "valid": true,
+      "correct": false
+    },
+    {
+      "id": "test-230002-0-0",
+      "scene_seed": 230002,
+      "scenario": "full",
+      "task_type": "color",
+      "expected": {
+        "status": "not_visible",
+        "color": null,
+        "id": null
+      },
+      "instruction": "走到红色球旁边",
+      "raw": "{\"status\":\"visible\",\"color\":\"green\",\"id\":1}",
+      "latency_s": 1.4384521000029054,
+      "model": "Qwen/Qwen3-VL-2B-Instruct",
+      "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+      "answer": {
+        "status": "ok",
+        "target_id": 1,
+        "visibility": "visible",
+        "reason": "VLM visual choice: green"
+      },
+      "visual_choice": {
+        "status": "visible",
+        "color": "green",
+        "id": 1
+      },
+      "valid": true,
+      "correct": false
+    },
+    {
+      "id": "test-230002-0-1",
+      "scene_seed": 230002,
+      "scenario": "full",
+      "task_type": "color",
+      "expected": {
+        "status": "visible",
+        "color": "blue",
+        "id": 2
+      },
+      "instruction": "走到蓝色球旁边",
+      "raw": "{\"status\":\"visible\",\"color\":\"blue\",\"id\":2}",
+      "latency_s": 1.3753479000006337,
+      "model": "Qwen/Qwen3-VL-2B-Instruct",
+      "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+      "answer": {
+        "status": "ok",
+        "target_id": 2,
+        "visibility": "visible",
+        "reason": "VLM visual choice: blue"
+      },
+      "visual_choice": {
+        "status": "visible",
+        "color": "blue",
+        "id": 2
+      },
+      "valid": true,
+      "correct": true
+    },
+    {
+      "id": "test-230002-0-2",
+      "scene_seed": 230002,
+      "scenario": "full",
+      "task_type": "color",
+      "expected": {
+        "status": "visible",
+        "color": "green",
+        "id": 1
+      },
+      "instruction": "走到绿色球旁边",
+      "raw": "{\"status\":\"visible\",\"color\":\"green\",\"id\":1}",
+      "latency_s": 1.3267418000032194,
+      "model": "Qwen/Qwen3-VL-2B-Instruct",
+      "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+      "answer": {
+        "status": "ok",
+        "target_id": 1,
+        "visibility": "visible",
+        "reason": "VLM visual choice: green"
+      },
+      "visual_choice": {
+        "status": "visible",
+        "color": "green",
+        "id": 1
+      },
+      "valid": true,
+      "correct": true
+    },
+    {
+      "id": "test-230002-0-3",
+      "scene_seed": 230002,
+      "scenario": "full",
+      "task_type": "side",
+      "expected": {
+        "status": "visible",
+        "color": "blue",
+        "id": 2
+      },
+      "instruction": "走到画面左边的球旁边",
+      "raw": "{\"status\":\"visible\",\"color\":\"green\",\"id\":1}",
+      "latency_s": 1.3380622999975458,
+      "model": "Qwen/Qwen3-VL-2B-Instruct",
+      "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+      "answer": {
+        "status": "ok",
+        "target_id": 1,
+        "visibility": "visible",
+        "reason": "VLM visual choice: green"
+      },
+      "visual_choice": {
+        "status": "visible",
+        "color": "green",
+        "id": 1
+      },
+      "valid": true,
+      "correct": false
+    },
+    {
+      "id": "test-230002-0-4",
+      "scene_seed": 230002,
+      "scenario": "full",
+      "task_type": "side",
+      "expected": {
+        "status": "visible",
+        "color": "green",
+        "id": 1
+      },
+      "instruction": "走到画面右边的球旁边",
+      "raw": "{\"status\":\"visible\",\"color\":\"green\",\"id\":1}",
+      "latency_s": 1.3845033000106923,
+      "model": "Qwen/Qwen3-VL-2B-Instruct",
+      "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+      "answer": {
+        "status": "ok",
+        "target_id": 1,
+        "visibility": "visible",
+        "reason": "VLM visual choice: green"
+      },
+      "visual_choice": {
+        "status": "visible",
+        "color": "green",
+        "id": 1
+      },
+      "valid": true,
+      "correct": true
+    },
+    {
+      "id": "test-230002-0-5",
+      "scene_seed": 230002,
+      "scenario": "full",
+      "task_type": "stop",
+      "expected": {
+        "status": "stop",
+        "color": null,
+        "id": null
+      },
+      "instruction": "停下来",
+      "raw": "{\"status\":\"stop\",\"color\":null,\"id\":null}",
+      "latency_s": 1.3236453999998048,
+      "model": "Qwen/Qwen3-VL-2B-Instruct",
+      "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+      "answer": {
+        "status": "stop",
+        "target_id": null,
+        "visibility": "uncertain",
+        "reason": "VLM visual choice: stop"
+      },
+      "visual_choice": {
+        "status": "stop",
+        "color": null,
+        "id": null
+      },
+      "valid": true,
+      "correct": true
+    },
+    {
+      "id": "test-230002-0-6",
+      "scene_seed": 230002,
+      "scenario": "full",
+      "task_type": "unsupported",
+      "expected": {
+        "status": "unsupported",
+        "color": null,
+        "id": null
+      },
+      "instruction": "请画一幅画",
+      "raw": "{\"status\":\"not_visible\",\"color\":null,\"id\":null}",
+      "latency_s": 1.4652268000063486,
+      "model": "Qwen/Qwen3-VL-2B-Instruct",
+      "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+      "answer": {
+        "status": "observe",
+        "target_id": null,
+        "visibility": "not_visible",
+        "reason": "VLM visual choice: not_visible"
+      },
+      "visual_choice": {
+        "status": "not_visible",
+        "color": null,
+        "id": null
+      },
+      "valid": true,
+      "correct": false
+    },
+    {
+      "id": "test-230003-0-0",
+      "scene_seed": 230003,
+      "scenario": "absent",
+      "task_type": "color",
+      "expected": {
+        "status": "not_visible",
+        "color": null,
+        "id": null
+      },
+      "instruction": "走到红色球旁边",
+      "raw": "{\"status\":\"visible\",\"color\":\"blue\",\"id\":2}",
+      "latency_s": 1.3617934999929275,
+      "model": "Qwen/Qwen3-VL-2B-Instruct",
+      "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+      "answer": {
+        "status": "ok",
+        "target_id": 2,
+        "visibility": "visible",
+        "reason": "VLM visual choice: blue"
+      },
+      "visual_choice": {
+        "status": "visible",
+        "color": "blue",
+        "id": 2
+      },
+      "valid": true,
+      "correct": false
+    },
+    {
+      "id": "test-230003-0-1",
+      "scene_seed": 230003,
+      "scenario": "absent",
+      "task_type": "color",
+      "expected": {
+        "status": "visible",
+        "color": "blue",
+        "id": 2
+      },
+      "instruction": "走到蓝色球旁边",
+      "raw": "{\"status\":\"visible\",\"color\":\"blue\",\"id\":2}",
+      "latency_s": 1.2671539999864763,
+      "model": "Qwen/Qwen3-VL-2B-Instruct",
+      "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+      "answer": {
+        "status": "ok",
+        "target_id": 2,
+        "visibility": "visible",
+        "reason": "VLM visual choice: blue"
+      },
+      "visual_choice": {
+        "status": "visible",
+        "color": "blue",
+        "id": 2
+      },
+      "valid": true,
+      "correct": true
+    },
+    {
+      "id": "test-230003-0-2",
+      "scene_seed": 230003,
+      "scenario": "absent",
+      "task_type": "color",
+      "expected": {
+        "status": "visible",
+        "color": "green",
+        "id": 1
+      },
+      "instruction": "走到绿色球旁边",
+      "raw": "{\"status\":\"visible\",\"color\":\"green\",\"id\":1}",
+      "latency_s": 1.2828057000006083,
+      "model": "Qwen/Qwen3-VL-2B-Instruct",
+      "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+      "answer": {
+        "status": "ok",
+        "target_id": 1,
+        "visibility": "visible",
+        "reason": "VLM visual choice: green"
+      },
+      "visual_choice": {
+        "status": "visible",
+        "color": "green",
+        "id": 1
+      },
+      "valid": true,
+      "correct": true
+    },
+    {
+      "id": "test-230003-0-3",
+      "scene_seed": 230003,
+      "scenario": "absent",
+      "task_type": "side",
+      "expected": {
+        "status": "visible",
+        "color": "green",
+        "id": 1
+      },
+      "instruction": "走到画面左边的球旁边",
+      "raw": "{\"status\":\"visible\",\"color\":\"green\",\"id\":1}",
+      "latency_s": 1.690968700000667,
+      "model": "Qwen/Qwen3-VL-2B-Instruct",
+      "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+      "answer": {
+        "status": "ok",
+        "target_id": 1,
+        "visibility": "visible",
+        "reason": "VLM visual choice: green"
+      },
+      "visual_choice": {
+        "status": "visible",
+        "color": "green",
+        "id": 1
+      },
+      "valid": true,
+      "correct": true
+    },
+    {
+      "id": "test-230003-0-4",
+      "scene_seed": 230003,
+      "scenario": "absent",
+      "task_type": "side",
+      "expected": {
+        "status": "visible",
+        "color": "blue",
+        "id": 2
+      },
+      "instruction": "走到画面右边的球旁边",
+      "raw": "{\"status\":\"visible\",\"color\":\"blue\",\"id\":2}",
+      "latency_s": 1.6135770000109915,
+      "model": "Qwen/Qwen3-VL-2B-Instruct",
+      "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+      "answer": {
+        "status": "ok",
+        "target_id": 2,
+        "visibility": "visible",
+        "reason": "VLM visual choice: blue"
+      },
+      "visual_choice": {
+        "status": "visible",
+        "color": "blue",
+        "id": 2
+      },
+      "valid": true,
+      "correct": true
+    },
+    {
+      "id": "test-230003-0-5",
+      "scene_seed": 230003,
+      "scenario": "absent",
+      "task_type": "stop",
+      "expected": {
+        "status": "stop",
+        "color": null,
+        "id": null
+      },
+      "instruction": "停下来",
+      "raw": "{\"status\":\"stop\",\"color\":null,\"id\":null}",
+      "latency_s": 1.5675941999943461,
+      "model": "Qwen/Qwen3-VL-2B-Instruct",
+      "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+      "answer": {
+        "status": "stop",
+        "target_id": null,
+        "visibility": "uncertain",
+        "reason": "VLM visual choice: stop"
+      },
+      "visual_choice": {
+        "status": "stop",
+        "color": null,
+        "id": null
+      },
+      "valid": true,
+      "correct": true
+    },
+    {
+      "id": "test-230003-0-6",
+      "scene_seed": 230003,
+      "scenario": "absent",
+      "task_type": "unsupported",
+      "expected": {
+        "status": "unsupported",
+        "color": null,
+        "id": null
+      },
+      "instruction": "请画一幅画",
+      "raw": "{\"status\":\"not_visible\",\"color\":null,\"id\":null}",
+      "latency_s": 1.6190480000077514,
+      "model": "Qwen/Qwen3-VL-2B-Instruct",
+      "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+      "answer": {
+        "status": "observe",
+        "target_id": null,
+        "visibility": "not_visible",
+        "reason": "VLM visual choice: not_visible"
+      },
+      "visual_choice": {
+        "status": "not_visible",
+        "color": null,
+        "id": null
+      },
+      "valid": true,
+      "correct": false
+    },
+    {
+      "id": "test-230004-0-0",
+      "scene_seed": 230004,
+      "scenario": "none",
+      "task_type": "color",
+      "expected": {
+        "status": "visible",
+        "color": "red",
+        "id": 3
+      },
+      "instruction": "走到红色球旁边",
+      "raw": "{\"status\":\"visible\",\"color\":\"red\",\"id\":3}",
+      "latency_s": 1.3664338999951724,
+      "model": "Qwen/Qwen3-VL-2B-Instruct",
+      "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+      "answer": {
+        "status": "ok",
+        "target_id": 3,
+        "visibility": "visible",
+        "reason": "VLM visual choice: red"
+      },
+      "visual_choice": {
+        "status": "visible",
+        "color": "red",
+        "id": 3
+      },
+      "valid": true,
+      "correct": true
+    },
+    {
+      "id": "test-230004-0-1",
+      "scene_seed": 230004,
+      "scenario": "none",
+      "task_type": "color",
+      "expected": {
+        "status": "visible",
+        "color": "blue",
+        "id": 2
+      },
+      "instruction": "走到蓝色球旁边",
+      "raw": "{\"status\":\"visible\",\"color\":\"blue\",\"id\":2}",
+      "latency_s": 1.3931990999990376,
+      "model": "Qwen/Qwen3-VL-2B-Instruct",
+      "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+      "answer": {
+        "status": "ok",
+        "target_id": 2,
+        "visibility": "visible",
+        "reason": "VLM visual choice: blue"
+      },
+      "visual_choice": {
+        "status": "visible",
+        "color": "blue",
+        "id": 2
+      },
+      "valid": true,
+      "correct": true
+    },
+    {
+      "id": "test-230004-0-2",
+      "scene_seed": 230004,
+      "scenario": "none",
+      "task_type": "color",
+      "expected": {
+        "status": "visible",
+        "color": "green",
+        "id": 1
+      },
+      "instruction": "走到绿色球旁边",
+      "raw": "{\"status\":\"visible\",\"color\":\"green\",\"id\":1}",
+      "latency_s": 1.3908182000013767,
+      "model": "Qwen/Qwen3-VL-2B-Instruct",
+      "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+      "answer": {
+        "status": "ok",
+        "target_id": 1,
+        "visibility": "visible",
+        "reason": "VLM visual choice: green"
+      },
+      "visual_choice": {
+        "status": "visible",
+        "color": "green",
+        "id": 1
+      },
+      "valid": true,
+      "correct": true
+    },
+    {
+      "id": "test-230004-0-3",
+      "scene_seed": 230004,
+      "scenario": "none",
+      "task_type": "side",
+      "expected": {
+        "status": "visible",
+        "color": "blue",
+        "id": 2
+      },
+      "instruction": "走到画面左边的球旁边",
+      "raw": "{\"status\":\"visible\",\"color\":\"blue\",\"id\":2}",
+      "latency_s": 1.2450799999933224,
+      "model": "Qwen/Qwen3-VL-2B-Instruct",
+      "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+      "answer": {
+        "status": "ok",
+        "target_id": 2,
+        "visibility": "visible",
+        "reason": "VLM visual choice: blue"
+      },
+      "visual_choice": {
+        "status": "visible",
+        "color": "blue",
+        "id": 2
+      },
+      "valid": true,
+      "correct": true
+    },
+    {
+      "id": "test-230004-0-4",
+      "scene_seed": 230004,
+      "scenario": "none",
+      "task_type": "side",
+      "expected": {
+        "status": "visible",
+        "color": "green",
+        "id": 1
+      },
+      "instruction": "走到画面右边的球旁边",
+      "raw": "{\"status\":\"visible\",\"color\":\"green\",\"id\":1}",
+      "latency_s": 1.2788351000053808,
+      "model": "Qwen/Qwen3-VL-2B-Instruct",
+      "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+      "answer": {
+        "status": "ok",
+        "target_id": 1,
+        "visibility": "visible",
+        "reason": "VLM visual choice: green"
+      },
+      "visual_choice": {
+        "status": "visible",
+        "color": "green",
+        "id": 1
+      },
+      "valid": true,
+      "correct": true
+    },
+    {
+      "id": "test-230004-0-5",
+      "scene_seed": 230004,
+      "scenario": "none",
+      "task_type": "stop",
+      "expected": {
+        "status": "stop",
+        "color": null,
+        "id": null
+      },
+      "instruction": "停下来",
+      "raw": "{\"status\":\"stop\",\"color\":null,\"id\":null}",
+      "latency_s": 1.329609199994593,
+      "model": "Qwen/Qwen3-VL-2B-Instruct",
+      "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+      "answer": {
+        "status": "stop",
+        "target_id": null,
+        "visibility": "uncertain",
+        "reason": "VLM visual choice: stop"
+      },
+      "visual_choice": {
+        "status": "stop",
+        "color": null,
+        "id": null
+      },
+      "valid": true,
+      "correct": true
+    },
+    {
+      "id": "test-230004-0-6",
+      "scene_seed": 230004,
+      "scenario": "none",
+      "task_type": "unsupported",
+      "expected": {
+        "status": "unsupported",
+        "color": null,
+        "id": null
+      },
+      "instruction": "请画一幅画",
+      "raw": "{\"status\":\"not_visible\",\"color\":null,\"id\":null}",
+      "latency_s": 1.405428199999733,
+      "model": "Qwen/Qwen3-VL-2B-Instruct",
+      "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+      "answer": {
+        "status": "observe",
+        "target_id": null,
+        "visibility": "not_visible",
+        "reason": "VLM visual choice: not_visible"
+      },
+      "visual_choice": {
+        "status": "not_visible",
+        "color": null,
+        "id": null
+      },
+      "valid": true,
+      "correct": false
+    },
+    {
+      "id": "test-230005-0-0",
+      "scene_seed": 230005,
+      "scenario": "none",
+      "task_type": "color",
+      "expected": {
+        "status": "visible",
+        "color": "red",
+        "id": 2
+      },
+      "instruction": "走到红色球旁边",
+      "raw": "{\"status\":\"visible\",\"color\":\"red\",\"id\":2}",
+      "latency_s": 1.2655217999999877,
+      "model": "Qwen/Qwen3-VL-2B-Instruct",
+      "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+      "answer": {
+        "status": "ok",
+        "target_id": 2,
+        "visibility": "visible",
+        "reason": "VLM visual choice: red"
+      },
+      "visual_choice": {
+        "status": "visible",
+        "color": "red",
+        "id": 2
+      },
+      "valid": true,
+      "correct": true
+    },
+    {
+      "id": "test-230005-0-1",
+      "scene_seed": 230005,
+      "scenario": "none",
+      "task_type": "color",
+      "expected": {
+        "status": "visible",
+        "color": "blue",
+        "id": 1
+      },
+      "instruction": "走到蓝色球旁边",
+      "raw": "{\"status\":\"visible\",\"color\":\"blue\",\"id\":1}",
+      "latency_s": 1.278938500006916,
+      "model": "Qwen/Qwen3-VL-2B-Instruct",
+      "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+      "answer": {
+        "status": "ok",
+        "target_id": 1,
+        "visibility": "visible",
+        "reason": "VLM visual choice: blue"
+      },
+      "visual_choice": {
+        "status": "visible",
+        "color": "blue",
+        "id": 1
+      },
+      "valid": true,
+      "correct": true
+    },
+    {
+      "id": "test-230005-0-2",
+      "scene_seed": 230005,
+      "scenario": "none",
+      "task_type": "color",
+      "expected": {
+        "status": "visible",
+        "color": "green",
+        "id": 3
+      },
+      "instruction": "走到绿色球旁边",
+      "raw": "{\"status\":\"visible\",\"color\":\"green\",\"id\":3}",
+      "latency_s": 1.2474924000125611,
+      "model": "Qwen/Qwen3-VL-2B-Instruct",
+      "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+      "answer": {
+        "status": "ok",
+        "target_id": 3,
+        "visibility": "visible",
+        "reason": "VLM visual choice: green"
+      },
+      "visual_choice": {
+        "status": "visible",
+        "color": "green",
+        "id": 3
+      },
+      "valid": true,
+      "correct": true
+    },
+    {
+      "id": "test-230005-0-3",
+      "scene_seed": 230005,
+      "scenario": "none",
+      "task_type": "side",
+      "expected": {
+        "status": "visible",
+        "color": "blue",
+        "id": 1
+      },
+      "instruction": "走到画面左边的球旁边",
+      "raw": "{\"status\":\"visible\",\"color\":\"blue\",\"id\":1}",
+      "latency_s": 1.2885462999984156,
+      "model": "Qwen/Qwen3-VL-2B-Instruct",
+      "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+      "answer": {
+        "status": "ok",
+        "target_id": 1,
+        "visibility": "visible",
+        "reason": "VLM visual choice: blue"
+      },
+      "visual_choice": {
+        "status": "visible",
+        "color": "blue",
+        "id": 1
+      },
+      "valid": true,
+      "correct": true
+    },
+    {
+      "id": "test-230005-0-4",
+      "scene_seed": 230005,
+      "scenario": "none",
+      "task_type": "side",
+      "expected": {
+        "status": "visible",
+        "color": "green",
+        "id": 3
+      },
+      "instruction": "走到画面右边的球旁边",
+      "raw": "{\"status\":\"visible\",\"color\":\"green\",\"id\":3}",
+      "latency_s": 1.4932748999999603,
+      "model": "Qwen/Qwen3-VL-2B-Instruct",
+      "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+      "answer": {
+        "status": "ok",
+        "target_id": 3,
+        "visibility": "visible",
+        "reason": "VLM visual choice: green"
+      },
+      "visual_choice": {
+        "status": "visible",
+        "color": "green",
+        "id": 3
+      },
+      "valid": true,
+      "correct": true
+    },
+    {
+      "id": "test-230005-0-5",
+      "scene_seed": 230005,
+      "scenario": "none",
+      "task_type": "stop",
+      "expected": {
+        "status": "stop",
+        "color": null,
+        "id": null
+      },
+      "instruction": "停下来",
+      "raw": "{\"status\":\"stop\",\"color\":null,\"id\":null}",
+      "latency_s": 1.649777400001767,
+      "model": "Qwen/Qwen3-VL-2B-Instruct",
+      "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+      "answer": {
+        "status": "stop",
+        "target_id": null,
+        "visibility": "uncertain",
+        "reason": "VLM visual choice: stop"
+      },
+      "visual_choice": {
+        "status": "stop",
+        "color": null,
+        "id": null
+      },
+      "valid": true,
+      "correct": true
+    },
+    {
+      "id": "test-230005-0-6",
+      "scene_seed": 230005,
+      "scenario": "none",
+      "task_type": "unsupported",
+      "expected": {
+        "status": "unsupported",
+        "color": null,
+        "id": null
+      },
+      "instruction": "请画一幅画",
+      "raw": "{\"status\":\"not_visible\",\"color\":null,\"id\":null}",
+      "latency_s": 1.6019859000080032,
+      "model": "Qwen/Qwen3-VL-2B-Instruct",
+      "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+      "answer": {
+        "status": "observe",
+        "target_id": null,
+        "visibility": "not_visible",
+        "reason": "VLM visual choice: not_visible"
+      },
+      "visual_choice": {
+        "status": "not_visible",
+        "color": null,
+        "id": null
+      },
+      "valid": true,
+      "correct": false
+    },
+    {
+      "id": "test-230006-0-0",
+      "scene_seed": 230006,
+      "scenario": "none",
+      "task_type": "color",
+      "expected": {
+        "status": "visible",
+        "color": "red",
+        "id": 2
+      },
+      "instruction": "走到红色球旁边",
+      "raw": "{\"status\":\"visible\",\"color\":\"red\",\"id\":2}",
+      "latency_s": 1.597742300000391,
+      "model": "Qwen/Qwen3-VL-2B-Instruct",
+      "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+      "answer": {
+        "status": "ok",
+        "target_id": 2,
+        "visibility": "visible",
+        "reason": "VLM visual choice: red"
+      },
+      "visual_choice": {
+        "status": "visible",
+        "color": "red",
+        "id": 2
+      },
+      "valid": true,
+      "correct": true
+    },
+    {
+      "id": "test-230006-0-1",
+      "scene_seed": 230006,
+      "scenario": "none",
+      "task_type": "color",
+      "expected": {
+        "status": "visible",
+        "color": "blue",
+        "id": 1
+      },
+      "instruction": "走到蓝色球旁边",
+      "raw": "{\"status\":\"visible\",\"color\":\"blue\",\"id\":1}",
+      "latency_s": 1.3907555000041611,
+      "model": "Qwen/Qwen3-VL-2B-Instruct",
+      "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+      "answer": {
+        "status": "ok",
+        "target_id": 1,
+        "visibility": "visible",
+        "reason": "VLM visual choice: blue"
+      },
+      "visual_choice": {
+        "status": "visible",
+        "color": "blue",
+        "id": 1
+      },
+      "valid": true,
+      "correct": true
+    },
+    {
+      "id": "test-230006-0-2",
+      "scene_seed": 230006,
+      "scenario": "none",
+      "task_type": "color",
+      "expected": {
+        "status": "visible",
+        "color": "green",
+        "id": 3
+      },
+      "instruction": "走到绿色球旁边",
+      "raw": "{\"status\":\"visible\",\"color\":\"green\",\"id\":3}",
+      "latency_s": 1.39250189998711,
+      "model": "Qwen/Qwen3-VL-2B-Instruct",
+      "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+      "answer": {
+        "status": "ok",
+        "target_id": 3,
+        "visibility": "visible",
+        "reason": "VLM visual choice: green"
+      },
+      "visual_choice": {
+        "status": "visible",
+        "color": "green",
+        "id": 3
+      },
+      "valid": true,
+      "correct": true
+    },
+    {
+      "id": "test-230006-0-3",
+      "scene_seed": 230006,
+      "scenario": "none",
+      "task_type": "side",
+      "expected": {
+        "status": "visible",
+        "color": "blue",
+        "id": 1
+      },
+      "instruction": "走到画面左边的球旁边",
+      "raw": "{\"status\":\"visible\",\"color\":\"blue\",\"id\":1}",
+      "latency_s": 1.4008704000007128,
+      "model": "Qwen/Qwen3-VL-2B-Instruct",
+      "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+      "answer": {
+        "status": "ok",
+        "target_id": 1,
+        "visibility": "visible",
+        "reason": "VLM visual choice: blue"
+      },
+      "visual_choice": {
+        "status": "visible",
+        "color": "blue",
+        "id": 1
+      },
+      "valid": true,
+      "correct": true
+    },
+    {
+      "id": "test-230006-0-4",
+      "scene_seed": 230006,
+      "scenario": "none",
+      "task_type": "side",
+      "expected": {
+        "status": "visible",
+        "color": "red",
+        "id": 2
+      },
+      "instruction": "走到画面右边的球旁边",
+      "raw": "{\"status\":\"visible\",\"color\":\"red\",\"id\":2}",
+      "latency_s": 1.3995247999991989,
+      "model": "Qwen/Qwen3-VL-2B-Instruct",
+      "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+      "answer": {
+        "status": "ok",
+        "target_id": 2,
+        "visibility": "visible",
+        "reason": "VLM visual choice: red"
+      },
+      "visual_choice": {
+        "status": "visible",
+        "color": "red",
+        "id": 2
+      },
+      "valid": true,
+      "correct": true
+    },
+    {
+      "id": "test-230006-0-5",
+      "scene_seed": 230006,
+      "scenario": "none",
+      "task_type": "stop",
+      "expected": {
+        "status": "stop",
+        "color": null,
+        "id": null
+      },
+      "instruction": "停下来",
+      "raw": "{\"status\":\"stop\",\"color\":null,\"id\":null}",
+      "latency_s": 1.348379200004274,
+      "model": "Qwen/Qwen3-VL-2B-Instruct",
+      "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+      "answer": {
+        "status": "stop",
+        "target_id": null,
+        "visibility": "uncertain",
+        "reason": "VLM visual choice: stop"
+      },
+      "visual_choice": {
+        "status": "stop",
+        "color": null,
+        "id": null
+      },
+      "valid": true,
+      "correct": true
+    },
+    {
+      "id": "test-230006-0-6",
+      "scene_seed": 230006,
+      "scenario": "none",
+      "task_type": "unsupported",
+      "expected": {
+        "status": "unsupported",
+        "color": null,
+        "id": null
+      },
+      "instruction": "请画一幅画",
+      "raw": "{\"status\":\"not_visible\",\"color\":null,\"id\":null}",
+      "latency_s": 1.4057255999941844,
+      "model": "Qwen/Qwen3-VL-2B-Instruct",
+      "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+      "answer": {
+        "status": "observe",
+        "target_id": null,
+        "visibility": "not_visible",
+        "reason": "VLM visual choice: not_visible"
+      },
+      "visual_choice": {
+        "status": "not_visible",
+        "color": null,
+        "id": null
+      },
+      "valid": true,
+      "correct": false
+    },
+    {
+      "id": "test-230007-0-0",
+      "scene_seed": 230007,
+      "scenario": "partial",
+      "task_type": "color",
+      "expected": {
+        "status": "partial",
+        "color": null,
+        "id": null
+      },
+      "instruction": "走到红色球旁边",
+      "raw": "{\"status\":\"visible\",\"color\":\"red\",\"id\":3}",
+      "latency_s": 1.324051400006283,
+      "model": "Qwen/Qwen3-VL-2B-Instruct",
+      "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+      "answer": {
+        "status": "ok",
+        "target_id": 3,
+        "visibility": "visible",
+        "reason": "VLM visual choice: red"
+      },
+      "visual_choice": {
+        "status": "visible",
+        "color": "red",
+        "id": 3
+      },
+      "valid": true,
+      "correct": false
+    },
+    {
+      "id": "test-230007-0-1",
+      "scene_seed": 230007,
+      "scenario": "partial",
+      "task_type": "color",
+      "expected": {
+        "status": "visible",
+        "color": "blue",
+        "id": 1
+      },
+      "instruction": "走到蓝色球旁边",
+      "raw": "{\"status\":\"visible\",\"color\":\"blue\",\"id\":1}",
+      "latency_s": 1.2558879999996861,
+      "model": "Qwen/Qwen3-VL-2B-Instruct",
+      "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+      "answer": {
+        "status": "ok",
+        "target_id": 1,
+        "visibility": "visible",
+        "reason": "VLM visual choice: blue"
+      },
+      "visual_choice": {
+        "status": "visible",
+        "color": "blue",
+        "id": 1
+      },
+      "valid": true,
+      "correct": true
+    },
+    {
+      "id": "test-230007-0-2",
+      "scene_seed": 230007,
+      "scenario": "partial",
+      "task_type": "color",
+      "expected": {
+        "status": "visible",
+        "color": "green",
+        "id": 2
+      },
+      "instruction": "走到绿色球旁边",
+      "raw": "{\"status\":\"visible\",\"color\":\"green\",\"id\":2}",
+      "latency_s": 1.2707817000045907,
+      "model": "Qwen/Qwen3-VL-2B-Instruct",
+      "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+      "answer": {
+        "status": "ok",
+        "target_id": 2,
+        "visibility": "visible",
+        "reason": "VLM visual choice: green"
+      },
+      "visual_choice": {
+        "status": "visible",
+        "color": "green",
+        "id": 2
+      },
+      "valid": true,
+      "correct": true
+    },
+    {
+      "id": "test-230007-0-3",
+      "scene_seed": 230007,
+      "scenario": "partial",
+      "task_type": "side",
+      "expected": {
+        "status": "partial",
+        "color": null,
+        "id": null
+      },
+      "instruction": "走到画面左边的球旁边",
+      "raw": "{\"status\":\"visible\",\"color\":\"red\",\"id\":3}",
+      "latency_s": 1.2816890999965835,
+      "model": "Qwen/Qwen3-VL-2B-Instruct",
+      "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+      "answer": {
+        "status": "ok",
+        "target_id": 3,
+        "visibility": "visible",
+        "reason": "VLM visual choice: red"
+      },
+      "visual_choice": {
+        "status": "visible",
+        "color": "red",
+        "id": 3
+      },
+      "valid": true,
+      "correct": false
+    },
+    {
+      "id": "test-230007-0-4",
+      "scene_seed": 230007,
+      "scenario": "partial",
+      "task_type": "side",
+      "expected": {
+        "status": "visible",
+        "color": "green",
+        "id": 2
+      },
+      "instruction": "走到画面右边的球旁边",
+      "raw": "{\"status\":\"visible\",\"color\":\"green\",\"id\":2}",
+      "latency_s": 1.299488000004203,
+      "model": "Qwen/Qwen3-VL-2B-Instruct",
+      "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+      "answer": {
+        "status": "ok",
+        "target_id": 2,
+        "visibility": "visible",
+        "reason": "VLM visual choice: green"
+      },
+      "visual_choice": {
+        "status": "visible",
+        "color": "green",
+        "id": 2
+      },
+      "valid": true,
+      "correct": true
+    },
+    {
+      "id": "test-230007-0-5",
+      "scene_seed": 230007,
+      "scenario": "partial",
+      "task_type": "stop",
+      "expected": {
+        "status": "stop",
+        "color": null,
+        "id": null
+      },
+      "instruction": "停下来",
+      "raw": "{\"status\":\"stop\",\"color\":null,\"id\":null}",
+      "latency_s": 1.5645816999895032,
+      "model": "Qwen/Qwen3-VL-2B-Instruct",
+      "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+      "answer": {
+        "status": "stop",
+        "target_id": null,
+        "visibility": "uncertain",
+        "reason": "VLM visual choice: stop"
+      },
+      "visual_choice": {
+        "status": "stop",
+        "color": null,
+        "id": null
+      },
+      "valid": true,
+      "correct": true
+    },
+    {
+      "id": "test-230007-0-6",
+      "scene_seed": 230007,
+      "scenario": "partial",
+      "task_type": "unsupported",
+      "expected": {
+        "status": "unsupported",
+        "color": null,
+        "id": null
+      },
+      "instruction": "请画一幅画",
+      "raw": "{\"status\":\"not_visible\",\"color\":null,\"id\":null}",
+      "latency_s": 1.7553450999985216,
+      "model": "Qwen/Qwen3-VL-2B-Instruct",
+      "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+      "answer": {
+        "status": "observe",
+        "target_id": null,
+        "visibility": "not_visible",
+        "reason": "VLM visual choice: not_visible"
+      },
+      "visual_choice": {
+        "status": "not_visible",
+        "color": null,
+        "id": null
+      },
+      "valid": true,
+      "correct": false
+    }
+  ]
+}

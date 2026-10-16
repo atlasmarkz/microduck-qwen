@@ -1,5 +1,7 @@
 # MicroDuck 第一视角视觉导航
 
+Windows / NVIDIA 的 Qwen3-VL QLoRA、学习型奖励与多场景实验见 [WINDOWS_VISION.md](WINDOWS_VISION.md)。本文下方的 MLX 命令与 smoke 记录保留为 Mac 路线。
+
 已完成的 6 场景 smoke tests 与保留失败记录见 [VISION_RESULTS.md](VISION_RESULTS.md)。其中 3 个随机布局完成了正确左球接近，3 个遮挡/缺失案例由安全层拒绝动作；这不等于 VLM 自身正确拒答。
 
 这是可运行的视觉分支，不替换已有 Qwen3-0.6B 文本 SFT。默认仍使用 Qwen3-VL-2B-Instruct 4-bit MLX 冻结基线；现可通过 `--adapter` 显式加载仿真采集数据训练的图文 LoRA。采集、训练、验证与限制见 [SIM_TRAINING.md](SIM_TRAINING.md)，历史内存探针见 [TRAINING_PLAN.md](TRAINING_PLAN.md)。
@@ -14,10 +16,10 @@
 
 ## 直接运行
 
-两个终端均先进入项目：
+两个终端均先从仓库父目录进入项目；已在仓库根目录时跳过 cd：
 
 ```bash
-cd /Users/mark/Code/microduck-qwen
+cd microduck-qwen
 ```
 
 终端一，启动随机布局和可视化：

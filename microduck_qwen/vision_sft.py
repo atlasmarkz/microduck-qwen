@@ -6,6 +6,7 @@ from datetime import datetime
 import importlib.metadata
 import json
 import math
+import os
 from pathlib import Path
 import random
 import time
@@ -183,6 +184,10 @@ def train(args):
 
 
 def evaluate(args):
+    model_id, revision = MODEL, REVISION
+    if os.name == "nt":
+        from .vision_torch import MODEL as model_id, REVISION as revision
+
     _, splits = load_splits(args.data)
     rows = splits[args.split]
     if args.limit:
@@ -209,7 +214,7 @@ def evaluate(args):
             result.update(correct=False, error=f"{type(error).__name__}: {error}")
         results.append(result)
         report = {"split": args.split, "dataset_manifest_sha256": digest(args.data / "manifest.json"),
-                  "model": MODEL, "revision": REVISION, "adapter": planner.adapter,
+                  "model": model_id, "revision": revision, "adapter": planner.adapter,
                   "sampling_seed": args.seed, "results": results, "correct": sum(r["correct"] for r in results),
                   "total": len(results), "note": "Raw visual decisions before controller safety guards; development pilot, not publication benchmark"}
         output.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n")
@@ -241,6 +246,8 @@ def main():
     args = parser.parse_args()
     args.data = args.data.resolve()
     if args.command == "train":
+        if os.name == "nt":
+            parser.error("Windows visual training uses microduck_qwen.vision_torch train; see WINDOWS_VISION.md")
         if not (1 <= args.steps <= 1000 and 1 <= args.rank <= 16 and 1 <= args.layers <= 28
                 and 1 <= args.accumulation <= 16 and 2 <= args.max_seq_length <= 2048
                 and math.isfinite(args.learning_rate) and args.learning_rate > 0):

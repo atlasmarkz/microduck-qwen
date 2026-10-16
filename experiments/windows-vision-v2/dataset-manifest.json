@@ -1,0 +1,1412 @@
+{
+  "format": "simulation_visual_v1",
+  "status": "completed",
+  "episodes": [
+    {
+      "split": "train",
+      "seed": 210000,
+      "scenario": "none",
+      "frames": [
+        {
+          "frame": 0,
+          "sim_time": 3.9799999999999374,
+          "examples": 7
+        },
+        {
+          "frame": 1,
+          "sim_time": 6.359999999999887,
+          "examples": 7
+        },
+        {
+          "frame": 2,
+          "sim_time": 8.419999999999916,
+          "examples": 7
+        },
+        {
+          "frame": 3,
+          "sim_time": 10.560000000000251,
+          "examples": 7
+        },
+        {
+          "frame": 4,
+          "sim_time": 12.160000000000501,
+          "examples": 7
+        }
+      ],
+      "status": "completed",
+      "startup_failures": [],
+      "expert": {
+        "target": "ball_0",
+        "plan": {
+          "status": "ok",
+          "goals": [
+            {
+              "target": "point",
+              "x": 1.0473140744879217,
+              "y": 0.3805547075981499,
+              "speed": "slow",
+              "stop_distance_m": 0.3
+            }
+          ]
+        },
+        "execution": {
+          "success": true,
+          "goals": [
+            {
+              "goal": {
+                "target": "point",
+                "x": 1.0473140744879217,
+                "y": 0.3805547075981499,
+                "speed": "slow",
+                "stop_distance_m": 0.3
+              },
+              "distance_m": 0.3225574561916044,
+              "elapsed_s": 7.906999999991967,
+              "path_length_m": 1.1511509459262192,
+              "min_clearance_m": 0.1125574561916044,
+              "position": [
+                0.7259258407844332,
+                0.35311539671484454
+              ]
+            }
+          ],
+          "observation": "oracle expert demonstration"
+        },
+        "distance_m": 0.3225574561916044,
+        "contacts": {
+          "steps_with_scene_contact": 0,
+          "minimum_contact_distance_m": null
+        },
+        "verified_success": true
+      }
+    },
+    {
+      "split": "train",
+      "seed": 210001,
+      "scenario": "partial",
+      "frames": [
+        {
+          "frame": 0,
+          "sim_time": 3.939999999999938,
+          "examples": 7
+        }
+      ],
+      "status": "completed",
+      "startup_failures": []
+    },
+    {
+      "split": "train",
+      "seed": 210002,
+      "scenario": "full",
+      "frames": [
+        {
+          "frame": 0,
+          "sim_time": 3.999999999999937,
+          "examples": 7
+        }
+      ],
+      "status": "completed",
+      "startup_failures": []
+    },
+    {
+      "split": "train",
+      "seed": 210003,
+      "scenario": "absent",
+      "frames": [
+        {
+          "frame": 0,
+          "sim_time": 3.899999999999939,
+          "examples": 7
+        }
+      ],
+      "status": "completed",
+      "startup_failures": []
+    },
+    {
+      "split": "train",
+      "seed": 210004,
+      "scenario": "none",
+      "frames": [
+        {
+          "frame": 0,
+          "sim_time": 3.959999999999938,
+          "examples": 7
+        },
+        {
+          "frame": 1,
+          "sim_time": 6.059999999999893,
+          "examples": 7
+        },
+        {
+          "frame": 2,
+          "sim_time": 8.139999999999873,
+          "examples": 7
+        },
+        {
+          "frame": 3,
+          "sim_time": 10.220000000000198,
+          "examples": 7
+        },
+        {
+          "frame": 4,
+          "sim_time": 10.760000000000282,
+          "examples": 7
+        }
+      ],
+      "status": "completed",
+      "startup_failures": [],
+      "expert": {
+        "target": "ball_0",
+        "plan": {
+          "status": "ok",
+          "goals": [
+            {
+              "target": "point",
+              "x": 0.97084489787755,
+              "y": 0.34322918629369403,
+              "speed": "slow",
+              "stop_distance_m": 0.3
+            }
+          ]
+        },
+        "execution": {
+          "success": true,
+          "goals": [
+            {
+              "goal": {
+                "target": "point",
+                "x": 0.97084489787755,
+                "y": 0.34322918629369403,
+                "speed": "slow",
+                "stop_distance_m": 0.3
+              },
+              "distance_m": 0.31004597684813134,
+              "elapsed_s": 6.688000000009197,
+              "path_length_m": 1.0043507318307627,
+              "min_clearance_m": 0.10004597684813132,
+              "position": [
+                0.6747550622980926,
+                0.2512546407593896
+              ]
+            }
+          ],
+          "observation": "oracle expert demonstration"
+        },
+        "distance_m": 0.31004597684813134,
+        "contacts": {
+          "steps_with_scene_contact": 0,
+          "minimum_contact_distance_m": null
+        },
+        "verified_success": true
+      }
+    },
+    {
+      "split": "train",
+      "seed": 210005,
+      "scenario": "none",
+      "frames": [
+        {
+          "frame": 0,
+          "sim_time": 3.8799999999999395,
+          "examples": 7
+        },
+        {
+          "frame": 1,
+          "sim_time": 6.019999999999894,
+          "examples": 7
+        },
+        {
+          "frame": 2,
+          "sim_time": 8.099999999999866,
+          "examples": 7
+        },
+        {
+          "frame": 3,
+          "sim_time": 10.400000000000226,
+          "examples": 7
+        },
+        {
+          "frame": 4,
+          "sim_time": 12.460000000000548,
+          "examples": 7
+        }
+      ],
+      "status": "completed",
+      "startup_failures": [],
+      "expert": {
+        "target": "ball_0",
+        "plan": {
+          "status": "ok",
+          "goals": [
+            {
+              "target": "point",
+              "x": 1.1009671120377047,
+              "y": 0.41238126041543793,
+              "speed": "slow",
+              "stop_distance_m": 0.3
+            }
+          ]
+        },
+        "execution": {
+          "success": true,
+          "goals": [
+            {
+              "goal": {
+                "target": "point",
+                "x": 1.1009671120377047,
+                "y": 0.41238126041543793,
+                "speed": "slow",
+                "stop_distance_m": 0.3
+              },
+              "distance_m": 0.3119599635388629,
+              "elapsed_s": 8.48399999999674,
+              "path_length_m": 1.2613387849611808,
+              "min_clearance_m": 0.10195996353886289,
+              "position": [
+                0.8311075175660548,
+                0.25587305576544095
+              ]
+            }
+          ],
+          "observation": "oracle expert demonstration"
+        },
+        "distance_m": 0.3119599635388629,
+        "contacts": {
+          "steps_with_scene_contact": 0,
+          "minimum_contact_distance_m": null
+        },
+        "verified_success": true
+      }
+    },
+    {
+      "split": "train",
+      "seed": 210006,
+      "scenario": "none",
+      "frames": [
+        {
+          "frame": 0,
+          "sim_time": 3.959999999999938,
+          "examples": 7
+        },
+        {
+          "frame": 1,
+          "sim_time": 6.279999999999888,
+          "examples": 7
+        },
+        {
+          "frame": 2,
+          "sim_time": 8.359999999999907,
+          "examples": 7
+        },
+        {
+          "frame": 3,
+          "sim_time": 10.480000000000238,
+          "examples": 7
+        },
+        {
+          "frame": 4,
+          "sim_time": 11.00000000000032,
+          "examples": 7
+        }
+      ],
+      "status": "completed",
+      "startup_failures": [],
+      "expert": {
+        "target": "ball_0",
+        "plan": {
+          "status": "ok",
+          "goals": [
+            {
+              "target": "point",
+              "x": 0.9931680236652893,
+              "y": 0.30751008122313567,
+              "speed": "slow",
+              "stop_distance_m": 0.3
+            }
+          ]
+        },
+        "execution": {
+          "success": true,
+          "goals": [
+            {
+              "goal": {
+                "target": "point",
+                "x": 0.9931680236652893,
+                "y": 0.30751008122313567,
+                "speed": "slow",
+                "stop_distance_m": 0.3
+              },
+              "distance_m": 0.3209978500741304,
+              "elapsed_s": 6.875,
+              "path_length_m": 1.0298810390168192,
+              "min_clearance_m": 0.11099785007413038,
+              "position": [
+                0.6778991796880045,
+                0.2471347901725715
+              ]
+            }
+          ],
+          "observation": "oracle expert demonstration"
+        },
+        "distance_m": 0.3209978500741304,
+        "contacts": {
+          "steps_with_scene_contact": 0,
+          "minimum_contact_distance_m": null
+        },
+        "verified_success": true
+      }
+    },
+    {
+      "split": "train",
+      "seed": 210007,
+      "scenario": "partial",
+      "frames": [
+        {
+          "frame": 0,
+          "sim_time": 3.9799999999999374,
+          "examples": 7
+        }
+      ],
+      "status": "completed",
+      "startup_failures": []
+    },
+    {
+      "split": "train",
+      "seed": 210008,
+      "scenario": "full",
+      "frames": [
+        {
+          "frame": 0,
+          "sim_time": 3.8799999999999395,
+          "examples": 7
+        }
+      ],
+      "status": "completed",
+      "startup_failures": []
+    },
+    {
+      "split": "train",
+      "seed": 210009,
+      "scenario": "absent",
+      "frames": [
+        {
+          "frame": 0,
+          "sim_time": 3.85999999999994,
+          "examples": 7
+        }
+      ],
+      "status": "completed",
+      "startup_failures": []
+    },
+    {
+      "split": "train",
+      "seed": 210010,
+      "scenario": "none",
+      "frames": [
+        {
+          "frame": 0,
+          "sim_time": 3.85999999999994,
+          "examples": 7
+        },
+        {
+          "frame": 1,
+          "sim_time": 6.139999999999891,
+          "examples": 7
+        },
+        {
+          "frame": 2,
+          "sim_time": 8.239999999999888,
+          "examples": 7
+        },
+        {
+          "frame": 3,
+          "sim_time": 10.340000000000217,
+          "examples": 7
+        },
+        {
+          "frame": 4,
+          "sim_time": 12.460000000000548,
+          "examples": 7
+        }
+      ],
+      "status": "completed",
+      "startup_failures": [],
+      "expert": {
+        "target": "ball_0",
+        "plan": {
+          "status": "ok",
+          "goals": [
+            {
+              "target": "point",
+              "x": 1.1232485405719772,
+              "y": 0.4142945159041142,
+              "speed": "slow",
+              "stop_distance_m": 0.3
+            }
+          ]
+        },
+        "execution": {
+          "success": true,
+          "goals": [
+            {
+              "goal": {
+                "target": "point",
+                "x": 1.1232485405719772,
+                "y": 0.4142945159041142,
+                "speed": "slow",
+                "stop_distance_m": 0.3
+              },
+              "distance_m": 0.31539149232133323,
+              "elapsed_s": 8.422000000005937,
+              "path_length_m": 1.2398465613897198,
+              "min_clearance_m": 0.10539149232133321,
+              "position": [
+                0.8312832243123709,
+                0.2950131362587325
+              ]
+            }
+          ],
+          "observation": "oracle expert demonstration"
+        },
+        "distance_m": 0.31539149232133323,
+        "contacts": {
+          "steps_with_scene_contact": 0,
+          "minimum_contact_distance_m": null
+        },
+        "verified_success": true
+      }
+    },
+    {
+      "split": "train",
+      "seed": 210011,
+      "scenario": "none",
+      "frames": [
+        {
+          "frame": 0,
+          "sim_time": 3.9799999999999374,
+          "examples": 7
+        },
+        {
+          "frame": 1,
+          "sim_time": 6.119999999999892,
+          "examples": 7
+        },
+        {
+          "frame": 2,
+          "sim_time": 8.239999999999888,
+          "examples": 7
+        },
+        {
+          "frame": 3,
+          "sim_time": 10.340000000000217,
+          "examples": 7
+        }
+      ],
+      "status": "completed",
+      "startup_failures": [],
+      "expert": {
+        "target": "ball_0",
+        "plan": {
+          "status": "ok",
+          "goals": [
+            {
+              "target": "point",
+              "x": 0.9054019083017845,
+              "y": 0.339097162089204,
+              "speed": "slow",
+              "stop_distance_m": 0.3
+            }
+          ]
+        },
+        "execution": {
+          "success": true,
+          "goals": [
+            {
+              "goal": {
+                "target": "point",
+                "x": 0.9054019083017845,
+                "y": 0.339097162089204,
+                "speed": "slow",
+                "stop_distance_m": 0.3
+              },
+              "distance_m": 0.3210491916040121,
+              "elapsed_s": 6.327999999994063,
+              "path_length_m": 0.9208935269460043,
+              "min_clearance_m": 0.11104919160401205,
+              "position": [
+                0.6121878194391418,
+                0.20833752947255907
+              ]
+            }
+          ],
+          "observation": "oracle expert demonstration"
+        },
+        "distance_m": 0.31916297766645346,
+        "contacts": {
+          "steps_with_scene_contact": 0,
+          "minimum_contact_distance_m": null
+        },
+        "verified_success": true
+      }
+    },
+    {
+      "split": "train",
+      "seed": 210012,
+      "scenario": "none",
+      "frames": [
+        {
+          "frame": 0,
+          "sim_time": 3.85999999999994,
+          "examples": 7
+        },
+        {
+          "frame": 1,
+          "sim_time": 6.099999999999892,
+          "examples": 7
+        },
+        {
+          "frame": 2,
+          "sim_time": 8.11999999999987,
+          "examples": 7
+        },
+        {
+          "frame": 3,
+          "sim_time": 10.140000000000185,
+          "examples": 7
+        },
+        {
+          "frame": 4,
+          "sim_time": 10.900000000000304,
+          "examples": 7
+        }
+      ],
+      "status": "completed",
+      "startup_failures": [],
+      "expert": {
+        "target": "ball_0",
+        "plan": {
+          "status": "ok",
+          "goals": [
+            {
+              "target": "point",
+              "x": 0.9626814732653902,
+              "y": 0.346676957102575,
+              "speed": "slow",
+              "stop_distance_m": 0.3
+            }
+          ]
+        },
+        "execution": {
+          "success": true,
+          "goals": [
+            {
+              "goal": {
+                "target": "point",
+                "x": 0.9626814732653902,
+                "y": 0.346676957102575,
+                "speed": "slow",
+                "stop_distance_m": 0.3
+              },
+              "distance_m": 0.3221153699079947,
+              "elapsed_s": 6.9539999999979045,
+              "path_length_m": 1.0312458548591603,
+              "min_clearance_m": 0.1121153699079947,
+              "position": [
+                0.6624303010499214,
+                0.23002557428093356
+              ]
+            }
+          ],
+          "observation": "oracle expert demonstration"
+        },
+        "distance_m": 0.3221153699079947,
+        "contacts": {
+          "steps_with_scene_contact": 0,
+          "minimum_contact_distance_m": null
+        },
+        "verified_success": true
+      }
+    },
+    {
+      "split": "train",
+      "seed": 210013,
+      "scenario": "partial",
+      "frames": [
+        {
+          "frame": 0,
+          "sim_time": 3.8799999999999395,
+          "examples": 7
+        }
+      ],
+      "status": "completed",
+      "startup_failures": []
+    },
+    {
+      "split": "train",
+      "seed": 210014,
+      "scenario": "full",
+      "frames": [
+        {
+          "frame": 0,
+          "sim_time": 3.85999999999994,
+          "examples": 7
+        }
+      ],
+      "status": "completed",
+      "startup_failures": []
+    },
+    {
+      "split": "train",
+      "seed": 210015,
+      "scenario": "absent",
+      "frames": [
+        {
+          "frame": 0,
+          "sim_time": 3.939999999999938,
+          "examples": 7
+        }
+      ],
+      "status": "completed",
+      "startup_failures": []
+    },
+    {
+      "split": "train",
+      "seed": 210016,
+      "scenario": "none",
+      "frames": [
+        {
+          "frame": 0,
+          "sim_time": 3.85999999999994,
+          "examples": 7
+        },
+        {
+          "frame": 1,
+          "sim_time": 6.119999999999892,
+          "examples": 7
+        },
+        {
+          "frame": 2,
+          "sim_time": 8.139999999999873,
+          "examples": 7
+        },
+        {
+          "frame": 3,
+          "sim_time": 10.420000000000229,
+          "examples": 7
+        },
+        {
+          "frame": 4,
+          "sim_time": 12.680000000000582,
+          "examples": 7
+        }
+      ],
+      "status": "completed",
+      "startup_failures": [],
+      "expert": {
+        "target": "ball_0",
+        "plan": {
+          "status": "ok",
+          "goals": [
+            {
+              "target": "point",
+              "x": 1.1802772383392877,
+              "y": 0.3282526666234915,
+              "speed": "slow",
+              "stop_distance_m": 0.3
+            }
+          ]
+        },
+        "execution": {
+          "success": true,
+          "goals": [
+            {
+              "goal": {
+                "target": "point",
+                "x": 1.1802772383392877,
+                "y": 0.3282526666234915,
+                "speed": "slow",
+                "stop_distance_m": 0.3
+              },
+              "distance_m": 0.32262108773436704,
+              "elapsed_s": 8.781000000002678,
+              "path_length_m": 1.30175859349483,
+              "min_clearance_m": 0.11262108773436702,
+              "position": [
+                0.8665696515618678,
+                0.2529405411111031
+              ]
+            }
+          ],
+          "observation": "oracle expert demonstration"
+        },
+        "distance_m": 0.32262108773436704,
+        "contacts": {
+          "steps_with_scene_contact": 0,
+          "minimum_contact_distance_m": null
+        },
+        "verified_success": true
+      }
+    },
+    {
+      "split": "train",
+      "seed": 210017,
+      "scenario": "none",
+      "frames": [
+        {
+          "frame": 0,
+          "sim_time": 3.8799999999999395,
+          "examples": 7
+        },
+        {
+          "frame": 1,
+          "sim_time": 5.919999999999896,
+          "examples": 7
+        },
+        {
+          "frame": 2,
+          "sim_time": 8.159999999999876,
+          "examples": 7
+        },
+        {
+          "frame": 3,
+          "sim_time": 10.180000000000192,
+          "examples": 7
+        },
+        {
+          "frame": 4,
+          "sim_time": 11.740000000000435,
+          "examples": 7
+        }
+      ],
+      "status": "completed",
+      "startup_failures": [],
+      "expert": {
+        "target": "ball_0",
+        "plan": {
+          "status": "ok",
+          "goals": [
+            {
+              "target": "point",
+              "x": 1.056663311250844,
+              "y": 0.4071818592242408,
+              "speed": "slow",
+              "stop_distance_m": 0.3
+            }
+          ]
+        },
+        "execution": {
+          "success": true,
+          "goals": [
+            {
+              "goal": {
+                "target": "point",
+                "x": 1.056663311250844,
+                "y": 0.4071818592242408,
+                "speed": "slow",
+                "stop_distance_m": 0.3
+              },
+              "distance_m": 0.32455440765327165,
+              "elapsed_s": 7.875,
+              "path_length_m": 1.158342645235144,
+              "min_clearance_m": 0.10987803517581884,
+              "position": [
+                0.7569850332701288,
+                0.2825684842050268
+              ]
+            }
+          ],
+          "observation": "oracle expert demonstration"
+        },
+        "distance_m": 0.32455440765327165,
+        "contacts": {
+          "steps_with_scene_contact": 0,
+          "minimum_contact_distance_m": null
+        },
+        "verified_success": true
+      }
+    },
+    {
+      "split": "train",
+      "seed": 210018,
+      "scenario": "none",
+      "frames": [
+        {
+          "frame": 0,
+          "sim_time": 3.899999999999939,
+          "examples": 7
+        },
+        {
+          "frame": 1,
+          "sim_time": 6.19999999999989,
+          "examples": 7
+        },
+        {
+          "frame": 2,
+          "sim_time": 8.179999999999879,
+          "examples": 7
+        },
+        {
+          "frame": 3,
+          "sim_time": 10.180000000000192,
+          "examples": 7
+        }
+      ],
+      "status": "completed",
+      "startup_failures": [],
+      "expert": {
+        "target": "ball_0",
+        "plan": {
+          "status": "ok",
+          "goals": [
+            {
+              "target": "point",
+              "x": 0.9099831323595778,
+              "y": 0.3086494338700138,
+              "speed": "slow",
+              "stop_distance_m": 0.3
+            }
+          ]
+        },
+        "execution": {
+          "success": true,
+          "goals": [
+            {
+              "goal": {
+                "target": "point",
+                "x": 0.9099831323595778,
+                "y": 0.3086494338700138,
+                "speed": "slow",
+                "stop_distance_m": 0.3
+              },
+              "distance_m": 0.3076876082735907,
+              "elapsed_s": 6.235000000000582,
+              "path_length_m": 0.9353264402110353,
+              "min_clearance_m": 0.09768760827359069,
+              "position": [
+                0.6234507010111258,
+                0.1965297207475338
+              ]
+            }
+          ],
+          "observation": "oracle expert demonstration"
+        },
+        "distance_m": 0.3076876082735907,
+        "contacts": {
+          "steps_with_scene_contact": 0,
+          "minimum_contact_distance_m": null
+        },
+        "verified_success": true
+      }
+    },
+    {
+      "split": "train",
+      "seed": 210019,
+      "scenario": "partial",
+      "frames": [
+        {
+          "frame": 0,
+          "sim_time": 4.059999999999936,
+          "examples": 7
+        }
+      ],
+      "status": "completed",
+      "startup_failures": []
+    },
+    {
+      "split": "train",
+      "seed": 210020,
+      "scenario": "full",
+      "frames": [
+        {
+          "frame": 0,
+          "sim_time": 3.9199999999999386,
+          "examples": 7
+        }
+      ],
+      "status": "completed",
+      "startup_failures": []
+    },
+    {
+      "split": "train",
+      "seed": 210021,
+      "scenario": "absent",
+      "frames": [
+        {
+          "frame": 0,
+          "sim_time": 3.85999999999994,
+          "examples": 7
+        }
+      ],
+      "status": "completed",
+      "startup_failures": []
+    },
+    {
+      "split": "train",
+      "seed": 210022,
+      "scenario": "none",
+      "frames": [
+        {
+          "frame": 0,
+          "sim_time": 3.8399999999999403,
+          "examples": 7
+        },
+        {
+          "frame": 1,
+          "sim_time": 6.099999999999892,
+          "examples": 7
+        },
+        {
+          "frame": 2,
+          "sim_time": 8.099999999999866,
+          "examples": 7
+        },
+        {
+          "frame": 3,
+          "sim_time": 10.380000000000223,
+          "examples": 7
+        },
+        {
+          "frame": 4,
+          "sim_time": 11.90000000000046,
+          "examples": 5
+        }
+      ],
+      "status": "completed",
+      "startup_failures": [],
+      "expert": {
+        "target": "ball_0",
+        "plan": {
+          "status": "ok",
+          "goals": [
+            {
+              "target": "point",
+              "x": 1.052841866614723,
+              "y": 0.4085183883635803,
+              "speed": "slow",
+              "stop_distance_m": 0.3
+            }
+          ]
+        },
+        "execution": {
+          "success": true,
+          "goals": [
+            {
+              "goal": {
+                "target": "point",
+                "x": 1.052841866614723,
+                "y": 0.4085183883635803,
+                "speed": "slow",
+                "stop_distance_m": 0.3
+              },
+              "distance_m": 0.3206515210549106,
+              "elapsed_s": 7.875,
+              "path_length_m": 1.1713352385685252,
+              "min_clearance_m": 0.1106515210549106,
+              "position": [
+                0.7831539019644196,
+                0.23506580211130076
+              ]
+            }
+          ],
+          "observation": "oracle expert demonstration"
+        },
+        "distance_m": 0.3206515210549106,
+        "contacts": {
+          "steps_with_scene_contact": 0,
+          "minimum_contact_distance_m": null
+        },
+        "verified_success": true
+      }
+    },
+    {
+      "split": "train",
+      "seed": 210023,
+      "scenario": "none",
+      "frames": [
+        {
+          "frame": 0,
+          "sim_time": 4.059999999999936,
+          "examples": 7
+        },
+        {
+          "frame": 1,
+          "sim_time": 6.139999999999891,
+          "examples": 7
+        },
+        {
+          "frame": 2,
+          "sim_time": 8.199999999999882,
+          "examples": 7
+        },
+        {
+          "frame": 3,
+          "sim_time": 10.220000000000198,
+          "examples": 5
+        },
+        {
+          "frame": 4,
+          "sim_time": 12.240000000000514,
+          "examples": 7
+        }
+      ],
+      "status": "completed",
+      "startup_failures": [],
+      "expert": {
+        "target": "ball_0",
+        "plan": {
+          "status": "ok",
+          "goals": [
+            {
+              "target": "point",
+              "x": 1.0977480471569123,
+              "y": 0.321475782377117,
+              "speed": "slow",
+              "stop_distance_m": 0.3
+            }
+          ]
+        },
+        "execution": {
+          "success": true,
+          "goals": [
+            {
+              "goal": {
+                "target": "point",
+                "x": 1.0977480471569123,
+                "y": 0.321475782377117,
+                "speed": "slow",
+                "stop_distance_m": 0.3
+              },
+              "distance_m": 0.3236240189961171,
+              "elapsed_s": 8.203000000008615,
+              "path_length_m": 1.2086780118061051,
+              "min_clearance_m": 0.11362401899611707,
+              "position": [
+                0.7768987541728958,
+                0.27918823263897474
+              ]
+            }
+          ],
+          "observation": "oracle expert demonstration"
+        },
+        "distance_m": 0.3236240189961171,
+        "contacts": {
+          "steps_with_scene_contact": 0,
+          "minimum_contact_distance_m": null
+        },
+        "verified_success": true
+      }
+    },
+    {
+      "split": "valid",
+      "seed": 220000,
+      "scenario": "none",
+      "frames": [
+        {
+          "frame": 0,
+          "sim_time": 3.899999999999939,
+          "examples": 7
+        }
+      ],
+      "status": "completed",
+      "startup_failures": []
+    },
+    {
+      "split": "valid",
+      "seed": 220001,
+      "scenario": "partial",
+      "frames": [
+        {
+          "frame": 0,
+          "sim_time": 3.8199999999999408,
+          "examples": 7
+        }
+      ],
+      "status": "completed",
+      "startup_failures": []
+    },
+    {
+      "split": "valid",
+      "seed": 220002,
+      "scenario": "full",
+      "frames": [
+        {
+          "frame": 0,
+          "sim_time": 3.899999999999939,
+          "examples": 7
+        }
+      ],
+      "status": "completed",
+      "startup_failures": []
+    },
+    {
+      "split": "valid",
+      "seed": 220003,
+      "scenario": "absent",
+      "frames": [
+        {
+          "frame": 0,
+          "sim_time": 4.0199999999999365,
+          "examples": 7
+        }
+      ],
+      "status": "completed",
+      "startup_failures": []
+    },
+    {
+      "split": "valid",
+      "seed": 220004,
+      "scenario": "none",
+      "frames": [
+        {
+          "frame": 0,
+          "sim_time": 3.8799999999999395,
+          "examples": 7
+        }
+      ],
+      "status": "completed",
+      "startup_failures": []
+    },
+    {
+      "split": "valid",
+      "seed": 220005,
+      "scenario": "none",
+      "frames": [
+        {
+          "frame": 0,
+          "sim_time": 4.039999999999936,
+          "examples": 7
+        }
+      ],
+      "status": "completed",
+      "startup_failures": []
+    },
+    {
+      "split": "valid",
+      "seed": 220006,
+      "scenario": "none",
+      "frames": [
+        {
+          "frame": 0,
+          "sim_time": 3.85999999999994,
+          "examples": 7
+        }
+      ],
+      "status": "completed",
+      "startup_failures": []
+    },
+    {
+      "split": "valid",
+      "seed": 220007,
+      "scenario": "partial",
+      "frames": [
+        {
+          "frame": 0,
+          "sim_time": 3.8799999999999395,
+          "examples": 7
+        }
+      ],
+      "status": "completed",
+      "startup_failures": []
+    },
+    {
+      "split": "test",
+      "seed": 230000,
+      "scenario": "none",
+      "frames": [
+        {
+          "frame": 0,
+          "sim_time": 3.9199999999999386,
+          "examples": 7
+        }
+      ],
+      "status": "completed",
+      "startup_failures": []
+    },
+    {
+      "split": "test",
+      "seed": 230001,
+      "scenario": "partial",
+      "frames": [
+        {
+          "frame": 0,
+          "sim_time": 3.959999999999938,
+          "examples": 7
+        }
+      ],
+      "status": "completed",
+      "startup_failures": []
+    },
+    {
+      "split": "test",
+      "seed": 230002,
+      "scenario": "full",
+      "frames": [
+        {
+          "frame": 0,
+          "sim_time": 3.85999999999994,
+          "examples": 7
+        }
+      ],
+      "status": "completed",
+      "startup_failures": []
+    },
+    {
+      "split": "test",
+      "seed": 230003,
+      "scenario": "absent",
+      "frames": [
+        {
+          "frame": 0,
+          "sim_time": 3.8799999999999395,
+          "examples": 7
+        }
+      ],
+      "status": "completed",
+      "startup_failures": []
+    },
+    {
+      "split": "test",
+      "seed": 230004,
+      "scenario": "none",
+      "frames": [
+        {
+          "frame": 0,
+          "sim_time": 3.8799999999999395,
+          "examples": 7
+        }
+      ],
+      "status": "completed",
+      "startup_failures": []
+    },
+    {
+      "split": "test",
+      "seed": 230005,
+      "scenario": "none",
+      "frames": [
+        {
+          "frame": 0,
+          "sim_time": 3.8399999999999403,
+          "examples": 7
+        }
+      ],
+      "status": "completed",
+      "startup_failures": []
+    },
+    {
+      "split": "test",
+      "seed": 230006,
+      "scenario": "none",
+      "frames": [
+        {
+          "frame": 0,
+          "sim_time": 3.7799999999999416,
+          "examples": 7
+        }
+      ],
+      "status": "completed",
+      "startup_failures": []
+    },
+    {
+      "split": "test",
+      "seed": 230007,
+      "scenario": "partial",
+      "frames": [
+        {
+          "frame": 0,
+          "sim_time": 3.9199999999999386,
+          "examples": 7
+        }
+      ],
+      "status": "completed",
+      "startup_failures": []
+    }
+  ],
+  "splits": {
+    "train": {
+      "examples": 486,
+      "scene_seeds": [
+        210000,
+        210001,
+        210002,
+        210003,
+        210004,
+        210005,
+        210006,
+        210007,
+        210008,
+        210009,
+        210010,
+        210011,
+        210012,
+        210013,
+        210014,
+        210015,
+        210016,
+        210017,
+        210018,
+        210019,
+        210020,
+        210021,
+        210022,
+        210023
+      ],
+      "sha256": "9a940ddcac31008e8997fb7bd0eff86906fbf034932d1436a8f4ce50b1928b31",
+      "statuses": {
+        "visible": 271,
+        "stop": 70,
+        "unsupported": 70,
+        "not_visible": 53,
+        "partial": 22
+      }
+    },
+    "valid": {
+      "examples": 56,
+      "scene_seeds": [
+        220000,
+        220001,
+        220002,
+        220003,
+        220004,
+        220005,
+        220006,
+        220007
+      ],
+      "sha256": "2d2ce6b718104191f5f6de24ea779b2918589d22b760695ab7efb4d43ac23354",
+      "statuses": {
+        "visible": 34,
+        "stop": 8,
+        "unsupported": 8,
+        "partial": 4,
+        "not_visible": 2
+      }
+    },
+    "test": {
+      "examples": 56,
+      "scene_seeds": [
+        230000,
+        230001,
+        230002,
+        230003,
+        230004,
+        230005,
+        230006,
+        230007
+      ],
+      "sha256": "879322c0520cbc64df1ab474ca62a6945a95fbe215a04d12369f9fb646eda954",
+      "statuses": {
+        "visible": 34,
+        "stop": 8,
+        "unsupported": 8,
+        "partial": 4,
+        "not_visible": 2
+      }
+    }
+  },
+  "model_inputs": [
+    "annotated_rgb",
+    "instruction"
+  ],
+  "supervision": "MuJoCo segmentation and scene truth; per-frame grounding, not joint imitation",
+  "navigate": true,
+  "seed_offset": 2
+}

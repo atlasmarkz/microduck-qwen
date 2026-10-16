@@ -72,6 +72,6 @@ VLM 不必先预测世界坐标，更不宜直接预测每个电机角度。第�
 
 ## 7. 代码位置与迁移说明
 
-实际项目根目录：`/Users/mark/Code/microduck-qwen`。核心源代码在 `microduck_qwen/`，单元测试在 `tests/`，已有结果在 `RESULTS.md`，运行命令在 `README.md`。
+实际项目根目录：`microduck-qwen`。核心源代码在 `microduck_qwen/`，单元测试在 `tests/`，已有结果在 `RESULTS.md`，运行命令在 `README.md`。
 
 旧 Codex 工作区路径保留兼容软链接，避免虚拟环境入口和历史记录的绝对路径失效。模型缓存、权重和原始结果随项目一起迁移，不重复下载、不覆盖两个官方仓库、不重写历史 provenance。本次补充模型缓存的相对位置解析和迁移测试，并修正评测汇总中的默认适配器标记，使其记录实际加载路径。

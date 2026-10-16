@@ -27,7 +27,7 @@ def configure_body():
     from mjlab_microduck.sim import body_server
 
     scene_path = os.environ.get("MICRODUCK_VISION_SCENE")
-    scene = json.loads(Path(scene_path).read_text()) if scene_path else arena()
+    scene = json.loads(Path(scene_path).read_text(encoding="utf-8")) if scene_path else arena()
     if scene_path:
         from .vision_sensor import RGBDCamera, add_robot_camera, run_rgbd
 

@@ -2,12 +2,18 @@
 
 ![中文指令驱动 MicroDuck：模型生成导航计划，小鸭绕开障碍走到红球旁并停车](assets/navigation-demo.gif)
 
-**本机实录：中文指令 → Qwen 文本 LoRA → 真实 MuJoCo 导航。** 画面旁的文字为运行状态叠加；当前演示使用仿真位姿和已知地图，尚未接入视觉 Qwen-VL。
+**本机实录：中文指令 → Qwen 文本 LoRA → 真实 MuJoCo 导航。** 画面旁的文字为运行状态叠加；这段 GIF 展示文本分支，使用仿真位姿和已知地图。Qwen-VL 第一视角选目标分支已实现，运行方法见下方。
 
 ```mermaid
 flowchart LR
     U["中文指令"] --> Q["Qwen3-0.6B + LoRA<br/>JSON 计划与格式校验"]
     Q --> N["A* 路径 + 闭环导航<br/>10 Hz 速度意图"]
+    U --> V["Qwen3-VL-2B + LoRA<br/>视觉选目标"]
+    S --> C["机身 RGB-D 相机<br/>颜色候选与编号"]
+    C -->|标号 RGB| V
+    V -->|候选编号| L["深度定位<br/>可见性与语义保护"]
+    C -->|深度与外参| L
+    L -->|目标坐标| N
     A["arena.json<br/>静态地图"] --> N
     N --> G["官方 ONNX 步态<br/>50 Hz 关节目标"]
     G --> S["MuJoCo + BAM<br/>200 Hz 物理仿真"]
@@ -21,7 +27,7 @@ flowchart LR
 
 ## 项目目标与当前状态
 
-研究目标是后训练 Qwen-VL，使其根据视觉、自然语言和历史反馈产生高层决策，结合 MicroDuck 已有 RL 步态完成仿真控制。已实现文本 SFT、视觉选球 SFT，以及新的**逐步技能 agent、仿真专家采集、专家接管式纠错回流和有预算的迭代 LoRA 流程**。新入口与边界见 [AGENT_TRAINING.md](AGENT_TRAINING.md)，旧视觉实验见 [SIM_TRAINING.md](SIM_TRAINING.md)。学习型 RM、无限制自主探索和高层 RL 尚未实现；不把安全规则当成模型学会的能力。硬件与后续计划见 [TRAINING_PLAN.md](TRAINING_PLAN.md)。
+研究目标是后训练 Qwen-VL，使其根据视觉、自然语言和历史反馈产生高层决策，结合 MicroDuck 已有 RL 步态完成仿真控制。已实现文本 SFT、视觉选球 SFT、逐步技能 agent 与仿真专家采集。本轮新增 Windows Qwen3-VL QLoRA、学习型动作/任务奖励模型，以及参考 UI-Genie 的有预算探索与成功样本回流，覆盖 40 个独立布局；运行方式、对照实验和边界见 [Windows 视觉实验](WINDOWS_VISION.md)。逐步技能入口见 [AGENT_TRAINING.md](AGENT_TRAINING.md)，旧视觉实验见 [SIM_TRAINING.md](SIM_TRAINING.md)。尚未实现无限制自主探索或高层 RL；不把安全规则当成模型学会的能力。
 
 获取源码：
 
@@ -41,6 +47,29 @@ GitHub 只同步源码、依赖配置、测试及说明，不包含本机虚拟�
 这会新建一组适配器，不等同于历史 900 步权重；已有同名权重时训练器会拒绝覆盖。MicroDuck 仿真仓库与策略需另行准备，路径可通过 `sim --microduck PATH --rl PATH --policies PATH` 指定。本机默认路径不是跨机器安装保证。
 
 视觉分支已独立实现：看图选择左右球、随机布局、RGB-D 定位和遮挡保护。默认仍为冻结 Qwen3-VL-2B，可用 `vision chat --adapter PATH` 显式加载本机图文 SFT 权重，见 [VISION.md](VISION.md) 与 [SIM_TRAINING.md](SIM_TRAINING.md)。本页下面的训练与 61.25% 指标仍专指 Qwen3-0.6B 文本 SFT，不是视觉训练结果。
+
+Windows 视觉独立测试在 8 个未训练布局上使用相同的 7 条模板，共 56 条记录；普通 SFT 与 UI-Genie 方法适配分支的 actor 均为 200 步：
+
+| Qwen3-VL 分支 | 总体正确 | 颜色/左右选球 | 停止及不支持模板 |
+| --- | --- | --- | --- |
+| 冻结基座 | 33/56（58.9%） | 33/40 | 0/16 |
+| 首轮 SFT，100 步 | 41/56（73.2%） | 33/40 | 8/16 |
+| 普通 SFT，200 步 | 49/56（87.5%） | 33/40 | 16/16 |
+| 奖励筛选回流，200 步 | 49/56（87.5%） | 33/40 | 16/16 |
+
+本轮提升来自停止/拒绝指令的格式与语义适配，**没有观察到选球或奖励回流的额外收益**。这也不是与文本模型在同一任务上的性能对照。遮挡与目标缺失仍有误判，不能把合法 JSON 当成正确视觉理解；完整方法、运行命令和物理结果见 [Windows 视觉实验](WINDOWS_VISION.md)。
+
+固定闭环测试中，基座、普通 SFT、回流 SFT 均成功 5/6，首轮 SFT 为 4/6；部分遮挡案例均判断错误，由可见性保护阻止移动。训练、奖励模型更新、独立评测及交互入口检查均已完成，59 项单元测试通过；审计记录见 [实验摘要](experiments/windows-vision-v2/summary.json)。本轮隔离场景种子，未隔离指令模板，不能据此宣称对陌生措辞泛化。
+
+本机查看视觉仿真，在仓库根目录打开两个 PowerShell 终端（需先准备下文的仿真资产及 [视觉环境和权重](WINDOWS_VISION.md#重现实验)）：
+
+```powershell
+# 终端一：第一视角相机与 MuJoCo 可视化
+.venv/Scripts/python.exe -X utf8 -m microduck_qwen.sim_native --vision --viewer --seed 230000 --port 7846 --manifest runs/vision-simulator.json
+
+# 终端二：加载验证集选定的视觉 SFT，输入“走到画面左边的球旁边”
+.venv/Scripts/python.exe -X utf8 -m microduck_qwen.vision chat --adapter adapters/vision-torch-static-control
+```
 
 在 Apple Silicon Mac 上对 Qwen3-0.6B 做 LoRA 监督微调，输入中文导航指令，输出目标及速度、停靠距离；导航器使用 MuJoCo 位姿与场景地图规划避障路径，向官方 `robotd` 发送速度命令，既有 ONNX 步态策略在 50 Hz 控制机器人。
 
@@ -66,7 +95,7 @@ python -m venv .venv
 .venv/Scripts/python.exe -m microduck_qwen.cli plan '移动到世界坐标（0.2，-0.4）' --adapter adapters/nav-torch
 ```
 
-OpenCV 用于完整单元测试，不代表视觉模型已在 Windows 上运行。训练使用最后 16 层全部线性层的 rank-16 LoRA（alpha=32）、batch size 2、学习率 1e-4、种子 42、最长 768 tokens，仅对答案和 EOS 计算损失。超过序列上限时报错；已有非空输出目录拒绝覆盖。`adapters/nav-torch/provenance.json` 保存版本、数据哈希、损失、训练时间、显存和参数更新检查。CPU 可运行但较慢；Windows 原生物理仿真和文本控制见下节，视觉训练仍未移植。
+本节 OpenCV 用于完整单元测试；视觉模型另按 [Windows 视觉实验](WINDOWS_VISION.md) 准备。文本训练使用最后 16 层全部线性层的 rank-16 LoRA（alpha=32）、batch size 2、学习率 1e-4、种子 42、最长 768 tokens，仅对答案和 EOS 计算损失。超过序列上限时报错；已有非空输出目录拒绝覆盖。`adapters/nav-torch/provenance.json` 保存版本、数据哈希、损失、训练时间、显存和参数更新检查。CPU 可运行文本分支但较慢；Windows 原生物理仿真和文本控制见下节，视觉训练使用独立的 CUDA QLoRA 入口。
 
 ### Windows 实测结果（2026-10-15）
 
@@ -125,7 +154,7 @@ Windows、RTX 3060 8 GiB、Python 3.12.14；PyTorch 2.11.0+cu128、Transformers 
 
 停止当前导航可在执行终端按 Ctrl+C，或另开终端运行 `.venv/Scripts/python.exe -X utf8 -m microduck_qwen.cli stop`。关闭 MuJoCo 窗口会退出本次仿真。右键拖动平移视角、左键拖动旋转、滚轮缩放。
 
-此入口使用官方 `alpha_walking.onnx` 步态、BAM M6 XL330 电机物理、5 ms MuJoCo 步长和 50 Hz 策略更新。高层仍复用已有 A* 与闭环导航；Windows 通过仅监听本机的 TCP 接口连接，不启动 Rust `robotd`。速度命令 500 ms 未更新会归零，跌倒或观测/动作非有限值会终止仿真。尚未接入视觉 Qwen-VL；机器人位姿和地图来自仿真真值。
+此入口使用官方 `alpha_walking.onnx` 步态、BAM M6 XL330 电机物理、5 ms MuJoCo 步长和 50 Hz 策略更新。高层仍复用已有 A* 与闭环导航；Windows 通过仅监听本机的 TCP 接口连接，不启动 Rust `robotd`。速度命令 500 ms 未更新会归零，跌倒或观测/动作非有限值会终止仿真。以上命令运行文本分支；启用 `--vision` 可运行 Qwen-VL 视觉选目标，见 [双终端命令](WINDOWS_VISION.md#本机查看)。机器人位姿和地图仍来自仿真真值。
 
 已完成 10 秒站立冒烟测试和一次训练后 Qwen 的红球导航：实际路径约 1.66 m，用时约 10.63 秒，最终躯干中心距球中心 0.3195 m（要求 0.30 m，允许 0.025 m 容差），平面包络最小净空约 0.1115 m。仅为一次本机演示，不是多场景成功率或全身无碰撞证明。记录见 [Windows 仿真摘要](experiments/windows-sim-v1/summary.json)。
 
@@ -229,7 +258,7 @@ python3 -m unittest discover -s tests -v
 - `../microduck_rl/.venv/`（MuJoCo、ONNX Runtime 与官方 body server）
 - `../duck-sim-state/policies/current/`（官方 ONNX 策略）
 
-启动时显式指定相对路径：`python -m microduck_qwen.sim --microduck ../microduck --rl ../microduck_rl --policies ../duck-sim-state/policies/current`。Python 模型环境与官方仿真环境分开，避免依赖冲突。Windows/Linux 文本训练和推理使用上述 PyTorch 后端；视觉训练仍使用 MLX，`sim` 启动器仍依赖 macOS ONNX 动态库和 mjpython；Windows 使用上述 `sim_native` 入口。
+启动时显式指定相对路径：`python -m microduck_qwen.sim --microduck ../microduck --rl ../microduck_rl --policies ../duck-sim-state/policies/current`。Python 模型环境与官方仿真环境分开，避免依赖冲突。Windows/Linux 文本训练和推理使用上述 PyTorch 后端；Mac 视觉训练使用 MLX，Windows 视觉训练使用 [PyTorch QLoRA](WINDOWS_VISION.md)。`sim` 启动器仍依赖 macOS ONNX 动态库和 mjpython；Windows 使用上述 `sim_native` 入口。
 
 ## 后续研究
 

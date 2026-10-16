@@ -1,0 +1,8 @@
+{
+  "selection": "vision-torch-static-control",
+  "criterion": "Validation exact match; static control chosen on tie to avoid unnecessary reward/exploration cost",
+  "valid_static": 50,
+  "valid_replay": 50,
+  "valid_total": 56,
+  "selected_before_test": true
+}

@@ -9,9 +9,11 @@ from datetime import datetime
 import importlib.metadata
 import json
 import math
+import os
 from pathlib import Path
 import subprocess
 import signal
+import sys
 import time
 
 import numpy as np
@@ -52,10 +54,11 @@ def start_scene(case_directory, seed, occlusion, port, collect_gt=False):
         log = log_path.open("w")
         process = subprocess.Popen(
             [
-                str(ROOT / ".venv/bin/python"),
+                sys.executable if os.name == "nt" else str(ROOT / ".venv/bin/python"),
+                "-X", "utf8",
                 "-u",
                 "-m",
-                "microduck_qwen.sim",
+                "microduck_qwen.sim_native" if os.name == "nt" else "microduck_qwen.sim",
                 "--vision",
                 "--seed",
                 str(seed),
@@ -221,7 +224,8 @@ def main():
                     "adapter": planner.adapter,
                     "versions": {
                         p: importlib.metadata.version(p)
-                        for p in ("mlx-vlm", "mlx", "transformers", "opencv-python")
+                        for p in (("torch", "peft", "bitsandbytes", "transformers", "opencv-python") if os.name == "nt"
+                            else ("mlx-vlm", "mlx", "transformers", "opencv-python"))
                     },
                     "note": "Development smoke battery. Robot pose and safety map are oracle. "
                     + ("Explicit task-level vision LoRA loaded. " if planner.adapter else "Frozen VLM baseline. ")

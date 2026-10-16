@@ -39,12 +39,15 @@ class RGBDCamera:
         if self.camera < 0:
             raise RuntimeError("vision_camera missing")
         self.model = model
+        self.collect_gt = os.environ.get("MICRODUCK_COLLECT_GT") == "1"
+        # MSAA blends encoded geom IDs at edges and creates false distant segmentation pixels.
+        if self.collect_gt:
+            model.vis.quality.offsamples = 0
         self.renderer = mujoco.Renderer(model, height=height, width=width)
         self.width, self.height = width, height
         self.lock = threading.Lock()
         self.latest = None
         self.latest_uyvy = None
-        self.collect_gt = os.environ.get("MICRODUCK_COLLECT_GT") == "1"
         self.latest_gt = None
 
     def render(self, world):

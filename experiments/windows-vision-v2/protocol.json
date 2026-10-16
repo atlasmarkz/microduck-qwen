@@ -1,0 +1,80 @@
+{
+  "status": "frozen_before_formal_training",
+  "reference": "https://arxiv.org/abs/2505.21496",
+  "scope": "Visual ball referent selection plus bounded closed-loop navigation; single high-level action, not full GUI beam search.",
+  "dataset": "data/windows-vision-v2",
+  "dataset_manifest_sha256": "463c2b363f19351a3f9758aba6e470f5f3b6a0f51785660bdc9b7fee0d484108",
+  "split_scene_counts": {
+    "train": 24,
+    "valid": 8,
+    "test": 8
+  },
+  "split_rows": {
+    "train": 486,
+    "valid": 56,
+    "test": 56
+  },
+  "actor": {
+    "r0_steps": 100,
+    "static_control_resume_steps": 100,
+    "replay_resume_steps": 100,
+    "learning_rate": 5e-05,
+    "seed": 42
+  },
+  "reward": {
+    "r0_steps": 50,
+    "refinement_steps": 50,
+    "labels": "single-token yes/no; action verification and physically measured completion/truncation",
+    "training_task_resampling": 8
+  },
+  "exploration": {
+    "train_seed_base": 410000,
+    "scenes": 8,
+    "sampled_candidates": 3,
+    "keep": 1,
+    "outcome_ground_truth_only_after_action_selection": true
+  },
+  "physical_cases": [
+    [
+      230000,
+      "none",
+      "走到画面左边的球旁边"
+    ],
+    [
+      230004,
+      "none",
+      "走到画面右边的球旁边"
+    ],
+    [
+      230005,
+      "none",
+      "走到红色球旁边"
+    ],
+    [
+      230006,
+      "none",
+      "走到蓝色球旁边"
+    ],
+    [
+      230001,
+      "partial",
+      "走到画面左边的球旁边"
+    ],
+    [
+      230002,
+      "full",
+      "走到画面左边的球旁边"
+    ]
+  ],
+  "test_policy": "No test evaluation or test-guided tuning until actor/reward branches are trained; retain all failures.",
+  "compute_control": "Equal actor optimization steps and optimizer resets; reward-model and exploration compute are additional and reported separately.",
+  "historical_exclusions": [
+    "windows-vision-v1 has MSAA-contaminated segmentation boxes; retained for diagnostics only",
+    "vision-torch-smoke adapter is not used in any formal experiment"
+  ],
+  "branch_protocol_frozen_before_exploration": {
+    "replay_mixture": "Repeat new verified replay rows to approximately equal original train rows; report raw trajectories separately",
+    "outcome_acceptance_threshold": 0.5,
+    "actor_replay_requires": "Independent physical/semantic verification AND learned reward >= 0.5"
+  }
+}

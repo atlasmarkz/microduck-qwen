@@ -1,5 +1,7 @@
 # 从 MicroDuck 仿真采集数据并训练 Qwen-VL
 
+后续 Windows 训练、奖励模型与等 actor 步数回流对照见 [WINDOWS_VISION.md](WINDOWS_VISION.md)；下面保留初轮 Mac 实验记录。
+
 本文保留初轮视觉选球实验。2026-10-15 新增的多技能 agent、两轮专家纠错 SFT 和实际动作评估见 [AGENT_TRAINING.md](AGENT_TRAINING.md)；以下“尚未实现”描述仅指本文当时的视觉分支。
 
 本轮实现的是“真实 MuJoCo 图像与专家交互 → 仿真核验标签 → 图文 LoRA → 显式加载回控制器”。不是用文字模板冒充仿真数据，也不是重新训练官方走路策略。多轮模型探索、自改进和学习型 RM 尚未实现。
@@ -32,8 +34,10 @@
 
 本机已有依赖；新机器先按 README 与 VISION.md 准备官方仓库、策略、MLX 环境及视觉模型。输出目录必须是新的，程序不会覆盖历史数据或权重。
 
+各代码块中的 `cd microduck-qwen` 从仓库父目录执行；已在仓库根目录时跳过。
+
 ```bash
-cd /Users/mark/Code/microduck-qwen
+cd microduck-qwen
 
 # 自动采集；此阶段不加载 VLM，减少内存并发。
 .venv-vlm/bin/python -m microduck_qwen.vision_data \
@@ -64,14 +68,14 @@ cd /Users/mark/Code/microduck-qwen
 终端一：
 
 ```bash
-cd /Users/mark/Code/microduck-qwen
+cd microduck-qwen
 .venv/bin/python -m microduck_qwen.sim --vision --viewer --seed 20000
 ```
 
 终端二（本机训练权重）：
 
 ```bash
-cd /Users/mark/Code/microduck-qwen
+cd microduck-qwen
 .venv-vlm/bin/python -m microduck_qwen.vision chat --adapter adapters/vision-sim-pilot-epoch1
 ```
 

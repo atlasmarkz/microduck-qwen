@@ -119,7 +119,7 @@ def visual_examples(verified):
 def load_splits(directory):
     """Integrity and group-leak checks shared by training and evaluation."""
     directory = Path(directory).resolve()
-    manifest = json.loads((directory / "manifest.json").read_text())
+    manifest = json.loads((directory / "manifest.json").read_text(encoding="utf-8"))
     if manifest.get("format") != "simulation_visual_v1" or manifest.get("status") != "completed":
         raise ValueError("dataset must be a completed simulation_visual_v1 collection")
     result, seen, seen_images = {}, set(), set()
@@ -127,7 +127,7 @@ def load_splits(directory):
         path = directory / f"{split}.jsonl"
         if digest(path) != manifest["splits"][split]["sha256"]:
             raise ValueError(f"{split} manifest hash mismatch")
-        rows = [json.loads(line) for line in path.read_text().splitlines()]
+        rows = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines()]
         if not rows:
             raise ValueError(f"{split} is empty")
         groups = {row["scene_seed"] for row in rows}

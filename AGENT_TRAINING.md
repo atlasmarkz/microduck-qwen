@@ -10,7 +10,7 @@
 
 ## 本地体验
 
-两个终端均进入 `/Users/mark/Code/microduck-qwen`。需要现有 `.venv`、`.venv-vlm`、上游 MicroDuck 仓库和缓存的固定模型；换机器需先参考 `VISION.md` 安装，GitHub 不包含这些大文件。
+两个终端均进入 `microduck-qwen`。需要现有 `.venv`、`.venv-vlm`、上游 MicroDuck 仓库和缓存的固定模型；换机器需先参考 `VISION.md` 安装，GitHub 不包含这些大文件。
 
 终端一（重启仿真很重要，旧 manifest 没有启动时的 home）：
 

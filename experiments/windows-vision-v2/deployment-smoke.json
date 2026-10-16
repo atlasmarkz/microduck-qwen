@@ -1,0 +1,36 @@
+{
+  "success": true,
+  "executed": true,
+  "collection_ground_truth": false,
+  "seed": 210000,
+  "semantic_check": {
+    "safe": true,
+    "status": "spatial_constraint_checked",
+    "side": "left",
+    "expected_id": 3
+  },
+  "execution": {
+    "success": true,
+    "goals": [
+      {
+        "goal": {
+          "target": "point",
+          "x": 1.0626200665094119,
+          "y": 0.38915021370046365,
+          "speed": "slow",
+          "stop_distance_m": 0.3
+        },
+        "distance_m": 0.318321590795858,
+        "elapsed_s": 7.735000000000582,
+        "path_length_m": 1.1603640045242938,
+        "min_clearance_m": 0.05843592992207325,
+        "position": [
+          0.7730001271448078,
+          0.2570558311959501
+        ]
+      }
+    ],
+    "observation": "RGB-D target; oracle robot pose and safety map; RGB color proposals + VLM selection"
+  },
+  "note": "Deployment smoke on a training layout; normal MSAA rendering, no collection GT endpoint; deployment semantic guard enabled. Not a held-out performance trial."
+}
