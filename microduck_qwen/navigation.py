@@ -45,7 +45,8 @@ class JsonConnection:
 
 class Robot:
     def __init__(self, path):
-        self.connection = JsonConnection(str(path), unix=True)
+        self.connection = JsonConnection(tuple(path) if isinstance(path, list) else str(path),
+                                         unix=not isinstance(path, list))
         self.request_id = 0
 
     def call(self, method, params=None):

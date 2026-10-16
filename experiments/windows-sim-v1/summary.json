@@ -1,0 +1,53 @@
+{
+  "platform": "Windows native MuJoCo viewer",
+  "backend": "native-onnx-bam",
+  "upstream_revision": "b02fdea4902c2b93b7d34a83a6f05da4ececb7d3",
+  "bam_revision": "57d13ead53206a6bf0db3d66f86506ae8c2ce01a",
+  "policy_revision": "665ae4eb20bfe13bca1ef4ea6d4bb6b4a096e448",
+  "policy": "alpha_walking.onnx",
+  "physics_timestep_s": 0.005,
+  "policy_hz": 50,
+  "stand_smoke": {
+    "sim_time_s": 10.0,
+    "final_trunk_z_m": 0.1166117917728556,
+    "passed": true
+  },
+  "navigation": {
+    "success": true,
+    "goals": [
+      {
+        "goal": {
+          "target": "red_ball",
+          "speed": "normal",
+          "stop_distance_m": 0.3
+        },
+        "distance_m": 0.3194966418070776,
+        "elapsed_s": 10.625,
+        "path_length_m": 1.6611830896468385,
+        "min_clearance_m": 0.11148238254755188,
+        "position": [
+          0.9317677410610815,
+          0.42357868357181727
+        ]
+      }
+    ],
+    "observation": "MuJoCo ground-truth pose and fixed scene map"
+  },
+  "instruction": "绕开障碍物走到红球旁边，离球30厘米停下",
+  "limits": [
+    "Single navigation demonstration, not a success-rate benchmark.",
+    "Uses MuJoCo ground-truth pose and known static map; no Qwen-VL perception.",
+    "Python TCP controller replaces robotd only for simulation; not validated on real hardware.",
+    "Clearance is a planar envelope estimate, not a whole-body collision certificate."
+  ],
+  "recorded_at_utc": "2026-10-16T04:32:54.873946+00:00",
+  "versions": {
+    "mujoco": "3.16.0",
+    "onnxruntime": "1.31.0",
+    "better-actuator-models": "1.0.1"
+  },
+  "unit_tests": {
+    "passed": 55,
+    "skipped": 0
+  }
+}

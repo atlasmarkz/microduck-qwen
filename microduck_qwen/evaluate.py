@@ -22,7 +22,7 @@ def main():
     parser.add_argument("--output")
     args = parser.parse_args()
     path = ROOT / f"data/{args.split}.jsonl"
-    rows = [json.loads(s) for s in path.read_text().splitlines()]
+    rows = [json.loads(s) for s in path.read_text(encoding="utf-8").splitlines()]
     by_category = collections.defaultdict(list)
     for row in rows:
         by_category[row["category"]].append(row)
@@ -58,7 +58,7 @@ def main():
         "note": "Synthetic held-out paraphrases; exact goal plans, not physical task success."}
     out = ROOT / (args.output or f"runs/{args.split}-{'base' if args.base else 'adapter'}.json")
     out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(json.dumps({"summary": summary, "results": results}, ensure_ascii=False, indent=2) + "\n")
+    out.write_text(json.dumps({"summary": summary, "results": results}, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(compact(summary))
 
 

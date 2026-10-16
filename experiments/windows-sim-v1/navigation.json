@@ -1,0 +1,38 @@
+{
+  "instruction": "绕开障碍物走到红球旁边，离球30厘米停下",
+  "plan": {
+    "status": "ok",
+    "goals": [
+      {
+        "target": "red_ball",
+        "speed": "normal",
+        "stop_distance_m": 0.3
+      }
+    ]
+  },
+  "raw": "{\"status\":\"ok\",\"goals\":[{\"target\":\"red_ball\",\"speed\":\"normal\",\"stop_distance_m\":0.3}]}",
+  "latency_s": 3.798764500010293,
+  "adapter": "adapters/nav-torch",
+  "execution": {
+    "success": true,
+    "goals": [
+      {
+        "goal": {
+          "target": "red_ball",
+          "speed": "normal",
+          "stop_distance_m": 0.3
+        },
+        "distance_m": 0.3194966418070776,
+        "elapsed_s": 10.625,
+        "path_length_m": 1.6611830896468385,
+        "min_clearance_m": 0.11148238254755188,
+        "position": [
+          0.9317677410610815,
+          0.42357868357181727
+        ]
+      }
+    ],
+    "observation": "MuJoCo ground-truth pose and fixed scene map"
+  },
+  "trajectory": "experiments/windows-sim-v1/trajectory.jsonl"
+}

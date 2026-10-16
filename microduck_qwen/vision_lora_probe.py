@@ -11,7 +11,6 @@ import importlib.metadata
 import json
 import math
 from pathlib import Path
-import resource
 import subprocess
 import sys
 import time
@@ -50,6 +49,7 @@ def image_token_id(config):
 
 
 def main():
+    import resource  # Only the macOS MLX memory probe needs Unix process statistics.
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--fixture", type=Path,
                         default=ROOT / "tests/fixtures/vision_lora_probe.json")

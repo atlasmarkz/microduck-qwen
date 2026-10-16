@@ -1,9 +1,10 @@
-"""MLX LoRA SFT with exactly the same non-thinking chat prefix as inference."""
+"""LoRA SFT with exactly the same non-thinking chat prefix as inference."""
 
 import argparse
 import copy
 import importlib.metadata
 import json
+import platform
 from types import SimpleNamespace
 
 from . import ROOT
@@ -38,11 +39,17 @@ class Dataset:
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--iters", type=int, default=300)
-    parser.add_argument("--adapter", default="adapters/nav")
+    parser.add_argument("--adapter")
     parser.add_argument("--data", default="data")
     parser.add_argument("--learning-rate", type=float, default=1e-4)
     parser.add_argument("--resume-adapter-file")
     args = parser.parse_args()
+    if platform.system() != "Darwin" or platform.machine() != "arm64":
+        from .torch_backend import train
+
+        args.adapter = args.adapter or "adapters/nav-torch"
+        return train(args)
+    args.adapter = args.adapter or "adapters/nav"
     import mlx.core as mx
     import numpy as np
     from mlx_lm import load
@@ -68,7 +75,7 @@ def main():
     model, tokenizer = load(config["model"])
     datasets = {}
     for split in ("train", "valid"):
-        rows = [json.loads(line) for line in (data_dir / f"{split}.jsonl").read_text().splitlines()]
+        rows = [json.loads(line) for line in (data_dir / f"{split}.jsonl").read_text(encoding="utf-8").splitlines()]
         datasets[split] = Dataset(rows, tokenizer, config["max_seq_length"])
     print(f"Training examples: {len(datasets['train'])}, max tokens: {datasets['train'].max_length}", flush=True)
     train_model(SimpleNamespace(**config), model, datasets["train"], datasets["valid"])

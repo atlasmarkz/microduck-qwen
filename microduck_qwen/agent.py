@@ -2,12 +2,12 @@
 
 import argparse
 from datetime import datetime
-import fcntl
 import json
 from pathlib import Path
 import time
 
 from . import ROOT
+from .locking import lock_exclusive
 from .skills import SkillExecutor, memory_state, parse_action, validate_action
 from .vision import MODEL, REVISION, capture, propose_balls, save_frame
 from .vision_data import digest
@@ -94,7 +94,7 @@ def run_instruction(planner, instruction, info, max_steps=5, preview=False):
     executor = None
     with (ROOT / "runs/navigation.lock").open("a") as lock:
         try:
-            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            lock_exclusive(lock)
         except BlockingIOError:
             raise RuntimeError("已有控制任务执行中，请先 Ctrl+C 或运行 agent stop") from None
         try:

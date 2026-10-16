@@ -9,8 +9,10 @@ from . import DEFAULT_MODEL, ROOT
 def model_path() -> Path:
     manifest = ROOT / "runs/model.json"
     if manifest.exists():
-        info = json.loads(manifest.read_text())
+        info = json.loads(manifest.read_text(encoding="utf-8"))
         path = Path(info["snapshot"])
+        if not path.is_absolute():
+            path = ROOT / path
         # Prefer this project's relocated cache. Historical training manifests keep
         # their original absolute paths; moving the project must not require editing
         # those experiment records or downloading the same model a second time.
@@ -34,9 +36,9 @@ def main():
     manifest = ROOT / "runs/model.json"
     manifest.parent.mkdir(parents=True, exist_ok=True)
     manifest.write_text(json.dumps({
-        "model": DEFAULT_MODEL, "snapshot": path,
+        "model": DEFAULT_MODEL, "snapshot": Path(path).relative_to(ROOT).as_posix(),
         "revision": Path(path).name,
-    }, ensure_ascii=False, indent=2) + "\n")
+    }, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(f"Model ready: {path}", flush=True)
 
 

@@ -9,7 +9,6 @@ import base64
 from contextlib import ExitStack
 from dataclasses import dataclass
 from datetime import datetime
-import fcntl
 import hashlib
 import json
 import math
@@ -23,6 +22,7 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 
 from . import ROOT
+from .locking import lock_exclusive
 from .navigation import JsonConnection, Observer, Robot, execute
 
 MODEL = "mlx-community/Qwen3-VL-2B-Instruct-4bit"
@@ -499,7 +499,7 @@ def run_instruction(planner, instruction, info, preview=False, timeout=60):
     }
     with ExitStack() as stack:
         lock = stack.enter_context((ROOT / "runs/navigation.lock").open("a"))
-        fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        lock_exclusive(lock)
         robot = Robot(info["socket"])
         stack.callback(robot.close)
         robot.stop()  # VLM runs only while stationary; no stale velocity during inference.

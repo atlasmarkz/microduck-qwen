@@ -1,6 +1,7 @@
 """Actual Qwen inference. Invalid output is reported, never replaced by a rules-based answer."""
 
 import time
+import platform
 from pathlib import Path
 
 from . import ROOT
@@ -10,6 +11,13 @@ from .download import model_path
 
 class Planner:
     def __init__(self, *, base=False, adapter=None):
+        self.backend = "mlx" if platform.system() == "Darwin" and platform.machine() == "arm64" else "torch"
+        if self.backend == "torch":
+            from .torch_backend import load
+
+            self.adapter = None if base else Path(adapter or ROOT / "adapters/nav-torch")
+            self.model, self.tokenizer = load(self.adapter)
+            return
         from mlx_lm import load
 
         self.adapter = None if base else Path(adapter or ROOT / "adapters/nav-v2")
@@ -18,6 +26,10 @@ class Planner:
         self.model, self.tokenizer = load(str(model_path()), adapter_path=str(self.adapter) if self.adapter else None)
 
     def predict(self, instruction):
+        if self.backend == "torch":
+            from .torch_backend import predict
+
+            return predict(self.model, self.tokenizer, instruction, self.adapter)
         from mlx_lm import generate
         from mlx_lm.sample_utils import make_sampler
 

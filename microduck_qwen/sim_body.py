@@ -10,7 +10,16 @@ import time
 from pathlib import Path
 
 
-def main():
+def reset_bam(controller, data):
+    if hasattr(controller, "reset"):
+        controller.reset(data.qpos)
+    else:
+        controller.model.reset()
+        controller.last_ts = data.time
+        controller.q_target[:] = data.qpos[controller.qpos_indexes]
+
+
+def configure_body():
     import mujoco
     import numpy as np
     from bam.model import load_model
@@ -118,8 +127,9 @@ def main():
             motor.actuator.vin = 7.4
             motor.actuator.max_current = None
             names = [self.model.actuator(i).name for i in range(self.model.nu)]
+            # Zero sag preserves calibration across BAM's gain/resistance API rename.
             self.bam = MujocoController(
-                motor, names, self.model, self.data, vin_drop_gain=0.0, vin_min=6.0
+                motor, names, self.model, self.data, 0.0, vin_min=6.0
             )
             self.collection_stats = {"steps_with_scene_contact": 0, "minimum_contact_distance_m": None}
             self.scene_geoms = {i for i in range(self.model.ngeom)
@@ -152,7 +162,7 @@ def main():
     class BamBody(body_server.Body):
         def place(self, pose, trunk_z, offset_y):
             super().place(pose, trunk_z, offset_y)
-            self.world.bam.reset(self.world.data.qpos)
+            reset_bam(self.world.bam, self.world.data)
             if list(self.actuators) != self.world.bam.act_indexes:
                 raise RuntimeError("BAM 与 body 的电机索引不一致")
 
@@ -172,7 +182,7 @@ def main():
                         # before its balancing network actually takes control.
                         self.hold_until = time.monotonic() + 2.5
                     self.released = True
-                    self.world.bam.reset(self.world.data.qpos)
+                    reset_bam(self.world.bam, self.world.data)
                 self._apply_torque()
 
         def _apply_torque(self):
@@ -181,7 +191,11 @@ def main():
     body_server.build_world = build_world
     body_server.World = BamWorld
     body_server.Body = BamBody
-    body_server.main()
+    return body_server
+
+
+def main():
+    configure_body().main()
 
 
 if __name__ == "__main__":

@@ -1,0 +1,2335 @@
+{
+  "summary": {
+    "count": 80,
+    "valid_rate": 0.8125,
+    "exact_plan_rate": 0.2,
+    "median_latency_s": 2.0494546499976423,
+    "by_category": {
+      "object": {
+        "count": 26,
+        "exact_rate": 0.5384615384615384
+      },
+      "point": {
+        "count": 26,
+        "exact_rate": 0
+      },
+      "sequence": {
+        "count": 20,
+        "exact_rate": 0.05
+      },
+      "stop": {
+        "count": 3,
+        "exact_rate": 0.3333333333333333
+      },
+      "unsupported": {
+        "count": 5,
+        "exact_rate": 0
+      }
+    },
+    "split": "test",
+    "dataset_sha256": "c7fae1a8066400f5f2148fff107f74f18cefcf5e75033349b15e4e076511fe23",
+    "selection_seed": 42,
+    "adapter": null,
+    "note": "Synthetic held-out paraphrases; exact goal plans, not physical task success."
+  },
+  "results": [
+    {
+      "instruction": "快速地朝蓝色标记行进，路上的障碍请绕过去，与目标保持0.5米距离后停下",
+      "plan": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "blue_marker",
+            "speed": "fast",
+            "stop_distance_m": 0.5
+          }
+        ]
+      },
+      "raw": "{\"status\":\"ok\",\"goals\":[{\"target\":\"blue_marker\",\"speed\":\"fast\",\"stop_distance_m\":0.5}]}",
+      "latency_s": 2.562157299995306,
+      "adapter": null,
+      "valid": true,
+      "exact": true,
+      "expected": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "blue_marker",
+            "speed": "fast",
+            "stop_distance_m": 0.5
+          }
+        ]
+      },
+      "category": "object"
+    },
+    {
+      "instruction": "我希望你抵达 x=1.05、y=0.5 这个点",
+      "plan": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "red_ball",
+            "speed": "normal",
+            "stop_distance_m": 0.3
+          }
+        ]
+      },
+      "raw": "{\"status\":\"ok\",\"goals\":[{\"target\":\"red_ball\",\"speed\":\"normal\",\"stop_distance_m\":0.3}]}",
+      "latency_s": 1.9173146000030101,
+      "adapter": null,
+      "valid": true,
+      "exact": false,
+      "expected": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "point",
+            "speed": "normal",
+            "stop_distance_m": 0.15,
+            "x": 1.05,
+            "y": 0.5
+          }
+        ]
+      },
+      "category": "point"
+    },
+    {
+      "instruction": "走到坐标(50,50)",
+      "plan": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "red_ball",
+            "speed": "normal",
+            "stop_distance_m": 0.3
+          }
+        ]
+      },
+      "raw": "{\"status\":\"ok\",\"goals\":[{\"target\":\"red_ball\",\"speed\":\"normal\",\"stop_distance_m\":0.3}]}",
+      "latency_s": 2.135118699996383,
+      "adapter": null,
+      "valid": true,
+      "exact": false,
+      "expected": {
+        "status": "unsupported",
+        "goals": []
+      },
+      "category": "unsupported"
+    },
+    {
+      "instruction": "完成朝蓝色标记行进，路上的障碍请绕过去，与目标保持50厘米距离后停下后，接着慢慢地以蓝点为目的地移动，与目标保持0.4米距离后停下",
+      "valid": false,
+      "exact": false,
+      "error": "停靠距离 必须在 0.25..0.6 范围内",
+      "latency_s": 3.505715600003896,
+      "expected": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "blue_marker",
+            "speed": "normal",
+            "stop_distance_m": 0.5
+          },
+          {
+            "target": "blue_marker",
+            "speed": "slow",
+            "stop_distance_m": 0.4
+          }
+        ]
+      },
+      "category": "sequence"
+    },
+    {
+      "instruction": "终止导航",
+      "plan": {
+        "status": "stop",
+        "goals": []
+      },
+      "raw": "{\"status\":\"stop\",\"goals\":[]}",
+      "latency_s": 0.8085729999947944,
+      "adapter": null,
+      "valid": true,
+      "exact": true,
+      "expected": {
+        "status": "stop",
+        "goals": []
+      },
+      "category": "stop"
+    },
+    {
+      "instruction": "慢慢地朝球行进，路上的障碍请绕过去",
+      "plan": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "red_ball",
+            "speed": "slow",
+            "stop_distance_m": 0.3
+          }
+        ]
+      },
+      "raw": "{\"status\":\"ok\",\"goals\":[{\"target\":\"red_ball\",\"speed\":\"slow\",\"stop_distance_m\":0.3}]}",
+      "latency_s": 2.031397200000356,
+      "adapter": null,
+      "valid": true,
+      "exact": true,
+      "expected": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "red_ball",
+            "speed": "slow",
+            "stop_distance_m": 0.3
+          }
+        ]
+      },
+      "category": "object"
+    },
+    {
+      "instruction": "慢慢地我希望你抵达 x=1.05、y=0.5 这个点",
+      "plan": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "red_ball",
+            "speed": "slow",
+            "stop_distance_m": 0.3
+          }
+        ]
+      },
+      "raw": "{\"status\":\"ok\",\"goals\":[{\"target\":\"red_ball\",\"speed\":\"slow\",\"stop_distance_m\":0.3}]}",
+      "latency_s": 1.906850300001679,
+      "adapter": null,
+      "valid": true,
+      "exact": false,
+      "expected": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "point",
+            "speed": "slow",
+            "stop_distance_m": 0.15,
+            "x": 1.05,
+            "y": 0.5
+          }
+        ]
+      },
+      "category": "point"
+    },
+    {
+      "instruction": "翻个跟头",
+      "plan": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "red_ball",
+            "speed": "normal",
+            "stop_distance_m": 0.3
+          }
+        ]
+      },
+      "raw": "{\"status\":\"ok\",\"goals\":[{\"target\":\"red_ball\",\"speed\":\"normal\",\"stop_distance_m\":0.3}]}",
+      "latency_s": 2.139425699999265,
+      "adapter": null,
+      "valid": true,
+      "exact": false,
+      "expected": {
+        "status": "unsupported",
+        "goals": []
+      },
+      "category": "unsupported"
+    },
+    {
+      "instruction": "完成慢慢地以小球为目的地移动，与目标保持25厘米距离后停下后，接着快速地以小球为目的地移动，与目标保持0.4米距离后停下",
+      "plan": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "red_ball",
+            "speed": "slow",
+            "stop_distance_m": 0.3
+          },
+          {
+            "target": "red_ball",
+            "speed": "fast",
+            "stop_distance_m": 0.4
+          }
+        ]
+      },
+      "raw": "{\"status\":\"ok\",\"goals\":[{\"target\":\"red_ball\",\"speed\":\"slow\",\"stop_distance_m\":0.3},{\"target\":\"red_ball\",\"speed\":\"fast\",\"stop_distance_m\":0.4}]}",
+      "latency_s": 3.8407604999956675,
+      "adapter": null,
+      "valid": true,
+      "exact": false,
+      "expected": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "red_ball",
+            "speed": "slow",
+            "stop_distance_m": 0.25
+          },
+          {
+            "target": "red_ball",
+            "speed": "fast",
+            "stop_distance_m": 0.4
+          }
+        ]
+      },
+      "category": "sequence"
+    },
+    {
+      "instruction": "在原地停住",
+      "plan": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "red_ball",
+            "speed": "normal",
+            "stop_distance_m": 0.3
+          }
+        ]
+      },
+      "raw": "{\"status\":\"ok\",\"goals\":[{\"target\":\"red_ball\",\"speed\":\"normal\",\"stop_distance_m\":0.3}]}",
+      "latency_s": 2.230480300000636,
+      "adapter": null,
+      "valid": true,
+      "exact": false,
+      "expected": {
+        "status": "stop",
+        "goals": []
+      },
+      "category": "stop"
+    },
+    {
+      "instruction": "朝蓝色标记行进，路上的障碍请绕过去，与目标保持0.5米距离后停下",
+      "plan": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "blue_marker",
+            "speed": "normal",
+            "stop_distance_m": 0.3
+          }
+        ]
+      },
+      "raw": "{\"status\":\"ok\",\"goals\":[{\"target\":\"blue_marker\",\"speed\":\"normal\",\"stop_distance_m\":0.3}]}",
+      "latency_s": 2.0303268999996362,
+      "adapter": null,
+      "valid": true,
+      "exact": false,
+      "expected": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "blue_marker",
+            "speed": "normal",
+            "stop_distance_m": 0.5
+          }
+        ]
+      },
+      "category": "object"
+    },
+    {
+      "instruction": "慢慢地请将世界坐标(1.05, -0.5)作为目的地",
+      "plan": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "red_ball",
+            "speed": "slow",
+            "stop_distance_m": 0.3
+          }
+        ]
+      },
+      "raw": "{\"status\":\"ok\",\"goals\":[{\"target\":\"red_ball\",\"speed\":\"slow\",\"stop_distance_m\":0.3}]}",
+      "latency_s": 1.989980000005744,
+      "adapter": null,
+      "valid": true,
+      "exact": false,
+      "expected": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "point",
+            "speed": "slow",
+            "stop_distance_m": 0.15,
+            "x": 1.05,
+            "y": -0.5
+          }
+        ]
+      },
+      "category": "point"
+    },
+    {
+      "instruction": "把蓝色物体拿过来",
+      "plan": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "blue_marker",
+            "speed": "normal",
+            "stop_distance_m": 0.3
+          }
+        ]
+      },
+      "raw": "{\"status\":\"ok\",\"goals\":[{\"target\":\"blue_marker\",\"speed\":\"normal\",\"stop_distance_m\":0.3}]}",
+      "latency_s": 1.93740919999982,
+      "adapter": null,
+      "valid": true,
+      "exact": false,
+      "expected": {
+        "status": "unsupported",
+        "goals": []
+      },
+      "category": "unsupported"
+    },
+    {
+      "instruction": "完成我要你抵达蓝色标记附近，与目标保持25厘米距离后停下后，接着我要你抵达蓝色标记附近，与目标保持30厘米距离后停下",
+      "plan": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "blue_marker",
+            "speed": "normal",
+            "stop_distance_m": 0.3
+          },
+          {
+            "target": "blue_marker",
+            "speed": "normal",
+            "stop_distance_m": 0.3
+          }
+        ]
+      },
+      "raw": "{\"status\":\"ok\",\"goals\":[{\"target\":\"blue_marker\",\"speed\":\"normal\",\"stop_distance_m\":0.3},{\"target\":\"blue_marker\",\"speed\":\"normal\",\"stop_distance_m\":0.3}]}",
+      "latency_s": 3.414900600000692,
+      "adapter": null,
+      "valid": true,
+      "exact": false,
+      "expected": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "blue_marker",
+            "speed": "normal",
+            "stop_distance_m": 0.25
+          },
+          {
+            "target": "blue_marker",
+            "speed": "normal",
+            "stop_distance_m": 0.3
+          }
+        ]
+      },
+      "category": "sequence"
+    },
+    {
+      "instruction": "取消当前移动",
+      "plan": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "red_ball",
+            "speed": "normal",
+            "stop_distance_m": 0.3
+          }
+        ]
+      },
+      "raw": "{\"status\":\"ok\",\"goals\":[{\"target\":\"red_ball\",\"speed\":\"normal\",\"stop_distance_m\":0.3}]}",
+      "latency_s": 1.9575383999981568,
+      "adapter": null,
+      "valid": true,
+      "exact": false,
+      "expected": {
+        "status": "stop",
+        "goals": []
+      },
+      "category": "stop"
+    },
+    {
+      "instruction": "以红球为目的地移动，与目标保持50厘米距离后停下",
+      "plan": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "red_ball",
+            "speed": "normal",
+            "stop_distance_m": 0.3
+          }
+        ]
+      },
+      "raw": "{\"status\":\"ok\",\"goals\":[{\"target\":\"red_ball\",\"speed\":\"normal\",\"stop_distance_m\":0.3}]}",
+      "latency_s": 1.842055300003267,
+      "adapter": null,
+      "valid": true,
+      "exact": false,
+      "expected": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "red_ball",
+            "speed": "normal",
+            "stop_distance_m": 0.5
+          }
+        ]
+      },
+      "category": "object"
+    },
+    {
+      "instruction": "快速地请将世界坐标(0.7, -0.5)作为目的地",
+      "plan": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "red_ball",
+            "speed": "fast",
+            "stop_distance_m": 0.3
+          }
+        ]
+      },
+      "raw": "{\"status\":\"ok\",\"goals\":[{\"target\":\"red_ball\",\"speed\":\"fast\",\"stop_distance_m\":0.3}]}",
+      "latency_s": 1.8457694000026095,
+      "adapter": null,
+      "valid": true,
+      "exact": false,
+      "expected": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "point",
+            "speed": "fast",
+            "stop_distance_m": 0.15,
+            "x": 0.7,
+            "y": -0.5
+          }
+        ]
+      },
+      "category": "point"
+    },
+    {
+      "instruction": "请拾起球",
+      "plan": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "red_ball",
+            "speed": "normal",
+            "stop_distance_m": 0.3
+          }
+        ]
+      },
+      "raw": "{\"status\":\"ok\",\"goals\":[{\"target\":\"red_ball\",\"speed\":\"normal\",\"stop_distance_m\":0.3}]}",
+      "latency_s": 2.165078899997752,
+      "adapter": null,
+      "valid": true,
+      "exact": false,
+      "expected": {
+        "status": "unsupported",
+        "goals": []
+      },
+      "category": "unsupported"
+    },
+    {
+      "instruction": "完成快速地我要你抵达蓝色标记附近，与目标保持0.4米距离后停下后，接着我要你抵达球附近，与目标保持0.5米距离后停下",
+      "plan": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "blue_marker",
+            "speed": "fast",
+            "stop_distance_m": 0.4
+          },
+          {
+            "target": "red_ball",
+            "speed": "fast",
+            "stop_distance_m": 0.5
+          }
+        ]
+      },
+      "raw": "{\"status\":\"ok\",\"goals\":[{\"target\":\"blue_marker\",\"speed\":\"fast\",\"stop_distance_m\":0.4},{\"target\":\"red_ball\",\"speed\":\"fast\",\"stop_distance_m\":0.5}]}",
+      "latency_s": 3.6328248999998323,
+      "adapter": null,
+      "valid": true,
+      "exact": false,
+      "expected": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "blue_marker",
+            "speed": "fast",
+            "stop_distance_m": 0.4
+          },
+          {
+            "target": "red_ball",
+            "speed": "normal",
+            "stop_distance_m": 0.5
+          }
+        ]
+      },
+      "category": "sequence"
+    },
+    {
+      "instruction": "慢慢地以小球为目的地移动，与目标保持30厘米距离后停下",
+      "plan": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "red_ball",
+            "speed": "slow",
+            "stop_distance_m": 0.3
+          }
+        ]
+      },
+      "raw": "{\"status\":\"ok\",\"goals\":[{\"target\":\"red_ball\",\"speed\":\"slow\",\"stop_distance_m\":0.3}]}",
+      "latency_s": 2.055435899994336,
+      "adapter": null,
+      "valid": true,
+      "exact": true,
+      "expected": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "red_ball",
+            "speed": "slow",
+            "stop_distance_m": 0.3
+          }
+        ]
+      },
+      "category": "object"
+    },
+    {
+      "instruction": "慢慢地我希望你抵达 x=1.05、y=0.0 这个点",
+      "plan": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "red_ball",
+            "speed": "slow",
+            "stop_distance_m": 0.3
+          }
+        ]
+      },
+      "raw": "{\"status\":\"ok\",\"goals\":[{\"target\":\"red_ball\",\"speed\":\"slow\",\"stop_distance_m\":0.3}]}",
+      "latency_s": 1.861606500002381,
+      "adapter": null,
+      "valid": true,
+      "exact": false,
+      "expected": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "point",
+            "speed": "slow",
+            "stop_distance_m": 0.15,
+            "x": 1.05,
+            "y": 0.0
+          }
+        ]
+      },
+      "category": "point"
+    },
+    {
+      "instruction": "找黄色小鸭",
+      "plan": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "red_ball",
+            "speed": "normal",
+            "stop_distance_m": 0.3
+          }
+        ]
+      },
+      "raw": "{\"status\":\"ok\",\"goals\":[{\"target\":\"red_ball\",\"speed\":\"normal\",\"stop_distance_m\":0.3}]}",
+      "latency_s": 1.9572920999999042,
+      "adapter": null,
+      "valid": true,
+      "exact": false,
+      "expected": {
+        "status": "unsupported",
+        "goals": []
+      },
+      "category": "unsupported"
+    },
+    {
+      "instruction": "完成慢慢地我要你抵达红球附近，与目标保持0.5米距离后停下后，接着以蓝点为目的地移动，与目标保持25厘米距离后停下",
+      "valid": false,
+      "exact": false,
+      "error": "停靠距离 必须在 0.25..0.6 范围内",
+      "latency_s": 3.384016399999382,
+      "expected": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "red_ball",
+            "speed": "slow",
+            "stop_distance_m": 0.5
+          },
+          {
+            "target": "blue_marker",
+            "speed": "normal",
+            "stop_distance_m": 0.25
+          }
+        ]
+      },
+      "category": "sequence"
+    },
+    {
+      "instruction": "朝蓝色标记行进，路上的障碍请绕过去，与目标保持50厘米距离后停下",
+      "plan": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "blue_marker",
+            "speed": "normal",
+            "stop_distance_m": 0.3
+          }
+        ]
+      },
+      "raw": "{\"status\":\"ok\",\"goals\":[{\"target\":\"blue_marker\",\"speed\":\"normal\",\"stop_distance_m\":0.3}]}",
+      "latency_s": 2.0657025999971665,
+      "adapter": null,
+      "valid": true,
+      "exact": false,
+      "expected": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "blue_marker",
+            "speed": "normal",
+            "stop_distance_m": 0.5
+          }
+        ]
+      },
+      "category": "object"
+    },
+    {
+      "instruction": "我希望你抵达 x=0.35、y=0.0 这个点",
+      "plan": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "red_ball",
+            "speed": "normal",
+            "stop_distance_m": 0.3
+          }
+        ]
+      },
+      "raw": "{\"status\":\"ok\",\"goals\":[{\"target\":\"red_ball\",\"speed\":\"normal\",\"stop_distance_m\":0.3}]}",
+      "latency_s": 1.891607000005024,
+      "adapter": null,
+      "valid": true,
+      "exact": false,
+      "expected": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "point",
+            "speed": "normal",
+            "stop_distance_m": 0.15,
+            "x": 0.35,
+            "y": 0.0
+          }
+        ]
+      },
+      "category": "point"
+    },
+    {
+      "instruction": "完成慢慢地以小球为目的地移动，与目标保持30厘米距离后停下后，接着快速地朝蓝点行进，路上的障碍请绕过去，与目标保持25厘米距离后停下",
+      "valid": false,
+      "exact": false,
+      "error": "Expecting value: line 1 column 1 (char 0)",
+      "latency_s": 6.270392100006575,
+      "expected": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "red_ball",
+            "speed": "slow",
+            "stop_distance_m": 0.3
+          },
+          {
+            "target": "blue_marker",
+            "speed": "fast",
+            "stop_distance_m": 0.25
+          }
+        ]
+      },
+      "category": "sequence"
+    },
+    {
+      "instruction": "以蓝色标记为目的地移动，与目标保持30厘米距离后停下",
+      "plan": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "blue_marker",
+            "speed": "normal",
+            "stop_distance_m": 0.3
+          }
+        ]
+      },
+      "raw": "{\"status\":\"ok\",\"goals\":[{\"target\":\"blue_marker\",\"speed\":\"normal\",\"stop_distance_m\":0.3}]}",
+      "latency_s": 1.87901039999997,
+      "adapter": null,
+      "valid": true,
+      "exact": true,
+      "expected": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "blue_marker",
+            "speed": "normal",
+            "stop_distance_m": 0.3
+          }
+        ]
+      },
+      "category": "object"
+    },
+    {
+      "instruction": "请将世界坐标(1.05, 0.5)作为目的地",
+      "valid": false,
+      "exact": false,
+      "error": "目标字段或速度不符合约定",
+      "latency_s": 2.1202197000020533,
+      "expected": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "point",
+            "speed": "normal",
+            "stop_distance_m": 0.15,
+            "x": 1.05,
+            "y": 0.5
+          }
+        ]
+      },
+      "category": "point"
+    },
+    {
+      "instruction": "完成快速地以球为目的地移动后，接着朝蓝色标记行进，路上的障碍请绕过去，与目标保持25厘米距离后停下",
+      "plan": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "red_ball",
+            "speed": "fast",
+            "stop_distance_m": 0.25
+          }
+        ]
+      },
+      "raw": "{\"status\":\"ok\",\"goals\":[{\"target\":\"red_ball\",\"speed\":\"fast\",\"stop_distance_m\":0.25}]}",
+      "latency_s": 2.0434734000009485,
+      "adapter": null,
+      "valid": true,
+      "exact": false,
+      "expected": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "red_ball",
+            "speed": "fast",
+            "stop_distance_m": 0.3
+          },
+          {
+            "target": "blue_marker",
+            "speed": "normal",
+            "stop_distance_m": 0.25
+          }
+        ]
+      },
+      "category": "sequence"
+    },
+    {
+      "instruction": "快速地以小球为目的地移动，与目标保持0.5米距离后停下",
+      "plan": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "red_ball",
+            "speed": "fast",
+            "stop_distance_m": 0.5
+          }
+        ]
+      },
+      "raw": "{\"status\":\"ok\",\"goals\":[{\"target\":\"red_ball\",\"speed\":\"fast\",\"stop_distance_m\":0.5}]}",
+      "latency_s": 1.8697517999971751,
+      "adapter": null,
+      "valid": true,
+      "exact": true,
+      "expected": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "red_ball",
+            "speed": "fast",
+            "stop_distance_m": 0.5
+          }
+        ]
+      },
+      "category": "object"
+    },
+    {
+      "instruction": "慢慢地我希望你抵达 x=0.35、y=0.0 这个点",
+      "plan": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "red_ball",
+            "speed": "slow",
+            "stop_distance_m": 0.3
+          }
+        ]
+      },
+      "raw": "{\"status\":\"ok\",\"goals\":[{\"target\":\"red_ball\",\"speed\":\"slow\",\"stop_distance_m\":0.3}]}",
+      "latency_s": 2.1072095000054105,
+      "adapter": null,
+      "valid": true,
+      "exact": false,
+      "expected": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "point",
+            "speed": "slow",
+            "stop_distance_m": 0.15,
+            "x": 0.35,
+            "y": 0.0
+          }
+        ]
+      },
+      "category": "point"
+    },
+    {
+      "instruction": "完成快速地我要你抵达球附近，与目标保持0.25米距离后停下后，接着以蓝点为目的地移动，与目标保持25厘米距离后停下",
+      "plan": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "red_ball",
+            "speed": "fast",
+            "stop_distance_m": 0.25
+          },
+          {
+            "target": "blue_marker",
+            "speed": "normal",
+            "stop_distance_m": 0.25
+          }
+        ]
+      },
+      "raw": "{\"status\":\"ok\",\"goals\":[{\"target\":\"red_ball\",\"speed\":\"fast\",\"stop_distance_m\":0.25},{\"target\":\"blue_marker\",\"speed\":\"normal\",\"stop_distance_m\":0.25}]}",
+      "latency_s": 3.5155114000008325,
+      "adapter": null,
+      "valid": true,
+      "exact": true,
+      "expected": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "red_ball",
+            "speed": "fast",
+            "stop_distance_m": 0.25
+          },
+          {
+            "target": "blue_marker",
+            "speed": "normal",
+            "stop_distance_m": 0.25
+          }
+        ]
+      },
+      "category": "sequence"
+    },
+    {
+      "instruction": "慢慢地我要你抵达蓝色标记附近，与目标保持0.4米距离后停下",
+      "plan": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "blue_marker",
+            "speed": "slow",
+            "stop_distance_m": 0.4
+          }
+        ]
+      },
+      "raw": "{\"status\":\"ok\",\"goals\":[{\"target\":\"blue_marker\",\"speed\":\"slow\",\"stop_distance_m\":0.4}]}",
+      "latency_s": 1.910366399999475,
+      "adapter": null,
+      "valid": true,
+      "exact": true,
+      "expected": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "blue_marker",
+            "speed": "slow",
+            "stop_distance_m": 0.4
+          }
+        ]
+      },
+      "category": "object"
+    },
+    {
+      "instruction": "慢慢地请将世界坐标(0.7, 0.5)作为目的地",
+      "plan": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "red_ball",
+            "speed": "slow",
+            "stop_distance_m": 0.3
+          }
+        ]
+      },
+      "raw": "{\"status\":\"ok\",\"goals\":[{\"target\":\"red_ball\",\"speed\":\"slow\",\"stop_distance_m\":0.3}]}",
+      "latency_s": 1.909148599996115,
+      "adapter": null,
+      "valid": true,
+      "exact": false,
+      "expected": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "point",
+            "speed": "slow",
+            "stop_distance_m": 0.15,
+            "x": 0.7,
+            "y": 0.5
+          }
+        ]
+      },
+      "category": "point"
+    },
+    {
+      "instruction": "完成慢慢地朝红球行进，路上的障碍请绕过去，与目标保持50厘米距离后停下后，接着慢慢地朝小球行进，路上的障碍请绕过去，与目标保持25厘米距离后停下",
+      "valid": false,
+      "exact": false,
+      "error": "停靠距离 必须在 0.25..0.6 范围内",
+      "latency_s": 3.4609474999961094,
+      "expected": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "red_ball",
+            "speed": "slow",
+            "stop_distance_m": 0.5
+          },
+          {
+            "target": "red_ball",
+            "speed": "slow",
+            "stop_distance_m": 0.25
+          }
+        ]
+      },
+      "category": "sequence"
+    },
+    {
+      "instruction": "我要你抵达蓝点附近，与目标保持0.4米距离后停下",
+      "plan": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "blue_marker",
+            "speed": "normal",
+            "stop_distance_m": 0.3
+          }
+        ]
+      },
+      "raw": "{\"status\":\"ok\",\"goals\":[{\"target\":\"blue_marker\",\"speed\":\"normal\",\"stop_distance_m\":0.3}]}",
+      "latency_s": 1.9641692000004696,
+      "adapter": null,
+      "valid": true,
+      "exact": false,
+      "expected": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "blue_marker",
+            "speed": "normal",
+            "stop_distance_m": 0.4
+          }
+        ]
+      },
+      "category": "object"
+    },
+    {
+      "instruction": "我希望你抵达 x=0.35、y=-0.5 这个点",
+      "plan": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "red_ball",
+            "speed": "normal",
+            "stop_distance_m": 0.3
+          }
+        ]
+      },
+      "raw": "{\"status\":\"ok\",\"goals\":[{\"target\":\"red_ball\",\"speed\":\"normal\",\"stop_distance_m\":0.3}]}",
+      "latency_s": 2.0615371000021696,
+      "adapter": null,
+      "valid": true,
+      "exact": false,
+      "expected": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "point",
+            "speed": "normal",
+            "stop_distance_m": 0.15,
+            "x": 0.35,
+            "y": -0.5
+          }
+        ]
+      },
+      "category": "point"
+    },
+    {
+      "instruction": "完成朝蓝色标记行进，路上的障碍请绕过去，与目标保持25厘米距离后停下后，接着快速地朝球行进，路上的障碍请绕过去",
+      "plan": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "blue_marker",
+            "speed": "normal",
+            "stop_distance_m": 0.3
+          },
+          {
+            "target": "red_ball",
+            "speed": "fast",
+            "stop_distance_m": 0.3
+          }
+        ]
+      },
+      "raw": "{\"status\":\"ok\",\"goals\":[{\"target\":\"blue_marker\",\"speed\":\"normal\",\"stop_distance_m\":0.3},{\"target\":\"red_ball\",\"speed\":\"fast\",\"stop_distance_m\":0.3}]}",
+      "latency_s": 3.1111415999985184,
+      "adapter": null,
+      "valid": true,
+      "exact": false,
+      "expected": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "blue_marker",
+            "speed": "normal",
+            "stop_distance_m": 0.25
+          },
+          {
+            "target": "red_ball",
+            "speed": "fast",
+            "stop_distance_m": 0.3
+          }
+        ]
+      },
+      "category": "sequence"
+    },
+    {
+      "instruction": "快速地我要你抵达蓝点附近，与目标保持25厘米距离后停下",
+      "plan": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "blue_marker",
+            "speed": "fast",
+            "stop_distance_m": 0.25
+          }
+        ]
+      },
+      "raw": "{\"status\":\"ok\",\"goals\":[{\"target\":\"blue_marker\",\"speed\":\"fast\",\"stop_distance_m\":0.25}]}",
+      "latency_s": 1.9770627000034438,
+      "adapter": null,
+      "valid": true,
+      "exact": true,
+      "expected": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "blue_marker",
+            "speed": "fast",
+            "stop_distance_m": 0.25
+          }
+        ]
+      },
+      "category": "object"
+    },
+    {
+      "instruction": "慢慢地我希望你抵达 x=1.05、y=-0.5 这个点",
+      "plan": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "red_ball",
+            "speed": "slow",
+            "stop_distance_m": 0.3
+          }
+        ]
+      },
+      "raw": "{\"status\":\"ok\",\"goals\":[{\"target\":\"red_ball\",\"speed\":\"slow\",\"stop_distance_m\":0.3}]}",
+      "latency_s": 1.997271100000944,
+      "adapter": null,
+      "valid": true,
+      "exact": false,
+      "expected": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "point",
+            "speed": "slow",
+            "stop_distance_m": 0.15,
+            "x": 1.05,
+            "y": -0.5
+          }
+        ]
+      },
+      "category": "point"
+    },
+    {
+      "instruction": "完成我要你抵达小球附近，与目标保持30厘米距离后停下后，接着快速地我要你抵达蓝色标记附近，与目标保持40厘米距离后停下",
+      "valid": false,
+      "exact": false,
+      "error": "停靠距离 必须在 0.25..0.6 范围内",
+      "latency_s": 3.259099499999138,
+      "expected": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "red_ball",
+            "speed": "normal",
+            "stop_distance_m": 0.3
+          },
+          {
+            "target": "blue_marker",
+            "speed": "fast",
+            "stop_distance_m": 0.4
+          }
+        ]
+      },
+      "category": "sequence"
+    },
+    {
+      "instruction": "慢慢地以蓝色标记为目的地移动",
+      "valid": false,
+      "exact": false,
+      "error": "停靠距离 必须在 0.25..0.6 范围内",
+      "latency_s": 1.8939870999965933,
+      "expected": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "blue_marker",
+            "speed": "slow",
+            "stop_distance_m": 0.3
+          }
+        ]
+      },
+      "category": "object"
+    },
+    {
+      "instruction": "请将世界坐标(0.7, 0.5)作为目的地",
+      "valid": false,
+      "exact": false,
+      "error": "目标字段或速度不符合约定",
+      "latency_s": 1.8232002000004286,
+      "expected": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "point",
+            "speed": "normal",
+            "stop_distance_m": 0.15,
+            "x": 0.7,
+            "y": 0.5
+          }
+        ]
+      },
+      "category": "point"
+    },
+    {
+      "instruction": "完成快速地朝蓝点行进，路上的障碍请绕过去，与目标保持50厘米距离后停下后，接着慢慢地朝蓝点行进，路上的障碍请绕过去，与目标保持0.4米距离后停下",
+      "plan": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "blue_marker",
+            "speed": "fast",
+            "stop_distance_m": 0.4
+          },
+          {
+            "target": "blue_marker",
+            "speed": "normal",
+            "stop_distance_m": 0.3
+          }
+        ]
+      },
+      "raw": "{\"status\":\"ok\",\"goals\":[{\"target\":\"blue_marker\",\"speed\":\"fast\",\"stop_distance_m\":0.4},{\"target\":\"blue_marker\",\"speed\":\"normal\",\"stop_distance_m\":0.3}]}",
+      "latency_s": 3.3384358000039356,
+      "adapter": null,
+      "valid": true,
+      "exact": false,
+      "expected": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "blue_marker",
+            "speed": "fast",
+            "stop_distance_m": 0.5
+          },
+          {
+            "target": "blue_marker",
+            "speed": "slow",
+            "stop_distance_m": 0.4
+          }
+        ]
+      },
+      "category": "sequence"
+    },
+    {
+      "instruction": "快速地朝红球行进，路上的障碍请绕过去，与目标保持0.25米距离后停下",
+      "plan": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "red_ball",
+            "speed": "fast",
+            "stop_distance_m": 0.25
+          }
+        ]
+      },
+      "raw": "{\"status\":\"ok\",\"goals\":[{\"target\":\"red_ball\",\"speed\":\"fast\",\"stop_distance_m\":0.25}]}",
+      "latency_s": 2.2590420999986236,
+      "adapter": null,
+      "valid": true,
+      "exact": true,
+      "expected": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "red_ball",
+            "speed": "fast",
+            "stop_distance_m": 0.25
+          }
+        ]
+      },
+      "category": "object"
+    },
+    {
+      "instruction": "我希望你抵达 x=0.7、y=0.0 这个点",
+      "plan": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "red_ball",
+            "speed": "normal",
+            "stop_distance_m": 0.3
+          }
+        ]
+      },
+      "raw": "{\"status\":\"ok\",\"goals\":[{\"target\":\"red_ball\",\"speed\":\"normal\",\"stop_distance_m\":0.3}]}",
+      "latency_s": 2.1113760999942315,
+      "adapter": null,
+      "valid": true,
+      "exact": false,
+      "expected": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "point",
+            "speed": "normal",
+            "stop_distance_m": 0.15,
+            "x": 0.7,
+            "y": 0.0
+          }
+        ]
+      },
+      "category": "point"
+    },
+    {
+      "instruction": "完成以蓝色标记为目的地移动，与目标保持40厘米距离后停下后，接着慢慢地以小球为目的地移动，与目标保持25厘米距离后停下",
+      "valid": false,
+      "exact": false,
+      "error": "Expecting value: line 1 column 1 (char 0)",
+      "latency_s": 3.5131583999973373,
+      "expected": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "blue_marker",
+            "speed": "normal",
+            "stop_distance_m": 0.4
+          },
+          {
+            "target": "red_ball",
+            "speed": "slow",
+            "stop_distance_m": 0.25
+          }
+        ]
+      },
+      "category": "sequence"
+    },
+    {
+      "instruction": "以蓝点为目的地移动，与目标保持25厘米距离后停下",
+      "plan": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "blue_marker",
+            "speed": "normal",
+            "stop_distance_m": 0.3
+          }
+        ]
+      },
+      "raw": "{\"status\":\"ok\",\"goals\":[{\"target\":\"blue_marker\",\"speed\":\"normal\",\"stop_distance_m\":0.3}]}",
+      "latency_s": 1.9632124999989173,
+      "adapter": null,
+      "valid": true,
+      "exact": false,
+      "expected": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "blue_marker",
+            "speed": "normal",
+            "stop_distance_m": 0.25
+          }
+        ]
+      },
+      "category": "object"
+    },
+    {
+      "instruction": "快速地请将世界坐标(0.35, -0.5)作为目的地",
+      "plan": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "red_ball",
+            "speed": "fast",
+            "stop_distance_m": 0.35
+          }
+        ]
+      },
+      "raw": "{\"status\":\"ok\",\"goals\":[{\"target\":\"red_ball\",\"speed\":\"fast\",\"stop_distance_m\":0.35}]}",
+      "latency_s": 2.1225556999997934,
+      "adapter": null,
+      "valid": true,
+      "exact": false,
+      "expected": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "point",
+            "speed": "fast",
+            "stop_distance_m": 0.15,
+            "x": 0.35,
+            "y": -0.5
+          }
+        ]
+      },
+      "category": "point"
+    },
+    {
+      "instruction": "完成快速地我要你抵达球附近，与目标保持40厘米距离后停下后，接着朝球行进，路上的障碍请绕过去，与目标保持25厘米距离后停下",
+      "plan": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "red_ball",
+            "speed": "fast",
+            "stop_distance_m": 0.25
+          }
+        ]
+      },
+      "raw": "{\"status\":\"ok\",\"goals\":[{\"target\":\"red_ball\",\"speed\":\"fast\",\"stop_distance_m\":0.25}]}",
+      "latency_s": 2.148579000000609,
+      "adapter": null,
+      "valid": true,
+      "exact": false,
+      "expected": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "red_ball",
+            "speed": "fast",
+            "stop_distance_m": 0.4
+          },
+          {
+            "target": "red_ball",
+            "speed": "normal",
+            "stop_distance_m": 0.25
+          }
+        ]
+      },
+      "category": "sequence"
+    },
+    {
+      "instruction": "快速地我要你抵达小球附近，与目标保持50厘米距离后停下",
+      "valid": false,
+      "exact": false,
+      "error": "停靠距离 必须在 0.25..0.6 范围内",
+      "latency_s": 1.94105529999797,
+      "expected": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "red_ball",
+            "speed": "fast",
+            "stop_distance_m": 0.5
+          }
+        ]
+      },
+      "category": "object"
+    },
+    {
+      "instruction": "请将世界坐标(0.35, 0.0)作为目的地",
+      "plan": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "red_ball",
+            "speed": "normal",
+            "stop_distance_m": 0.3
+          }
+        ]
+      },
+      "raw": "{\"status\":\"ok\",\"goals\":[{\"target\":\"red_ball\",\"speed\":\"normal\",\"stop_distance_m\":0.3}]}",
+      "latency_s": 1.8273218999966048,
+      "adapter": null,
+      "valid": true,
+      "exact": false,
+      "expected": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "point",
+            "speed": "normal",
+            "stop_distance_m": 0.15,
+            "x": 0.35,
+            "y": 0.0
+          }
+        ]
+      },
+      "category": "point"
+    },
+    {
+      "instruction": "完成我要你抵达蓝点附近，与目标保持40厘米距离后停下后，接着慢慢地我要你抵达蓝点附近，与目标保持50厘米距离后停下",
+      "valid": false,
+      "exact": false,
+      "error": "停靠距离 必须在 0.25..0.6 范围内",
+      "latency_s": 3.4999692999990657,
+      "expected": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "blue_marker",
+            "speed": "normal",
+            "stop_distance_m": 0.4
+          },
+          {
+            "target": "blue_marker",
+            "speed": "slow",
+            "stop_distance_m": 0.5
+          }
+        ]
+      },
+      "category": "sequence"
+    },
+    {
+      "instruction": "慢慢地我要你抵达红球附近，与目标保持0.25米距离后停下",
+      "plan": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "red_ball",
+            "speed": "slow",
+            "stop_distance_m": 0.25
+          }
+        ]
+      },
+      "raw": "{\"status\":\"ok\",\"goals\":[{\"target\":\"red_ball\",\"speed\":\"slow\",\"stop_distance_m\":0.25}]}",
+      "latency_s": 2.3187524000022677,
+      "adapter": null,
+      "valid": true,
+      "exact": true,
+      "expected": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "red_ball",
+            "speed": "slow",
+            "stop_distance_m": 0.25
+          }
+        ]
+      },
+      "category": "object"
+    },
+    {
+      "instruction": "请将世界坐标(0.7, 0.0)作为目的地",
+      "plan": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "red_ball",
+            "speed": "normal",
+            "stop_distance_m": 0.3
+          }
+        ]
+      },
+      "raw": "{\"status\":\"ok\",\"goals\":[{\"target\":\"red_ball\",\"speed\":\"normal\",\"stop_distance_m\":0.3}]}",
+      "latency_s": 2.3867012999980943,
+      "adapter": null,
+      "valid": true,
+      "exact": false,
+      "expected": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "point",
+            "speed": "normal",
+            "stop_distance_m": 0.15,
+            "x": 0.7,
+            "y": 0.0
+          }
+        ]
+      },
+      "category": "point"
+    },
+    {
+      "instruction": "完成快速地朝蓝点行进，路上的障碍请绕过去，与目标保持0.25米距离后停下后，接着朝蓝点行进，路上的障碍请绕过去，与目标保持0.25米距离后停下",
+      "plan": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "blue_marker",
+            "speed": "fast",
+            "stop_distance_m": 0.25
+          }
+        ]
+      },
+      "raw": "{\"status\":\"ok\",\"goals\":[{\"target\":\"blue_marker\",\"speed\":\"fast\",\"stop_distance_m\":0.25}]}",
+      "latency_s": 2.079056499998842,
+      "adapter": null,
+      "valid": true,
+      "exact": false,
+      "expected": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "blue_marker",
+            "speed": "fast",
+            "stop_distance_m": 0.25
+          },
+          {
+            "target": "blue_marker",
+            "speed": "normal",
+            "stop_distance_m": 0.25
+          }
+        ]
+      },
+      "category": "sequence"
+    },
+    {
+      "instruction": "我要你抵达球附近，与目标保持0.5米距离后停下",
+      "plan": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "red_ball",
+            "speed": "normal",
+            "stop_distance_m": 0.3
+          }
+        ]
+      },
+      "raw": "{\"status\":\"ok\",\"goals\":[{\"target\":\"red_ball\",\"speed\":\"normal\",\"stop_distance_m\":0.3}]}",
+      "latency_s": 1.8888941000041086,
+      "adapter": null,
+      "valid": true,
+      "exact": false,
+      "expected": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "red_ball",
+            "speed": "normal",
+            "stop_distance_m": 0.5
+          }
+        ]
+      },
+      "category": "object"
+    },
+    {
+      "instruction": "快速地我希望你抵达 x=0.35、y=-0.5 这个点",
+      "plan": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "red_ball",
+            "speed": "fast",
+            "stop_distance_m": 0.3
+          }
+        ]
+      },
+      "raw": "{\"status\":\"ok\",\"goals\":[{\"target\":\"red_ball\",\"speed\":\"fast\",\"stop_distance_m\":0.3}]}",
+      "latency_s": 1.9552305999968667,
+      "adapter": null,
+      "valid": true,
+      "exact": false,
+      "expected": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "point",
+            "speed": "fast",
+            "stop_distance_m": 0.15,
+            "x": 0.35,
+            "y": -0.5
+          }
+        ]
+      },
+      "category": "point"
+    },
+    {
+      "instruction": "完成我要你抵达小球附近，与目标保持0.25米距离后停下后，接着快速地以蓝色标记为目的地移动，与目标保持0.25米距离后停下",
+      "plan": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "red_ball",
+            "speed": "fast",
+            "stop_distance_m": 0.25
+          },
+          {
+            "target": "blue_marker",
+            "speed": "normal",
+            "stop_distance_m": 0.25
+          }
+        ]
+      },
+      "raw": "{\"status\":\"ok\",\"goals\":[{\"target\":\"red_ball\",\"speed\":\"fast\",\"stop_distance_m\":0.25},{\"target\":\"blue_marker\",\"speed\":\"normal\",\"stop_distance_m\":0.25}]}",
+      "latency_s": 3.392430800005968,
+      "adapter": null,
+      "valid": true,
+      "exact": false,
+      "expected": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "red_ball",
+            "speed": "normal",
+            "stop_distance_m": 0.25
+          },
+          {
+            "target": "blue_marker",
+            "speed": "fast",
+            "stop_distance_m": 0.25
+          }
+        ]
+      },
+      "category": "sequence"
+    },
+    {
+      "instruction": "快速地我要你抵达蓝色标记附近，与目标保持40厘米距离后停下",
+      "valid": false,
+      "exact": false,
+      "error": "停靠距离 必须在 0.25..0.6 范围内",
+      "latency_s": 2.0249220999976387,
+      "expected": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "blue_marker",
+            "speed": "fast",
+            "stop_distance_m": 0.4
+          }
+        ]
+      },
+      "category": "object"
+    },
+    {
+      "instruction": "请将世界坐标(0.35, 0.5)作为目的地",
+      "plan": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "red_ball",
+            "speed": "normal",
+            "stop_distance_m": 0.3
+          }
+        ]
+      },
+      "raw": "{\"status\":\"ok\",\"goals\":[{\"target\":\"red_ball\",\"speed\":\"normal\",\"stop_distance_m\":0.3}]}",
+      "latency_s": 1.8521436999944854,
+      "adapter": null,
+      "valid": true,
+      "exact": false,
+      "expected": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "point",
+            "speed": "normal",
+            "stop_distance_m": 0.15,
+            "x": 0.35,
+            "y": 0.5
+          }
+        ]
+      },
+      "category": "point"
+    },
+    {
+      "instruction": "完成以球为目的地移动，与目标保持0.25米距离后停下后，接着我要你抵达小球附近，与目标保持30厘米距离后停下",
+      "valid": false,
+      "exact": false,
+      "error": "停靠距离 必须在 0.25..0.6 范围内",
+      "latency_s": 3.1923838000002434,
+      "expected": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "red_ball",
+            "speed": "normal",
+            "stop_distance_m": 0.25
+          },
+          {
+            "target": "red_ball",
+            "speed": "normal",
+            "stop_distance_m": 0.3
+          }
+        ]
+      },
+      "category": "sequence"
+    },
+    {
+      "instruction": "我要你抵达蓝色标记附近，与目标保持30厘米距离后停下",
+      "plan": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "blue_marker",
+            "speed": "normal",
+            "stop_distance_m": 0.3
+          }
+        ]
+      },
+      "raw": "{\"status\":\"ok\",\"goals\":[{\"target\":\"blue_marker\",\"speed\":\"normal\",\"stop_distance_m\":0.3}]}",
+      "latency_s": 2.2775428000022657,
+      "adapter": null,
+      "valid": true,
+      "exact": true,
+      "expected": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "blue_marker",
+            "speed": "normal",
+            "stop_distance_m": 0.3
+          }
+        ]
+      },
+      "category": "object"
+    },
+    {
+      "instruction": "慢慢地请将世界坐标(1.05, 0.0)作为目的地",
+      "plan": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "red_ball",
+            "speed": "slow",
+            "stop_distance_m": 0.3
+          }
+        ]
+      },
+      "raw": "{\"status\":\"ok\",\"goals\":[{\"target\":\"red_ball\",\"speed\":\"slow\",\"stop_distance_m\":0.3}]}",
+      "latency_s": 2.21677130000171,
+      "adapter": null,
+      "valid": true,
+      "exact": false,
+      "expected": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "point",
+            "speed": "slow",
+            "stop_distance_m": 0.15,
+            "x": 1.05,
+            "y": 0.0
+          }
+        ]
+      },
+      "category": "point"
+    },
+    {
+      "instruction": "完成慢慢地朝蓝点行进，路上的障碍请绕过去，与目标保持50厘米距离后停下后，接着以蓝色标记为目的地移动，与目标保持40厘米距离后停下",
+      "plan": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "blue_marker",
+            "speed": "slow",
+            "stop_distance_m": 0.3
+          },
+          {
+            "target": "blue_marker",
+            "speed": "normal",
+            "stop_distance_m": 0.3
+          },
+          {
+            "target": "blue_marker",
+            "speed": "fast",
+            "stop_distance_m": 0.4
+          }
+        ]
+      },
+      "raw": "{\"status\":\"ok\",\"goals\":[{\"target\":\"blue_marker\",\"speed\":\"slow\",\"stop_distance_m\":0.3},{\"target\":\"blue_marker\",\"speed\":\"normal\",\"stop_distance_m\":0.3},{\"target\":\"blue_marker\",\"speed\":\"fast\",\"stop_distance_m\":0.4}]}",
+      "latency_s": 4.681144800000766,
+      "adapter": null,
+      "valid": true,
+      "exact": false,
+      "expected": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "blue_marker",
+            "speed": "slow",
+            "stop_distance_m": 0.5
+          },
+          {
+            "target": "blue_marker",
+            "speed": "normal",
+            "stop_distance_m": 0.4
+          }
+        ]
+      },
+      "category": "sequence"
+    },
+    {
+      "instruction": "快速地朝蓝点行进，路上的障碍请绕过去，与目标保持25厘米距离后停下",
+      "plan": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "blue_marker",
+            "speed": "fast",
+            "stop_distance_m": 0.25
+          }
+        ]
+      },
+      "raw": "{\"status\":\"ok\",\"goals\":[{\"target\":\"blue_marker\",\"speed\":\"fast\",\"stop_distance_m\":0.25}]}",
+      "latency_s": 2.058326099999249,
+      "adapter": null,
+      "valid": true,
+      "exact": true,
+      "expected": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "blue_marker",
+            "speed": "fast",
+            "stop_distance_m": 0.25
+          }
+        ]
+      },
+      "category": "object"
+    },
+    {
+      "instruction": "慢慢地请将世界坐标(0.7, -0.5)作为目的地",
+      "plan": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "red_ball",
+            "speed": "slow",
+            "stop_distance_m": 0.3
+          }
+        ]
+      },
+      "raw": "{\"status\":\"ok\",\"goals\":[{\"target\":\"red_ball\",\"speed\":\"slow\",\"stop_distance_m\":0.3}]}",
+      "latency_s": 2.015677899995353,
+      "adapter": null,
+      "valid": true,
+      "exact": false,
+      "expected": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "point",
+            "speed": "slow",
+            "stop_distance_m": 0.15,
+            "x": 0.7,
+            "y": -0.5
+          }
+        ]
+      },
+      "category": "point"
+    },
+    {
+      "instruction": "完成以蓝色标记为目的地移动，与目标保持30厘米距离后停下后，接着快速地朝球行进，路上的障碍请绕过去，与目标保持30厘米距离后停下",
+      "plan": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "red_ball",
+            "speed": "fast",
+            "stop_distance_m": 0.3
+          }
+        ]
+      },
+      "raw": "{\"status\":\"ok\",\"goals\":[{\"target\":\"red_ball\",\"speed\":\"fast\",\"stop_distance_m\":0.3}]}",
+      "latency_s": 1.9343921000036062,
+      "adapter": null,
+      "valid": true,
+      "exact": false,
+      "expected": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "blue_marker",
+            "speed": "normal",
+            "stop_distance_m": 0.3
+          },
+          {
+            "target": "red_ball",
+            "speed": "fast",
+            "stop_distance_m": 0.3
+          }
+        ]
+      },
+      "category": "sequence"
+    },
+    {
+      "instruction": "朝蓝点行进，路上的障碍请绕过去",
+      "plan": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "blue_marker",
+            "speed": "normal",
+            "stop_distance_m": 0.3
+          }
+        ]
+      },
+      "raw": "{\"status\":\"ok\",\"goals\":[{\"target\":\"blue_marker\",\"speed\":\"normal\",\"stop_distance_m\":0.3}]}",
+      "latency_s": 1.947988499996427,
+      "adapter": null,
+      "valid": true,
+      "exact": true,
+      "expected": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "blue_marker",
+            "speed": "normal",
+            "stop_distance_m": 0.3
+          }
+        ]
+      },
+      "category": "object"
+    },
+    {
+      "instruction": "我希望你抵达 x=1.05、y=0.0 这个点",
+      "plan": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "red_ball",
+            "speed": "normal",
+            "stop_distance_m": 0.3
+          }
+        ]
+      },
+      "raw": "{\"status\":\"ok\",\"goals\":[{\"target\":\"red_ball\",\"speed\":\"normal\",\"stop_distance_m\":0.3}]}",
+      "latency_s": 1.9139746000000741,
+      "adapter": null,
+      "valid": true,
+      "exact": false,
+      "expected": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "point",
+            "speed": "normal",
+            "stop_distance_m": 0.15,
+            "x": 1.05,
+            "y": 0.0
+          }
+        ]
+      },
+      "category": "point"
+    },
+    {
+      "instruction": "慢慢地朝蓝点行进，路上的障碍请绕过去，与目标保持40厘米距离后停下",
+      "valid": false,
+      "exact": false,
+      "error": "停靠距离 必须在 0.25..0.6 范围内",
+      "latency_s": 1.9771779000002425,
+      "expected": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "blue_marker",
+            "speed": "slow",
+            "stop_distance_m": 0.4
+          }
+        ]
+      },
+      "category": "object"
+    },
+    {
+      "instruction": "慢慢地请将世界坐标(0.35, 0.0)作为目的地",
+      "plan": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "red_ball",
+            "speed": "slow",
+            "stop_distance_m": 0.35
+          }
+        ]
+      },
+      "raw": "{\"status\":\"ok\",\"goals\":[{\"target\":\"red_ball\",\"speed\":\"slow\",\"stop_distance_m\":0.35}]}",
+      "latency_s": 2.290080400001898,
+      "adapter": null,
+      "valid": true,
+      "exact": false,
+      "expected": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "point",
+            "speed": "slow",
+            "stop_distance_m": 0.15,
+            "x": 0.35,
+            "y": 0.0
+          }
+        ]
+      },
+      "category": "point"
+    },
+    {
+      "instruction": "快速地以蓝点为目的地移动",
+      "plan": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "blue_marker",
+            "speed": "fast",
+            "stop_distance_m": 0.3
+          }
+        ]
+      },
+      "raw": "{\"status\":\"ok\",\"goals\":[{\"target\":\"blue_marker\",\"speed\":\"fast\",\"stop_distance_m\":0.3}]}",
+      "latency_s": 2.23783949999779,
+      "adapter": null,
+      "valid": true,
+      "exact": true,
+      "expected": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "blue_marker",
+            "speed": "fast",
+            "stop_distance_m": 0.3
+          }
+        ]
+      },
+      "category": "object"
+    },
+    {
+      "instruction": "快速地请将世界坐标(0.35, 0.5)作为目的地",
+      "plan": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "red_ball",
+            "speed": "fast",
+            "stop_distance_m": 0.35
+          }
+        ]
+      },
+      "raw": "{\"status\":\"ok\",\"goals\":[{\"target\":\"red_ball\",\"speed\":\"fast\",\"stop_distance_m\":0.35}]}",
+      "latency_s": 2.372292499996547,
+      "adapter": null,
+      "valid": true,
+      "exact": false,
+      "expected": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "point",
+            "speed": "fast",
+            "stop_distance_m": 0.15,
+            "x": 0.35,
+            "y": 0.5
+          }
+        ]
+      },
+      "category": "point"
+    },
+    {
+      "instruction": "快速地以小球为目的地移动，与目标保持30厘米距离后停下",
+      "plan": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "red_ball",
+            "speed": "fast",
+            "stop_distance_m": 0.3
+          }
+        ]
+      },
+      "raw": "{\"status\":\"ok\",\"goals\":[{\"target\":\"red_ball\",\"speed\":\"fast\",\"stop_distance_m\":0.3}]}",
+      "latency_s": 1.915566999996372,
+      "adapter": null,
+      "valid": true,
+      "exact": true,
+      "expected": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "red_ball",
+            "speed": "fast",
+            "stop_distance_m": 0.3
+          }
+        ]
+      },
+      "category": "object"
+    },
+    {
+      "instruction": "请将世界坐标(1.05, 0.0)作为目的地",
+      "valid": false,
+      "exact": false,
+      "error": "目标字段或速度不符合约定",
+      "latency_s": 1.923658699997759,
+      "expected": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "point",
+            "speed": "normal",
+            "stop_distance_m": 0.15,
+            "x": 1.05,
+            "y": 0.0
+          }
+        ]
+      },
+      "category": "point"
+    },
+    {
+      "instruction": "快速地以球为目的地移动，与目标保持40厘米距离后停下",
+      "plan": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "red_ball",
+            "speed": "fast",
+            "stop_distance_m": 0.3
+          }
+        ]
+      },
+      "raw": "{\"status\":\"ok\",\"goals\":[{\"target\":\"red_ball\",\"speed\":\"fast\",\"stop_distance_m\":0.3}]}",
+      "latency_s": 1.8998369999972056,
+      "adapter": null,
+      "valid": true,
+      "exact": false,
+      "expected": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "red_ball",
+            "speed": "fast",
+            "stop_distance_m": 0.4
+          }
+        ]
+      },
+      "category": "object"
+    },
+    {
+      "instruction": "我希望你抵达 x=1.05、y=-0.5 这个点",
+      "plan": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "red_ball",
+            "speed": "normal",
+            "stop_distance_m": 0.3
+          }
+        ]
+      },
+      "raw": "{\"status\":\"ok\",\"goals\":[{\"target\":\"red_ball\",\"speed\":\"normal\",\"stop_distance_m\":0.3}]}",
+      "latency_s": 2.0881657999998424,
+      "adapter": null,
+      "valid": true,
+      "exact": false,
+      "expected": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "point",
+            "speed": "normal",
+            "stop_distance_m": 0.15,
+            "x": 1.05,
+            "y": -0.5
+          }
+        ]
+      },
+      "category": "point"
+    },
+    {
+      "instruction": "慢慢地以蓝色标记为目的地移动，与目标保持0.5米距离后停下",
+      "plan": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "blue_marker",
+            "speed": "slow",
+            "stop_distance_m": 0.3
+          }
+        ]
+      },
+      "raw": "{\"status\":\"ok\",\"goals\":[{\"target\":\"blue_marker\",\"speed\":\"slow\",\"stop_distance_m\":0.3}]}",
+      "latency_s": 1.9118355000027805,
+      "adapter": null,
+      "valid": true,
+      "exact": false,
+      "expected": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "blue_marker",
+            "speed": "slow",
+            "stop_distance_m": 0.5
+          }
+        ]
+      },
+      "category": "object"
+    },
+    {
+      "instruction": "慢慢地请将世界坐标(1.05, 0.5)作为目的地",
+      "plan": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "red_ball",
+            "speed": "slow",
+            "stop_distance_m": 0.3
+          }
+        ]
+      },
+      "raw": "{\"status\":\"ok\",\"goals\":[{\"target\":\"red_ball\",\"speed\":\"slow\",\"stop_distance_m\":0.3}]}",
+      "latency_s": 1.8670805000001565,
+      "adapter": null,
+      "valid": true,
+      "exact": false,
+      "expected": {
+        "status": "ok",
+        "goals": [
+          {
+            "target": "point",
+            "speed": "slow",
+            "stop_distance_m": 0.15,
+            "x": 1.05,
+            "y": 0.5
+          }
+        ]
+      },
+      "category": "point"
+    }
+  ]
+}

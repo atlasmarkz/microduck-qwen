@@ -7,7 +7,18 @@ name = "microduck-qwen"
 version = "0.1.0"
 description = "Locally fine-tuned Qwen goals for the official MicroDuck MuJoCo simulator"
 requires-python = ">=3.12,<3.13"
-dependencies = ["mlx-lm[train]==0.32.0", "mlx==0.32.3", "transformers==5.19.0"]
+dependencies = [
+    "mlx-lm[train]==0.32.0; sys_platform == 'darwin' and platform_machine == 'arm64'",
+    "mlx==0.32.3; sys_platform == 'darwin' and platform_machine == 'arm64'",
+    "transformers==5.19.0",
+]
+
+[project.optional-dependencies]
+torch = ["torch==2.11.0", "peft==0.21.2", "numpy>=1.26", "Pillow==12.3.0"]
+simulation = [
+    "mujoco==3.16.0", "onnxruntime==1.31.0",
+    "better-actuator-models @ https://codeload.github.com/Rhoban/bam/zip/57d13ead53206a6bf0db3d66f86506ae8c2ce01a",
+]
 
 [project.scripts]
 duck-language = "microduck_qwen.cli:main"

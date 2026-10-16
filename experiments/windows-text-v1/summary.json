@@ -1,0 +1,138 @@
+{
+  "date": "2026-10-15",
+  "platform": "Windows / NVIDIA RTX 3060 8 GiB",
+  "source_base_commit": "2a92a3ff62be7698ca273010733f3795b57774f8",
+  "model": {
+    "model": "Qwen/Qwen3-0.6B",
+    "revision": "c1899de289a04d12100db370d81485cdf75e47ca"
+  },
+  "versions": {
+    "torch": "2.11.0+cu128",
+    "transformers": "5.19.0",
+    "peft": "0.21.2"
+  },
+  "base": {
+    "count": 80,
+    "valid_rate": 0.8125,
+    "exact_plan_rate": 0.2,
+    "median_latency_s": 2.0494546499976423,
+    "by_category": {
+      "object": {
+        "count": 26,
+        "exact_rate": 0.5384615384615384
+      },
+      "point": {
+        "count": 26,
+        "exact_rate": 0
+      },
+      "sequence": {
+        "count": 20,
+        "exact_rate": 0.05
+      },
+      "stop": {
+        "count": 3,
+        "exact_rate": 0.3333333333333333
+      },
+      "unsupported": {
+        "count": 5,
+        "exact_rate": 0
+      }
+    },
+    "split": "test",
+    "dataset_sha256": "c7fae1a8066400f5f2148fff107f74f18cefcf5e75033349b15e4e076511fe23",
+    "selection_seed": 42,
+    "adapter": null,
+    "note": "Synthetic held-out paraphrases; exact goal plans, not physical task success."
+  },
+  "sft": {
+    "count": 80,
+    "valid_rate": 1,
+    "exact_plan_rate": 0.9375,
+    "median_latency_s": 3.736366099998122,
+    "by_category": {
+      "object": {
+        "count": 26,
+        "exact_rate": 1
+      },
+      "point": {
+        "count": 26,
+        "exact_rate": 1
+      },
+      "sequence": {
+        "count": 20,
+        "exact_rate": 0.75
+      },
+      "stop": {
+        "count": 3,
+        "exact_rate": 1
+      },
+      "unsupported": {
+        "count": 5,
+        "exact_rate": 1
+      }
+    },
+    "split": "test",
+    "dataset_sha256": "c7fae1a8066400f5f2148fff107f74f18cefcf5e75033349b15e4e076511fe23",
+    "selection_seed": 42,
+    "adapter": "adapters/nav-torch",
+    "note": "Synthetic held-out paraphrases; exact goal plans, not physical task success."
+  },
+  "training": {
+    "backend": "torch",
+    "device": "cuda",
+    "iterations": 300,
+    "seed": 42,
+    "batch_size": 2,
+    "learning_rate": 0.0001,
+    "lora": {
+      "rank": 16,
+      "alpha": 32,
+      "last_layers": 16,
+      "target_modules": "all-linear"
+    },
+    "max_seq_length": 768,
+    "completion_only_loss": true,
+    "enable_thinking": false,
+    "trainable_parameters": 5767168,
+    "changed_tensors": 224,
+    "valid_loss": 0.0005303775789354562,
+    "elapsed_s": 145.8263078000018,
+    "peak_cuda_allocated_bytes": 2366577664,
+    "note": "PEFT adapters are separate from historical MLX weights; no physical navigation evaluation."
+  },
+  "dataset": {
+    "train": {
+      "rows": 1542,
+      "unique_instructions": 1374,
+      "sha256": "c070fc69dc02a64becb12dc6d5ae1ce7a18addc84f5f5da4d9788b5a8e196cea"
+    },
+    "valid": {
+      "rows": 148,
+      "unique_instructions": 148,
+      "sha256": "40924fcd60660280ed79be1728e19757bbcad1054dfd27bf51cd6ed6180cea92"
+    },
+    "test": {
+      "rows": 226,
+      "unique_instructions": 226,
+      "sha256": "c7fae1a8066400f5f2148fff107f74f18cefcf5e75033349b15e4e076511fe23"
+    },
+    "method": "Synthetic grammar teacher; disjoint paraphrase templates, not human-validated language data."
+  },
+  "unit_tests": {
+    "passed": 52,
+    "skipped": 0
+  },
+  "artifacts": {
+    "base": "experiments/windows-text-v1/base-test.json",
+    "sft": "experiments/windows-text-v1/sft-test.json",
+    "training": "experiments/windows-text-v1/training.json",
+    "adapter": "adapters/nav-torch"
+  },
+  "limits": [
+    "One training seed; synthetic grammar-generated text only.",
+    "Test set evaluated once after the fixed 300-step run; no test-driven tuning.",
+    "No Windows visual model training or physical simulator rollout.",
+    "Historical MLX runs differ in backend, LoRA scaling, and training budget; not a controlled platform comparison.",
+    "CUDA peak is PyTorch allocated memory, not total GPU or system memory."
+  ]
+}

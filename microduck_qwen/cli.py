@@ -3,11 +3,11 @@
 import argparse
 from contextlib import ExitStack
 from datetime import datetime
-import fcntl
 import json
 import time
 
 from . import ROOT
+from .locking import lock_exclusive
 from .contract import compact
 from .model import Planner
 from .navigation import Observer, Robot, execute
@@ -24,7 +24,7 @@ def run_instruction(planner, instruction, preview=False, timeout=60):
     with ExitStack() as resources:
         execution_lock = resources.enter_context((ROOT / "runs/navigation.lock").open("a"))
         try:
-            fcntl.flock(execution_lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            lock_exclusive(execution_lock)
         except BlockingIOError:
             raise RuntimeError("已有导航指令在执行；先用 stop 或 Ctrl+C 停止它。")
         try:

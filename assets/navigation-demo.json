@@ -1,0 +1,43 @@
+{
+  "prediction": {
+    "instruction": "绕开障碍物走到红球旁边，离球30厘米停下",
+    "plan": {
+      "status": "ok",
+      "goals": [
+        {
+          "target": "red_ball",
+          "speed": "normal",
+          "stop_distance_m": 0.3
+        }
+      ]
+    },
+    "raw": "{\"status\":\"ok\",\"goals\":[{\"target\":\"red_ball\",\"speed\":\"normal\",\"stop_distance_m\":0.3}]}",
+    "latency_s": 3.6794262000039453
+  },
+  "execution": {
+    "success": true,
+    "goals": [
+      {
+        "goal": {
+          "target": "red_ball",
+          "speed": "normal",
+          "stop_distance_m": 0.3
+        },
+        "distance_m": 0.32308211793295516,
+        "elapsed_s": 9.468999999997322,
+        "path_length_m": 1.520004509806298,
+        "min_clearance_m": 0.11713327075430185,
+        "position": [
+          0.9201325643389205,
+          0.4114195570076176
+        ]
+      }
+    ],
+    "observation": "MuJoCo ground-truth pose and fixed scene map"
+  },
+  "nominal_fps": 10,
+  "duration_s": 16.39,
+  "frame_count": 167,
+  "gif": "assets/navigation-demo.gif",
+  "note": "Live model inference and live MuJoCo physics; text is a status overlay. Frame durations preserve wall-clock capture intervals, rounded to GIF's 10 ms resolution."
+}

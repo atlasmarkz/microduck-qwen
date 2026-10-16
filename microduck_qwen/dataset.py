@@ -107,12 +107,12 @@ def main():
             raise ValueError(f"数据集跨 split 重复: {overlap}")
         seen |= inputs
         text = "".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows)
-        (out / f"{split}.jsonl").write_text(text)
+        (out / f"{split}.jsonl").write_text(text, encoding="utf-8", newline="\n")
         chat = [{"messages": messages(r["instruction"]) + [{"role": "assistant", "content": compact(r["expected"])}]} for r in rows]
-        (out / f"{split}_chat.jsonl").write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in chat))
+        (out / f"{split}_chat.jsonl").write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in chat), encoding="utf-8", newline="\n")
         stats[split] = {"rows": len(rows), "unique_instructions": len(inputs), "sha256": hashlib.sha256(text.encode()).hexdigest()}
     stats["method"] = "Synthetic grammar teacher; disjoint paraphrase templates, not human-validated language data."
-    (out / "manifest.json").write_text(json.dumps(stats, ensure_ascii=False, indent=2) + "\n")
+    (out / "manifest.json").write_text(json.dumps(stats, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(json.dumps(stats, ensure_ascii=False, indent=2))
 
 

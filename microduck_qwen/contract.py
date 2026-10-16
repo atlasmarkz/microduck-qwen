@@ -13,7 +13,7 @@ target只能是red_ball、blue_marker或point；point必须额外包含x和y，�
 
 
 def arena():
-    return json.loads(ARENA_FILE.read_text())
+    return json.loads(ARENA_FILE.read_text(encoding="utf-8"))
 
 
 def messages(instruction: str):
