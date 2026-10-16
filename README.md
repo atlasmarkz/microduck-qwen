@@ -1,5 +1,11 @@
 # MicroDuck × Qwen：中文目标导航
 
+![Qwen-VL 根据第一视角选中左侧绿色球，MicroDuck 实际导航并停车](assets/vision-navigation-demo.gif)
+
+**视觉方案本机实录：中文指令 + 第一视角 RGB → Qwen3-VL 选球 → RGB-D 定位 → MuJoCo 闭环导航。** 左下角显示实际送入模型的固定编号图片，右下角为持续更新的第一视角，上方为同一次物理运行的第三人称视图。展示使用已训练的普通视觉 SFT；位姿、相机外参与安全地图仍来自仿真，单次演示不代表多场景成功率。[视觉录制记录](assets/vision-navigation-demo.json)
+
+重新录制视觉演示：`.venv/Scripts/python.exe -X utf8 -m microduck_qwen.record_demo --vision`（先准备 [Windows 视觉环境与权重](WINDOWS_VISION.md)）。
+
 ![中文指令驱动 MicroDuck：模型生成导航计划，小鸭绕开障碍走到红球旁并停车](assets/navigation-demo.gif)
 
 **本机实录：中文指令 → Qwen 文本 LoRA → 真实 MuJoCo 导航。** 画面旁的文字为运行状态叠加；这段 GIF 展示文本分支，使用仿真位姿和已知地图。Qwen-VL 第一视角选目标分支已实现，运行方法见下方。

@@ -1,0 +1,144 @@
+{
+  "model_input": ".\\runs\\vision\\20261016-122735-945883\\initial-candidates.png",
+  "prediction": {
+    "instruction": "走到画面左边的球旁边",
+    "raw": "{\"status\":\"visible\",\"color\":\"green\",\"id\":1}",
+    "latency_s": 2.6470890999917174,
+    "model": "Qwen/Qwen3-VL-2B-Instruct",
+    "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+    "adapter": {
+      "path": ".\\adapters\\vision-torch-static-control",
+      "sha256": "89d9c163b464a60ea169aae0006e0d70af976891571de9d520d04d8f04b51b3a",
+      "backend": "torch"
+    },
+    "answer": {
+      "status": "ok",
+      "target_id": 1,
+      "visibility": "visible",
+      "reason": "VLM visual choice: green"
+    },
+    "visual_choice": {
+      "status": "visible",
+      "color": "green",
+      "id": 1
+    }
+  },
+  "command": {
+    "instruction": "走到画面左边的球旁边",
+    "executed": true,
+    "success": true,
+    "directory": ".\\runs\\vision\\20261016-122735-945883",
+    "observation": "RGB-D target; oracle robot pose and safety map; RGB color proposals + VLM selection",
+    "raw": "{\"status\":\"visible\",\"color\":\"green\",\"id\":1}",
+    "latency_s": 2.6470890999917174,
+    "model": "Qwen/Qwen3-VL-2B-Instruct",
+    "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+    "adapter": {
+      "path": ".\\adapters\\vision-torch-static-control",
+      "sha256": "89d9c163b464a60ea169aae0006e0d70af976891571de9d520d04d8f04b51b3a",
+      "backend": "torch"
+    },
+    "answer": {
+      "status": "ok",
+      "target_id": 1,
+      "visibility": "visible",
+      "reason": "VLM visual choice: green"
+    },
+    "visual_choice": {
+      "status": "visible",
+      "color": "green",
+      "id": 1
+    },
+    "selected": {
+      "color": "green",
+      "bbox": [
+        185,
+        159,
+        229,
+        201
+      ],
+      "pixel": [
+        206.46206896551723,
+        179.26758620689654
+      ],
+      "world_position": [
+        1.0625635564387705,
+        0.3890073330918331,
+        0.06872366964707376
+      ],
+      "surface_depth_m": 0.9073496460914612,
+      "visible_fraction_estimate": 1.0,
+      "visibility": "visible",
+      "id": 1
+    },
+    "semantic_check": {
+      "safe": true,
+      "status": "spatial_constraint_checked",
+      "side": "left",
+      "expected_id": 1
+    },
+    "preflight_visibility": {
+      "safe": true,
+      "status": "visible",
+      "visible_fraction_estimate": 1.0
+    },
+    "execution": {
+      "success": true,
+      "goals": [
+        {
+          "goal": {
+            "target": "point",
+            "x": 1.0625635564387705,
+            "y": 0.3890073330918331,
+            "speed": "slow",
+            "stop_distance_m": 0.3
+          },
+          "distance_m": 0.3222687743240246,
+          "elapsed_s": 7.625,
+          "path_length_m": 1.13428776698764,
+          "min_clearance_m": 0.040032797458492975,
+          "position": [
+            0.7835087448915167,
+            0.22780691418221688
+          ]
+        }
+      ],
+      "observation": "RGB-D target; oracle robot pose and safety map; RGB color proposals + VLM selection"
+    }
+  },
+  "execution": {
+    "success": true,
+    "goals": [
+      {
+        "goal": {
+          "target": "point",
+          "x": 1.0625635564387705,
+          "y": 0.3890073330918331,
+          "speed": "slow",
+          "stop_distance_m": 0.3
+        },
+        "distance_m": 0.3222687743240246,
+        "elapsed_s": 7.625,
+        "path_length_m": 1.13428776698764,
+        "min_clearance_m": 0.040032797458492975,
+        "position": [
+          0.7835087448915167,
+          0.22780691418221688
+        ]
+      }
+    ],
+    "observation": "RGB-D target; oracle robot pose and safety map; RGB color proposals + VLM selection"
+  },
+  "nominal_fps": 10,
+  "duration_s": 13.77,
+  "frame_count": 123,
+  "gif": "assets/vision-navigation-demo.gif",
+  "note": "Live model inference and live MuJoCo physics; text is a status overlay. Frame durations preserve wall-clock capture intervals, rounded to GIF's 10 ms resolution.",
+  "mode": "vision",
+  "seed": 210000,
+  "instruction": "走到画面左边的球旁边",
+  "collection_ground_truth": false,
+  "model_input_sha256": "7ba125215b84cbed30db557ddfa89a4f05f781a6ca352667db7e4a784f61edb9",
+  "gif_sha256": "8a4d3f8b18164185e6669bd670dde0b0f4cbd81291e79a4ff5a66d185ef8706b",
+  "captured_frame_count": 140
+}
