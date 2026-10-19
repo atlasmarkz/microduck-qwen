@@ -9,7 +9,7 @@ from microduck_qwen.agent_data import model_rows, load_splits, tasks, teacher_ac
 from microduck_qwen.skills import memory_state, parse_action, validate_action
 from microduck_qwen.skills import SkillExecutor
 from microduck_qwen.agent_eval import semantic_match
-from microduck_qwen.vision_data import digest
+from microduck_qwen.sim_data import digest
 from microduck_qwen.vision import MODEL, REVISION
 
 
@@ -141,16 +141,14 @@ class AgentTests(unittest.TestCase):
         row = {"instruction": "后退0.2米", "memory": self.memory(),
                "expected": {"action": "move", "direction": "backward", "distance_m": 0.2},
                "scene_seed": 987654321, "teacher_specs": "SECRET"}
-        prompt = row_prompt("agent", row)
+        prompt = row_prompt(row)
         self.assertEqual(prompt, agent_prompt("后退0.2米", self.memory()))
         for secret in ("SECRET", "987654321"):
             self.assertNotIn(secret, prompt)
 
-    def test_torch_row_prompt_uses_visual_prompt_for_non_agent_tasks(self):
-        from microduck_qwen.vision import visual_prompt
+    def test_torch_row_prompt_prefers_an_explicit_prompt(self):
         from microduck_qwen.vision_torch import row_prompt
-        self.assertEqual(row_prompt("actor", {"instruction": "走到红球旁边"}), visual_prompt("走到红球旁边"))
-        self.assertEqual(row_prompt("reward", {"instruction": "走到红球旁边"}), visual_prompt("走到红球旁边"))
+        self.assertEqual(row_prompt({"prompt": "已经构造好的提示"}), "已经构造好的提示")
 
 
 if __name__ == "__main__":

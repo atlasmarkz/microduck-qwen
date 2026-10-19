@@ -8,7 +8,7 @@ from pathlib import Path
 from . import ROOT
 from .agent import AgentPlanner
 from .agent_data import episode, load_splits, tasks
-from .vision_data import digest
+from .sim_data import digest
 from .sim_runner import start_scene, stop_process
 from .skills import parse_action
 

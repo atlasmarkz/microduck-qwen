@@ -1,24 +1,24 @@
 import json
 from importlib.util import find_spec
 from pathlib import Path
-import tempfile
 import sys
+import tempfile
 from types import SimpleNamespace
 import unittest
 from unittest.mock import Mock, patch
 
-from microduck_qwen.vision_torch import TorchVisionPlanner, encoded, reward_examples, reward_prompt
+from microduck_qwen.vision_torch import TorchAgentPlanner, agent_reward_examples, encoded, reward_prompt
 
 
 @unittest.skipUnless(find_spec("torch"), "optional PyTorch backend")
 class VisionTorchTests(unittest.TestCase):
-    def test_adapter_metadata_remains_serializable_for_existing_evaluators(self):
+    def test_agent_adapter_metadata_remains_serializable_for_evaluators(self):
         model = Mock()
         model.eval.return_value = model
         peft = SimpleNamespace(PeftModel=SimpleNamespace(from_pretrained=Mock(return_value=model)))
         with patch.dict(sys.modules, {"peft": peft}), patch("microduck_qwen.vision_torch.load_model", return_value=(model, Mock())), patch("microduck_qwen.vision_torch.checked_adapter", return_value={"adapter_sha256": "verified"}) as checked:
-            planner = TorchVisionPlanner(Path("adapters/example"))
-        checked.assert_called_once_with(Path("adapters/example"), "actor")
+            planner = TorchAgentPlanner(Path("adapters/example"))
+        checked.assert_called_once_with(Path("adapters/example"), "agent")
         self.assertEqual(json.loads(json.dumps(planner.adapter))["sha256"], "verified")
 
     def test_image_and_prompt_are_excluded_from_completion_loss(self):
@@ -48,15 +48,11 @@ class VisionTorchTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 encoded(processor, path, "instruction", "yes", limit=5)
 
-    def test_reward_negatives_never_duplicate_the_correct_answer(self):
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            (root / "frame-observation.json").write_text(json.dumps({"candidates": [
-                {"id": 1, "color": "red"}, {"id": 2, "color": "blue"}]}))
-            expected = {"status": "visible", "color": "red", "id": 1}
-            row = {"id": "train-row", "image": "frame-candidates.png", "instruction": "红球", "expected": expected}
-            examples = reward_examples([row], root)
-            self.assertEqual([r["reward_label"] for r in examples], [1, 0, 0])
-            for negative in examples[1:]:
-                self.assertNotEqual(negative["proposed_action"], expected)
-            self.assertNotIn("scene_seed", reward_prompt("红球", expected))
+    def test_reward_negatives_never_duplicate_the_correct_skill(self):
+        expected = {"action": "move", "direction": "forward", "distance_m": 0.2}
+        row = {"id": "train-row", "image": "step-000-candidates.png", "instruction": "前进0.2米", "expected": expected}
+        examples = agent_reward_examples([row])
+        self.assertEqual([r["reward_label"] for r in examples], [1, 0, 0])
+        for negative in examples[1:]:
+            self.assertNotEqual(negative["proposed_action"], expected)
+        self.assertNotIn("scene_seed", reward_prompt("前进0.2米", expected))

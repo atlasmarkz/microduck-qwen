@@ -7,7 +7,7 @@ import json
 from . import ROOT
 from .skills import SkillExecutor
 from .sim_runner import start_scene, stop_process
-from .vision_data import request
+from .sim_data import request
 
 
 def main():

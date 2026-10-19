@@ -7,7 +7,7 @@ from pathlib import Path
 import shutil
 
 from .agent_eval import semantic_match
-from .vision_data import digest
+from .sim_data import digest
 
 
 def main():

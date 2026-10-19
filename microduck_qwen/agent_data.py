@@ -15,7 +15,7 @@ from . import ROOT
 from .agent import AgentPlanner, agent_prompt, checked_memory
 from .skills import SkillExecutor, memory_state, validate_action
 from .vision import propose_balls, save_frame
-from .vision_data import collection_frame, digest, request, verify_objects
+from .sim_data import collection_frame, digest, request, verify_objects
 from .sim_runner import start_scene, stop_process
 
 
@@ -209,7 +209,7 @@ def main():
                 "method": "expert-intervened data aggregation; not unrestricted DAgger or learned reward model",
                 "seed_offset": args.seed_offset}
     manifest["source_sha256"] = {name: digest(ROOT / "microduck_qwen" / name) for name in
-        ("agent_data.py", "skills.py", "navigation.py", "vision.py", "vision_scene.py", "sim.py", "sim_body.py")}
+        ("agent_data.py", "skills.py", "navigation.py", "vision.py", "sim_data.py", "sim_runner.py", "vision_scene.py", "sim.py", "sim_body.py")}
     splits = {split: [] for split in ("train", "valid", "test")}
     planner = None
     if args.base_data:

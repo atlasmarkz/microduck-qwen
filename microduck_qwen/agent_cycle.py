@@ -3,6 +3,7 @@
 import argparse
 from datetime import datetime
 import json
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -65,11 +66,17 @@ def main():
                     "--train-scenes", args.correction_scenes, "--seed-offset", args.seed_offset + index * 100)
                 data = corrected
             adapter = ROOT / "adapters" / f"{args.name}-r{index}"
-            flags = ["train", "--task", "agent", "--data", data, "--output", adapter,
-                     "--steps", args.steps, "--accumulation", 1, "--max-seq-length", 1024]
-            if parent:
-                flags.extend(["--resume-adapter", parent])
-            run("vision_sft", *flags)
+            if os.name == "nt":
+                flags = ["train", "--task", "agent", "--data", data, "--output", adapter, "--steps", args.steps]
+                if parent:
+                    flags.extend(["--resume", parent])
+                run("vision_torch", *flags)
+            else:
+                flags = ["train", "--data", data, "--output", adapter, "--steps", args.steps,
+                         "--accumulation", 1, "--max-seq-length", 1024]
+                if parent:
+                    flags.extend(["--resume-adapter", parent])
+                run("vision_sft", *flags)
             evaluation = output / f"r{index}-valid"
             run("agent_eval", "--data", data, "--adapter", adapter, "--output", evaluation)
             metrics = json.loads((evaluation / "report.json").read_text())

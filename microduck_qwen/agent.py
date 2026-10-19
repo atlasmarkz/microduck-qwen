@@ -11,7 +11,7 @@ from . import ROOT
 from .locking import lock_exclusive
 from .skills import SkillExecutor, memory_state, parse_action, validate_action
 from .vision import MODEL, REVISION, capture, propose_balls, save_frame
-from .vision_data import digest
+from .sim_data import digest
 
 
 def checked_memory(memory):
