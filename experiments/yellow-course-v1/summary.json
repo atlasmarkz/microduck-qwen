@@ -246,8 +246,8 @@
   "tests_passed": 78,
   "automatically_deployed": false,
   "demo": {
-    "path": "assets/agent-demo.gif",
-    "record": "assets/agent-demo.json",
+    "path": "assets/yellow-obstacles-4b-v1.gif",
+    "record": "assets/yellow-obstacles-4b-v1.json",
     "gif_sha256": "4f4ebfb6f0b07eadc851da8b2e495141bd093c283bca7bd22194c19074bf0101",
     "record_sha256": "c33a2d0dfcb7da0dbf32aac6f3afcea03b3d279c88dc0ef2dd79ae5faafe467b",
     "frames": 161,

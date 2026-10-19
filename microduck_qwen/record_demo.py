@@ -162,7 +162,7 @@ def main():
                          if s.get("prediction", {}).get("action", {}).get("action") == "bypass_return"]
             assert len(completed) == 1 and completed[0]["success"] and completed[0]["trace_verification"]["success"], "bypass recording failed physical verification"
         durations = [max(20, round((b - a) * 100) * 10) for a, b in zip(times, times[1:])] + [100]
-        output = ROOT / "assets/agent-demo.gif"
+        output = ROOT / "assets" / ("yellow-obstacles-4b-v1.gif" if args.yellow_course else "agent-demo.gif")
         frames[0].save(output, save_all=True, append_images=frames[1:], duration=durations, loop=0, optimize=True)
         with Image.open(output) as gif:
             assert gif.is_animated and gif.n_frames > 30 and gif.size == (1040, 560)
