@@ -8,7 +8,7 @@ from pathlib import Path
 from .navigation import Observer, Robot, execute
 from .vision import VisualGuard, VisualOutputError, capture, propose_balls, save_frame, visibility_check
 from .vision_data import collection_frame, digest, request, verify_objects, visual_examples
-from .vision_eval import start_scene, stop_process
+from .sim_runner import start_scene, stop_process
 from .vision_scene import make_scene
 from .vision_torch import TorchVisionPlanner, checked_adapter, outcome_prompt, reward_prompt, reward_score
 

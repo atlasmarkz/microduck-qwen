@@ -16,7 +16,7 @@ from .agent import AgentPlanner, agent_prompt, checked_memory
 from .skills import SkillExecutor, memory_state, validate_action
 from .vision import propose_balls, save_frame
 from .vision_data import collection_frame, digest, request, verify_objects
-from .vision_eval import start_scene, stop_process
+from .sim_runner import start_scene, stop_process
 
 
 def model_rows(rows, directory):

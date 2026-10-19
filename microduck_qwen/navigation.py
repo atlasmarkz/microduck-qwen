@@ -12,7 +12,7 @@ ROBOT_RADIUS = 0.14
 PATH_MARGIN = 0.12
 GRID = 0.05
 # These are policy conditioning inputs, NOT measured physical speeds. Commands below
-# about 0.2 produce little motion with the installed walking actor. See check_gait.
+# about 0.2 produce little motion with the installed walking actor.
 SPEED = {"slow": 0.30, "normal": 0.35, "fast": 0.40}
 
 

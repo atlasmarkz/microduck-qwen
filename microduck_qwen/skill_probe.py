@@ -6,7 +6,7 @@ import json
 
 from . import ROOT
 from .skills import SkillExecutor
-from .vision_eval import start_scene, stop_process
+from .sim_runner import start_scene, stop_process
 from .vision_data import request
 
 

@@ -19,7 +19,7 @@ import numpy as np
 from . import ROOT
 from .navigation import JsonConnection, Observer, Robot, execute
 from .vision import Frame, decode_array, project, propose_balls, save_frame
-from .vision_eval import start_scene, stop_process
+from .sim_runner import start_scene, stop_process
 
 
 def digest(path):
