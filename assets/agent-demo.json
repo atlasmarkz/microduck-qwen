@@ -1,0 +1,188 @@
+{
+  "episode": {
+    "instruction": "前进0.2米，再回到初始位置",
+    "steps": [
+      {
+        "memory": {
+          "home_recorded": true,
+          "odometry_relative_home": {
+            "x": 0.0,
+            "y": 0.0,
+            "yaw_deg": 0.0
+          },
+          "completed": []
+        },
+        "prediction": {
+          "instruction": "前进0.2米，再回到初始位置",
+          "raw": "{\"action\":\"move\",\"direction\":\"forward\",\"distance_m\":0.2}",
+          "latency_s": 2.609196500001417,
+          "model": "Qwen/Qwen3-VL-2B-Instruct",
+          "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+          "adapter": {
+            "path": ".\\adapters\\agent-hard-v3-sft300",
+            "sha256": "c43d3c81380d976e80d333791aeee6a46359d40723959cd3d45032009b8f03ef",
+            "backend": "torch"
+          },
+          "action": {
+            "action": "move",
+            "direction": "forward",
+            "distance_m": 0.2
+          }
+        },
+        "execution": {
+          "action": {
+            "action": "move",
+            "direction": "forward",
+            "distance_m": 0.2
+          },
+          "success": true,
+          "observation": "oracle robot odometry and known safety map",
+          "achieved": 0.2012942476254022,
+          "requested": 0.2,
+          "units": "meters",
+          "lateral_m": 0.011824558354095039,
+          "start": {
+            "position": [
+              0.0020938259476712307,
+              0.00012618720983097184
+            ],
+            "yaw": -0.004188668536725462
+          },
+          "end": {
+            "position": [
+              0.20343583673820062,
+              0.011107489417332982
+            ],
+            "yaw": -0.04084388543444078
+          }
+        }
+      },
+      {
+        "memory": {
+          "home_recorded": true,
+          "odometry_relative_home": {
+            "x": 0.2,
+            "y": 0.01,
+            "yaw_deg": -3.3
+          },
+          "completed": [
+            {
+              "action": "move",
+              "direction": "forward",
+              "distance_m": 0.2
+            }
+          ]
+        },
+        "prediction": {
+          "instruction": "前进0.2米，再回到初始位置",
+          "raw": "{\"action\":\"done\"}",
+          "latency_s": 0.9647972999991907,
+          "model": "Qwen/Qwen3-VL-2B-Instruct",
+          "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+          "adapter": {
+            "path": ".\\adapters\\agent-hard-v3-sft300",
+            "sha256": "c43d3c81380d976e80d333791aeee6a46359d40723959cd3d45032009b8f03ef",
+            "backend": "torch"
+          },
+          "action": {
+            "action": "done"
+          }
+        },
+        "execution": {
+          "action": {
+            "action": "done"
+          },
+          "success": false,
+          "observation": "oracle robot odometry and known safety map",
+          "no_motion": true
+        }
+      }
+    ],
+    "directory": ".\\runs\\agent\\20261019-183915-856924",
+    "status": "model_done",
+    "task_success_verified": false,
+    "note": "No free-text semantic oracle. done is a model claim, not verified task success."
+  },
+  "frame_count": 74,
+  "instruction": "前进0.2米，再回到初始位置",
+  "seed": 230000,
+  "clutter": true,
+  "occlusion": "none",
+  "adapter": {
+    "path": ".\\adapters\\agent-hard-v3-sft300",
+    "sha256": "c43d3c81380d976e80d333791aeee6a46359d40723959cd3d45032009b8f03ef",
+    "backend": "torch"
+  },
+  "decisions": [
+    {
+      "image": ".\\runs\\agent\\20261019-183915-856924\\step-000-candidates.png",
+      "memory": {
+        "home_recorded": true,
+        "odometry_relative_home": {
+          "x": 0.0,
+          "y": 0.0,
+          "yaw_deg": 0.0
+        },
+        "completed": []
+      },
+      "status": "predicted",
+      "prediction": {
+        "instruction": "前进0.2米，再回到初始位置",
+        "raw": "{\"action\":\"move\",\"direction\":\"forward\",\"distance_m\":0.2}",
+        "latency_s": 2.609196500001417,
+        "model": "Qwen/Qwen3-VL-2B-Instruct",
+        "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+        "adapter": {
+          "path": ".\\adapters\\agent-hard-v3-sft300",
+          "sha256": "c43d3c81380d976e80d333791aeee6a46359d40723959cd3d45032009b8f03ef",
+          "backend": "torch"
+        },
+        "action": {
+          "action": "move",
+          "direction": "forward",
+          "distance_m": 0.2
+        }
+      }
+    },
+    {
+      "image": ".\\runs\\agent\\20261019-183915-856924\\step-001-candidates.png",
+      "memory": {
+        "home_recorded": true,
+        "odometry_relative_home": {
+          "x": 0.2,
+          "y": 0.01,
+          "yaw_deg": -3.3
+        },
+        "completed": [
+          {
+            "action": "move",
+            "direction": "forward",
+            "distance_m": 0.2
+          }
+        ]
+      },
+      "status": "predicted",
+      "prediction": {
+        "instruction": "前进0.2米，再回到初始位置",
+        "raw": "{\"action\":\"done\"}",
+        "latency_s": 0.9647972999991907,
+        "model": "Qwen/Qwen3-VL-2B-Instruct",
+        "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+        "adapter": {
+          "path": ".\\adapters\\agent-hard-v3-sft300",
+          "sha256": "c43d3c81380d976e80d333791aeee6a46359d40723959cd3d45032009b8f03ef",
+          "backend": "torch"
+        },
+        "action": {
+          "action": "done"
+        }
+      }
+    }
+  ],
+  "duration_s": 9.77,
+  "max_displacement_m": 0.20600597185329125,
+  "final_home_distance_m": 0.19753131276191566,
+  "gif_sha256": "b6245aa41cc7db8a9666e08c4a2359f3c5c5d94eb62e2211a87b567d0cde1fca",
+  "collection_ground_truth": false,
+  "note": "Live model inference and physics; model_done is not independently verified task success. No teacher intervention. Wall-clock frame timing preserved."
+}

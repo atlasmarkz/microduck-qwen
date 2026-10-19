@@ -5,9 +5,17 @@
 > 这是本项目**唯一**的 VLM 数据链路。早期纯文本 Qwen 分支（无图像）与只做选球的视觉指代分支都已移除；选球能力并入 `approach` 技能。
 > **Windows（PyTorch + CUDA）与 Mac（MLX）两套部署都保留。**
 
-![早期视觉指代链路实录：模型选中左侧球后完成导航并停车](assets/vision-navigation-demo.gif)
+![当前技能 agent 本地实录：前进后提前结束，未执行返回起点](assets/agent-demo.gif)
 
-上图由已合并的视觉指代链路录制（`assets/vision-navigation-demo.json`）。机器人位姿、相机外参与安全地图仍为仿真真值，单次演示不代表多场景成功率。
+**当前版本实录（2026-10-19）：任务未完整完成。** 输入「前进0.2米，再回到初始位置」，实际模型先输出 `move`，前进约 0.201 m，再重新看图却输出 `done`，遗漏 `return_home`；停车后距起点约 0.198 m。演示使用 `agent-hard-v3-sft300`，包含同色多球与障碍柱，全程没有教师接管。左下为每步实际模型输入，右下为实时第一视角。原始动作、执行结果及 GIF 哈希见 [演示记录](assets/agent-demo.json)。机器人位姿、相机外参与安全地图仍为仿真真值。
+
+在已安装模型、仿真依赖和本地技能权重的 Windows 环境中重新录制（约十余秒动画，覆盖上述 GIF 与记录）：
+
+```powershell
+.venv/Scripts/python.exe -X utf8 -m microduck_qwen.record_demo --adapter adapters/agent-hard-v3-sft300
+```
+
+录制器自建隔离仿真与临时控制端口，真实运行当前 `agent.run_instruction`；权重和上游资源不随 Git 仓库分发。旧的选球导航 GIF 保留在 `assets/vision-navigation-demo.gif`，不代表当前多步 agent 的效果。
 
 ## 系统构成
 
@@ -37,6 +45,26 @@ flowchart LR
 - **专家纠错闭环**：`agent_data` 采集 → `agent_cycle` 训练/纠错/评估；技能动作奖励模型用 `vision_torch train --task reward`。
 
 尚未实现：无限制自主探索、高层在线 RL、真机验证。不把安全规则当成模型学会的能力。
+
+## 统一的数据回路
+
+当前统一的是 **技能 agent 的数据格式、提示词、动作 schema 与执行器**：`agent_data` 生成 `simulation_agent_v1` 数据，`agent_cycle` 在 Windows 调用 `vision_torch --task agent`、在 Mac 调用 `vision_sft`，两者消费同样的编号 RGB、中文指令、可观测记忆和下一步技能标签。两套后端的适配器权重不互换。
+
+```mermaid
+flowchart LR
+    S["MuJoCo 场景<br/>plain / hard"] --> D["agent_data<br/>专家执行与物理校验"]
+    D --> T["统一 train / valid / test<br/>图像 + 指令 + 记忆 + 技能标签"]
+    T --> W["Windows vision_torch<br/>或 Mac vision_sft"]
+    W --> A["技能 agent LoRA"]
+    A --> C["新训练场景中模型提议<br/>专家纠错并接管"]
+    C -->|"仅核验成功轨迹回流<br/>合并原训练集"| T
+    A --> E["agent_eval<br/>固定离线评测 + 独立物理执行"]
+    T -.-> R["独立动作奖励模型<br/>Windows train --task reward"]
+```
+
+`agent_cycle` 最多运行三轮；纠错只增加训练场景，原验证／测试数据保持固定，失败轨迹保留供诊断但不作为成功示范训练。模型输入不包含教师任务 DSL、目标真值坐标或分割 ID；这些真值只用于标签与验收。物理评估中教师只评分，不代替模型做决策。
+
+**奖励回路尚未统一到自动迭代里。** 当前奖励模型从同一批技能数据构造正确／反事实错误动作，单独训练与评测；`agent_cycle` 没有调用它来筛选提议或生成奖励。因此当前是「专家纠错 → 数据聚合 → SFT」回路，尚未形成完整的 UI-Genie 奖励驱动自探索流程；交互 `agent run/chat` 的日志也不会自动成为训练数据。旧纯文本和独立选球数据只保留作历史记录，不进入当前技能训练。
 
 ## 模型选型
 
