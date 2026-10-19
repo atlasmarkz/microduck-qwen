@@ -24,7 +24,7 @@ def main():
     from PIL import Image, ImageDraw, ImageFont
     from .agent import AgentPlanner, run_instruction
     from .vision_torch import MODEL
-    from .vision import annotate, capture, propose_balls
+    from .vision import annotate, capture, propose_targets
     from .vision_scene import make_scene
 
     instruction = "依次绕过黄色障碍物并回到原位" if args.yellow_course else "前进0.2米，再回到初始位置"
@@ -134,7 +134,7 @@ def main():
                 draw.text((24, 454), f"状态：{status}", font=small, fill="#90edc2")
                 draw.text((24, 487), "done 仅为模型声明，非成功认证", font=small, fill="#ffc778")
                 live_frame = capture(observation.server_address[1])
-                live = annotate(live_frame, propose_balls(live_frame)).resize((320, 180))
+                live = annotate(live_frame, propose_targets(live_frame)).resize((320, 180))
                 model_image = live
                 if decisions:
                     with Image.open(decisions[-1]["image"]) as image:

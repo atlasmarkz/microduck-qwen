@@ -38,7 +38,11 @@ def yellow_detections(frame):
         if good.sum() < len(depths) * 0.6:
             continue
         point = unproject(float(np.median(xs[good])), float(np.median(ys[good])), float(np.median(depths[good])), frame.metadata)
-        found.append({"position": point[:2].tolist(), "pixels": int(good.sum())})
+        x, y, width, height, area = [int(value) for value in stats[index]]
+        found.append({"position": point[:2].tolist(), "pixels": int(good.sum()),
+                      "surface_position": point.tolist(), "pixel": [float(np.median(xs[good])), float(np.median(ys[good]))],
+                      "bbox": [x, y, x + width, y + height], "depth": float(np.median(depths[good])),
+                      "valid_depth_fraction": float(good.sum() / area)})
     return found
 
 

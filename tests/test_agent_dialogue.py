@@ -13,6 +13,15 @@ BLOCKED = {"success": False, "needs_user_input": True, "no_motion": True, "retry
 
 
 class AgentDialogueTests(unittest.TestCase):
+    def test_invalid_model_output_asks_for_clarification_in_interactive_mode(self):
+        report, planner, executor, captures = self.run_case(
+            [{"success": True}], [None, {"action": "stop"}], ["最近的一根黄色柱子"])
+        self.assertEqual(report["status"], "model_stop")
+        self.assertEqual(captures, 2)
+        self.assertEqual(executor.run.call_count, 1)
+        self.assertIn("最近的一根黄色柱子", planner.predict.call_args.args[0])
+        self.assertEqual(len(report["interactions"]), 1)
+
     def run_case(self, results, predictions, answers=None, max_steps=5):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -28,7 +37,7 @@ class AgentDialogueTests(unittest.TestCase):
                 saved = json.loads(next((root / "runs/agent").glob("*/result.json")).read_text())
                 self.assertEqual(saved["status"], "waiting_for_user")
                 return next(iterator)
-            with patch.object(agent, "ROOT", root), patch.object(agent, "SkillExecutor", return_value=executor), patch.object(agent, "capture", return_value=None) as capture, patch.object(agent, "propose_balls", return_value=[]), patch.object(agent, "save_frame", return_value=root / "frame.png"):
+            with patch.object(agent, "ROOT", root), patch.object(agent, "SkillExecutor", return_value=executor), patch.object(agent, "capture", return_value=None) as capture, patch.object(agent, "propose_targets", return_value=[]), patch.object(agent, "save_frame", return_value=root / "frame.png"):
                 report = agent.run_instruction(planner, "前进0.2米，然后回家", {"port": 1}, max_steps,
                                                ask=ask if answers is not None else None)
             return report, planner, executor, capture.call_count

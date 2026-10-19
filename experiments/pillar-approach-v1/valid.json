@@ -1,0 +1,550 @@
+{
+  "mode": "offline_action_exact_match",
+  "adapter": {
+    "path": "adapters\\agent-yellow-v1",
+    "sha256": "1afcbaad9e8f91d64cecfaee1f04e3200f1057bd71be7718b93a8ed6dfab1a94",
+    "backend": "torch"
+  },
+  "split": "valid",
+  "dataset_manifest_sha256": "14df93c6bd46c447f089aff5462396234198d1ccf7ffb1c20dfc1fbb10d04a8c",
+  "results": [
+    {
+      "id": "valid-71700-task-00-0",
+      "task_type": "move",
+      "expected": {
+        "action": "move",
+        "direction": "forward",
+        "distance_m": 0.2
+      },
+      "prediction": {
+        "instruction": "先往前走20厘米，然后回到起点",
+        "raw": "{\"action\":\"move\",\"direction\":\"forward\",\"distance_m\":0.2}",
+        "latency_s": 2.74072580000211,
+        "model": "Qwen/Qwen3-VL-4B-Instruct",
+        "revision": "ebb281ec70b05090aa6165b016eac8ec08e71b17",
+        "adapter": {
+          "path": "adapters\\agent-yellow-v1",
+          "sha256": "1afcbaad9e8f91d64cecfaee1f04e3200f1057bd71be7718b93a8ed6dfab1a94",
+          "backend": "torch"
+        },
+        "action": {
+          "action": "move",
+          "direction": "forward",
+          "distance_m": 0.2
+        }
+      },
+      "correct": true,
+      "semantic_correct_after_fence_removal": true
+    },
+    {
+      "id": "valid-71700-task-00-1",
+      "task_type": "return_home",
+      "expected": {
+        "action": "return_home"
+      },
+      "prediction": {
+        "instruction": "先往前走20厘米，然后回到起点",
+        "raw": "{\"action\":\"return_home\"}",
+        "latency_s": 1.1493583000010403,
+        "model": "Qwen/Qwen3-VL-4B-Instruct",
+        "revision": "ebb281ec70b05090aa6165b016eac8ec08e71b17",
+        "adapter": {
+          "path": "adapters\\agent-yellow-v1",
+          "sha256": "1afcbaad9e8f91d64cecfaee1f04e3200f1057bd71be7718b93a8ed6dfab1a94",
+          "backend": "torch"
+        },
+        "action": {
+          "action": "return_home"
+        }
+      },
+      "correct": true,
+      "semantic_correct_after_fence_removal": true
+    },
+    {
+      "id": "valid-71700-task-00-2",
+      "task_type": "done",
+      "expected": {
+        "action": "done"
+      },
+      "prediction": {
+        "instruction": "先往前走20厘米，然后回到起点",
+        "raw": "{\"action\":\"done\"}",
+        "latency_s": 1.0452388000012434,
+        "model": "Qwen/Qwen3-VL-4B-Instruct",
+        "revision": "ebb281ec70b05090aa6165b016eac8ec08e71b17",
+        "adapter": {
+          "path": "adapters\\agent-yellow-v1",
+          "sha256": "1afcbaad9e8f91d64cecfaee1f04e3200f1057bd71be7718b93a8ed6dfab1a94",
+          "backend": "torch"
+        },
+        "action": {
+          "action": "done"
+        }
+      },
+      "correct": true,
+      "semantic_correct_after_fence_removal": true
+    },
+    {
+      "id": "valid-71700-task-01-0",
+      "task_type": "move",
+      "expected": {
+        "action": "move",
+        "direction": "backward",
+        "distance_m": 0.2
+      },
+      "prediction": {
+        "instruction": "先向后退20厘米，随后回到出发点",
+        "raw": "{\"action\":\"move\",\"direction\":\"backward\",\"distance_m\":0.2}",
+        "latency_s": 2.090963999999076,
+        "model": "Qwen/Qwen3-VL-4B-Instruct",
+        "revision": "ebb281ec70b05090aa6165b016eac8ec08e71b17",
+        "adapter": {
+          "path": "adapters\\agent-yellow-v1",
+          "sha256": "1afcbaad9e8f91d64cecfaee1f04e3200f1057bd71be7718b93a8ed6dfab1a94",
+          "backend": "torch"
+        },
+        "action": {
+          "action": "move",
+          "direction": "backward",
+          "distance_m": 0.2
+        }
+      },
+      "correct": true,
+      "semantic_correct_after_fence_removal": true
+    },
+    {
+      "id": "valid-71700-task-01-1",
+      "task_type": "return_home",
+      "expected": {
+        "action": "return_home"
+      },
+      "prediction": {
+        "instruction": "先向后退20厘米，随后回到出发点",
+        "raw": "{\"action\":\"return_home\"}",
+        "latency_s": 1.1393332000006922,
+        "model": "Qwen/Qwen3-VL-4B-Instruct",
+        "revision": "ebb281ec70b05090aa6165b016eac8ec08e71b17",
+        "adapter": {
+          "path": "adapters\\agent-yellow-v1",
+          "sha256": "1afcbaad9e8f91d64cecfaee1f04e3200f1057bd71be7718b93a8ed6dfab1a94",
+          "backend": "torch"
+        },
+        "action": {
+          "action": "return_home"
+        }
+      },
+      "correct": true,
+      "semantic_correct_after_fence_removal": true
+    },
+    {
+      "id": "valid-71700-task-01-2",
+      "task_type": "done",
+      "expected": {
+        "action": "done"
+      },
+      "prediction": {
+        "instruction": "先向后退20厘米，随后回到出发点",
+        "raw": "{\"action\":\"done\"}",
+        "latency_s": 1.0480999000028532,
+        "model": "Qwen/Qwen3-VL-4B-Instruct",
+        "revision": "ebb281ec70b05090aa6165b016eac8ec08e71b17",
+        "adapter": {
+          "path": "adapters\\agent-yellow-v1",
+          "sha256": "1afcbaad9e8f91d64cecfaee1f04e3200f1057bd71be7718b93a8ed6dfab1a94",
+          "backend": "torch"
+        },
+        "action": {
+          "action": "done"
+        }
+      },
+      "correct": true,
+      "semantic_correct_after_fence_removal": true
+    },
+    {
+      "id": "valid-71700-task-02-0",
+      "task_type": "turn",
+      "expected": {
+        "action": "turn",
+        "direction": "left",
+        "degrees": 45
+      },
+      "prediction": {
+        "instruction": "先左转45度，再右转45度",
+        "raw": "{\"action\":\"turn\",\"direction\":\"left\",\"degrees\":45}",
+        "latency_s": 1.9463833999980125,
+        "model": "Qwen/Qwen3-VL-4B-Instruct",
+        "revision": "ebb281ec70b05090aa6165b016eac8ec08e71b17",
+        "adapter": {
+          "path": "adapters\\agent-yellow-v1",
+          "sha256": "1afcbaad9e8f91d64cecfaee1f04e3200f1057bd71be7718b93a8ed6dfab1a94",
+          "backend": "torch"
+        },
+        "action": {
+          "action": "turn",
+          "direction": "left",
+          "degrees": 45
+        }
+      },
+      "correct": true,
+      "semantic_correct_after_fence_removal": true
+    },
+    {
+      "id": "valid-71700-task-02-1",
+      "task_type": "turn",
+      "expected": {
+        "action": "turn",
+        "direction": "right",
+        "degrees": 45
+      },
+      "prediction": {
+        "instruction": "先左转45度，再右转45度",
+        "raw": "{\"action\":\"turn\",\"direction\":\"right\",\"degrees\":45}",
+        "latency_s": 1.8621063999999024,
+        "model": "Qwen/Qwen3-VL-4B-Instruct",
+        "revision": "ebb281ec70b05090aa6165b016eac8ec08e71b17",
+        "adapter": {
+          "path": "adapters\\agent-yellow-v1",
+          "sha256": "1afcbaad9e8f91d64cecfaee1f04e3200f1057bd71be7718b93a8ed6dfab1a94",
+          "backend": "torch"
+        },
+        "action": {
+          "action": "turn",
+          "direction": "right",
+          "degrees": 45
+        }
+      },
+      "correct": true,
+      "semantic_correct_after_fence_removal": true
+    },
+    {
+      "id": "valid-71700-task-02-2",
+      "task_type": "done",
+      "expected": {
+        "action": "done"
+      },
+      "prediction": {
+        "instruction": "先左转45度，再右转45度",
+        "raw": "{\"action\":\"done\"}",
+        "latency_s": 1.068194899999071,
+        "model": "Qwen/Qwen3-VL-4B-Instruct",
+        "revision": "ebb281ec70b05090aa6165b016eac8ec08e71b17",
+        "adapter": {
+          "path": "adapters\\agent-yellow-v1",
+          "sha256": "1afcbaad9e8f91d64cecfaee1f04e3200f1057bd71be7718b93a8ed6dfab1a94",
+          "backend": "torch"
+        },
+        "action": {
+          "action": "done"
+        }
+      },
+      "correct": true,
+      "semantic_correct_after_fence_removal": true
+    },
+    {
+      "id": "valid-71700-task-03-0",
+      "task_type": "approach",
+      "expected": {
+        "action": "approach",
+        "color": "green",
+        "id": 1
+      },
+      "prediction": {
+        "instruction": "靠近照片里最左侧的球，之后返回起点",
+        "raw": "{\"action\":\"approach\",\"color\":\"green\",\"id\":1}",
+        "latency_s": 2.2729791999990994,
+        "model": "Qwen/Qwen3-VL-4B-Instruct",
+        "revision": "ebb281ec70b05090aa6165b016eac8ec08e71b17",
+        "adapter": {
+          "path": "adapters\\agent-yellow-v1",
+          "sha256": "1afcbaad9e8f91d64cecfaee1f04e3200f1057bd71be7718b93a8ed6dfab1a94",
+          "backend": "torch"
+        },
+        "action": {
+          "action": "approach",
+          "color": "green",
+          "id": 1
+        }
+      },
+      "correct": true,
+      "semantic_correct_after_fence_removal": true
+    },
+    {
+      "id": "valid-71700-task-03-1",
+      "task_type": "return_home",
+      "expected": {
+        "action": "return_home"
+      },
+      "prediction": {
+        "instruction": "靠近照片里最左侧的球，之后返回起点",
+        "raw": "{\"action\":\"return_home\"}",
+        "latency_s": 1.3509907999978168,
+        "model": "Qwen/Qwen3-VL-4B-Instruct",
+        "revision": "ebb281ec70b05090aa6165b016eac8ec08e71b17",
+        "adapter": {
+          "path": "adapters\\agent-yellow-v1",
+          "sha256": "1afcbaad9e8f91d64cecfaee1f04e3200f1057bd71be7718b93a8ed6dfab1a94",
+          "backend": "torch"
+        },
+        "action": {
+          "action": "return_home"
+        }
+      },
+      "correct": true,
+      "semantic_correct_after_fence_removal": true
+    },
+    {
+      "id": "valid-71700-task-03-2",
+      "task_type": "done",
+      "expected": {
+        "action": "done"
+      },
+      "prediction": {
+        "instruction": "靠近照片里最左侧的球，之后返回起点",
+        "raw": "{\"action\":\"clarify\"}",
+        "latency_s": 1.2624484000007214,
+        "model": "Qwen/Qwen3-VL-4B-Instruct",
+        "revision": "ebb281ec70b05090aa6165b016eac8ec08e71b17",
+        "adapter": {
+          "path": "adapters\\agent-yellow-v1",
+          "sha256": "1afcbaad9e8f91d64cecfaee1f04e3200f1057bd71be7718b93a8ed6dfab1a94",
+          "backend": "torch"
+        },
+        "action": {
+          "action": "clarify"
+        }
+      },
+      "correct": false,
+      "semantic_correct_after_fence_removal": false
+    },
+    {
+      "id": "valid-71700-task-04-0",
+      "task_type": "move",
+      "expected": {
+        "action": "move",
+        "direction": "forward",
+        "distance_m": 0.2
+      },
+      "prediction": {
+        "instruction": "往前移动20厘米",
+        "raw": "{\"action\":\"move\",\"direction\":\"forward\",\"distance_m\":0.2}",
+        "latency_s": 2.2983069000001706,
+        "model": "Qwen/Qwen3-VL-4B-Instruct",
+        "revision": "ebb281ec70b05090aa6165b016eac8ec08e71b17",
+        "adapter": {
+          "path": "adapters\\agent-yellow-v1",
+          "sha256": "1afcbaad9e8f91d64cecfaee1f04e3200f1057bd71be7718b93a8ed6dfab1a94",
+          "backend": "torch"
+        },
+        "action": {
+          "action": "move",
+          "direction": "forward",
+          "distance_m": 0.2
+        }
+      },
+      "correct": true,
+      "semantic_correct_after_fence_removal": true
+    },
+    {
+      "id": "valid-71700-task-04-1",
+      "task_type": "done",
+      "expected": {
+        "action": "done"
+      },
+      "prediction": {
+        "instruction": "往前移动20厘米",
+        "raw": "{\"action\":\"done\"}",
+        "latency_s": 1.118288700003177,
+        "model": "Qwen/Qwen3-VL-4B-Instruct",
+        "revision": "ebb281ec70b05090aa6165b016eac8ec08e71b17",
+        "adapter": {
+          "path": "adapters\\agent-yellow-v1",
+          "sha256": "1afcbaad9e8f91d64cecfaee1f04e3200f1057bd71be7718b93a8ed6dfab1a94",
+          "backend": "torch"
+        },
+        "action": {
+          "action": "done"
+        }
+      },
+      "correct": true,
+      "semantic_correct_after_fence_removal": true
+    },
+    {
+      "id": "valid-71700-task-05-0",
+      "task_type": "move",
+      "expected": {
+        "action": "move",
+        "direction": "backward",
+        "distance_m": 0.2
+      },
+      "prediction": {
+        "instruction": "向后退20厘米",
+        "raw": "{\"action\":\"move\",\"direction\":\"backward\",\"distance_m\":0.2}",
+        "latency_s": 2.2162171000018134,
+        "model": "Qwen/Qwen3-VL-4B-Instruct",
+        "revision": "ebb281ec70b05090aa6165b016eac8ec08e71b17",
+        "adapter": {
+          "path": "adapters\\agent-yellow-v1",
+          "sha256": "1afcbaad9e8f91d64cecfaee1f04e3200f1057bd71be7718b93a8ed6dfab1a94",
+          "backend": "torch"
+        },
+        "action": {
+          "action": "move",
+          "direction": "backward",
+          "distance_m": 0.2
+        }
+      },
+      "correct": true,
+      "semantic_correct_after_fence_removal": true
+    },
+    {
+      "id": "valid-71700-task-05-1",
+      "task_type": "done",
+      "expected": {
+        "action": "done"
+      },
+      "prediction": {
+        "instruction": "向后退20厘米",
+        "raw": "{\"action\":\"done\"}",
+        "latency_s": 1.0996207000025606,
+        "model": "Qwen/Qwen3-VL-4B-Instruct",
+        "revision": "ebb281ec70b05090aa6165b016eac8ec08e71b17",
+        "adapter": {
+          "path": "adapters\\agent-yellow-v1",
+          "sha256": "1afcbaad9e8f91d64cecfaee1f04e3200f1057bd71be7718b93a8ed6dfab1a94",
+          "backend": "torch"
+        },
+        "action": {
+          "action": "done"
+        }
+      },
+      "correct": true,
+      "semantic_correct_after_fence_removal": true
+    },
+    {
+      "id": "valid-71700-task-06-0",
+      "task_type": "stop",
+      "expected": {
+        "action": "stop"
+      },
+      "prediction": {
+        "instruction": "立即停止移动",
+        "raw": "{\"action\":\"stop\"}",
+        "latency_s": 1.0876871999971627,
+        "model": "Qwen/Qwen3-VL-4B-Instruct",
+        "revision": "ebb281ec70b05090aa6165b016eac8ec08e71b17",
+        "adapter": {
+          "path": "adapters\\agent-yellow-v1",
+          "sha256": "1afcbaad9e8f91d64cecfaee1f04e3200f1057bd71be7718b93a8ed6dfab1a94",
+          "backend": "torch"
+        },
+        "action": {
+          "action": "stop"
+        }
+      },
+      "correct": true,
+      "semantic_correct_after_fence_removal": true
+    },
+    {
+      "id": "valid-71700-task-07-0",
+      "task_type": "unsupported",
+      "expected": {
+        "action": "unsupported"
+      },
+      "prediction": {
+        "instruction": "帮我把球踢走",
+        "raw": "{\"action\":\"unsupported\"}",
+        "latency_s": 1.0755801999985124,
+        "model": "Qwen/Qwen3-VL-4B-Instruct",
+        "revision": "ebb281ec70b05090aa6165b016eac8ec08e71b17",
+        "adapter": {
+          "path": "adapters\\agent-yellow-v1",
+          "sha256": "1afcbaad9e8f91d64cecfaee1f04e3200f1057bd71be7718b93a8ed6dfab1a94",
+          "backend": "torch"
+        },
+        "action": {
+          "action": "unsupported"
+        }
+      },
+      "correct": true,
+      "semantic_correct_after_fence_removal": true
+    },
+    {
+      "id": "valid-71700-task-08-0",
+      "task_type": "clarify",
+      "expected": {
+        "action": "clarify"
+      },
+      "prediction": {
+        "instruction": "到那个地方去",
+        "raw": "{\"action\":\"clarify\"}",
+        "latency_s": 1.172784700000193,
+        "model": "Qwen/Qwen3-VL-4B-Instruct",
+        "revision": "ebb281ec70b05090aa6165b016eac8ec08e71b17",
+        "adapter": {
+          "path": "adapters\\agent-yellow-v1",
+          "sha256": "1afcbaad9e8f91d64cecfaee1f04e3200f1057bd71be7718b93a8ed6dfab1a94",
+          "backend": "torch"
+        },
+        "action": {
+          "action": "clarify"
+        }
+      },
+      "correct": true,
+      "semantic_correct_after_fence_removal": true
+    },
+    {
+      "id": "valid-75100-task-09-0",
+      "task_type": "bypass_return",
+      "expected": {
+        "action": "bypass_return",
+        "side": "auto"
+      },
+      "prediction": {
+        "instruction": "绕行所有黄色柱体，按由近到远依次通过后返回开始的位置",
+        "raw": "{\"action\":\"bypass_return\",\"side\":\"auto\"}",
+        "latency_s": 1.766236999999819,
+        "model": "Qwen/Qwen3-VL-4B-Instruct",
+        "revision": "ebb281ec70b05090aa6165b016eac8ec08e71b17",
+        "adapter": {
+          "path": "adapters\\agent-yellow-v1",
+          "sha256": "1afcbaad9e8f91d64cecfaee1f04e3200f1057bd71be7718b93a8ed6dfab1a94",
+          "backend": "torch"
+        },
+        "action": {
+          "action": "bypass_return",
+          "side": "auto"
+        }
+      },
+      "correct": true,
+      "semantic_correct_after_fence_removal": true
+    },
+    {
+      "id": "valid-75100-task-09-1",
+      "task_type": "done",
+      "expected": {
+        "action": "done"
+      },
+      "prediction": {
+        "instruction": "绕行所有黄色柱体，按由近到远依次通过后返回开始的位置",
+        "raw": "{\"action\":\"done\"}",
+        "latency_s": 1.1126939000023413,
+        "model": "Qwen/Qwen3-VL-4B-Instruct",
+        "revision": "ebb281ec70b05090aa6165b016eac8ec08e71b17",
+        "adapter": {
+          "path": "adapters\\agent-yellow-v1",
+          "sha256": "1afcbaad9e8f91d64cecfaee1f04e3200f1057bd71be7718b93a8ed6dfab1a94",
+          "backend": "torch"
+        },
+        "action": {
+          "action": "done"
+        }
+      },
+      "correct": true,
+      "semantic_correct_after_fence_removal": true
+    }
+  ],
+  "correct": 20,
+  "total": 21,
+  "note": "Development pilot. Rollout teacher is scorer AFTER execution, never a semantic intervention.",
+  "semantic_correct_after_fence_removal": 20
+}

@@ -1,6 +1,6 @@
-"""RGB-D camera capture, colored-ball proposals and conservative visibility guarding.
+"""RGB-D capture, calibrated ball/pillar proposals and visibility guarding.
 
-Shared by every VLM link. This is a modular colored-ball prototype, NOT general
+Shared by every VLM link. This is a calibrated known-shape prototype, NOT general
 object detection, SLAM or a fine-tuned VLA. Ground-truth scene labels never enter
 the VLM prompt.
 """
@@ -163,6 +163,35 @@ def propose_balls(frame):
     return candidates
 
 
+def propose_targets(frame):
+    """Number calibrated balls and yellow 10 cm-radius, 30 cm-high pillars together."""
+    from .bypass import yellow_detections
+
+    candidates = propose_balls(frame)
+    for detection in yellow_detections(frame):
+        surface = np.asarray(detection["surface_position"])
+        if not 0.04 < surface[2] < 0.35:
+            continue  # Reflections on the floor are not pillars.
+        ray = surface[:2] - np.asarray(frame.metadata["camera_position"][:2])
+        length = float(np.linalg.norm(ray))
+        if length < 0.06:
+            continue
+        center = surface.copy()
+        center[:2] += 0.10 * ray / length
+        center[2] = 0.15
+        expected = frame.metadata["fx"] * frame.metadata["fy"] * 0.2 * 0.3 / detection["depth"] ** 2
+        fraction = min(1.0, detection["pixels"] / max(1.0, expected))
+        candidates.append({"color": "yellow", "kind": "pillar", "bbox": detection["bbox"],
+            "pixel": detection["pixel"], "world_position": center.tolist(),
+            "surface_depth_m": detection["depth"], "visible_fraction_estimate": fraction,
+            "visibility": "visible" if fraction >= MIN_VISIBILITY and detection["valid_depth_fraction"] >= 0.8 else "partial"})
+    ids = list(range(1, len(candidates) + 1))
+    random.Random(zlib.crc32(frame.rgb.tobytes())).shuffle(ids)
+    for candidate, ident in zip(candidates, ids):
+        candidate["id"] = ident
+    return candidates
+
+
 def annotate(frame, candidates):
     image = Image.fromarray(frame.rgb)
     draw = ImageDraw.Draw(image)
@@ -207,6 +236,8 @@ def approachable(candidate):
     the model chose is still the binding it can be held to. Below the floor the
     target is treated as not localisable and the caller must refuse or search.
     """
+    if candidate.get("color") == "yellow":
+        return candidate["visibility"] == "visible"
     return candidate["visibility"] == "visible" or (
         candidate["visibility"] == "partial"
         and candidate["visible_fraction_estimate"] >= APPROACH_VISIBILITY_FLOOR
@@ -214,7 +245,7 @@ def approachable(candidate):
 
 
 def visibility_check(frame, target, color):
-    candidates = propose_balls(frame)
+    candidates = propose_targets(frame) if color == "yellow" else propose_balls(frame)
     matching = [
         c
         for c in candidates
@@ -241,7 +272,8 @@ def visibility_check(frame, target, color):
         return {"safe": False, "status": "out_of_view"}
     crop = frame.depth[int(v) - 2 : int(v) + 3, int(u) - 2 : int(u) + 3]
     actual = float(np.median(crop))
-    blocked = math.isfinite(actual) and actual < z - BALL_RADIUS - 0.04
+    radius = 0.10 if color == "yellow" else BALL_RADIUS
+    blocked = math.isfinite(actual) and actual < z - radius - 0.04
     return {
         "safe": False,
         "status": "occluded" if blocked else "missing",
@@ -298,7 +330,7 @@ class VisualGuard:
         )
         self.last_time = time.monotonic()
         save_frame(
-            self.directory, frame, propose_balls(frame), f"track-{self.index:04d}"
+            self.directory, frame, propose_targets(frame), f"track-{self.index:04d}"
         )
         self.index += 1
         return self.last
@@ -347,7 +379,7 @@ def main():
             robot.close()
         return
     frame = capture(info["port"])
-    candidates = propose_balls(frame)
+    candidates = propose_targets(frame)
     directory = ROOT / "runs/vision" / datetime.now().strftime("%Y%m%d-%H%M%S-%f")
     print(save_frame(directory, frame, candidates))
     print(json.dumps(candidates, ensure_ascii=False))

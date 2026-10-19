@@ -6,7 +6,7 @@ from pathlib import Path
 import time
 
 from .navigation import Robot, Observer, execute, clearance, inside
-from .vision import capture, propose_balls, visibility_check, approachable, VisualGuard
+from .vision import capture, propose_targets, visibility_check, approachable, VisualGuard
 
 
 class NeedsUserInput(RuntimeError):
@@ -29,7 +29,7 @@ def validate_action(action):
     name = action.get("action")
     keys = {
         "move": {"action", "direction", "distance_m"}, "turn": {"action", "direction", "degrees"},
-        "approach": {"action", "color", "id"}, "search": {"action", "color"},
+        "approach": {"action", "color", "selector" if "selector" in action else "id"}, "search": {"action", "color"},
         "return_home": {"action"}, "stop": {"action"}, "done": {"action"},
         "clarify": {"action"}, "unsupported": {"action"},
         "bypass_return": {"action", "side"},
@@ -44,10 +44,16 @@ def validate_action(action):
         if action["direction"] not in ("left", "right"):
             raise ValueError("invalid turn direction")
         number(action["degrees"], 5, 120)
-    if name in ("approach", "search") and action["color"] not in ("red", "blue", "green"):
-        raise ValueError("unknown ball color")
-    if name == "approach" and (type(action["id"]) is not int or not 1 <= action["id"] <= 20):
-        raise ValueError("invalid current-frame target ID")
+    if name in ("approach", "search") and action["color"] not in ("red", "blue", "green", "yellow"):
+        raise ValueError("supported targets are red/blue/green balls and yellow pillars")
+    if name == "approach":
+        if "selector" in action:
+            if action["selector"] not in ("nearest", "leftmost", "rightmost", "only"):
+                raise ValueError("invalid target selector")
+        elif type(action["id"]) is not int or not 1 <= action["id"] <= 20:
+            raise ValueError("invalid current-frame target ID")
+        elif action["color"] == "yellow":
+            raise ValueError("yellow pillars require selector=nearest/leftmost/rightmost/only, not guessed id")
     if name == "bypass_return" and action["side"] not in ("auto", "left", "right"):
         raise ValueError("invalid bypass side")
     return action
@@ -62,6 +68,27 @@ def parse_action(raw):
             result[key] = value
         return result
     return validate_action(json.loads(raw.strip(), object_pairs_hook=unique))
+
+
+def bind_target(action, candidates, position):
+    choices = [c for c in candidates or [] if c["color"] == action["color"]]
+    if "id" in action:
+        selected = next((c for c in choices if c["id"] == action["id"]), None)
+    else:
+        selector = action["selector"]
+        if not choices:
+            raise NeedsUserInput("no currently visible target of the requested color")
+        if selector == "only":
+            if len(choices) != 1:
+                raise NeedsUserInput(f"{len(choices)} matching objects; specify nearest, leftmost or rightmost")
+            selected = choices[0]
+        elif selector == "nearest":
+            selected = min(choices, key=lambda c: math.dist(position, c["world_position"][:2]))
+        else:
+            selected = sorted(choices, key=lambda c: c["pixel"][0], reverse=selector == "rightmost")[0]
+    if selected is None or not approachable(selected):
+        raise NeedsUserInput("target is not bound to a sufficiently visible current-frame candidate")
+    return selected
 
 
 def memory_state(info, state, completed):
@@ -204,20 +231,20 @@ class SkillExecutor:
                 from .bypass import run_bypass
                 result.update(run_bypass(self, action, output))
             elif name == "approach":
-                selected = next((c for c in candidates or [] if c["id"] == action["id"] and c["color"] == action["color"]), None)
-                if selected is None or not approachable(selected):
-                    raise NeedsUserInput("target is not bound to a sufficiently visible current-frame candidate")
+                selected = bind_target(action, candidates, self.healthy()["trunk"][:2])
+                result["bound_target"] = selected
                 target = selected["world_position"]
                 if not visibility_check(capture(self.info["port"]), target, action["color"])["safe"]:
                     raise NeedsUserInput("target no longer safely visible")
-                plan = {"status": "ok", "goals": [{"target": "point", "x": target[0], "y": target[1], "speed": "slow", "stop_distance_m": 0.30}]}
+                distance = 0.45 if action["color"] == "yellow" else 0.30
+                plan = {"status": "ok", "goals": [{"target": "point", "x": target[0], "y": target[1], "speed": "slow", "stop_distance_m": distance}]}
                 result["navigation"] = execute(plan, self.robot, self.observer, output.with_suffix(".jsonl"), timeout_s=40, scene=self.scene, cancel_file=self.cancel_file,
                     guard=VisualGuard(self.info["port"], target, action["color"], self.directory))
                 result["success"] = result["navigation"]["success"]
             elif name == "search":
                 result["turns"] = []
                 for index in range(9):
-                    found = [c for c in propose_balls(capture(self.info["port"])) if c["color"] == action["color"] and approachable(c)]
+                    found = [c for c in propose_targets(capture(self.info["port"])) if c["color"] == action["color"] and approachable(c)]
                     if found:
                         result["success"] = True
                         break

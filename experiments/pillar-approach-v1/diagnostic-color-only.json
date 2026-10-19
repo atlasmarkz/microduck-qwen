@@ -1,0 +1,226 @@
+{
+  "initial_candidates": [
+    {
+      "color": "yellow",
+      "kind": "pillar",
+      "bbox": [
+        144,
+        71,
+        242,
+        224
+      ],
+      "pixel": [
+        193.0,
+        146.0
+      ],
+      "world_position": [
+        0.7669724722592985,
+        0.29417504802827005,
+        0.15
+      ],
+      "surface_depth_m": 0.5727276802062988,
+      "visible_fraction_estimate": 0.9252567121508899,
+      "visibility": "visible",
+      "id": 1
+    },
+    {
+      "color": "yellow",
+      "kind": "pillar",
+      "bbox": [
+        352,
+        120,
+        389,
+        177
+      ],
+      "pixel": [
+        369.0,
+        148.0
+      ],
+      "world_position": [
+        1.702242606755901,
+        -0.2863449819426845,
+        0.15
+      ],
+      "surface_depth_m": 1.4979716539382935,
+      "visible_fraction_estimate": 0.9505339682247368,
+      "visibility": "visible",
+      "id": 3
+    },
+    {
+      "color": "yellow",
+      "kind": "pillar",
+      "bbox": [
+        282,
+        131,
+        305,
+        166
+      ],
+      "pixel": [
+        293.0,
+        148.0
+      ],
+      "world_position": [
+        2.669851880997062,
+        0.22892202064079334,
+        0.15
+      ],
+      "surface_depth_m": 2.45646333694458,
+      "visible_fraction_estimate": 0.9687803398799939,
+      "visibility": "visible",
+      "id": 2
+    }
+  ],
+  "nearest_ground_truth_for_scoring_only": {
+    "name": "yellow_0",
+    "x": 0.7607478981057064,
+    "y": 0.2793386172596514,
+    "radius": 0.1,
+    "height": 0.3,
+    "rgba": [
+      0.9,
+      0.65,
+      0.06,
+      1
+    ]
+  },
+  "ambiguous": {
+    "instruction": "走到黄色的柱子旁边停下",
+    "raw": "{\"action\":\"approach\",\"color\":\"yellow\",\"id\":1}",
+    "latency_s": 2.799580300001253,
+    "model": "Qwen/Qwen3-VL-4B-Instruct",
+    "revision": "ebb281ec70b05090aa6165b016eac8ec08e71b17",
+    "adapter": {
+      "path": "adapters\\agent-yellow-v1",
+      "sha256": "1afcbaad9e8f91d64cecfaee1f04e3200f1057bd71be7718b93a8ed6dfab1a94",
+      "backend": "torch"
+    },
+    "action": {
+      "action": "approach",
+      "color": "yellow",
+      "id": 1
+    }
+  },
+  "episode": {
+    "instruction": "走到离我最近的黄色柱子旁边停下",
+    "active_instruction": "走到离我最近的黄色柱子旁边停下",
+    "steps": [
+      {
+        "memory": {
+          "home_recorded": true,
+          "odometry_relative_home": {
+            "x": -0.0,
+            "y": -0.0,
+            "yaw_deg": 0.1
+          },
+          "completed": []
+        },
+        "prediction": {
+          "instruction": "走到离我最近的黄色柱子旁边停下",
+          "raw": "{\"action\":\"approach\",\"color\":\"yellow\",\"id\":1}",
+          "latency_s": 1.9982005999991088,
+          "model": "Qwen/Qwen3-VL-4B-Instruct",
+          "revision": "ebb281ec70b05090aa6165b016eac8ec08e71b17",
+          "adapter": {
+            "path": "adapters\\agent-yellow-v1",
+            "sha256": "1afcbaad9e8f91d64cecfaee1f04e3200f1057bd71be7718b93a8ed6dfab1a94",
+            "backend": "torch"
+          },
+          "action": {
+            "action": "approach",
+            "color": "yellow",
+            "id": 1
+          }
+        },
+        "planning_instruction": "走到离我最近的黄色柱子旁边停下",
+        "execution": {
+          "action": {
+            "action": "approach",
+            "color": "yellow",
+            "id": 1
+          },
+          "success": true,
+          "observation": "oracle robot odometry and known safety map",
+          "navigation": {
+            "success": true,
+            "goals": [
+              {
+                "goal": {
+                  "target": "point",
+                  "x": 1.702135948746298,
+                  "y": -0.2896531002468834,
+                  "speed": "slow",
+                  "stop_distance_m": 0.45
+                },
+                "distance_m": 0.47175084332913686,
+                "elapsed_s": 12.46900000000096,
+                "path_length_m": 1.840391593055864,
+                "min_clearance_m": 0.14478500265713945,
+                "position": [
+                  1.2381937363690214,
+                  -0.20417513960070338
+                ]
+              }
+            ],
+            "observation": "MuJoCo ground-truth pose and fixed scene map"
+          }
+        }
+      },
+      {
+        "memory": {
+          "home_recorded": true,
+          "odometry_relative_home": {
+            "x": 1.24,
+            "y": -0.19,
+            "yaw_deg": -9.2
+          },
+          "completed": [
+            {
+              "action": "approach",
+              "color": "yellow",
+              "id": 1
+            }
+          ]
+        },
+        "prediction": {
+          "instruction": "走到离我最近的黄色柱子旁边停下",
+          "raw": "{\"action\":\"stop\"}",
+          "latency_s": 1.3304048999998486,
+          "model": "Qwen/Qwen3-VL-4B-Instruct",
+          "revision": "ebb281ec70b05090aa6165b016eac8ec08e71b17",
+          "adapter": {
+            "path": "adapters\\agent-yellow-v1",
+            "sha256": "1afcbaad9e8f91d64cecfaee1f04e3200f1057bd71be7718b93a8ed6dfab1a94",
+            "backend": "torch"
+          },
+          "action": {
+            "action": "stop"
+          }
+        },
+        "planning_instruction": "走到离我最近的黄色柱子旁边停下",
+        "execution": {
+          "action": {
+            "action": "stop"
+          },
+          "success": true,
+          "observation": "oracle robot odometry and known safety map",
+          "no_motion": true
+        }
+      }
+    ],
+    "directory": ".\\runs\\agent\\20261019-201706-126076",
+    "status": "model_stop",
+    "task_success_verified": false,
+    "interactions": [],
+    "note": "No free-text semantic oracle. done is a model claim, not verified task success.",
+    "task_start_pose": {
+      "x": 0.001962848336149957,
+      "y": -0.00037452344051724674,
+      "yaw": -0.002481808159070937
+    }
+  },
+  "final_distance_to_nearest_pillar_m": 0.6690021926011132,
+  "contacts": {
+    "steps_with_scene_contact": 0,
+    "minimum_contact_distance_m": null
+  }
+}

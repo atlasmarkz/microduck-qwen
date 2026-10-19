@@ -15,13 +15,30 @@ from microduck_qwen.agent_data import (
     write_splits,
 )
 from microduck_qwen.skills import memory_state, parse_action, validate_action
-from microduck_qwen.skills import SkillExecutor
+from microduck_qwen.skills import SkillExecutor, NeedsUserInput, bind_target
 from microduck_qwen.agent_eval import semantic_match
 from microduck_qwen.sim_data import digest
 from microduck_qwen.vision import MODEL, REVISION
 
 
 class AgentTests(unittest.TestCase):
+    def test_relative_target_binding_does_not_guess_ids_or_ambiguous_objects(self):
+        close = {"id": 3, "color": "yellow", "world_position": [0.8, 0.2, 0.15],
+                 "pixel": [100, 40], "visibility": "visible"}
+        far = {"id": 1, "color": "yellow", "world_position": [1.7, -0.2, 0.15],
+               "pixel": [300, 40], "visibility": "visible"}
+        for selector, expected in (("nearest", close), ("leftmost", close), ("rightmost", far)):
+            action = validate_action({"action": "approach", "color": "yellow", "selector": selector})
+            self.assertEqual(bind_target(action, [far, close], [0, 0]), expected)
+        action = {"action": "approach", "color": "yellow", "selector": "only"}
+        with self.assertRaises(NeedsUserInput):
+            bind_target(action, [far, close], [0, 0])
+        self.assertEqual(bind_target(action, [close], [0, 0]), close)
+        with self.assertRaises(ValueError):
+            validate_action({"action": "approach", "color": "yellow", "id": 1})
+        with self.assertRaises(ValueError):
+            validate_action(dict(action, id=1))
+
     def memory(self):
         return {"home_recorded": True, "odometry_relative_home": {"x": 0, "y": 0, "yaw_deg": 0}, "completed": []}
 
@@ -85,7 +102,7 @@ class AgentTests(unittest.TestCase):
                 image = directory / "input.png"
                 image.write_bytes(b"image")
                 return image
-            with patch.object(agent_data, "SkillExecutor", Executor), patch.object(agent_data, "request", return_value={"steps_with_scene_contact": 0}), patch.object(agent_data, "collection_frame", return_value=(None, None)), patch.object(agent_data, "propose_balls", return_value=[]), patch.object(agent_data, "verify_objects", return_value=[]), patch.object(agent_data, "save_frame", side_effect=save):
+            with patch.object(agent_data, "SkillExecutor", Executor), patch.object(agent_data, "request", return_value={"steps_with_scene_contact": 0}), patch.object(agent_data, "collection_frame", return_value=(None, None)), patch.object(agent_data, "propose_targets", return_value=[]), patch.object(agent_data, "verify_objects", return_value=[]), patch.object(agent_data, "save_frame", side_effect=save):
                 rows, report = agent_data.episode(root, root / "episode", {"port": 1}, "train", 99,
                                                  "停下来", [{"action": "stop"}], Planner(), True)
                 accepted = Planner()
@@ -191,7 +208,7 @@ class AgentTests(unittest.TestCase):
         class Planner:
             def predict(self, *args):
                 return {"action": {"action": "done"}}
-        with tempfile.TemporaryDirectory() as tmp, patch.object(agent, "ROOT", Path(tmp)), patch.object(agent, "SkillExecutor", Executor), patch.object(agent, "capture", return_value=None), patch.object(agent, "propose_balls", return_value=[]), patch.object(agent, "save_frame", return_value=Path(tmp) / "rgb.png"):
+        with tempfile.TemporaryDirectory() as tmp, patch.object(agent, "ROOT", Path(tmp)), patch.object(agent, "SkillExecutor", Executor), patch.object(agent, "capture", return_value=None), patch.object(agent, "propose_targets", return_value=[]), patch.object(agent, "save_frame", return_value=Path(tmp) / "rgb.png"):
             result = agent.run_instruction(Planner(), "走到蓝球旁边", {"port": 1})
             self.assertEqual(result["status"], "model_done")
             self.assertFalse(result["task_success_verified"])

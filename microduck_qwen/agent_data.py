@@ -15,7 +15,7 @@ import shutil
 from . import ROOT
 from .agent import AgentPlanner, agent_prompt, checked_memory
 from .skills import SkillExecutor, memory_state, validate_action
-from .vision import propose_balls, save_frame
+from .vision import propose_targets, save_frame
 from .sim_data import collection_frame, digest, request, verify_objects
 from .sim_runner import start_scene, stop_process
 
@@ -164,7 +164,7 @@ def episode(output, directory, info, split, seed, instruction, specs, planner=No
         for index, spec in enumerate(specs + ([{"action": "done"}] if specs[-1].get("action") not in ("stop", "clarify", "unsupported") else [])):
             executor.robot.stop()
             frame, gt = collection_frame(info["port"])
-            candidates = propose_balls(frame)
+            candidates = propose_targets(frame)
             verified = verify_objects(executor.scene, frame, gt, candidates)
             # Persist the observation BEFORE the teacher can refuse it. A refused
             # task is exactly the case whose frame and verdicts have to stay

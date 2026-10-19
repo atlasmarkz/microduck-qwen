@@ -1,0 +1,40 @@
+{
+  "status": "completed",
+  "model": "Qwen/Qwen3-VL-4B-Instruct",
+  "adapter": "adapters/agent-yellow-v1",
+  "adapter_sha256": "1afcbaad9e8f91d64cecfaee1f04e3200f1057bd71be7718b93a8ed6dfab1a94",
+  "new_training_steps": 0,
+  "reward_training_steps": 0,
+  "scene_seed": 92001,
+  "original_instruction": "走到黄色的柱子旁边停下",
+  "scripted_user_reply": "走到离我最近的黄色柱子旁边停下",
+  "no_motion_before_clarification": true,
+  "final_status": "model_stop",
+  "distance_to_actual_nearest_pillar_m": 0.4592171484780251,
+  "obstacle_contact_steps": 0,
+  "unit_tests": 81,
+  "valid": {
+    "correct": 20,
+    "total": 21
+  },
+  "diagnostics": [
+    "Allowing yellow alone produced a valid approach to the WRONG pillar through guessed ID 1.",
+    "Relative selectors bound the right target but the actor repeated approach until the step limit.",
+    "Explicit measured completion feedback fixed stopping in the tested dialogue.",
+    "An intermediate prompt caused a repeated bypass decision; final validation retains both outputs."
+  ],
+  "scope": "One real 4B model/MuJoCo dialogue with a scripted human clarification, plus fixed development validation; no new final-test tuning or retraining.",
+  "limitations": [
+    "Calibrated colors and pillar dimensions; oracle localization and known safety map.",
+    "Free-form language remains a bounded prototype; this does not establish open-vocabulary or arbitrary-dialogue reliability.",
+    "Relative nearest binding is measured; the language model still chooses the selector.",
+    "Latest physical rollout uses unchanged approach-completion feedback; final added feedback for bypass/return is checked on offline validation."
+  ],
+  "source_sha256": {
+    "agent.py": "daac96152b6962d2c07b26090d54bc43fce8f6ce8dad2931cc902c1c70bb1d59",
+    "skills.py": "cceb2a838cb8ecca4961db53b55ac989228c19d09f259e3261db0aa0d89ba01f",
+    "vision.py": "98226282a28fc1dc11a76f740d30b1ba2eef046f1c2eb2afa7ed406c22dc95f6",
+    "bypass.py": "44d5cc9fa0112fe07a7fca6edff550bc503d93d8ecff3ae711d00dad38fe598a",
+    "agent_data.py": "d870d845ec350633c53dc84a9878ad71d4f190bf325f45b14d5b13e112d6963a"
+  }
+}

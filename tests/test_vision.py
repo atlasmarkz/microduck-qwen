@@ -24,11 +24,27 @@ from microduck_qwen.vision import (
     OUT_OF_VIEW_GRACE,
     visibility_check,
     VisualGuard,
+    propose_targets,
 )
 from microduck_qwen.vision_scene import make_scene
 
 
 class VisionTests(unittest.TestCase):
+    def test_yellow_pillar_gets_a_numbered_localized_target_not_a_ball(self):
+        metadata = self.metadata()
+        metadata.update(camera_position=[0, 0, 0.15], camera_rotation=[[0, 0, -1], [-1, 0, 0], [0, 1, 0]])
+        frame = Frame(np.zeros((80, 100, 3), np.uint8), np.ones((80, 100), np.float32), metadata)
+        frame.rgb[25:55, 40:60] = [230, 166, 15]
+        candidates = propose_targets(frame)
+        self.assertEqual(len(candidates), 1)
+        target = candidates[0]
+        self.assertEqual((target["color"], target["kind"], target["id"]), ("yellow", "pillar", 1))
+        self.assertTrue(approachable(target))
+        self.assertAlmostEqual(target["world_position"][0], 1.1)
+        self.assertTrue(visibility_check(frame, np.asarray(target["world_position"]), "yellow")["safe"])
+        frame.depth[:] = float("nan")
+        self.assertEqual(propose_targets(frame), [])
+
     def metadata(self):
         return {
             "width": 100,
@@ -128,7 +144,7 @@ class ApproachGuardTests(unittest.TestCase):
 
         with patch("microduck_qwen.vision.capture", return_value=object()), patch(
             "microduck_qwen.vision.visibility_check", side_effect=fake_check
-        ), patch("microduck_qwen.vision.propose_balls", return_value=[]), patch(
+        ), patch("microduck_qwen.vision.propose_targets", return_value=[]), patch(
             "microduck_qwen.vision.save_frame", return_value=None
         ):
             first = guard(None, None)

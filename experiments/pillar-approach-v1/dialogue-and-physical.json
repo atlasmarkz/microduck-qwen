@@ -1,0 +1,299 @@
+{
+  "initial_candidates": [
+    {
+      "color": "yellow",
+      "kind": "pillar",
+      "bbox": [
+        144,
+        71,
+        242,
+        224
+      ],
+      "pixel": [
+        193.0,
+        146.0
+      ],
+      "world_position": [
+        0.7669724722592985,
+        0.29417504802827005,
+        0.15
+      ],
+      "surface_depth_m": 0.5727276802062988,
+      "visible_fraction_estimate": 0.9252567121508899,
+      "visibility": "visible",
+      "id": 1
+    },
+    {
+      "color": "yellow",
+      "kind": "pillar",
+      "bbox": [
+        352,
+        120,
+        389,
+        177
+      ],
+      "pixel": [
+        369.0,
+        148.0
+      ],
+      "world_position": [
+        1.702242606755901,
+        -0.2863449819426845,
+        0.15
+      ],
+      "surface_depth_m": 1.4979716539382935,
+      "visible_fraction_estimate": 0.9505339682247368,
+      "visibility": "visible",
+      "id": 3
+    },
+    {
+      "color": "yellow",
+      "kind": "pillar",
+      "bbox": [
+        282,
+        131,
+        305,
+        166
+      ],
+      "pixel": [
+        293.0,
+        148.0
+      ],
+      "world_position": [
+        2.669851880997062,
+        0.22892202064079334,
+        0.15
+      ],
+      "surface_depth_m": 2.45646333694458,
+      "visible_fraction_estimate": 0.9687803398799939,
+      "visibility": "visible",
+      "id": 2
+    }
+  ],
+  "nearest_ground_truth_for_scoring_only": {
+    "name": "yellow_0",
+    "x": 0.7607478981057064,
+    "y": 0.2793386172596514,
+    "radius": 0.1,
+    "height": 0.3,
+    "rgba": [
+      0.9,
+      0.65,
+      0.06,
+      1
+    ]
+  },
+  "ambiguous": {
+    "instruction": "走到黄色的柱子旁边停下",
+    "raw": "{\"action\":\"approach\",\"color\":\"yellow\",\"selector\":\"only\"}",
+    "latency_s": 2.6569471000002522,
+    "model": "Qwen/Qwen3-VL-4B-Instruct",
+    "revision": "ebb281ec70b05090aa6165b016eac8ec08e71b17",
+    "adapter": {
+      "path": "adapters\\agent-yellow-v1",
+      "sha256": "1afcbaad9e8f91d64cecfaee1f04e3200f1057bd71be7718b93a8ed6dfab1a94",
+      "backend": "torch"
+    },
+    "action": {
+      "action": "approach",
+      "color": "yellow",
+      "selector": "only"
+    }
+  },
+  "episode": {
+    "instruction": "走到黄色的柱子旁边停下",
+    "active_instruction": "走到黄色的柱子旁边停下",
+    "steps": [
+      {
+        "memory": {
+          "home_recorded": true,
+          "odometry_relative_home": {
+            "x": -0.0,
+            "y": -0.0,
+            "yaw_deg": 0.1
+          },
+          "completed": []
+        },
+        "prediction": {
+          "instruction": "走到黄色的柱子旁边停下",
+          "raw": "{\"action\":\"approach\",\"color\":\"yellow\",\"selector\":\"only\"}",
+          "latency_s": 2.027855299998919,
+          "model": "Qwen/Qwen3-VL-4B-Instruct",
+          "revision": "ebb281ec70b05090aa6165b016eac8ec08e71b17",
+          "adapter": {
+            "path": "adapters\\agent-yellow-v1",
+            "sha256": "1afcbaad9e8f91d64cecfaee1f04e3200f1057bd71be7718b93a8ed6dfab1a94",
+            "backend": "torch"
+          },
+          "action": {
+            "action": "approach",
+            "color": "yellow",
+            "selector": "only"
+          }
+        },
+        "planning_instruction": "走到黄色的柱子旁边停下",
+        "execution": {
+          "action": {
+            "action": "approach",
+            "color": "yellow",
+            "selector": "only"
+          },
+          "success": false,
+          "observation": "oracle robot odometry and known safety map",
+          "error": "NeedsUserInput: 3 matching objects; specify nearest, leftmost or rightmost",
+          "needs_user_input": true,
+          "no_motion": true,
+          "retry_safe": false
+        }
+      },
+      {
+        "memory": {
+          "home_recorded": true,
+          "odometry_relative_home": {
+            "x": -0.0,
+            "y": -0.0,
+            "yaw_deg": 0.1
+          },
+          "completed": []
+        },
+        "prediction": {
+          "instruction": "走到黄色的柱子旁边停下\n执行反馈=目标未唯一绑定或不可见，动作尚未开始。请明确最近、最左或最右的目标。NeedsUserInput: 3 matching objects; specify nearest, leftmost or rightmost\n用户最新补充=走到离我最近的黄色柱子旁边停下\n结合已完成动作和当前图像重新选择下一步；安全约束始终有效。",
+          "raw": "{\"action\":\"approach\",\"color\":\"yellow\",\"selector\":\"nearest\"}",
+          "latency_s": 2.1019404999969993,
+          "model": "Qwen/Qwen3-VL-4B-Instruct",
+          "revision": "ebb281ec70b05090aa6165b016eac8ec08e71b17",
+          "adapter": {
+            "path": "adapters\\agent-yellow-v1",
+            "sha256": "1afcbaad9e8f91d64cecfaee1f04e3200f1057bd71be7718b93a8ed6dfab1a94",
+            "backend": "torch"
+          },
+          "action": {
+            "action": "approach",
+            "color": "yellow",
+            "selector": "nearest"
+          }
+        },
+        "planning_instruction": "走到黄色的柱子旁边停下\n执行反馈=目标未唯一绑定或不可见，动作尚未开始。请明确最近、最左或最右的目标。NeedsUserInput: 3 matching objects; specify nearest, leftmost or rightmost\n用户最新补充=走到离我最近的黄色柱子旁边停下\n结合已完成动作和当前图像重新选择下一步；安全约束始终有效。",
+        "execution": {
+          "action": {
+            "action": "approach",
+            "color": "yellow",
+            "selector": "nearest"
+          },
+          "success": true,
+          "observation": "oracle robot odometry and known safety map",
+          "bound_target": {
+            "color": "yellow",
+            "kind": "pillar",
+            "bbox": [
+              145,
+              72,
+              242,
+              225
+            ],
+            "pixel": [
+              194.0,
+              147.0
+            ],
+            "world_position": [
+              0.7668777554048352,
+              0.2930047489468152,
+              0.15
+            ],
+            "surface_depth_m": 0.5734869241714478,
+            "visible_fraction_estimate": 0.9235916902619928,
+            "visibility": "visible",
+            "id": 3
+          },
+          "navigation": {
+            "success": true,
+            "goals": [
+              {
+                "goal": {
+                  "target": "point",
+                  "x": 0.7668777554048352,
+                  "y": 0.2930047489468152,
+                  "speed": "slow",
+                  "stop_distance_m": 0.45
+                },
+                "distance_m": 0.46657123260808225,
+                "elapsed_s": 3.625,
+                "path_length_m": 0.5040323976577658,
+                "min_clearance_m": 0.2161022789261967,
+                "position": [
+                  0.330850051881179,
+                  0.1269669313951749
+                ]
+              }
+            ],
+            "observation": "MuJoCo ground-truth pose and fixed scene map"
+          }
+        }
+      },
+      {
+        "memory": {
+          "home_recorded": true,
+          "odometry_relative_home": {
+            "x": 0.33,
+            "y": 0.14,
+            "yaw_deg": 23.9
+          },
+          "completed": [
+            {
+              "action": "approach",
+              "color": "yellow",
+              "selector": "nearest"
+            }
+          ]
+        },
+        "prediction": {
+          "instruction": "走到黄色的柱子旁边停下\n执行反馈=目标未唯一绑定或不可见，动作尚未开始。请明确最近、最左或最右的目标。NeedsUserInput: 3 matching objects; specify nearest, leftmost or rightmost\n用户最新补充=走到离我最近的黄色柱子旁边停下\n结合已完成动作和当前图像重新选择下一步；安全约束始终有效。",
+          "raw": "{\"action\":\"stop\"}",
+          "latency_s": 1.4591772999992827,
+          "model": "Qwen/Qwen3-VL-4B-Instruct",
+          "revision": "ebb281ec70b05090aa6165b016eac8ec08e71b17",
+          "adapter": {
+            "path": "adapters\\agent-yellow-v1",
+            "sha256": "1afcbaad9e8f91d64cecfaee1f04e3200f1057bd71be7718b93a8ed6dfab1a94",
+            "backend": "torch"
+          },
+          "action": {
+            "action": "stop"
+          }
+        },
+        "planning_instruction": "走到黄色的柱子旁边停下\n执行反馈=目标未唯一绑定或不可见，动作尚未开始。请明确最近、最左或最右的目标。NeedsUserInput: 3 matching objects; specify nearest, leftmost or rightmost\n用户最新补充=走到离我最近的黄色柱子旁边停下\n结合已完成动作和当前图像重新选择下一步；安全约束始终有效。",
+        "execution": {
+          "action": {
+            "action": "stop"
+          },
+          "success": true,
+          "observation": "oracle robot odometry and known safety map",
+          "no_motion": true
+        }
+      }
+    ],
+    "directory": ".\\runs\\agent\\20261019-202117-205914",
+    "status": "model_stop",
+    "task_success_verified": false,
+    "interactions": [
+      {
+        "reason": "目标未唯一绑定或不可见，动作尚未开始。请明确最近、最左或最右的目标。NeedsUserInput: 3 matching objects; specify nearest, leftmost or rightmost",
+        "question": "机器人已停车。目标未唯一绑定或不可见，动作尚未开始。请明确最近、最左或最右的目标。NeedsUserInput: 3 matching objects; specify nearest, leftmost or rightmost\n可补充具体指令（改目标请输入“改为…”），或输入“取消”。\n你 > ",
+        "completed": [],
+        "retry_allowed": false,
+        "answer": "走到离我最近的黄色柱子旁边停下"
+      }
+    ],
+    "note": "No free-text semantic oracle. done is a model claim, not verified task success.",
+    "task_start_pose": {
+      "x": 0.0019624589982897666,
+      "y": -0.0003619341289101059,
+      "yaw": -0.0024919830286293165
+    }
+  },
+  "final_distance_to_nearest_pillar_m": 0.4592171484780251,
+  "contacts": {
+    "steps_with_scene_contact": 0,
+    "minimum_contact_distance_m": null
+  }
+}
