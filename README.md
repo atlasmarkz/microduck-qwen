@@ -42,9 +42,16 @@ flowchart LR
 
 **统一使用 `Qwen/Qwen3-VL-2B-Instruct`**（Windows CUDA 固定 revision `89644892e4d85e24eaac8bacfd4f463576704203`；Mac MLX 使用 `mlx-community/Qwen3-VL-2B-Instruct-4bit`）。
 
-- RTX 3060 8 GiB：2B + NF4 QLoRA（冻结视觉塔、最后 8 层 q/v rank 8，458,752 参数）实测训练显存峰值：技能任务约 2.35 GiB、奖励任务约 1.91 GiB，余量充足。
-- 4B 在 8 GiB 上只能 batch 1、无余量，风险大于收益；7B 以上只能推理、不能训练。
-- 模型 ID 为代码常量，后续替换更大的 VLM 只需改一行。
+- RTX 3060 8 GiB（`torch.cuda.mem_get_info()` 实测空闲 7.01 GiB，注意 `nvidia-smi` 的占用口径含桌面程序）逐档实测 NF4 + QLoRA：
+
+  | 模型 | 加载峰值 | 加载后空闲 | 单次决策 | QLoRA 训练峰值 | 秒/步 | 结论 |
+  |---|---|---|---|---|---|---|
+  | Qwen3-VL-2B-Instruct | 1.4 GiB | ~5.6 GiB | 2.4 s | 2.52 GiB | 0.66 | 当前基线 |
+  | Qwen3-VL-4B-Instruct | 2.73 GiB | 4.23 GiB | 1.15–2.44 s | **3.62 GiB（余 2.74 GiB）** | 1.78 | **本机甜点，训练完全可行** |
+  | Qwen3-VL-8B-Instruct | 5.99 GiB | **0.04 GiB** | 7.3–22.3 s | **9.28 GiB → 超出物理显存** | 3.0 | 训练直接爆显存，推理挤到换页 |
+
+  本机天花板是 **4B**：速度与 2B 同级、训练还剩 3.4 GiB 余量。8B 训练需要约 9.3 GiB，超过 7.01 GiB 可用显存，训练虽然不报错但已落到共享显存，不能算可训练。Mac 侧对应 `mlx-community/Qwen3-VL-4B-Instruct-4bit`（统一内存，容量限制不同）。
+- 模型 ID 为代码常量（`vision_torch.py` / `vision.py` 的 `MODEL`/`REVISION`），换模型只需改常量；`checked_adapter` 会按 model+revision 拒绝旧适配器。
 
 ## Windows / NVIDIA 部署
 
