@@ -1,4 +1,5 @@
 import base64
+import math
 import unittest
 import zlib
 
@@ -9,6 +10,7 @@ try:
 except ModuleNotFoundError:
     raise unittest.SkipTest("optional vision dependencies: run tests in .venv-vlm")
 
+from microduck_qwen.navigation import pathfind
 from microduck_qwen.vision import (
     decode_array,
     project,
@@ -76,6 +78,49 @@ class VisionTests(unittest.TestCase):
             visibility_check(frame, np.array([0.0, 0.0, 1.0]), "red")["status"],
             "out_of_view",
         )
+
+class SceneClutterTests(unittest.TestCase):
+    """The harder opt-in scene must stay physically consistent and navigable."""
+
+    def items(self, scene):
+        return [(name, obj) for name, obj in scene["objects"].items()] + [
+            (obj["name"], obj) for obj in scene["obstacles"]
+        ]
+
+    def test_default_scene_is_unchanged_by_the_clutter_option(self):
+        scene = make_scene(42)
+        self.assertFalse(scene["clutter"])
+        self.assertEqual(len(scene["objects"]), 3)
+        self.assertEqual(len(scene["obstacles"]), 1)
+
+    def test_clutter_adds_duplicate_colors_without_overlapping_bodies(self):
+        scene = make_scene(7, "full", True)
+        self.assertTrue(scene["clutter"])
+        self.assertEqual(len(scene["objects"]), 5)
+        colors = [obj["color"] for obj in scene["objects"].values()]
+        self.assertGreater(len(colors), len(set(colors)))
+        items = self.items(scene)
+        for index, (name_a, a) in enumerate(items):
+            for name_b, b in items[index + 1:]:
+                gap = math.dist((a["x"], a["y"]), (b["x"], b["y"])) - a["radius"] - b["radius"]
+                self.assertGreater(gap, 0.0, f"{name_a} overlaps {name_b}")
+
+    def test_clutter_keeps_every_visible_target_reachable(self):
+        scene = make_scene(7, "full", True)
+        for name in ("ball_1", "ball_2", "ball_3", "ball_4"):
+            obj = scene["objects"][name]
+            self.assertTrue(
+                pathfind((0.0, 0.0), (obj["x"], obj["y"]), 0.30, scene), name
+            )
+
+    def test_fully_occluded_target_has_no_reachable_stop_region(self):
+        # Documents the conservative design: the ball behind the occluder cannot be
+        # physically approached at the 0.30 m stopping distance either.
+        scene = make_scene(7, "full", True)
+        obj = scene["objects"]["ball_0"]
+        with self.assertRaises(ValueError):
+            pathfind((0.0, 0.0), (obj["x"], obj["y"]), 0.30, scene)
+
 
 if __name__ == "__main__":
     unittest.main()

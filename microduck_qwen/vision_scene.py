@@ -3,7 +3,7 @@
 import random
 
 
-def make_scene(seed=42, occlusion="none"):
+def make_scene(seed=42, occlusion="none", clutter=False):
     if occlusion not in ("none", "partial", "full", "absent"):
         raise ValueError("unknown occlusion scenario")
     rng = random.Random(seed)
@@ -40,6 +40,35 @@ def make_scene(seed=42, occlusion="none"):
             "rgba": [0.9, 0.65, 0.06, 1],
         }
     ]
+    if clutter:
+        # Duplicate two ball colors and widen the row so identity can no longer be
+        # inferred from color alone. Extra pillars sit behind the ball row: they are
+        # guaranteed clear of every ball and of every 0.30 m approach stopping point,
+        # and far enough from obstacle_1's ±0.65..0.85 bay not to overlap it.
+        for index, y in enumerate((0.62, -0.62)):
+            color, rgba = colors[index]
+            objects[f"ball_{index + 3}"] = {
+                "label": color + " ball",
+                "color": color,
+                "x": rng.uniform(0.9, 1.2),
+                "y": y + rng.uniform(-0.03, 0.03),
+                "radius": 0.07,
+                "collidable": True,
+                "shape": "sphere",
+                "rgba": rgba,
+                "path_margin": 0.035,
+            }
+        for index, y in enumerate((0.52, -0.52)):
+            obstacles.append(
+                {
+                    "name": f"pillar_{index}",
+                    "x": rng.uniform(1.45, 1.60),
+                    "y": y + rng.uniform(-0.17, 0.17),
+                    "radius": 0.10,
+                    "height": 0.3,
+                    "rgba": [0.9, 0.65, 0.06, 1],
+                }
+            )
     if occlusion in ("partial", "full"):
         target = objects["ball_0"]
         x = target["x"] * 0.60
@@ -62,6 +91,7 @@ def make_scene(seed=42, occlusion="none"):
         "obstacles": obstacles,
         "seed": seed,
         "occlusion": occlusion,
+        "clutter": clutter,
         "evaluation_only_initial_left_target": "ball_0"
         if "ball_0" in objects
         else None,

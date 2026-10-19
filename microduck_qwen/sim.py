@@ -25,6 +25,9 @@ def main():
         "--occlusion", choices=["none", "partial", "full", "absent"], default="none"
     )
     parser.add_argument(
+        "--clutter", action="store_true", help="duplicate ball colors and add side pillars"
+    )
+    parser.add_argument(
         "--manifest", type=Path, help="independent instance metadata path"
     )
     parser.add_argument(
@@ -96,7 +99,7 @@ def main():
 
         scene_path = state / "scene.json"
         scene_path.write_text(
-            json.dumps(make_scene(args.seed, args.occlusion), indent=2) + "\n"
+            json.dumps(make_scene(args.seed, args.occlusion, args.clutter), indent=2) + "\n"
         )
         env["MICRODUCK_VISION_SCENE"] = str(scene_path)
     command = [
