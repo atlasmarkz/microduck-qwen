@@ -1,0 +1,26 @@
+{
+  "mode": "independent_actor_rollout",
+  "adapter": {
+    "path": "adapters/agent-yellow-v1",
+    "sha256": "1afcbaad9e8f91d64cecfaee1f04e3200f1057bd71be7718b93a8ed6dfab1a94",
+    "backend": "torch"
+  },
+  "split": "valid",
+  "dataset_manifest_sha256": "1f897864f9dbd7371d6422a22248e427b38f4f5625e1dca1a978b54fa6c269e2",
+  "results": [
+    {
+      "task_id": 9,
+      "correct": true,
+      "error": null,
+      "episode": "./runs/yellow-rollout-92000/task-09/episode.json"
+    }
+  ],
+  "correct": 1,
+  "total": 1,
+  "note": "Development pilot. Rollout teacher is scorer AFTER execution, never a semantic intervention.",
+  "scene_seed": 92000,
+  "scene_mix": "yellow",
+  "occlusion": "none",
+  "clutter": false,
+  "startup_failures": []
+}

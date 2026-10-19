@@ -31,6 +31,7 @@ ALTERNATIVE_SKILLS = [
     {"action": "done"},
     {"action": "clarify"},
     {"action": "unsupported"},
+    {"action": "bypass_return", "side": "auto"},
 ]
 
 
@@ -112,7 +113,7 @@ def load_model():
     return model.eval(), processor
 
 
-def encoded(processor, image, prompt, completion=None, limit=768):
+def encoded(processor, image, prompt, completion=None, limit=1024):
     import torch
     from PIL import Image
 
@@ -347,7 +348,7 @@ def train(args):
     report = {"status": "completed", "task": args.task, "model": MODEL, "revision": REVISION,
         "steps": args.steps, "seed": 42, "batch_size": 1, "learning_rate": args.learning_rate,
         "last_layers": 8, "rank": 8, "alpha": 16, "quantization": "NF4 double-quant; BF16 compute",
-        "image_pixels": {"min": 65536, "max": 131072}, "max_seq_length": 768,
+        "image_pixels": {"min": 65536, "max": 131072}, "max_seq_length": 1024,
         "completion_only_loss": True, "trainable_parameters": sum(p.numel() for p in parameters.values()),
         "changed_tensors": changed, "optimizer_state_resumed": False,
         "elapsed_s": elapsed, "peak_cuda_allocated_bytes": torch.cuda.max_memory_allocated(),

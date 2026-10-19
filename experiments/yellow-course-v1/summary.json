@@ -1,0 +1,294 @@
+{
+  "status": "completed",
+  "model": "Qwen/Qwen3-VL-4B-Instruct",
+  "revision": "ebb281ec70b05090aa6165b016eac8ec08e71b17",
+  "adapter": "adapters/agent-yellow-v1",
+  "adapter_sha256": "1afcbaad9e8f91d64cecfaee1f04e3200f1057bd71be7718b93a8ed6dfab1a94",
+  "parent_adapter_sha256": "12efa89a66d1e6ac987769b8f1b2c664786a7ac3c4c4359ed031cdfab8feb313",
+  "training_steps": 120,
+  "sampling_pool_rows": 354,
+  "new_train_rows": 12,
+  "extra_replay_repeat": 15,
+  "actual_new_task_training_draws": 64,
+  "reward_selected_replay_rows": 0,
+  "mixed_valid": {
+    "correct": 19,
+    "total": 21
+  },
+  "mixed_final_test": {
+    "correct": 16,
+    "total": 18
+  },
+  "yellow_valid": {
+    "correct": 2,
+    "total": 2
+  },
+  "yellow_final_test": {
+    "correct": 2,
+    "total": 2
+  },
+  "experts": [
+    {
+      "split": "train",
+      "seed": 65100,
+      "verified": true,
+      "contacts": 0,
+      "obstacles": 2,
+      "return": {
+        "navigation": {
+          "success": true,
+          "goals": [
+            {
+              "goal": {
+                "target": "point",
+                "x": 0.0020881925779313373,
+                "y": 0.00012676164427236972,
+                "speed": "slow",
+                "stop_distance_m": 0.1
+              },
+              "distance_m": 0.08927247740974043,
+              "elapsed_s": 24.96900000000096,
+              "path_length_m": 3.5572045353252606,
+              "min_clearance_m": 0.109743049745643,
+              "position": [
+                0.09136059819696808,
+                0.0002399776448762598
+              ]
+            }
+          ],
+          "observation": "MuJoCo ground-truth pose and fixed scene map"
+        },
+        "distance_home_m": 0.0775954426078679,
+        "home_yaw_error_deg": 3.6287878229407267,
+        "success": true
+      }
+    },
+    {
+      "split": "train",
+      "seed": 65101,
+      "verified": true,
+      "contacts": 0,
+      "obstacles": 3,
+      "return": {
+        "navigation": {
+          "success": true,
+          "goals": [
+            {
+              "goal": {
+                "target": "point",
+                "x": 0.002077834787867965,
+                "y": 0.00012904772218025234,
+                "speed": "slow",
+                "stop_distance_m": 0.1
+              },
+              "distance_m": 0.09088695109805171,
+              "elapsed_s": 33.81299999999828,
+              "path_length_m": 4.880568192292539,
+              "min_clearance_m": 0.07959070494944928,
+              "position": [
+                0.09286841896300263,
+                0.004313268681621931
+              ]
+            }
+          ],
+          "observation": "MuJoCo ground-truth pose and fixed scene map"
+        },
+        "distance_home_m": 0.11115199086401567,
+        "home_yaw_error_deg": 0.009548363751166552,
+        "success": true
+      }
+    },
+    {
+      "split": "valid",
+      "seed": 75100,
+      "verified": true,
+      "contacts": 0,
+      "obstacles": 2,
+      "return": {
+        "navigation": {
+          "success": true,
+          "goals": [
+            {
+              "goal": {
+                "target": "point",
+                "x": 0.002077834787867965,
+                "y": 0.00012904772218025234,
+                "speed": "slow",
+                "stop_distance_m": 0.1
+              },
+              "distance_m": 0.09906936696676184,
+              "elapsed_s": 24.485000000000582,
+              "path_length_m": 3.473457886616455,
+              "min_clearance_m": 0.11980793581379956,
+              "position": [
+                0.10031604900922503,
+                0.012935012652386906
+              ]
+            }
+          ],
+          "observation": "MuJoCo ground-truth pose and fixed scene map"
+        },
+        "distance_home_m": 0.10662348446519614,
+        "home_yaw_error_deg": 1.3918956096866295,
+        "success": true
+      }
+    },
+    {
+      "split": "test",
+      "seed": 85100,
+      "verified": true,
+      "contacts": 0,
+      "obstacles": 2,
+      "return": {
+        "navigation": {
+          "success": true,
+          "goals": [
+            {
+              "goal": {
+                "target": "point",
+                "x": 0.0020757687981401347,
+                "y": 0.00012661001292027036,
+                "speed": "slow",
+                "stop_distance_m": 0.1
+              },
+              "distance_m": 0.08846491825473654,
+              "elapsed_s": 25.23400000000038,
+              "path_length_m": 3.6178958137200246,
+              "min_clearance_m": 0.12264122470500827,
+              "position": [
+                0.09044993873176803,
+                -0.00387936681670278
+              ]
+            }
+          ],
+          "observation": "MuJoCo ground-truth pose and fixed scene map"
+        },
+        "distance_home_m": 0.09599686876826985,
+        "home_yaw_error_deg": 0.09994159148382904,
+        "success": true
+      }
+    }
+  ],
+  "independent_actor_rollouts": [
+    {
+      "seed": 92000,
+      "verified": true,
+      "contacts": 0,
+      "obstacles": 2,
+      "minimum_clearance_m": 0.1093911985337678,
+      "return": {
+        "navigation": {
+          "success": true,
+          "goals": [
+            {
+              "goal": {
+                "target": "point",
+                "x": 0.0020881925779313373,
+                "y": 0.00012676164427236972,
+                "speed": "slow",
+                "stop_distance_m": 0.1
+              },
+              "distance_m": 0.09395903796352709,
+              "elapsed_s": 22.03099999999904,
+              "path_length_m": 3.2535656450585906,
+              "min_clearance_m": 0.1093911985337678,
+              "position": [
+                0.09586879377959871,
+                -0.005661126855461291
+              ]
+            }
+          ],
+          "observation": "MuJoCo ground-truth pose and fixed scene map"
+        },
+        "distance_home_m": 0.09709675928000676,
+        "home_yaw_error_deg": 0.3902156114595766,
+        "success": true
+      },
+      "teacher_interventions": 0
+    },
+    {
+      "seed": 92001,
+      "verified": true,
+      "contacts": 0,
+      "obstacles": 3,
+      "minimum_clearance_m": 0.11663841837415068,
+      "return": {
+        "navigation": {
+          "success": true,
+          "goals": [
+            {
+              "goal": {
+                "target": "point",
+                "x": 0.002061860494291477,
+                "y": 0.0001273381970775735,
+                "speed": "slow",
+                "stop_distance_m": 0.1
+              },
+              "distance_m": 0.09219307814691383,
+              "elapsed_s": 35.51499999999942,
+              "path_length_m": 5.152448378319255,
+              "min_clearance_m": 0.11663841837415068,
+              "position": [
+                -0.019659976130365506,
+                0.08972491334202594
+              ]
+            }
+          ],
+          "observation": "MuJoCo ground-truth pose and fixed scene map"
+        },
+        "distance_home_m": 0.07454055921321108,
+        "home_yaw_error_deg": 4.639205289930264,
+        "success": true
+      },
+      "teacher_interventions": 0
+    }
+  ],
+  "tests_passed": 78,
+  "automatically_deployed": false,
+  "demo": {
+    "path": "assets/agent-demo.gif",
+    "record": "assets/agent-demo.json",
+    "gif_sha256": "4f4ebfb6f0b07eadc851da8b2e495141bd093c283bca7bd22194c19074bf0101",
+    "record_sha256": "c33a2d0dfcb7da0dbf32aac6f3afcea03b3d279c88dc0ef2dd79ae5faafe467b",
+    "frames": 161,
+    "duration_s": 81.15,
+    "macro_success": true,
+    "contact_ground_truth_collected": false
+  },
+  "implementation_sha256_at_audit": {
+    "agent.py": "a8735ecd7889c93cb105f0c31adbe76e3ada2eeb709ad793268f1f90f7b1235e",
+    "agent_audit.py": "40146585db9563df6e93cd247667a4a67084d617c4d8af8d710ef176cdb51b7e",
+    "agent_cycle.py": "133a35a0f18861e27d3a8b067a57fa4c03a55eda773de6511427b894c9a3fe3a",
+    "agent_data.py": "4291acdc0b7c9a48ceacc72eb5d734ee2fdfe6dec930a9e799bcc76993900bfa",
+    "agent_eval.py": "b5ad2f239fd494536059eb242deac2109b5d020baa573d9943389856a51d49ab",
+    "agent_probe.py": "2f93e9af06a81addd03d78651c2387ff4202dfc9e0540cf6a5a2268cc612e083",
+    "bypass.py": "e867e64f9345ee223193509a4938811a2f3cf34346ede8fc9c0227f4eb49c085",
+    "contract.py": "5c7dd8c6e69f4b152c49f5f9a56fbd5eb03b8c8fa874e389307a536e106d8358",
+    "locking.py": "6c402b5851edd81cc20890911d9f55621b1300b893f4efc66ae8e6abe6b9c965",
+    "navigation.py": "0b3419046eeacf64e3778107f5da62ec6ed810215646ae6e8fdc89139427dbc4",
+    "record_demo.py": "951e93e80bb2f707a90fed316ca0ca569b5ce90170abd198f4bb53c82b24ab4a",
+    "sim.py": "d636b345b36a50044a0c963657c3f626010965db34380db057718e2e20e7923b",
+    "sim_body.py": "e0a89cda9f757d060d859611aa76dc9c7a6ab4c9d67e9fcbfd51078f83edba87",
+    "sim_data.py": "62e9fc801db7d59580b8a24e9d0e76cedb21f34197e043eef151b25aacf3ce12",
+    "sim_native.py": "4415e24197bf9eba55096008216fd9f7b896c0ad5cebcc6b2f5a9dd37c2d4895",
+    "sim_runner.py": "ad41c1e639e43a17c9226c3824f7c41bef1fad7e737efbf714eb239976b9659b",
+    "skills.py": "5ffbf233c9401cf34b96a9ae1b0a05399fa32d0377336d7e0a7f80e54cebb012",
+    "skill_probe.py": "43380d2729e47a39ea7d2edabfea9ced50987c35e307d9215704d31259b995cc",
+    "vision.py": "9fa03a2366e9af4ebf91110ef084688fb67591b3b3e7c1ff39e5e72f35ab70c3",
+    "vision_lora_probe.py": "fb16d1c76eb5e1c3ce1627e7625ea18a93132d05fffe7d304f34a013cfe38165",
+    "vision_scene.py": "b78a3ec245b6849a4f3cf27d481f42e81689d7bdae7a92898b8ce6e3838e13ae",
+    "vision_sensor.py": "c0dd68e78d85f0cd62840c4a98eba823f021e35abd25ff94d4c54c4c078a84c9",
+    "vision_sft.py": "e622fffda6386427a505d5f24354680ee68ebcb5a591d73164b6e25420930c7b",
+    "vision_torch.py": "39a43f835a0a50f338a24aaf58155f29aaa9ee8896c88c301ae22bcb2d992dc0",
+    "__init__.py": "1510aee3f578702425c1b97b7ed434db58013c63567590f843604644d68e89eb"
+  },
+  "limitations": [
+    "Finite static yellow courses; oracle pose, camera extrinsics and static map.",
+    "VLM chooses composite skill; deterministic waypoint execution and RGB-D color confirmation.",
+    "Only auto-side language task trained and physically evaluated in this pilot; left/right teacher templates and schema supplied.",
+    "No reward-model retraining or reward-gated rollouts in this pilot.",
+    "Old-task development regressions retained; experimental adapter does not replace the generic default.",
+    "Four expert trajectories; language paraphrases and replay are not independent physical samples.",
+    "Final test evaluated once after freezing the 120-step adapter; no tuning on it."
+  ]
+}

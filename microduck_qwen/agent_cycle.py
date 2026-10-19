@@ -25,7 +25,7 @@ def main():
     parser.add_argument("--reward-threshold", type=float, default=0.5)
     parser.add_argument("--correction-scenes", type=int, default=1)
     parser.add_argument("--seed-offset", type=int, default=100)
-    parser.add_argument("--scene-mix", choices=("plain", "hard"), default="plain",
+    parser.add_argument("--scene-mix", choices=("plain", "hard", "yellow"), default="plain",
                         help="scene difficulty for correction collection and rollouts")
     parser.add_argument("--rollout", action="store_true", help="also test 4 independent physical tasks each round")
     args = parser.parse_args()
@@ -117,7 +117,7 @@ def main():
             if args.rollout:
                 rollout = output / f"r{index}-rollout"
                 run("agent_eval", "--data", data, "--adapter", adapter, "--output", rollout, "--rollout",
-                    "--scene-mix", args.scene_mix)
+                    "--scene-mix", args.scene_mix, *(["--task-ids", 9] if args.scene_mix == "yellow" else []))
                 physical = json.loads((rollout / "report.json").read_text())
                 entry.update(rollout_correct=physical["correct"], rollout_total=physical["total"])
             score = entry["valid_correct"] / entry["valid_total"]

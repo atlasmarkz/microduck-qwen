@@ -18,6 +18,7 @@ from .sim_data import digest
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--adapter", type=Path, default=ROOT / "adapters/agent-4b-v1-r0")
+    parser.add_argument("--yellow-course", action="store_true", help="record ordered yellow-obstacle passing and return")
     args = parser.parse_args()
     import mujoco
     from PIL import Image, ImageDraw, ImageFont
@@ -26,11 +27,12 @@ def main():
     from .vision import annotate, capture, propose_balls
     from .vision_scene import make_scene
 
-    instruction = "前进0.2米，再回到初始位置"
+    instruction = "依次绕过黄色障碍物并回到原位" if args.yellow_course else "前进0.2米，再回到初始位置"
+    seed = 230001 if args.yellow_course else 230000
     run = ROOT / "runs/agent-demo-recording" / time.strftime("%Y%m%d-%H%M%S")
     run.mkdir(parents=True, exist_ok=False)
     scene = run / "scene.json"
-    scene.write_text(json.dumps(make_scene(230000, "none", True)), encoding="utf-8")
+    scene.write_text(json.dumps(make_scene(seed, "none", not args.yellow_course, args.yellow_course)), encoding="utf-8")
     os.environ["MICRODUCK_VISION_SCENE"] = str(scene)
     os.environ.pop("MICRODUCK_COLLECT_GT", None)
     planner = AgentPlanner(args.adapter)
@@ -50,6 +52,9 @@ def main():
     camera = mujoco.MjvCamera()
     camera.lookat[:] = [0.5, 0, 0.12]
     camera.distance, camera.azimuth, camera.elevation = 2.1, 130, -30
+    if args.yellow_course:
+        camera.lookat[:] = [1.3, 0, 0.12]
+        camera.distance, camera.elevation = 3.8, -45
     font = ImageFont.truetype("msyh.ttc", 17)
     small = ImageFont.truetype("msyh.ttc", 14)
     listeners, frames, times, decisions = [], [], [], []
@@ -97,7 +102,7 @@ def main():
         ended = None
         count = 0
         max_displacement = 0.0
-        while time.monotonic() - started < 90:
+        while time.monotonic() - started < (240 if args.yellow_course else 90):
             elapsed = time.monotonic() - started
             if elapsed >= 1.5 and worker is None:
                 worker = threading.Thread(target=execute, daemon=True)
@@ -107,7 +112,7 @@ def main():
             pose = body.sensors()["trunk"]
             distance = math.hypot(pose[0] - home["x"], pose[1] - home["y"])
             max_displacement = max(max_displacement, distance)
-            if count % 5 == 0:
+            if count % (25 if args.yellow_course else 5) == 0:
                 body.camera.render(world)
                 renderer.update_scene(world.data, camera=camera)
                 canvas = Image.new("RGB", (1040, 560), "#0c1424")
@@ -116,7 +121,7 @@ def main():
                 draw.text((24, 24), "MICRODUCK × QWEN-VL", font=font, fill="white")
                 draw.text((24, 65), "当前技能 agent · 真实本地运行", font=font, fill="#9aabc7")
                 draw.text((24, 120), "中文指令", font=font, fill="#61c9ff")
-                draw.text((24, 155), "前进0.2米，再回到初始位置", font=font, fill="white")
+                draw.text((24, 155), instruction, font=font, fill="white")
                 draw.text((24, 205), "逐步模型决策（每步重新看图）", font=font, fill="#61c9ff")
                 for i, decision in enumerate(decisions):
                     action = decision.get("prediction", {}).get("action", {})
@@ -124,7 +129,7 @@ def main():
                     draw.text((24, 240 + i * 33), f"{i + 1}. {label}", font=small, fill="white")
                 draw.text((24, 420), f"距起点：{distance:.3f} m", font=font, fill="white")
                 status = result.get("episode", {}).get("status", "执行中")
-                if status == "model_done" and not any(d.get("prediction", {}).get("action", {}).get("action") == "return_home" for d in decisions):
+                if status == "model_done" and not any(d.get("prediction", {}).get("action", {}).get("action") in ("return_home", "bypass_return") for d in decisions):
                     status = "提前结束：未执行回家"
                 draw.text((24, 454), f"状态：{status}", font=small, fill="#90edc2")
                 draw.text((24, 487), "done 仅为模型声明，非成功认证", font=small, fill="#ffc778")
@@ -152,6 +157,10 @@ def main():
             raise RuntimeError(f"recording failed: {result}")
         worker.join(timeout=1)
         assert decisions and len(frames) > 30
+        if args.yellow_course:
+            completed = [s.get("execution", {}) for s in result["episode"]["steps"]
+                         if s.get("prediction", {}).get("action", {}).get("action") == "bypass_return"]
+            assert len(completed) == 1 and completed[0]["success"] and completed[0]["trace_verification"]["success"], "bypass recording failed physical verification"
         durations = [max(20, round((b - a) * 100) * 10) for a, b in zip(times, times[1:])] + [100]
         output = ROOT / "assets/agent-demo.gif"
         frames[0].save(output, save_all=True, append_images=frames[1:], duration=durations, loop=0, optimize=True)
@@ -165,7 +174,7 @@ def main():
             result["frame_count"] = gif.n_frames
         for i, name in ((0, "start"), (len(frames) // 2, "middle"), (-1, "end")):
             frames[i].save(run / f"{name}.png")
-        result.update(instruction=instruction, seed=230000, clutter=True, occlusion="none",
+        result.update(instruction=instruction, seed=seed, clutter=not args.yellow_course, yellow_course=args.yellow_course, occlusion="none",
                       adapter=planner.adapter, decisions=decisions, duration_s=encoded_ms / 1000,
                       max_displacement_m=max_displacement, final_home_distance_m=distance,
                       gif_sha256=digest(output), collection_ground_truth=False,

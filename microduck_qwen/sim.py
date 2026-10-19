@@ -21,6 +21,7 @@ def main():
     parser.add_argument("--vision", action="store_true")
     parser.add_argument("--collect-gt", action="store_true", help="isolated collection-only segmentation/verification endpoint")
     parser.add_argument("--seed", type=int, default=42)
+    parser.add_argument("--yellow-course", action="store_true", help="two/three yellow obstacles with room to pass and return")
     parser.add_argument(
         "--occlusion", choices=["none", "partial", "full", "absent"], default="none"
     )
@@ -43,6 +44,8 @@ def main():
     )
     parser.add_argument("--walking-policy", default="alpha_walking.onnx")
     args = parser.parse_args()
+    if args.yellow_course and (not args.vision or args.clutter or args.occlusion != "none"):
+        parser.error("--yellow-course requires --vision and no ball occlusion/clutter flags")
     if args.collect_gt and not args.vision:
         parser.error("--collect-gt requires --vision")
     args.port = args.port or (7822 if args.vision else 7821)
@@ -99,7 +102,7 @@ def main():
 
         scene_path = state / "scene.json"
         scene_path.write_text(
-            json.dumps(make_scene(args.seed, args.occlusion, args.clutter), indent=2) + "\n"
+            json.dumps(make_scene(args.seed, args.occlusion, args.clutter, args.yellow_course), indent=2) + "\n"
         )
         env["MICRODUCK_VISION_SCENE"] = str(scene_path)
     command = [
@@ -234,6 +237,7 @@ def main():
             "seed": args.seed if args.vision else None,
             "occlusion": args.occlusion if args.vision else None,
             "clutter": args.clutter if args.vision else None,
+            "yellow_course": args.yellow_course if args.vision else None,
             "startup": "held HOME until balancing policy ready"
             if args.vision
             else "sitstand",

@@ -39,10 +39,12 @@ def agent_prompt(instruction, memory):
             '{"action":"approach","color":"red或blue或green","id":图中编号}；'
             '{"action":"search","color":"red或blue或green"}；'
             '{"action":"return_home"}；{"action":"stop"}；{"action":"done"}；'
+            '{"action":"bypass_return","side":"auto或left或right"}；'
             '{"action":"clarify"}；{"action":"unsupported"}。'
             "移动距离0.05至0.35米，转角5至120度；未指定时移动0.2米或转90度。"
             "靠近仅限清晰可见目标；找不到可搜索，遮挡不冒进。回初始位置用return_home（没有home时clarify）。"
             "按顺序完成，已经完成不要重复；全部完成才done。踢球、跳舞、抓取等未实现技能用unsupported。"
+            "依次绕过黄色障碍物并回原位用bypass_return：按任务开始距离由近到远，从一侧经过各柱后方并自动回本条任务起点；未指定侧用auto，指定左/右用left/right；不是绕整圈。此技能成功后直接done，不再重复return_home。"
             "记忆=" + json.dumps(memory, ensure_ascii=False, separators=(",", ":")) + "\n指令=" + instruction)
 
 
@@ -147,6 +149,9 @@ def run_instruction(planner, instruction, info, max_steps=5, preview=False, ask=
                     report["active_instruction"] = replacement
                     event["replaced_goal"] = replacement
                     completed.clear()
+                    state = executor.healthy()
+                    executor.task_start_pose = {"x": state["trunk"][0], "y": state["trunk"][1], "yaw": state["yaw"]}
+                    event["task_start_pose"] = executor.task_start_pose
                 else:
                     planning_instruction = (planning_instruction + "\n执行反馈=" + reason
                         + "\n用户最新补充=" + answer + "\n结合已完成动作和当前图像重新选择下一步；安全约束始终有效。")
@@ -163,6 +168,9 @@ def run_instruction(planner, instruction, info, max_steps=5, preview=False, ask=
         try:
             executor = SkillExecutor(info, directory, cancel_file=ROOT / "runs/cancel_navigation")
             executor.robot.stop()
+            initial = executor.healthy()
+            executor.task_start_pose = {"x": initial["trunk"][0], "y": initial["trunk"][1], "yaw": initial["yaw"]}
+            report["task_start_pose"] = executor.task_start_pose
             for index in range(max_steps):
                 frame = capture(info["port"])
                 candidates = propose_balls(frame)
@@ -197,6 +205,7 @@ def run_instruction(planner, instruction, info, max_steps=5, preview=False, ask=
                     execution = step["execution"]
                     if execution.get("needs_user_input"):
                         reason = ("当前移动路径在已知安全地图中受阻，动作尚未开始。" if action["action"] == "move"
+                                  else "黄色障碍的视觉确认或安全绕行预检查未通过，动作尚未开始。" if action["action"] == "bypass_return"
                                   else "目标无法与当前清晰可见对象绑定，动作尚未开始。")
                         if request_input(reason, action if execution.get("retry_safe") else None):
                             continue

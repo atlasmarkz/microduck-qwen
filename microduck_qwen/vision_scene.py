@@ -3,10 +3,19 @@
 import random
 
 
-def make_scene(seed=42, occlusion="none", clutter=False):
+def make_scene(seed=42, occlusion="none", clutter=False, yellow_course=False):
     if occlusion not in ("none", "partial", "full", "absent"):
         raise ValueError("unknown occlusion scenario")
     rng = random.Random(seed)
+    if yellow_course:
+        if occlusion != "none" or clutter:
+            raise ValueError("yellow course cannot be mixed with ball occlusion/clutter profiles")
+        return {"bounds": [-0.7, 3.4, -1.4, 1.4], "objects": {},
+                "obstacles": [{"name": f"yellow_{i}", "x": 0.75 + i * 0.95 + rng.uniform(-0.04, 0.04),
+                    "y": (-1 if i % 2 else 1) * rng.uniform(0.21, 0.29), "radius": 0.10,
+                    "height": 0.30, "rgba": [0.9, 0.65, 0.06, 1]} for i in range(2 + seed % 2)],
+                "seed": seed, "occlusion": "none", "clutter": False, "yellow_course": True,
+                "evaluation_only_initial_left_target": None}
     colors = [
         ("red", [0.9, 0.06, 0.04, 1]),
         ("blue", [0.04, 0.16, 0.95, 1]),

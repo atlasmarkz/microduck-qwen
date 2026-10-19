@@ -1,0 +1,66 @@
+{
+  "mode": "offline_action_exact_match",
+  "adapter": {
+    "path": "adapters/agent-4b-v1-r0",
+    "sha256": "12efa89a66d1e6ac987769b8f1b2c664786a7ac3c4c4359ed031cdfab8feb313",
+    "backend": "torch"
+  },
+  "split": "valid",
+  "dataset_manifest_sha256": "1f897864f9dbd7371d6422a22248e427b38f4f5625e1dca1a978b54fa6c269e2",
+  "results": [
+    {
+      "id": "valid-75100-task-09-0",
+      "task_type": "bypass_return",
+      "expected": {
+        "action": "bypass_return",
+        "side": "auto"
+      },
+      "prediction": {
+        "instruction": "绕行所有黄色柱体，按由近到远依次通过后返回开始的位置",
+        "raw": "{\"action\":\"bypass_return\",\"side\":\"right\"}",
+        "latency_s": 2.288029799998185,
+        "model": "Qwen/Qwen3-VL-4B-Instruct",
+        "revision": "ebb281ec70b05090aa6165b016eac8ec08e71b17",
+        "adapter": {
+          "path": "adapters/agent-4b-v1-r0",
+          "sha256": "12efa89a66d1e6ac987769b8f1b2c664786a7ac3c4c4359ed031cdfab8feb313",
+          "backend": "torch"
+        },
+        "action": {
+          "action": "bypass_return",
+          "side": "right"
+        }
+      },
+      "correct": false,
+      "semantic_correct_after_fence_removal": false
+    },
+    {
+      "id": "valid-75100-task-09-1",
+      "task_type": "done",
+      "expected": {
+        "action": "done"
+      },
+      "prediction": {
+        "instruction": "绕行所有黄色柱体，按由近到远依次通过后返回开始的位置",
+        "raw": "{\"action\":\"done\"}",
+        "latency_s": 1.010607500000333,
+        "model": "Qwen/Qwen3-VL-4B-Instruct",
+        "revision": "ebb281ec70b05090aa6165b016eac8ec08e71b17",
+        "adapter": {
+          "path": "adapters/agent-4b-v1-r0",
+          "sha256": "12efa89a66d1e6ac987769b8f1b2c664786a7ac3c4c4359ed031cdfab8feb313",
+          "backend": "torch"
+        },
+        "action": {
+          "action": "done"
+        }
+      },
+      "correct": true,
+      "semantic_correct_after_fence_removal": true
+    }
+  ],
+  "correct": 1,
+  "total": 2,
+  "note": "Development pilot. Rollout teacher is scorer AFTER execution, never a semantic intervention.",
+  "semantic_correct_after_fence_removal": 1
+}

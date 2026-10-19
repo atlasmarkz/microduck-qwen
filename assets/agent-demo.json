@@ -1,7 +1,7 @@
 {
   "episode": {
-    "instruction": "前进0.2米，再回到初始位置",
-    "active_instruction": "前进0.2米，再回到初始位置",
+    "instruction": "依次绕过黄色障碍物并回到原位",
+    "active_instruction": "依次绕过黄色障碍物并回到原位",
     "steps": [
       {
         "memory": {
@@ -14,151 +14,334 @@
           "completed": []
         },
         "prediction": {
-          "instruction": "前进0.2米，再回到初始位置",
-          "raw": "{\"action\":\"move\",\"direction\":\"forward\",\"distance_m\":0.2}",
-          "latency_s": 3.0621338000019023,
+          "instruction": "依次绕过黄色障碍物并回到原位",
+          "raw": "{\"action\":\"bypass_return\",\"side\":\"auto\"}",
+          "latency_s": 2.3731206999982533,
           "model": "Qwen/Qwen3-VL-4B-Instruct",
           "revision": "ebb281ec70b05090aa6165b016eac8ec08e71b17",
           "adapter": {
-            "path": "adapters\\agent-4b-v1-r0",
-            "sha256": "12efa89a66d1e6ac987769b8f1b2c664786a7ac3c4c4359ed031cdfab8feb313",
+            "path": "adapters\\agent-yellow-v1",
+            "sha256": "1afcbaad9e8f91d64cecfaee1f04e3200f1057bd71be7718b93a8ed6dfab1a94",
             "backend": "torch"
           },
           "action": {
-            "action": "move",
-            "direction": "forward",
-            "distance_m": 0.2
+            "action": "bypass_return",
+            "side": "auto"
           }
         },
-        "planning_instruction": "前进0.2米，再回到初始位置",
+        "planning_instruction": "依次绕过黄色障碍物并回到原位",
         "execution": {
           "action": {
-            "action": "move",
-            "direction": "forward",
-            "distance_m": 0.2
+            "action": "bypass_return",
+            "side": "auto"
           },
           "success": true,
-          "observation": "oracle robot odometry and known safety map",
-          "achieved": 0.1991539044387091,
-          "requested": 0.2,
-          "units": "meters",
-          "lateral_m": 0.01072302813157346,
-          "start": {
-            "position": [
-              0.00205061613353806,
-              0.00012035452552021858
-            ],
-            "yaw": -0.0041952931841341195
-          },
-          "end": {
-            "position": [
-              0.20124775408704418,
-              0.010007781724991128
-            ],
-            "yaw": 0.03577617843879791
-          }
-        }
-      },
-      {
-        "memory": {
-          "home_recorded": true,
-          "odometry_relative_home": {
-            "x": 0.19,
-            "y": 0.01,
-            "yaw_deg": 1.2
-          },
-          "completed": [
-            {
-              "action": "move",
-              "direction": "forward",
-              "distance_m": 0.2
-            }
-          ]
-        },
-        "prediction": {
-          "instruction": "前进0.2米，再回到初始位置",
-          "raw": "{\"action\":\"return_home\"}",
-          "latency_s": 1.49539680000089,
-          "model": "Qwen/Qwen3-VL-4B-Instruct",
-          "revision": "ebb281ec70b05090aa6165b016eac8ec08e71b17",
-          "adapter": {
-            "path": "adapters\\agent-4b-v1-r0",
-            "sha256": "12efa89a66d1e6ac987769b8f1b2c664786a7ac3c4c4359ed031cdfab8feb313",
-            "backend": "torch"
-          },
-          "action": {
-            "action": "return_home"
-          }
-        },
-        "planning_instruction": "前进0.2米，再回到初始位置",
-        "execution": {
-          "action": {
-            "action": "return_home"
-          },
-          "success": true,
-          "observation": "oracle robot odometry and known safety map",
-          "navigation": {
-            "success": true,
-            "goals": [
-              {
-                "goal": {
-                  "target": "point",
-                  "x": 0.0,
-                  "y": 0.0,
-                  "speed": "slow",
-                  "stop_distance_m": 0.1
-                },
-                "distance_m": 0.09812487447205608,
-                "elapsed_s": 4.125,
-                "path_length_m": 0.4909939678427554,
-                "min_clearance_m": 0.5936648906825598,
-                "position": [
-                  0.09803317683863642,
-                  -0.004241135352874529
-                ]
-              }
-            ],
-            "observation": "MuJoCo ground-truth pose and fixed scene map"
-          },
-          "distance_home_m": 0.058000550177954135,
-          "home_yaw_error_deg": 6.652688201818575
-        }
-      },
-      {
-        "memory": {
-          "home_recorded": true,
-          "odometry_relative_home": {
-            "x": 0.05,
+          "observation": "RGB-D yellow confirmation; oracle pose/static map; near-to-far order frozen at task start",
+          "task_start_pose": {
+            "x": 0.0,
             "y": 0.0,
-            "yaw_deg": 6.4
+            "yaw": 0.0
           },
-          "completed": [
+          "legs": [
             {
-              "action": "move",
-              "direction": "forward",
-              "distance_m": 0.2
+              "obstacle": {
+                "name": "yellow_0",
+                "x": 0.7752800448213438,
+                "y": 0.25372063329771566,
+                "radius": 0.1,
+                "height": 0.3,
+                "rgba": [
+                  0.9,
+                  0.65,
+                  0.06,
+                  1
+                ]
+              },
+              "side": "right",
+              "points": [
+                [
+                  0.2552800448213438,
+                  -0.26627936670228436
+                ],
+                [
+                  1.295280044821344,
+                  -0.26627936670228436
+                ]
+              ]
             },
             {
-              "action": "return_home"
+              "obstacle": {
+                "name": "yellow_1",
+                "x": 1.7248414381037764,
+                "y": -0.27001853963231864,
+                "radius": 0.1,
+                "height": 0.3,
+                "rgba": [
+                  0.9,
+                  0.65,
+                  0.06,
+                  1
+                ]
+              },
+              "side": "right",
+              "points": [
+                [
+                  1.2048414381037764,
+                  -0.7900185396323187
+                ],
+                [
+                  2.2448414381037765,
+                  -0.7900185396323187
+                ]
+              ]
+            },
+            {
+              "obstacle": {
+                "name": "yellow_2",
+                "x": 2.6250560537092134,
+                "y": 0.2182899772205319,
+                "radius": 0.1,
+                "height": 0.3,
+                "rgba": [
+                  0.9,
+                  0.65,
+                  0.06,
+                  1
+                ]
+              },
+              "side": "right",
+              "points": [
+                [
+                  2.1050560537092133,
+                  -0.3017100227794681
+                ],
+                [
+                  3.1450560537092134,
+                  -0.3017100227794681
+                ]
+              ]
+            }
+          ],
+          "visual_bindings": [
+            {
+              "position": [
+                0.6897796923067849,
+                0.22959295155270257
+              ],
+              "pixels": 12731
+            },
+            {
+              "position": [
+                1.6401781344102662,
+                -0.25818505157976807
+              ],
+              "pixels": 1931
+            },
+            {
+              "position": [
+                2.540722218003876,
+                0.2100645799149926
+              ],
+              "pixels": 774
+            }
+          ],
+          "navigation": [
+            {
+              "success": true,
+              "goals": [
+                {
+                  "goal": {
+                    "target": "point",
+                    "x": 0.2552800448213438,
+                    "y": -0.26627936670228436,
+                    "speed": "normal",
+                    "stop_distance_m": 0.1
+                  },
+                  "distance_m": 0.08850836514940809,
+                  "elapsed_s": 2.4069999999992433,
+                  "path_length_m": 0.39521748583710015,
+                  "min_clearance_m": 0.4736094384733097,
+                  "position": [
+                    0.21456994681463193,
+                    -0.1876891725193911
+                  ]
+                },
+                {
+                  "goal": {
+                    "target": "point",
+                    "x": 1.295280044821344,
+                    "y": -0.26627936670228436,
+                    "speed": "normal",
+                    "stop_distance_m": 0.1
+                  },
+                  "distance_m": 0.08911565030093441,
+                  "elapsed_s": 7.859000000000378,
+                  "path_length_m": 1.2978809147627137,
+                  "min_clearance_m": 0.21660874669144603,
+                  "position": [
+                    1.209472629835139,
+                    -0.2422234596949889
+                  ]
+                }
+              ],
+              "observation": "MuJoCo ground-truth pose and fixed scene map"
+            },
+            {
+              "success": true,
+              "goals": [
+                {
+                  "goal": {
+                    "target": "point",
+                    "x": 1.2048414381037764,
+                    "y": -0.7900185396323187,
+                    "speed": "normal",
+                    "stop_distance_m": 0.1
+                  },
+                  "distance_m": 0.0933522053383958,
+                  "elapsed_s": 4.453000000001339,
+                  "path_length_m": 0.6988568404212314,
+                  "min_clearance_m": 0.2665495649575157,
+                  "position": [
+                    1.2135012579610163,
+                    -0.6970688663591857
+                  ]
+                },
+                {
+                  "goal": {
+                    "target": "point",
+                    "x": 2.2448414381037765,
+                    "y": -0.7900185396323187,
+                    "speed": "normal",
+                    "stop_distance_m": 0.1
+                  },
+                  "distance_m": 0.09557240643848794,
+                  "elapsed_s": 8.18699999999808,
+                  "path_length_m": 1.31839770448951,
+                  "min_clearance_m": 0.2279079247608784,
+                  "position": [
+                    2.149331678560984,
+                    -0.7934784102254893
+                  ]
+                }
+              ],
+              "observation": "MuJoCo ground-truth pose and fixed scene map"
+            },
+            {
+              "success": true,
+              "goals": [
+                {
+                  "goal": {
+                    "target": "point",
+                    "x": 2.1050560537092133,
+                    "y": -0.3017100227794681,
+                    "speed": "normal",
+                    "stop_distance_m": 0.1
+                  },
+                  "distance_m": 0.095833501032121,
+                  "elapsed_s": 5.234000000000378,
+                  "path_length_m": 0.714550212118137,
+                  "min_clearance_m": 0.1703616403853171,
+                  "position": [
+                    2.1159541886533506,
+                    -0.3969218422916112
+                  ]
+                },
+                {
+                  "goal": {
+                    "target": "point",
+                    "x": 3.1450560537092134,
+                    "y": -0.3017100227794681,
+                    "speed": "normal",
+                    "stop_distance_m": 0.1
+                  },
+                  "distance_m": 0.09890052231430857,
+                  "elapsed_s": 8.6720000000023,
+                  "path_length_m": 1.3677190783356732,
+                  "min_clearance_m": 0.14256896940798014,
+                  "position": [
+                    3.047252342783137,
+                    -0.2870216789949734
+                  ]
+                }
+              ],
+              "observation": "MuJoCo ground-truth pose and fixed scene map"
+            }
+          ],
+          "trace_verification": {
+            "success": true,
+            "completion_indices": [
+              93,
+              219,
+              358
+            ],
+            "obstacle_order": [
+              "yellow_0",
+              "yellow_1",
+              "yellow_2"
+            ]
+          },
+          "minimum_clearance_m": 0.10323712271923888,
+          "return": {
+            "navigation": {
+              "success": true,
+              "goals": [
+                {
+                  "goal": {
+                    "target": "point",
+                    "x": 0.0,
+                    "y": 0.0,
+                    "speed": "slow",
+                    "stop_distance_m": 0.1
+                  },
+                  "distance_m": 0.08989821952233963,
+                  "elapsed_s": 32.03099999999904,
+                  "path_length_m": 4.572319212568577,
+                  "min_clearance_m": 0.10323712271923888,
+                  "position": [
+                    0.07912346405201488,
+                    -0.042675136903075964
+                  ]
+                }
+              ],
+              "observation": "MuJoCo ground-truth pose and fixed scene map"
+            },
+            "distance_home_m": 0.09508500608579563,
+            "home_yaw_error_deg": 8.222340024016825,
+            "success": true
+          }
+        }
+      },
+      {
+        "memory": {
+          "home_recorded": true,
+          "odometry_relative_home": {
+            "x": 0.07,
+            "y": -0.06,
+            "yaw_deg": 8.1
+          },
+          "completed": [
+            {
+              "action": "bypass_return",
+              "side": "auto"
             }
           ]
         },
         "prediction": {
-          "instruction": "前进0.2米，再回到初始位置",
+          "instruction": "依次绕过黄色障碍物并回到原位",
           "raw": "{\"action\":\"done\"}",
-          "latency_s": 1.3747841000003973,
+          "latency_s": 1.2928525999996054,
           "model": "Qwen/Qwen3-VL-4B-Instruct",
           "revision": "ebb281ec70b05090aa6165b016eac8ec08e71b17",
           "adapter": {
-            "path": "adapters\\agent-4b-v1-r0",
-            "sha256": "12efa89a66d1e6ac987769b8f1b2c664786a7ac3c4c4359ed031cdfab8feb313",
+            "path": "adapters\\agent-yellow-v1",
+            "sha256": "1afcbaad9e8f91d64cecfaee1f04e3200f1057bd71be7718b93a8ed6dfab1a94",
             "backend": "torch"
           },
           "action": {
             "action": "done"
           }
         },
-        "planning_instruction": "前进0.2米，再回到初始位置",
+        "planning_instruction": "依次绕过黄色障碍物并回到原位",
         "execution": {
           "action": {
             "action": "done"
@@ -169,25 +352,31 @@
         }
       }
     ],
-    "directory": ".\\runs\\agent\\20261019-192404-230314",
+    "directory": ".\\runs\\agent\\20261019-195115-834327",
     "status": "model_done",
     "task_success_verified": false,
     "interactions": [],
-    "note": "No free-text semantic oracle. done is a model claim, not verified task success."
+    "note": "No free-text semantic oracle. done is a model claim, not verified task success.",
+    "task_start_pose": {
+      "x": 0.0,
+      "y": 0.0,
+      "yaw": 0.0
+    }
   },
-  "frame_count": 169,
-  "instruction": "前进0.2米，再回到初始位置",
-  "seed": 230000,
-  "clutter": true,
+  "frame_count": 161,
+  "instruction": "依次绕过黄色障碍物并回到原位",
+  "seed": 230001,
+  "clutter": false,
+  "yellow_course": true,
   "occlusion": "none",
   "adapter": {
-    "path": "adapters\\agent-4b-v1-r0",
-    "sha256": "12efa89a66d1e6ac987769b8f1b2c664786a7ac3c4c4359ed031cdfab8feb313",
+    "path": "adapters\\agent-yellow-v1",
+    "sha256": "1afcbaad9e8f91d64cecfaee1f04e3200f1057bd71be7718b93a8ed6dfab1a94",
     "backend": "torch"
   },
   "decisions": [
     {
-      "image": ".\\runs\\agent\\20261019-192404-230314\\step-000-candidates.png",
+      "image": ".\\runs\\agent\\20261019-195115-834327\\step-000-candidates.png",
       "memory": {
         "home_recorded": true,
         "odometry_relative_home": {
@@ -199,87 +388,48 @@
       },
       "status": "predicted",
       "prediction": {
-        "instruction": "前进0.2米，再回到初始位置",
-        "raw": "{\"action\":\"move\",\"direction\":\"forward\",\"distance_m\":0.2}",
-        "latency_s": 3.0621338000019023,
+        "instruction": "依次绕过黄色障碍物并回到原位",
+        "raw": "{\"action\":\"bypass_return\",\"side\":\"auto\"}",
+        "latency_s": 2.3731206999982533,
         "model": "Qwen/Qwen3-VL-4B-Instruct",
         "revision": "ebb281ec70b05090aa6165b016eac8ec08e71b17",
         "adapter": {
-          "path": "adapters\\agent-4b-v1-r0",
-          "sha256": "12efa89a66d1e6ac987769b8f1b2c664786a7ac3c4c4359ed031cdfab8feb313",
+          "path": "adapters\\agent-yellow-v1",
+          "sha256": "1afcbaad9e8f91d64cecfaee1f04e3200f1057bd71be7718b93a8ed6dfab1a94",
           "backend": "torch"
         },
         "action": {
-          "action": "move",
-          "direction": "forward",
-          "distance_m": 0.2
+          "action": "bypass_return",
+          "side": "auto"
         }
       }
     },
     {
-      "image": ".\\runs\\agent\\20261019-192404-230314\\step-001-candidates.png",
+      "image": ".\\runs\\agent\\20261019-195115-834327\\step-001-candidates.png",
       "memory": {
         "home_recorded": true,
         "odometry_relative_home": {
-          "x": 0.19,
-          "y": 0.01,
-          "yaw_deg": 1.2
+          "x": 0.07,
+          "y": -0.06,
+          "yaw_deg": 8.1
         },
         "completed": [
           {
-            "action": "move",
-            "direction": "forward",
-            "distance_m": 0.2
+            "action": "bypass_return",
+            "side": "auto"
           }
         ]
       },
       "status": "predicted",
       "prediction": {
-        "instruction": "前进0.2米，再回到初始位置",
-        "raw": "{\"action\":\"return_home\"}",
-        "latency_s": 1.49539680000089,
-        "model": "Qwen/Qwen3-VL-4B-Instruct",
-        "revision": "ebb281ec70b05090aa6165b016eac8ec08e71b17",
-        "adapter": {
-          "path": "adapters\\agent-4b-v1-r0",
-          "sha256": "12efa89a66d1e6ac987769b8f1b2c664786a7ac3c4c4359ed031cdfab8feb313",
-          "backend": "torch"
-        },
-        "action": {
-          "action": "return_home"
-        }
-      }
-    },
-    {
-      "image": ".\\runs\\agent\\20261019-192404-230314\\step-002-candidates.png",
-      "memory": {
-        "home_recorded": true,
-        "odometry_relative_home": {
-          "x": 0.05,
-          "y": 0.0,
-          "yaw_deg": 6.4
-        },
-        "completed": [
-          {
-            "action": "move",
-            "direction": "forward",
-            "distance_m": 0.2
-          },
-          {
-            "action": "return_home"
-          }
-        ]
-      },
-      "status": "predicted",
-      "prediction": {
-        "instruction": "前进0.2米，再回到初始位置",
+        "instruction": "依次绕过黄色障碍物并回到原位",
         "raw": "{\"action\":\"done\"}",
-        "latency_s": 1.3747841000003973,
+        "latency_s": 1.2928525999996054,
         "model": "Qwen/Qwen3-VL-4B-Instruct",
         "revision": "ebb281ec70b05090aa6165b016eac8ec08e71b17",
         "adapter": {
-          "path": "adapters\\agent-4b-v1-r0",
-          "sha256": "12efa89a66d1e6ac987769b8f1b2c664786a7ac3c4c4359ed031cdfab8feb313",
+          "path": "adapters\\agent-yellow-v1",
+          "sha256": "1afcbaad9e8f91d64cecfaee1f04e3200f1057bd71be7718b93a8ed6dfab1a94",
           "backend": "torch"
         },
         "action": {
@@ -288,10 +438,10 @@
       }
     }
   ],
-  "duration_s": 20.41,
-  "max_displacement_m": 0.21498596563922195,
-  "final_home_distance_m": 0.05269127003357868,
-  "gif_sha256": "7d288f062cc5864175302c9460a3507f36a6cc98aa20cdfd49bcca41361acaa7",
+  "duration_s": 81.15,
+  "max_displacement_m": 3.086975980310949,
+  "final_home_distance_m": 0.09396113057637673,
+  "gif_sha256": "4f4ebfb6f0b07eadc851da8b2e495141bd093c283bca7bd22194c19074bf0101",
   "collection_ground_truth": false,
   "note": "Live model inference and physics; model_done is not independently verified task success. No teacher intervention. Wall-clock frame timing preserved."
 }

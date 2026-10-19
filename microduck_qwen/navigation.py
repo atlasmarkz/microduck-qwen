@@ -278,6 +278,7 @@ def execute(
     guard=None,
     observation_label=None,
     arrival_tolerance_m=0.025,
+    cancel_started_ns=None,
 ):
     if not math.isfinite(arrival_tolerance_m) or not 0 <= arrival_tolerance_m <= 0.025:
         raise ValueError("arrival tolerance must be 0..0.025m")
@@ -295,7 +296,7 @@ def execute(
     }
     if observation_label:
         summary["observation"] = observation_label
-    execution_started_ns = time.time_ns()
+    execution_started_ns = time.time_ns() if cancel_started_ns is None else cancel_started_ns
     trace_file.parent.mkdir(parents=True, exist_ok=True)
     try:
         with trace_file.open("w") as trace:

@@ -1,0 +1,70 @@
+{
+  "format": "simulation_agent_v1",
+  "status": "completed",
+  "splits": {
+    "train": {
+      "sha256": "738b95aa6f6c2333722fac77fe0ad54d6f88605cf1d3d74cc865c8483eead7ea",
+      "examples": 174,
+      "scene_seeds": [
+        61700,
+        61701,
+        61702,
+        65100,
+        65101
+      ],
+      "actions": {
+        "move": 36,
+        "return_home": 24,
+        "done": 57,
+        "turn": 18,
+        "approach": 6,
+        "stop": 9,
+        "unsupported": 9,
+        "clarify": 9,
+        "bypass_return": 6
+      }
+    },
+    "valid": {
+      "sha256": "b0447219ff8d2f94002a0637da7faf76eca6c3714028600512197feccb8d2e81",
+      "examples": 21,
+      "scene_seeds": [
+        71700,
+        75100
+      ],
+      "actions": {
+        "move": 4,
+        "return_home": 3,
+        "done": 7,
+        "turn": 2,
+        "approach": 1,
+        "stop": 1,
+        "unsupported": 1,
+        "clarify": 1,
+        "bypass_return": 1
+      }
+    },
+    "test": {
+      "sha256": "71af76d720732077cf2fdce5d26105ff08619583ec059c60eac6d02aa92829ae",
+      "examples": 18,
+      "scene_seeds": [
+        81700,
+        85100
+      ],
+      "actions": {
+        "move": 4,
+        "return_home": 2,
+        "done": 6,
+        "turn": 2,
+        "stop": 1,
+        "unsupported": 1,
+        "clarify": 1,
+        "bypass_return": 1
+      }
+    }
+  },
+  "parent_manifests": {
+    "old": "be06e9981fef934c84607ca8b7fde584850beb767da90df53108c67ce63603a8",
+    "yellow": "1f897864f9dbd7371d6422a22248e427b38f4f5625e1dca1a978b54fa6c269e2"
+  },
+  "method": "Disjoint old tasks plus physically verified yellow bypass demonstrations; no reward-selected labels"
+}

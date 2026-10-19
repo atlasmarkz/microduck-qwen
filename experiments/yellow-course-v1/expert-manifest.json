@@ -1,0 +1,108 @@
+{
+  "format": "simulation_agent_v1",
+  "status": "completed",
+  "episodes": [
+    {
+      "seed": 65100,
+      "split": "train",
+      "task": 9,
+      "verified": true,
+      "occlusion": "none",
+      "clutter": false,
+      "rows": 6,
+      "error": null,
+      "interventions": 0
+    },
+    {
+      "seed": 65101,
+      "split": "train",
+      "task": 9,
+      "verified": true,
+      "occlusion": "none",
+      "clutter": false,
+      "rows": 6,
+      "error": null,
+      "interventions": 0
+    },
+    {
+      "seed": 75100,
+      "split": "valid",
+      "task": 9,
+      "verified": true,
+      "occlusion": "none",
+      "clutter": false,
+      "rows": 2,
+      "error": null,
+      "interventions": 0
+    },
+    {
+      "seed": 85100,
+      "split": "test",
+      "task": 9,
+      "verified": true,
+      "occlusion": "none",
+      "clutter": false,
+      "rows": 2,
+      "error": null,
+      "interventions": 0
+    }
+  ],
+  "splits": {
+    "train": {
+      "sha256": "1a4ae3911a43cd6d10d8c1c57844b0356595253a29f3896bd688da8a958a1866",
+      "examples": 12,
+      "scene_seeds": [
+        65100,
+        65101
+      ],
+      "actions": {
+        "bypass_return": 6,
+        "done": 6
+      }
+    },
+    "valid": {
+      "sha256": "e8972ef9dd48f0fbba179ebc80e178ad96aa3f5cc6124fa3d84a63670d19eeae",
+      "examples": 2,
+      "scene_seeds": [
+        75100
+      ],
+      "actions": {
+        "bypass_return": 1,
+        "done": 1
+      }
+    },
+    "test": {
+      "sha256": "1c8c3709b09301328d8411832e57ceab4c9228cb774914a6a6f6cedcfe9537e0",
+      "examples": 2,
+      "scene_seeds": [
+        85100
+      ],
+      "actions": {
+        "bypass_return": 1,
+        "done": 1
+      }
+    }
+  },
+  "inputs": [
+    "numbered RGB",
+    "instruction",
+    "own oracle odometry",
+    "completed actions"
+  ],
+  "method": "expert-intervened data aggregation; not unrestricted DAgger or learned reward model",
+  "scene_mix": "yellow",
+  "seed_offset": 4100,
+  "source_sha256": {
+    "agent_data.py": "4291acdc0b7c9a48ceacc72eb5d734ee2fdfe6dec930a9e799bcc76993900bfa",
+    "skills.py": "5ffbf233c9401cf34b96a9ae1b0a05399fa32d0377336d7e0a7f80e54cebb012",
+    "bypass.py": "e867e64f9345ee223193509a4938811a2f3cf34346ede8fc9c0227f4eb49c085",
+    "navigation.py": "0b3419046eeacf64e3778107f5da62ec6ed810215646ae6e8fdc89139427dbc4",
+    "vision.py": "9fa03a2366e9af4ebf91110ef084688fb67591b3b3e7c1ff39e5e72f35ab70c3",
+    "sim_data.py": "62e9fc801db7d59580b8a24e9d0e76cedb21f34197e043eef151b25aacf3ce12",
+    "sim_runner.py": "ad41c1e639e43a17c9226c3824f7c41bef1fad7e737efbf714eb239976b9659b",
+    "vision_scene.py": "b78a3ec245b6849a4f3cf27d481f42e81689d7bdae7a92898b8ce6e3838e13ae",
+    "sim.py": "d636b345b36a50044a0c963657c3f626010965db34380db057718e2e20e7923b",
+    "sim_body.py": "e0a89cda9f757d060d859611aa76dc9c7a6ab4c9d67e9fcbfd51078f83edba87"
+  },
+  "startup_failures": []
+}

@@ -1,0 +1,294 @@
+{
+  "instruction": "请逐一绕开黄色障碍，完成后回到刚才出发的地方",
+  "teacher_specs": [
+    {
+      "action": "bypass_return",
+      "side": "auto"
+    }
+  ],
+  "steps": [
+    {
+      "expected": {
+        "action": "bypass_return",
+        "side": "auto"
+      },
+      "memory": {
+        "home_recorded": true,
+        "odometry_relative_home": {
+          "x": -0.0,
+          "y": 0.0,
+          "yaw_deg": 0.0
+        },
+        "completed": []
+      },
+      "execution": {
+        "action": {
+          "action": "bypass_return",
+          "side": "auto"
+        },
+        "success": true,
+        "observation": "RGB-D yellow confirmation; oracle pose/static map; near-to-far order frozen at task start",
+        "task_start_pose": {
+          "x": 0.0020757687981401347,
+          "y": 0.00012661001292027036,
+          "yaw": -0.0041995341909270125
+        },
+        "legs": [
+          {
+            "obstacle": {
+              "name": "yellow_0",
+              "x": 0.7532908436595719,
+              "y": 0.2888411296404698,
+              "radius": 0.1,
+              "height": 0.3,
+              "rgba": [
+                0.9,
+                0.65,
+                0.06,
+                1
+              ]
+            },
+            "side": "right",
+            "points": [
+              [
+                0.23111167767509835,
+                -0.228970533623076
+              ],
+              [
+                1.2711025069231177,
+                -0.23333803634400369
+              ]
+            ]
+          },
+          {
+            "obstacle": {
+              "name": "yellow_1",
+              "x": 1.7292398906391222,
+              "y": -0.2594583974888403,
+              "radius": 0.1,
+              "height": 0.3,
+              "rgba": [
+                0.9,
+                0.65,
+                0.06,
+                1
+              ]
+            },
+            "side": "right",
+            "points": [
+              [
+                1.2070607246546488,
+                -0.7772700607523861
+              ],
+              [
+                2.247051553902668,
+                -0.7816375634733138
+              ]
+            ]
+          }
+        ],
+        "visual_bindings": [
+          {
+            "position": [
+              0.6680262642482788,
+              0.2626303911202556
+            ],
+            "pixels": 13892
+          },
+          {
+            "position": [
+              1.6445574259449822,
+              -0.24890827362036905
+            ],
+            "pixels": 1917
+          }
+        ],
+        "navigation": [
+          {
+            "success": true,
+            "goals": [
+              {
+                "goal": {
+                  "target": "point",
+                  "x": 0.23111167767509835,
+                  "y": -0.228970533623076,
+                  "speed": "normal",
+                  "stop_distance_m": 0.1
+                },
+                "distance_m": 0.09023076337332486,
+                "elapsed_s": 2.5309999999990396,
+                "path_length_m": 0.38932626591317615,
+                "min_clearance_m": 0.5160893864823684,
+                "position": [
+                  0.14919705959595664,
+                  -0.19113422825533044
+                ]
+              },
+              {
+                "goal": {
+                  "target": "point",
+                  "x": 1.2711025069231177,
+                  "y": -0.23333803634400369,
+                  "speed": "normal",
+                  "stop_distance_m": 0.1
+                },
+                "distance_m": 0.09179858412445786,
+                "elapsed_s": 8.062000000001717,
+                "path_length_m": 1.3613678027462017,
+                "min_clearance_m": 0.2241651499541102,
+                "position": [
+                  1.1824725191118888,
+                  -0.20942767650069335
+                ]
+              }
+            ],
+            "observation": "MuJoCo ground-truth pose and fixed scene map"
+          },
+          {
+            "success": true,
+            "goals": [
+              {
+                "goal": {
+                  "target": "point",
+                  "x": 1.2070607246546488,
+                  "y": -0.7772700607523861,
+                  "speed": "normal",
+                  "stop_distance_m": 0.1
+                },
+                "distance_m": 0.08272490843936317,
+                "elapsed_s": 4.936999999998079,
+                "path_length_m": 0.7554802401076355,
+                "min_clearance_m": 0.2672003316165451,
+                "position": [
+                  1.2130387029936198,
+                  -0.6947614293779668
+                ]
+              },
+              {
+                "goal": {
+                  "target": "point",
+                  "x": 2.247051553902668,
+                  "y": -0.7816375634733138,
+                  "speed": "normal",
+                  "stop_distance_m": 0.1
+                },
+                "distance_m": 0.0918638214594288,
+                "elapsed_s": 8.89100000000326,
+                "path_length_m": 1.390237319425826,
+                "min_clearance_m": 0.21992763032812723,
+                "position": [
+                  2.1553486337482393,
+                  -0.7870722785790265
+                ]
+              }
+            ],
+            "observation": "MuJoCo ground-truth pose and fixed scene map"
+          }
+        ],
+        "trace_verification": {
+          "success": true,
+          "completion_indices": [
+            97,
+            234
+          ],
+          "obstacle_order": [
+            "yellow_0",
+            "yellow_1"
+          ]
+        },
+        "minimum_clearance_m": 0.12264122470500827,
+        "return": {
+          "navigation": {
+            "success": true,
+            "goals": [
+              {
+                "goal": {
+                  "target": "point",
+                  "x": 0.0020757687981401347,
+                  "y": 0.00012661001292027036,
+                  "speed": "slow",
+                  "stop_distance_m": 0.1
+                },
+                "distance_m": 0.08846491825473654,
+                "elapsed_s": 25.23400000000038,
+                "path_length_m": 3.6178958137200246,
+                "min_clearance_m": 0.12264122470500827,
+                "position": [
+                  0.09044993873176803,
+                  -0.00387936681670278
+                ]
+              }
+            ],
+            "observation": "MuJoCo ground-truth pose and fixed scene map"
+          },
+          "distance_home_m": 0.09599686876826985,
+          "home_yaw_error_deg": 0.09994159148382904,
+          "success": true
+        }
+      }
+    },
+    {
+      "expected": {
+        "action": "done"
+      },
+      "memory": {
+        "home_recorded": true,
+        "odometry_relative_home": {
+          "x": 0.09,
+          "y": 0.02,
+          "yaw_deg": 0.5
+        },
+        "completed": [
+          {
+            "action": "bypass_return",
+            "side": "auto"
+          }
+        ]
+      },
+      "execution": {
+        "action": {
+          "action": "done"
+        },
+        "success": false,
+        "observation": "oracle robot odometry and known safety map",
+        "no_motion": true
+      }
+    }
+  ],
+  "verified": true,
+  "intervene": true,
+  "mode": "expert",
+  "reset": {
+    "action": {
+      "action": "return_home"
+    },
+    "success": true,
+    "observation": "oracle robot odometry and known safety map",
+    "navigation": {
+      "success": true,
+      "goals": [
+        {
+          "goal": {
+            "target": "point",
+            "x": 0.002095174313935256,
+            "y": 0.00012426120713048932,
+            "speed": "slow",
+            "stop_distance_m": 0.1
+          },
+          "distance_m": 1.9547146387971953e-05,
+          "elapsed_s": 0.0,
+          "path_length_m": 0.0,
+          "min_clearance_m": 0.5647857867425551,
+          "position": [
+            0.0020757687981401347,
+            0.00012661001292027036
+          ]
+        }
+      ],
+      "observation": "MuJoCo ground-truth pose and fixed scene map"
+    },
+    "distance_home_m": 1.9547146387971953e-05,
+    "home_yaw_error_deg": 0.001906288878643918
+  },
+  "scene_contact_steps_delta": 0
+}

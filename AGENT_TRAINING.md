@@ -36,7 +36,7 @@ Windows 新的 4B 实验权重为 `adapters/agent-4b-v1-r0`，奖励权重为 `a
 - 走到画面左边的球旁边，然后回到初始位置
 - 停下来
 
-以上只有 7 条固定模板（本轮新增场景并不在训练分布内）。想换更难的场景，可在仿真命令上加 `--occlusion partial|full|absent`（最左侧目标被遮挡／缺失）或 `--clutter`（5 球，两对同色，必须靠图中编号区分，另加两根柱体）；两者可叠加。采集端用 `--scene-mix hard` 就能把同一批难场景纳入训练，见下文「数据与训练闭环」。
+这些示例来自有限训练模板。想换更难的场景，可在仿真命令上加 `--occlusion partial|full|absent`（最左侧目标被遮挡／缺失）或 `--clutter`（5 球，两对同色，必须靠图中编号区分，另加两根柱体）；两者可叠加。采集端用 `--scene-mix hard` 就能把同一批难场景纳入训练；另有专门的黄色障碍场景与复合任务，见下文。
 
 先预览而不执行：
 
@@ -72,9 +72,35 @@ Windows 新的 4B 实验权重为 `adapters/agent-4b-v1-r0`，奖励权重为 `a
 
 等待状态及每次问答保存在该任务的 `runs/agent/<timestamp>/result.json`。每条任务最多提问三次，且仍受技能步骤预算限制。重新行动前检查取消状态与仿真健康；用户授权不会关闭地图或视觉保护。
 
-**当前范围**：这是命令行的有界澄清与暂停机制，尚无语音／网页界面，也没有完整的对话训练或自动左右绕行决策。运动中发生部分位移后失败、跌倒、定位或通信异常会保持原有停止行为，不提供可能重复完整距离的“继续”。等待期间没有持续 VLM 推理，恢复前才重新观察。原逐步模型仍可能提前 `done`，本次没有实现完整任务编译器。
+**当前范围**：这是命令行的有界澄清与暂停机制，尚无语音／网页界面或完整对话训练。自动选侧只在下述已知静态黄色障碍复合技能内实现。运动中发生部分位移后失败、跌倒、定位或通信异常会保持原有停止行为，不提供可能重复完整距离的“继续”。等待期间没有持续 VLM 推理，恢复前才重新观察。原逐步模型仍可能提前 `done`，尚未实现通用任务编译器。
 
 本机 71 项测试通过，覆盖新图像重试、取消、等待、目标替换、提问预算和部分位移失败不自动重试；真实 MuJoCo＋官方步态实跑了“移动前受阻 → 提问 → 重试仍受阻 → 再提问 → 取消”。该集成自检使用脚本化决策与回答，验证交互和控制行为，不证明自然语言对话模型效果，见 [记录](experiments/dialogue-v1/summary.json)。
+
+## 黄色障碍复合任务
+
+新增任务 9（自动选侧）、10（全部左侧）、11（全部右侧），共享严格 JSON schema：`{"action":"bypass_return","side":"auto"}`，方向也可为 `left/right`。该技能内部完成逐柱绕行和返回；成功后下一步应为 `done`。默认 `--scene-mix yellow` 只采集任务 9，原 `plain/hard` 默认仍采集旧任务 0–8，需增加左右侧示范时显式传 `--task-ids 9 10 11`。
+
+目标是从障碍前方经指定一侧到后方，并依次完成后返回任务起点。执行开始前从 RGB-D 黄色像素及有效深度确认所有目标，与已知地图中心绑定；冻结按任务起点距离的顺序，最多三根柱。执行器用 A* 和官方冻结步态走两个侧向路点，并对实际位置轨迹做独立前／侧／后穿越与顺序验收，之后才返回任务起点。轨迹不连续、漏绕、顺序错误不能因返程补过目标而算成功。返程须距起点 ≤0.125 m、朝向误差 <12°，全程几何净空 ≥0.025 m；采集和独立物理评测还要求 MuJoCo 障碍接触步数为零。
+
+本条任务开始位姿与 `return_home` 的仿真启动位姿不同。交互中 `改为…` 开始新目标，也重新记录该目标的起点；补充条件保留原任务起点。地图、相机外参和机器人定位仍为仿真真值，没有训练步态或未知环境建图。方向和顺序的执行可靠性由有界技能保证，不能据此声称模型学会了通用长程规划。
+
+复现实验（输出目录须不存在）：
+
+```powershell
+.venv/Scripts/python.exe -X utf8 -m microduck_qwen.agent_data --output data/yellow-course-v1 --train-scenes 2 --valid-scenes 1 --test-scenes 1 --seed-offset 4100 --scene-mix yellow --task-ids 9
+.venv/Scripts/python.exe -X utf8 experiments/yellow-course-v1/prepare_data.py
+.venv/Scripts/python.exe -X utf8 -m microduck_qwen.vision_torch train --task agent --data data/agent-yellow-mixed-v1 --output adapters/agent-yellow-v1 --resume adapters/agent-4b-v1-r0 --extra data/agent-yellow-mixed-v1/yellow-replay.jsonl --steps 120
+.venv/Scripts/python.exe -X utf8 -m microduck_qwen.agent_eval --data data/agent-yellow-mixed-v1 --adapter adapters/agent-yellow-v1 --output runs/yellow-mixed-valid
+.venv/Scripts/python.exe -X utf8 -m microduck_qwen.agent_eval --data data/yellow-course-v1 --adapter adapters/agent-yellow-v1 --output runs/yellow-rollout-92000 --rollout --task-ids 9 --scene-mix yellow --seed 92000 --port 7962
+```
+
+混合脚本还需要既有 `data/agent-hard-v3`。新增四条物理专家轨迹覆盖 train 的两根／三根柱和各一条独立 valid/test 布局；train 三种有限模板表达产生 12 行，valid/test 各 2 行，不是 12 条独立轨迹。与旧任务合并为 174/21/18 行，场景、图像按 split 隔离。`--extra` 回放的是 12 条经物理核验的新任务训练行，额外重复 15 次，与混合原训练行形成 354 行采样池；不标为奖励模型挑选的样本。续训预算固定 120 步，只更新 LoRA，最长序列 1024，拒绝静默截断。
+
+新任务也可通过 `agent_cycle --scene-mix yellow` 进入原奖励辅助纠错回路，其独立物理评测会使用任务 9。本轮续训及独立 actor 实验不使用奖励筛选或教师接管，旧奖励模型尚未针对这个新技能验证。离线指标为严格动作匹配；未指定侧时输出 `right` 仍是合法单侧绕行，但与教师的 `auto` 默认协议不同，不能把这项匹配差异当成实际碰撞或漏绕。
+
+120 步实验权重为 `adapters/agent-yellow-v1`：新增 valid **2/2**，混合 valid **19/21**（旧任务 17/19）。两处旧任务回归分别是在靠近球后的 `return_home`、拒绝踢球的 `unsupported` 上输出 `clarify`。因此保留 `agent-4b-v1-r0` 为通用示例默认权重，新权重仅显式用于绕障实验；没有自动部署。该实验只训练与物理验证自动选侧，左右侧协议与教师模板已提供，但未实测模型对左右侧自然语言的可靠程度。完整记录见 [实验审计](experiments/yellow-course-v1/summary.json)。
+
+冻结后仅运行一次最终 test：混合 **16/18**，其中黄色任务 **2/2**，没有根据 test 调参。另用训练／验证／测试布局之外的 seed 92000、92001 独立运行两柱和三柱任务，均完成 `bypass_return → done`，无教师接管，MuJoCo 障碍接触为零；最终距任务起点分别为 **0.097 m / 0.075 m**，朝向误差 **0.39° / 4.64°**。这是两个有限场景的完整执行结果，不是开放任务成功率。78 项单元测试通过。
 
 ## 数据与训练闭环
 

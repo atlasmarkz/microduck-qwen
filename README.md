@@ -5,14 +5,14 @@
 > 这是本项目**唯一**的 VLM 数据链路。早期纯文本 Qwen 分支（无图像）与只做选球的视觉指代分支都已移除；选球能力并入 `approach` 技能。
 > **Windows（PyTorch + CUDA）与 Mac（MLX）两套部署都保留。**
 
-![Qwen3-VL-4B 技能 agent 实录：前进后返回起点](assets/agent-demo.gif)
+![Qwen3-VL-4B 实录：依次绕过三根黄色障碍物并返回任务起点](assets/agent-demo.gif)
 
-**当前 4B 实录（2026-10-19）。** 输入「前进0.2米，再回到初始位置」，模型依次输出 `move → return_home → done`，实际前进约 0.199 m，最终距起点约 0.053 m；移动与回家技能均通过自身验收。演示使用新训的 `agent-4b-v1-r0`，约 20 秒，包含同色多球与障碍柱，全程没有教师接管。左下为每步实际模型输入，右下为实时第一视角。原始动作、执行结果及 GIF 哈希见 [演示记录](assets/agent-demo.json)。机器人位姿、相机外参与安全地图仍为仿真真值；这条固定演示不代表开放指令可靠性，`done` 仍仅是模型声明。
+**当前复杂任务 4B 实录（2026-10-19）。** 输入「依次绕过黄色障碍物并回到原位」，模型输出 `bypass_return / auto → done`；执行器按近到远经过三根黄柱后方，再回到本条任务起点。实际轨迹通过侧向穿越与顺序验收，最终距任务起点约 **0.095 m**、朝向误差 **8.22°**。演示使用续训 120 步的 `agent-yellow-v1`，约 81 秒，全程没有教师接管，保留真实时间。左下为实际模型输入，右下为实时第一视角；六个绕行路点与返程由几何执行器控制，VLM 共做两次技能决策。原始动作、结果及 GIF 哈希见 [演示记录](assets/agent-demo.json)。位姿、相机外参与静态地图仍为仿真真值；`done` 仅是模型声明，新权重有旧任务退化，尚未替换通用默认权重。
 
 在已安装模型、仿真依赖和本地技能权重的 Windows 环境中重新录制（覆盖上述 GIF 与记录）：
 
 ```powershell
-.venv/Scripts/python.exe -X utf8 -m microduck_qwen.record_demo --adapter adapters/agent-4b-v1-r0
+.venv/Scripts/python.exe -X utf8 -m microduck_qwen.record_demo --adapter adapters/agent-yellow-v1 --yellow-course
 ```
 
 录制器自建隔离仿真与临时控制端口，真实运行当前 `agent.run_instruction`；权重和上游资源不随 Git 仓库分发。旧的选球导航 GIF 保留在 `assets/vision-navigation-demo.gif`，不代表当前多步 agent 的效果。
@@ -28,8 +28,12 @@ flowchart LR
     V -->|技能 JSON| L["校验层<br/>schema · 颜色编号绑定 · 语义 · 可见性"]
     C -->|深度与外参| L
     L -->|技能| K["SkillExecutor<br/>approach / move / turn / search / return_home / stop"]
-    K --> N["A* 路径 + 10 Hz 闭环导航"]
+    K --> B["bypass_return 复合技能<br/>冻结顺序 → 逐柱侧绕 → 任务起点<br/>RGB-D 确认 + 实际轨迹验收"]
+    S -->|黄色像素与深度| B
+    B --> N["A* 路径 + 10 Hz 闭环导航"]
+    K --> N
     A["场景地图"] --> N
+    A --> B
     N --> G["官方 ONNX 步态 50 Hz"]
     G --> M["MuJoCo + BAM 官方物理"]
     M -->|位姿反馈| N
@@ -41,6 +45,7 @@ flowchart LR
 已实现：
 
 - **逐步技能 agent**：前进/后退、左右转向、接近当前图像里的球、搜索、返回起点、停止、完成、澄清、拒绝未实现功能；每步重新观察，最多 5 步（[AGENT_TRAINING.md](AGENT_TRAINING.md)）。
+- **顺序绕障并返回**：`bypass_return` 支持 1–3 个已知黄色障碍，按任务开始时由近到远的顺序，从侧面到后方，最后返回本条任务起点并恢复朝向；RGB-D 先确认目标，几何执行器检查实测轨迹。
 - **双后端**：Windows 用 PyTorch + CUDA 的 NF4 QLoRA；Mac 用 MLX 4-bit 浮点 LoRA。两者共用同一份 `agent_data` 数据与技能 schema，权重不互换。
 - **奖励辅助的专家纠错闭环**：Windows `agent_cycle` 每轮训练 actor 与动作奖励模型，再用奖励排序下一轮提议；专家独立核验，实际错误提议回流为奖励负例。
 - **停车后主动提问**：`agent chat` 在移动前发现已知地图路径受阻、视觉目标绑定失败或模型请求澄清时询问用户。支持重试、补充条件、`改为…` 和取消；重试仍须通过新一轮检查。详见 [交互说明](AGENT_TRAINING.md#受阻与澄清时向用户提问)。
@@ -53,7 +58,7 @@ flowchart LR
 
 ```mermaid
 flowchart LR
-    S["MuJoCo 场景<br/>plain / hard"] --> D["agent_data<br/>专家执行与物理校验"]
+    S["MuJoCo 场景<br/>plain / hard / yellow"] --> D["agent_data<br/>专家执行与物理校验"]
     D --> T["统一 train / valid / test<br/>图像 + 指令 + 记忆 + 技能标签"]
     T --> W["Windows vision_torch<br/>或 Mac vision_sft"]
     W --> A["技能 agent LoRA"]
@@ -114,6 +119,26 @@ python -m venv .venv
 ```
 
 更难的可选场景（只改场景，不动技能与执行层）：`--occlusion partial|full|absent` 让最左侧目标被柱体部分遮挡／完全遮挡／缺失；`--clutter` 生成 5 个球（其中两对同色，必须靠编号而非颜色区分）并加两根柱体。两者可叠加，例如 `--clutter --occlusion full`。采集/训练/评测也支持同一档位：`agent_data`、`agent_eval --rollout`、`agent_cycle` 都有 `--scene-mix {plain,hard}`，详见 [AGENT_TRAINING.md](AGENT_TRAINING.md)。
+
+## 复杂任务：依次绕过黄色障碍物并回到原位
+
+在两个终端分别运行：
+
+```powershell
+.venv/Scripts/python.exe -X utf8 -m microduck_qwen.sim_native --vision --viewer --yellow-course --seed 92001 --port 7846 --manifest runs/vision-simulator.json
+```
+
+```powershell
+.venv/Scripts/python.exe -X utf8 -m microduck_qwen.agent run '依次绕过黄色障碍物并回到原位' --adapter adapters/agent-yellow-v1 --interactive
+```
+
+本地实验权重需先按 [训练说明](AGENT_TRAINING.md#黄色障碍复合任务) 生成，不随仓库分发。偶数 seed 为两根柱、奇数为三根柱，坐标有随机扰动；本场景不与 `--clutter/--occlusion` 混用。
+
+这里的“绕过”按已确认的验收方式执行：**从每根柱的一侧走到后方，再前往下一根，最后返回任务起点**；不是绕柱一整圈。未指定方向用 `side=auto` 根据已知地图选择较短的可行侧，也可明确说“从左侧／右侧”。顺序和前后方向在任务开始时冻结；“原位”是本条指令开始的位置与朝向，`return_home` 则仍指仿真启动位置。
+
+Qwen3-VL-4B 看图理解指令并选择复合技能；RGB-D 黄色连通区域和深度用于初始目标确认，柱体坐标与避障几何来自已知仿真地图。逐柱执行和返回由确定性控制完成，不依赖 VLM 每个路点都重新规划。只支持有界静态场景，尚无未知环境视觉建图或动态障碍绕行；预检查失败时停车询问，部分运动后失败则停止。
+
+本轮新增任务 valid/test 均 **2/2**，两柱／三柱独立物理执行 **2/2**，均无教师接管或障碍接触。混合旧任务后 valid 为 **19/21**、最终 test 为 **16/18**，因此保留实验权重身份；78 项测试通过。数据、训练、原始模型输出及实际轨迹见 [实验记录](experiments/yellow-course-v1/summary.json)。
 
 ## macOS / Apple Silicon 部署
 

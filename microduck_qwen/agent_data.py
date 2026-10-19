@@ -48,7 +48,7 @@ APPROACH_TRUE_DISTANCE_M = APPROACH_STOP_M + ARRIVAL_TOLERANCE_M + COAST_ALLOWAN
 
 
 def scene_profile(split, index, mix):
-    if mix == "plain":
+    if mix in ("plain", "yellow"):
         return "none", False
     return SCENE_PROFILES[(PROFILE_BASE[split] + index) % len(SCENE_PROFILES)]
 
@@ -121,6 +121,16 @@ def tasks(split, variant=0):
         test_text = ["前行20厘米后返回最初的位置", "先后退20厘米再返回最初的位置", "左转45度后请右转45度",
                      "走近画面最左球后回到最初位置", "前行20厘米", "后退20厘米", "停止行进", "把红球踢开", "去那个位置"]
         result = [(text, specs) for text, (_, specs) in zip(test_text, result)]
+    phrases = {
+        "train": [
+            ["依次绕过黄色障碍物并回到原位", "依次从左侧绕过黄色障碍物，再回到原位", "依次从右侧绕过黄色障碍物，再回到原位"],
+            ["按从近到远的顺序绕开黄色柱子，最后返回出发位置", "从左边逐个绕过黄色柱子后回出发点", "从右边逐个绕过黄色柱子后回出发点"],
+            ["逐个经过黄色障碍后方，然后回到本次任务起点", "逐个从左边经过黄色障碍后方并返回起点", "逐个从右边经过黄色障碍后方并返回起点"]],
+        "valid": [["绕行所有黄色柱体，按由近到远依次通过后返回开始的位置", "按近远顺序从左边绕过各黄色柱体，最后返回任务开始处", "按近远顺序从右边绕过各黄色柱体，最后返回任务开始处"]],
+        "test": [["请逐一绕开黄色障碍，完成后回到刚才出发的地方", "请逐一从黄色障碍左边通过，随后回到刚才出发的地方", "请逐一从黄色障碍右边通过，随后回到刚才出发的地方"]]}
+    selected = phrases[split][variant % 3 if split == "train" else 0]
+    result.extend((text, [{"action": "bypass_return", "side": side}])
+                  for text, side in zip(selected, ("auto", "left", "right")))
     return result
 
 
@@ -149,6 +159,8 @@ def episode(output, directory, info, split, seed, instruction, specs, planner=No
         report["reset"] = reset
         if not reset["success"]:
             raise RuntimeError("cannot restore task start")
+        initial = executor.healthy()
+        executor.task_start_pose = {"x": initial["trunk"][0], "y": initial["trunk"][1], "yaw": initial["yaw"]}
         for index, spec in enumerate(specs + ([{"action": "done"}] if specs[-1].get("action") not in ("stop", "clarify", "unsupported") else [])):
             executor.robot.stop()
             frame, gt = collection_frame(info["port"])
@@ -191,6 +203,7 @@ def episode(output, directory, info, split, seed, instruction, specs, planner=No
                     raise RuntimeError("approach failed independent true-distance check")
             rows.append({"id": f"{split}-{seed}-{directory.name}-{index}", "scene_seed": seed, "split": split,
                          "scene_occlusion": info.get("occlusion"), "scene_clutter": bool(info.get("clutter")),
+                         "scene_yellow_course": bool(info.get("yellow_course")),
                          "image": str(image.relative_to(output)), "image_sha256": digest(image),
                          "instruction": instruction, "memory": memory, "expected": expected,
                          "verified": True, "task_type": expected["action"],
@@ -234,9 +247,10 @@ def main():
     parser.add_argument("--test-scenes", type=int, default=1)
     parser.add_argument("--seed-offset", type=int, default=10)
     parser.add_argument("--port", type=int, default=7862)
-    parser.add_argument("--scene-mix", choices=("plain", "hard"), default="plain",
+    parser.add_argument("--scene-mix", choices=("plain", "hard", "yellow"), default="plain",
                         help="plain reproduces the open-row scenes; hard adds occluded/absent/duplicated-row scenes")
     parser.add_argument("--actor-adapter", type=Path)
+    parser.add_argument("--task-ids", type=int, nargs="+", help="subset of finite teacher tasks; yellow defaults to task 9")
     parser.add_argument("--reward-adapter", type=Path)
     parser.add_argument("--reward-samples", type=int, default=3)
     parser.add_argument("--reward-threshold", type=float, default=0.5)
@@ -248,6 +262,9 @@ def main():
         parser.error("correction collection requires BOTH base-data and actor-adapter")
     if args.reward_adapter and (not args.actor_adapter or os.name != "nt"):
         parser.error("reward-guided collection requires Windows CUDA and an actor adapter")
+    task_ids = args.task_ids if args.task_ids is not None else ([9] if args.scene_mix == "yellow" else list(range(9)))
+    if len(set(task_ids)) != len(task_ids) or any(i < 0 or i >= len(tasks("train")) for i in task_ids):
+        parser.error("invalid/duplicate task IDs")
     output = args.output.resolve()
     if args.base_data and output.is_relative_to(args.base_data.resolve()):
         parser.error("output must not be inside base-data")
@@ -257,7 +274,7 @@ def main():
                 "method": "expert-intervened data aggregation; not unrestricted DAgger or learned reward model",
                 "scene_mix": args.scene_mix, "seed_offset": args.seed_offset}
     manifest["source_sha256"] = {name: digest(ROOT / "microduck_qwen" / name) for name in
-        ("agent_data.py", "skills.py", "navigation.py", "vision.py", "sim_data.py", "sim_runner.py", "vision_scene.py", "sim.py", "sim_body.py")}
+        ("agent_data.py", "skills.py", "bypass.py", "navigation.py", "vision.py", "sim_data.py", "sim_runner.py", "vision_scene.py", "sim.py", "sim_body.py")}
     splits = {split: [] for split in ("train", "valid", "test")}
     planner = None
     if args.base_data:
@@ -292,11 +309,13 @@ def main():
                 process = log = None
                 try:
                     process, log, info, failures = start_scene(scene_dir, seed, occlusion, args.port,
-                                                              collect_gt=True, clutter=clutter)
+                                                              collect_gt=True, clutter=clutter, yellow_course=args.scene_mix == "yellow")
                     shutil.copyfile(info["scene_file"], scene_dir / "scene.json")
                     manifest.setdefault("startup_failures", []).extend(failures)
                     variant = 1 + i % 2 if args.base_data else i % 3
                     for index, (instruction, specs) in enumerate(tasks(split, variant)):
+                        if index not in task_ids:
+                            continue
                         directory = scene_dir / f"task-{index:02d}"
                         rows, report = episode(output, directory, info, split, seed, instruction, specs, planner, True)
                         if args.reward_adapter:

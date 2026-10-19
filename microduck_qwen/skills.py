@@ -32,6 +32,7 @@ def validate_action(action):
         "approach": {"action", "color", "id"}, "search": {"action", "color"},
         "return_home": {"action"}, "stop": {"action"}, "done": {"action"},
         "clarify": {"action"}, "unsupported": {"action"},
+        "bypass_return": {"action", "side"},
     }
     if name not in keys or set(action) != keys[name]:
         raise ValueError("unknown action or unexpected fields")
@@ -47,6 +48,8 @@ def validate_action(action):
         raise ValueError("unknown ball color")
     if name == "approach" and (type(action["id"]) is not int or not 1 <= action["id"] <= 20):
         raise ValueError("invalid current-frame target ID")
+    if name == "bypass_return" and action["side"] not in ("auto", "left", "right"):
+        raise ValueError("invalid bypass side")
     return action
 
 
@@ -160,6 +163,25 @@ class SkillExecutor:
                 self.robot.move(0.30 if signed > 0 else -self.backward_command, correction)
             time.sleep(0.08)
 
+    def _return_to_pose(self, home, output):
+        plan = {"status": "ok", "goals": [{"target": "point", "x": home["x"], "y": home["y"], "speed": "slow", "stop_distance_m": 0.10}]}
+        result = {"navigation": execute(plan, self.robot, self.observer, output.with_suffix(".jsonl"), timeout_s=60,
+                  scene=self.scene, cancel_file=self.cancel_file, arrival_tolerance_m=0, cancel_started_ns=self.started_ns)}
+        delta = angle(home["yaw"] - self.healthy()["yaw"])
+        if abs(delta) > math.radians(5):
+            with output.with_suffix(".turn.jsonl").open("w") as trace:
+                for _ in range(2):
+                    delta = angle(home["yaw"] - self.healthy()["yaw"])
+                    if abs(delta) <= math.radians(5):
+                        break
+                    self._bounded({"action": "turn", "direction": "left" if delta > 0 else "right",
+                                   "degrees": min(120, abs(math.degrees(delta)))}, trace)
+        state = self.healthy()
+        result.update(distance_home_m=math.dist(state["trunk"][:2], [home["x"], home["y"]]),
+                      home_yaw_error_deg=abs(math.degrees(angle(state["yaw"] - home["yaw"]))))
+        result["success"] = result["navigation"]["success"] and result["distance_home_m"] <= 0.125 and result["home_yaw_error_deg"] < 12
+        return result
+
     def run(self, action, candidates=None):
         validate_action(action)
         name = action["action"]
@@ -177,22 +199,10 @@ class SkillExecutor:
                 home = self.info.get("home_pose")
                 if home is None:
                     raise RuntimeError("home was not recorded at simulator startup; restart simulator")
-                plan = {"status": "ok", "goals": [{"target": "point", "x": home["x"], "y": home["y"], "speed": "slow", "stop_distance_m": 0.10}]}
-                result["navigation"] = execute(plan, self.robot, self.observer, output.with_suffix(".jsonl"), timeout_s=40, scene=self.scene, cancel_file=self.cancel_file, arrival_tolerance_m=0)
-                state = self.healthy()
-                delta = angle(home["yaw"] - state["yaw"])
-                if abs(delta) > math.radians(5):
-                    with output.with_suffix(".turn.jsonl").open("w") as trace:
-                        for _ in range(2):
-                            delta = angle(home["yaw"] - self.healthy()["yaw"])
-                            if abs(delta) <= math.radians(5):
-                                break
-                            turn = {"action": "turn", "direction": "left" if delta > 0 else "right", "degrees": min(120, abs(math.degrees(delta)))}
-                            self._bounded(turn, trace)
-                state = self.healthy()
-                result.update(distance_home_m=math.dist(state["trunk"][:2], [home["x"], home["y"]]),
-                              home_yaw_error_deg=abs(math.degrees(angle(state["yaw"] - home["yaw"]))))
-                result["success"] = result["navigation"]["success"] and result["distance_home_m"] <= 0.125 and result["home_yaw_error_deg"] < 12
+                result.update(self._return_to_pose(home, output))
+            elif name == "bypass_return":
+                from .bypass import run_bypass
+                result.update(run_bypass(self, action, output))
             elif name == "approach":
                 selected = next((c for c in candidates or [] if c["id"] == action["id"] and c["color"] == action["color"]), None)
                 if selected is None or not approachable(selected):
