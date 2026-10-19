@@ -1,0 +1,44 @@
+{
+  "mode": "independent_actor_rollout",
+  "adapter": {
+    "path": ".\\adapters\\agent-4b-v1-r0",
+    "sha256": "12efa89a66d1e6ac987769b8f1b2c664786a7ac3c4c4359ed031cdfab8feb313",
+    "backend": "torch"
+  },
+  "split": "valid",
+  "dataset_manifest_sha256": "be06e9981fef934c84607ca8b7fde584850beb767da90df53108c67ce63603a8",
+  "results": [
+    {
+      "task_id": 0,
+      "correct": true,
+      "error": null,
+      "episode": ".\\runs\\agent-cycle\\agent-4b-v1\\r0-rollout\\task-00\\episode.json"
+    },
+    {
+      "task_id": 1,
+      "correct": true,
+      "error": null,
+      "episode": ".\\runs\\agent-cycle\\agent-4b-v1\\r0-rollout\\task-01\\episode.json"
+    },
+    {
+      "task_id": 2,
+      "correct": true,
+      "error": null,
+      "episode": ".\\runs\\agent-cycle\\agent-4b-v1\\r0-rollout\\task-02\\episode.json"
+    },
+    {
+      "task_id": 3,
+      "correct": false,
+      "error": "failed physical skill or wrong task action (scored AFTER execution)",
+      "episode": ".\\runs\\agent-cycle\\agent-4b-v1\\r0-rollout\\task-03\\episode.json"
+    }
+  ],
+  "correct": 3,
+  "total": 4,
+  "note": "Development pilot. Rollout teacher is scorer AFTER execution, never a semantic intervention.",
+  "scene_seed": 91010,
+  "scene_mix": "hard",
+  "occlusion": "partial",
+  "clutter": true,
+  "startup_failures": []
+}

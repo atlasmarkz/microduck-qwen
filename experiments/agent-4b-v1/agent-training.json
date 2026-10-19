@@ -1,0 +1,1544 @@
+{
+  "status": "completed",
+  "task": "agent",
+  "model": "Qwen/Qwen3-VL-4B-Instruct",
+  "revision": "ebb281ec70b05090aa6165b016eac8ec08e71b17",
+  "steps": 300,
+  "seed": 42,
+  "batch_size": 1,
+  "learning_rate": 5e-05,
+  "last_layers": 8,
+  "rank": 8,
+  "alpha": 16,
+  "quantization": "NF4 double-quant; BF16 compute",
+  "image_pixels": {
+    "min": 65536,
+    "max": 131072
+  },
+  "max_seq_length": 768,
+  "completion_only_loss": true,
+  "trainable_parameters": 655360,
+  "changed_tensors": 32,
+  "optimizer_state_resumed": false,
+  "elapsed_s": 433.2609122000031,
+  "peak_cuda_allocated_bytes": 3916352000,
+  "valid_loss": 0.005579535112797442,
+  "history": [
+    {
+      "step": 1,
+      "row_id": "train-61700-task-03-1",
+      "loss": 2.8283894062042236
+    },
+    {
+      "step": 2,
+      "row_id": "train-61700-task-00-0-paraphrase-2",
+      "loss": 0.049292437732219696
+    },
+    {
+      "step": 3,
+      "row_id": "train-61701-task-01-1-paraphrase-0",
+      "loss": 0.000232959384447895
+    },
+    {
+      "step": 4,
+      "row_id": "train-61701-task-00-2-paraphrase-0",
+      "loss": 0.8353456854820251
+    },
+    {
+      "step": 5,
+      "row_id": "train-61701-task-00-0",
+      "loss": 0.02378045581281185
+    },
+    {
+      "step": 6,
+      "row_id": "train-61700-task-03-2-paraphrase-2",
+      "loss": 2.8565282821655273
+    },
+    {
+      "step": 7,
+      "row_id": "train-61700-task-02-2-paraphrase-2",
+      "loss": 2.04198956489563
+    },
+    {
+      "step": 8,
+      "row_id": "train-61702-task-03-1-paraphrase-1",
+      "loss": 2.4133079051971436
+    },
+    {
+      "step": 9,
+      "row_id": "train-61700-task-02-1-paraphrase-1",
+      "loss": 0.45035064220428467
+    },
+    {
+      "step": 10,
+      "row_id": "train-61702-task-05-0-paraphrase-1",
+      "loss": 0.00024939922150224447
+    },
+    {
+      "step": 11,
+      "row_id": "train-61702-task-00-0-paraphrase-0",
+      "loss": 0.04965699464082718
+    },
+    {
+      "step": 12,
+      "row_id": "train-61700-task-00-2-paraphrase-2",
+      "loss": 2.08420729637146
+    },
+    {
+      "step": 13,
+      "row_id": "train-61700-task-00-1-paraphrase-2",
+      "loss": 2.9301514625549316
+    },
+    {
+      "step": 14,
+      "row_id": "train-61700-task-02-2-paraphrase-1",
+      "loss": 0.2598668336868286
+    },
+    {
+      "step": 15,
+      "row_id": "train-61700-task-08-0-paraphrase-1",
+      "loss": 2.6798954010009766
+    },
+    {
+      "step": 16,
+      "row_id": "train-61701-task-00-2",
+      "loss": 1.7511249780654907
+    },
+    {
+      "step": 17,
+      "row_id": "train-61702-task-02-0-paraphrase-1",
+      "loss": 0.23693129420280457
+    },
+    {
+      "step": 18,
+      "row_id": "train-61702-task-08-0-paraphrase-0",
+      "loss": 2.0557401180267334
+    },
+    {
+      "step": 19,
+      "row_id": "train-61702-task-04-0-paraphrase-0",
+      "loss": 0.0001244352024514228
+    },
+    {
+      "step": 20,
+      "row_id": "train-61700-task-06-0-paraphrase-2",
+      "loss": 0.00122451304923743
+    },
+    {
+      "step": 21,
+      "row_id": "train-61702-task-06-0-paraphrase-0",
+      "loss": 0.00019793136743828654
+    },
+    {
+      "step": 22,
+      "row_id": "train-61702-task-00-2",
+      "loss": 1.9175418615341187
+    },
+    {
+      "step": 23,
+      "row_id": "train-61700-task-08-0-paraphrase-2",
+      "loss": 1.9141148328781128
+    },
+    {
+      "step": 24,
+      "row_id": "train-61702-task-01-0",
+      "loss": 0.009910915978252888
+    },
+    {
+      "step": 25,
+      "row_id": "train-61701-task-01-2-paraphrase-0",
+      "loss": 0.03637360781431198
+    },
+    {
+      "step": 26,
+      "row_id": "train-61700-task-00-1",
+      "loss": 0.33732500672340393
+    },
+    {
+      "step": 27,
+      "row_id": "train-61700-task-04-0-paraphrase-2",
+      "loss": 0.0006648717098869383
+    },
+    {
+      "step": 28,
+      "row_id": "train-61702-task-05-1-paraphrase-1",
+      "loss": 2.354201316833496
+    },
+    {
+      "step": 29,
+      "row_id": "train-61701-task-04-1-paraphrase-0",
+      "loss": 2.458346128463745
+    },
+    {
+      "step": 30,
+      "row_id": "train-61702-task-03-2-paraphrase-0",
+      "loss": 2.003028154373169
+    },
+    {
+      "step": 31,
+      "row_id": "train-61700-task-04-1-paraphrase-1",
+      "loss": 2.729193925857544
+    },
+    {
+      "step": 32,
+      "row_id": "train-61702-task-05-0",
+      "loss": 1.9351329683559015e-05
+    },
+    {
+      "step": 33,
+      "row_id": "train-61701-task-04-0-paraphrase-0",
+      "loss": 0.0002462730335537344
+    },
+    {
+      "step": 34,
+      "row_id": "train-61702-task-06-0-paraphrase-1",
+      "loss": 0.0007733315578661859
+    },
+    {
+      "step": 35,
+      "row_id": "train-61702-task-05-1",
+      "loss": 2.4792017936706543
+    },
+    {
+      "step": 36,
+      "row_id": "train-61700-task-06-0",
+      "loss": 0.0001940413931151852
+    },
+    {
+      "step": 37,
+      "row_id": "train-61700-task-01-0-paraphrase-1",
+      "loss": 0.2386678010225296
+    },
+    {
+      "step": 38,
+      "row_id": "train-61700-task-05-1-paraphrase-1",
+      "loss": 1.750054955482483
+    },
+    {
+      "step": 39,
+      "row_id": "train-61702-task-03-2",
+      "loss": 0.9619278907775879
+    },
+    {
+      "step": 40,
+      "row_id": "train-61700-task-05-0-paraphrase-1",
+      "loss": 0.027951769530773163
+    },
+    {
+      "step": 41,
+      "row_id": "train-61701-task-02-2",
+      "loss": 0.06804356724023819
+    },
+    {
+      "step": 42,
+      "row_id": "train-61700-task-03-0-paraphrase-2",
+      "loss": 0.0012128034140914679
+    },
+    {
+      "step": 43,
+      "row_id": "train-61701-task-08-0-paraphrase-0",
+      "loss": 1.21336829662323
+    },
+    {
+      "step": 44,
+      "row_id": "train-61700-task-00-2-paraphrase-1",
+      "loss": 0.5894456505775452
+    },
+    {
+      "step": 45,
+      "row_id": "train-61701-task-05-1-paraphrase-0",
+      "loss": 1.083628535270691
+    },
+    {
+      "step": 46,
+      "row_id": "train-61701-task-00-1",
+      "loss": 0.018789006397128105
+    },
+    {
+      "step": 47,
+      "row_id": "train-61701-task-01-2",
+      "loss": 0.03599489852786064
+    },
+    {
+      "step": 48,
+      "row_id": "train-61700-task-01-0-paraphrase-2",
+      "loss": 0.0026709362864494324
+    },
+    {
+      "step": 49,
+      "row_id": "train-61702-task-02-0-paraphrase-0",
+      "loss": 0.047033656388521194
+    },
+    {
+      "step": 50,
+      "row_id": "train-61700-task-01-1",
+      "loss": 0.0003106780641246587
+    },
+    {
+      "step": 51,
+      "row_id": "train-61702-task-08-0",
+      "loss": 0.9476426839828491
+    },
+    {
+      "step": 52,
+      "row_id": "train-61700-task-04-1",
+      "loss": 1.0836187601089478
+    },
+    {
+      "step": 53,
+      "row_id": "train-61702-task-00-1",
+      "loss": 1.7329635620117188
+    },
+    {
+      "step": 54,
+      "row_id": "train-61701-task-02-2-paraphrase-0",
+      "loss": 0.004164484795182943
+    },
+    {
+      "step": 55,
+      "row_id": "train-61701-task-02-1-paraphrase-0",
+      "loss": 0.26804542541503906
+    },
+    {
+      "step": 56,
+      "row_id": "train-61700-task-05-0-paraphrase-2",
+      "loss": 4.160466050961986e-05
+    },
+    {
+      "step": 57,
+      "row_id": "train-61701-task-01-1-paraphrase-2",
+      "loss": 0.9316554069519043
+    },
+    {
+      "step": 58,
+      "row_id": "train-61700-task-02-0-paraphrase-2",
+      "loss": 0.03323204070329666
+    },
+    {
+      "step": 59,
+      "row_id": "train-61701-task-05-0",
+      "loss": 0.0014154949458315969
+    },
+    {
+      "step": 60,
+      "row_id": "train-61702-task-05-1-paraphrase-0",
+      "loss": 0.21892310678958893
+    },
+    {
+      "step": 61,
+      "row_id": "train-61702-task-01-1-paraphrase-0",
+      "loss": 0.00022286700550466776
+    },
+    {
+      "step": 62,
+      "row_id": "train-61701-task-04-0",
+      "loss": 0.00013419489550869912
+    },
+    {
+      "step": 63,
+      "row_id": "train-61700-task-03-2",
+      "loss": 0.5505139231681824
+    },
+    {
+      "step": 64,
+      "row_id": "train-61701-task-06-0-paraphrase-2",
+      "loss": 0.25046205520629883
+    },
+    {
+      "step": 65,
+      "row_id": "train-61702-task-00-2-paraphrase-0",
+      "loss": 0.002596226055175066
+    },
+    {
+      "step": 66,
+      "row_id": "train-61702-task-00-1-paraphrase-1",
+      "loss": 0.004265574272722006
+    },
+    {
+      "step": 67,
+      "row_id": "train-61701-task-07-0",
+      "loss": 3.5080177783966064
+    },
+    {
+      "step": 68,
+      "row_id": "train-61702-task-02-2",
+      "loss": 0.0738835260272026
+    },
+    {
+      "step": 69,
+      "row_id": "train-61702-task-00-2-paraphrase-1",
+      "loss": 0.0076267048716545105
+    },
+    {
+      "step": 70,
+      "row_id": "train-61702-task-07-0",
+      "loss": 0.03430589661002159
+    },
+    {
+      "step": 71,
+      "row_id": "train-61702-task-01-2",
+      "loss": 0.001037128851749003
+    },
+    {
+      "step": 72,
+      "row_id": "train-61701-task-02-0-paraphrase-2",
+      "loss": 0.0015689055435359478
+    },
+    {
+      "step": 73,
+      "row_id": "train-61702-task-00-1-paraphrase-0",
+      "loss": 0.01495656929910183
+    },
+    {
+      "step": 74,
+      "row_id": "train-61700-task-02-2",
+      "loss": 0.009237884543836117
+    },
+    {
+      "step": 75,
+      "row_id": "train-61700-task-05-1-paraphrase-2",
+      "loss": 0.25037142634391785
+    },
+    {
+      "step": 76,
+      "row_id": "train-61702-task-02-1",
+      "loss": 0.3009653389453888
+    },
+    {
+      "step": 77,
+      "row_id": "train-61702-task-02-2-paraphrase-0",
+      "loss": 0.009200655855238438
+    },
+    {
+      "step": 78,
+      "row_id": "train-61700-task-03-1-paraphrase-2",
+      "loss": 0.613470733165741
+    },
+    {
+      "step": 79,
+      "row_id": "train-61701-task-02-1-paraphrase-2",
+      "loss": 0.08796320110559464
+    },
+    {
+      "step": 80,
+      "row_id": "train-61700-task-01-0",
+      "loss": 0.22390371561050415
+    },
+    {
+      "step": 81,
+      "row_id": "train-61702-task-01-1-paraphrase-1",
+      "loss": 0.0006788489408791065
+    },
+    {
+      "step": 82,
+      "row_id": "train-61700-task-02-0-paraphrase-1",
+      "loss": 0.0020889146253466606
+    },
+    {
+      "step": 83,
+      "row_id": "train-61702-task-01-1",
+      "loss": 0.19571611285209656
+    },
+    {
+      "step": 84,
+      "row_id": "train-61700-task-03-1-paraphrase-1",
+      "loss": 0.30902692675590515
+    },
+    {
+      "step": 85,
+      "row_id": "train-61701-task-04-0-paraphrase-2",
+      "loss": 0.0024356767535209656
+    },
+    {
+      "step": 86,
+      "row_id": "train-61702-task-04-1-paraphrase-1",
+      "loss": 0.042017895728349686
+    },
+    {
+      "step": 87,
+      "row_id": "train-61702-task-01-0-paraphrase-0",
+      "loss": 0.27108851075172424
+    },
+    {
+      "step": 88,
+      "row_id": "train-61701-task-07-0-paraphrase-0",
+      "loss": 2.6589744091033936
+    },
+    {
+      "step": 89,
+      "row_id": "train-61702-task-03-0",
+      "loss": 0.017384497448801994
+    },
+    {
+      "step": 90,
+      "row_id": "train-61702-task-08-0-paraphrase-1",
+      "loss": 0.6779194474220276
+    },
+    {
+      "step": 91,
+      "row_id": "train-61700-task-04-1-paraphrase-2",
+      "loss": 0.04204908385872841
+    },
+    {
+      "step": 92,
+      "row_id": "train-61702-task-05-0-paraphrase-0",
+      "loss": 0.019342392683029175
+    },
+    {
+      "step": 93,
+      "row_id": "train-61701-task-05-1-paraphrase-2",
+      "loss": 0.04693536087870598
+    },
+    {
+      "step": 94,
+      "row_id": "train-61700-task-00-1-paraphrase-1",
+      "loss": 0.014720485545694828
+    },
+    {
+      "step": 95,
+      "row_id": "train-61702-task-03-0-paraphrase-0",
+      "loss": 0.019387701526284218
+    },
+    {
+      "step": 96,
+      "row_id": "train-61700-task-07-0",
+      "loss": 2.0697128772735596
+    },
+    {
+      "step": 97,
+      "row_id": "train-61701-task-01-2-paraphrase-2",
+      "loss": 0.0023905413690954447
+    },
+    {
+      "step": 98,
+      "row_id": "train-61701-task-08-0",
+      "loss": 0.68211829662323
+    },
+    {
+      "step": 99,
+      "row_id": "train-61700-task-03-0",
+      "loss": 0.006208736915141344
+    },
+    {
+      "step": 100,
+      "row_id": "train-61701-task-05-1",
+      "loss": 0.0012267105048522353
+    },
+    {
+      "step": 101,
+      "row_id": "train-61701-task-00-0-paraphrase-0",
+      "loss": 0.0680183470249176
+    },
+    {
+      "step": 102,
+      "row_id": "train-61700-task-04-0",
+      "loss": 0.008600493893027306
+    },
+    {
+      "step": 103,
+      "row_id": "train-61702-task-04-0",
+      "loss": 0.001309899496845901
+    },
+    {
+      "step": 104,
+      "row_id": "train-61702-task-04-0-paraphrase-1",
+      "loss": 0.0015885921893641353
+    },
+    {
+      "step": 105,
+      "row_id": "train-61702-task-01-2-paraphrase-0",
+      "loss": 0.014677874743938446
+    },
+    {
+      "step": 106,
+      "row_id": "train-61700-task-01-1-paraphrase-1",
+      "loss": 0.0005948771140538156
+    },
+    {
+      "step": 107,
+      "row_id": "train-61702-task-00-0",
+      "loss": 0.0076823909766972065
+    },
+    {
+      "step": 108,
+      "row_id": "train-61701-task-02-0-paraphrase-0",
+      "loss": 0.0008027296280488372
+    },
+    {
+      "step": 109,
+      "row_id": "train-61700-task-02-1-paraphrase-2",
+      "loss": 0.0768812894821167
+    },
+    {
+      "step": 110,
+      "row_id": "train-61702-task-02-1-paraphrase-1",
+      "loss": 0.1884666234254837
+    },
+    {
+      "step": 111,
+      "row_id": "train-61701-task-01-0-paraphrase-0",
+      "loss": 0.06525439023971558
+    },
+    {
+      "step": 112,
+      "row_id": "train-61701-task-02-2-paraphrase-2",
+      "loss": 0.07027550786733627
+    },
+    {
+      "step": 113,
+      "row_id": "train-61700-task-01-1-paraphrase-2",
+      "loss": 0.04872650280594826
+    },
+    {
+      "step": 114,
+      "row_id": "train-61701-task-00-1-paraphrase-2",
+      "loss": 0.21399331092834473
+    },
+    {
+      "step": 115,
+      "row_id": "train-61702-task-03-0-paraphrase-1",
+      "loss": 0.0018799074459820986
+    },
+    {
+      "step": 116,
+      "row_id": "train-61701-task-05-0-paraphrase-0",
+      "loss": 0.002747791586443782
+    },
+    {
+      "step": 117,
+      "row_id": "train-61701-task-00-2-paraphrase-2",
+      "loss": 0.010482979007065296
+    },
+    {
+      "step": 118,
+      "row_id": "train-61700-task-06-0-paraphrase-1",
+      "loss": 0.003161773784086108
+    },
+    {
+      "step": 119,
+      "row_id": "train-61701-task-06-0-paraphrase-0",
+      "loss": 0.013203885406255722
+    },
+    {
+      "step": 120,
+      "row_id": "train-61701-task-00-0-paraphrase-2",
+      "loss": 0.002191403182223439
+    },
+    {
+      "step": 121,
+      "row_id": "train-61700-task-05-1",
+      "loss": 0.00891853030771017
+    },
+    {
+      "step": 122,
+      "row_id": "train-61700-task-07-0-paraphrase-2",
+      "loss": 0.007092749234288931
+    },
+    {
+      "step": 123,
+      "row_id": "train-61702-task-02-1-paraphrase-0",
+      "loss": 0.128155916929245
+    },
+    {
+      "step": 124,
+      "row_id": "train-61700-task-01-2-paraphrase-1",
+      "loss": 0.02765846811234951
+    },
+    {
+      "step": 125,
+      "row_id": "train-61701-task-02-0",
+      "loss": 0.0021653957664966583
+    },
+    {
+      "step": 126,
+      "row_id": "train-61700-task-03-2-paraphrase-1",
+      "loss": 0.4882682263851166
+    },
+    {
+      "step": 127,
+      "row_id": "train-61700-task-08-0",
+      "loss": 0.34247276186943054
+    },
+    {
+      "step": 128,
+      "row_id": "train-61701-task-07-0-paraphrase-2",
+      "loss": 0.005591863766312599
+    },
+    {
+      "step": 129,
+      "row_id": "train-61700-task-00-0-paraphrase-1",
+      "loss": 0.002301108557730913
+    },
+    {
+      "step": 130,
+      "row_id": "train-61702-task-00-0-paraphrase-1",
+      "loss": 0.002266016323119402
+    },
+    {
+      "step": 131,
+      "row_id": "train-61702-task-04-1",
+      "loss": 0.05232882872223854
+    },
+    {
+      "step": 132,
+      "row_id": "train-61702-task-07-0-paraphrase-0",
+      "loss": 2.132533311843872
+    },
+    {
+      "step": 133,
+      "row_id": "train-61702-task-07-0-paraphrase-1",
+      "loss": 2.0673820972442627
+    },
+    {
+      "step": 134,
+      "row_id": "train-61701-task-01-1",
+      "loss": 0.00045315237366594374
+    },
+    {
+      "step": 135,
+      "row_id": "train-61702-task-02-0",
+      "loss": 0.0042481510899960995
+    },
+    {
+      "step": 136,
+      "row_id": "train-61701-task-02-1",
+      "loss": 0.059605468064546585
+    },
+    {
+      "step": 137,
+      "row_id": "train-61700-task-02-1",
+      "loss": 0.02043401077389717
+    },
+    {
+      "step": 138,
+      "row_id": "train-61700-task-00-2",
+      "loss": 0.004819124937057495
+    },
+    {
+      "step": 139,
+      "row_id": "train-61701-task-05-0-paraphrase-2",
+      "loss": 0.00015871625510044396
+    },
+    {
+      "step": 140,
+      "row_id": "train-61702-task-02-2-paraphrase-1",
+      "loss": 0.020358266308903694
+    },
+    {
+      "step": 141,
+      "row_id": "train-61701-task-01-0-paraphrase-2",
+      "loss": 0.006030515767633915
+    },
+    {
+      "step": 142,
+      "row_id": "train-61700-task-04-0-paraphrase-1",
+      "loss": 0.00026706798234954476
+    },
+    {
+      "step": 143,
+      "row_id": "train-61702-task-01-2-paraphrase-1",
+      "loss": 0.0062289051711559296
+    },
+    {
+      "step": 144,
+      "row_id": "train-61700-task-07-0-paraphrase-1",
+      "loss": 1.24677312374115
+    },
+    {
+      "step": 145,
+      "row_id": "train-61700-task-01-2-paraphrase-2",
+      "loss": 0.0013306328328326344
+    },
+    {
+      "step": 146,
+      "row_id": "train-61700-task-00-0",
+      "loss": 0.030948558822274208
+    },
+    {
+      "step": 147,
+      "row_id": "train-61702-task-01-0-paraphrase-1",
+      "loss": 0.18869425356388092
+    },
+    {
+      "step": 148,
+      "row_id": "train-61701-task-06-0",
+      "loss": 0.013212517835199833
+    },
+    {
+      "step": 149,
+      "row_id": "train-61700-task-02-0",
+      "loss": 0.0014458101941272616
+    },
+    {
+      "step": 150,
+      "row_id": "train-61702-task-06-0",
+      "loss": 0.28365033864974976
+    },
+    {
+      "step": 151,
+      "row_id": "train-61702-task-03-2-paraphrase-1",
+      "loss": 0.10588765144348145
+    },
+    {
+      "step": 152,
+      "row_id": "train-61700-task-03-0-paraphrase-1",
+      "loss": 0.006525165867060423
+    },
+    {
+      "step": 153,
+      "row_id": "train-61701-task-01-0",
+      "loss": 0.04195860028266907
+    },
+    {
+      "step": 154,
+      "row_id": "train-61702-task-03-1-paraphrase-0",
+      "loss": 0.06723053753376007
+    },
+    {
+      "step": 155,
+      "row_id": "train-61700-task-01-2",
+      "loss": 0.002102155238389969
+    },
+    {
+      "step": 156,
+      "row_id": "train-61702-task-03-1",
+      "loss": 0.038153231143951416
+    },
+    {
+      "step": 157,
+      "row_id": "train-61701-task-04-1",
+      "loss": 0.009233367629349232
+    },
+    {
+      "step": 158,
+      "row_id": "train-61702-task-04-1-paraphrase-0",
+      "loss": 0.004428437445312738
+    },
+    {
+      "step": 159,
+      "row_id": "train-61700-task-05-0",
+      "loss": 0.00424557738006115
+    },
+    {
+      "step": 160,
+      "row_id": "train-61701-task-08-0-paraphrase-2",
+      "loss": 0.49382033944129944
+    },
+    {
+      "step": 161,
+      "row_id": "train-61701-task-04-1-paraphrase-2",
+      "loss": 0.014920459128916264
+    },
+    {
+      "step": 162,
+      "row_id": "train-61701-task-00-1-paraphrase-0",
+      "loss": 0.0002270174736622721
+    },
+    {
+      "step": 163,
+      "row_id": "train-61702-task-02-2-paraphrase-0",
+      "loss": 0.0034517142921686172
+    },
+    {
+      "step": 164,
+      "row_id": "train-61700-task-05-1-paraphrase-1",
+      "loss": 0.0008117035031318665
+    },
+    {
+      "step": 165,
+      "row_id": "train-61702-task-02-0-paraphrase-1",
+      "loss": 0.0032061694655567408
+    },
+    {
+      "step": 166,
+      "row_id": "train-61700-task-03-0",
+      "loss": 0.0017452654428780079
+    },
+    {
+      "step": 167,
+      "row_id": "train-61701-task-02-1",
+      "loss": 0.02296243980526924
+    },
+    {
+      "step": 168,
+      "row_id": "train-61702-task-08-0",
+      "loss": 0.3618128001689911
+    },
+    {
+      "step": 169,
+      "row_id": "train-61702-task-06-0-paraphrase-1",
+      "loss": 0.0014839814975857735
+    },
+    {
+      "step": 170,
+      "row_id": "train-61700-task-06-0-paraphrase-2",
+      "loss": 0.16237567365169525
+    },
+    {
+      "step": 171,
+      "row_id": "train-61700-task-04-1-paraphrase-1",
+      "loss": 0.008214694447815418
+    },
+    {
+      "step": 172,
+      "row_id": "train-61701-task-05-1-paraphrase-2",
+      "loss": 0.005775101482868195
+    },
+    {
+      "step": 173,
+      "row_id": "train-61700-task-04-1-paraphrase-2",
+      "loss": 0.007309910375624895
+    },
+    {
+      "step": 174,
+      "row_id": "train-61702-task-03-0-paraphrase-1",
+      "loss": 0.006938139908015728
+    },
+    {
+      "step": 175,
+      "row_id": "train-61702-task-03-0-paraphrase-0",
+      "loss": 0.0036567954812198877
+    },
+    {
+      "step": 176,
+      "row_id": "train-61700-task-00-0",
+      "loss": 0.0065826717764139175
+    },
+    {
+      "step": 177,
+      "row_id": "train-61701-task-02-1-paraphrase-2",
+      "loss": 0.009571916423738003
+    },
+    {
+      "step": 178,
+      "row_id": "train-61702-task-02-2",
+      "loss": 0.004858903121203184
+    },
+    {
+      "step": 179,
+      "row_id": "train-61700-task-00-1-paraphrase-1",
+      "loss": 0.001971606630831957
+    },
+    {
+      "step": 180,
+      "row_id": "train-61700-task-03-1",
+      "loss": 0.04548504948616028
+    },
+    {
+      "step": 181,
+      "row_id": "train-61701-task-05-0-paraphrase-0",
+      "loss": 0.001205093809403479
+    },
+    {
+      "step": 182,
+      "row_id": "train-61701-task-02-0-paraphrase-0",
+      "loss": 0.002918221754953265
+    },
+    {
+      "step": 183,
+      "row_id": "train-61701-task-00-1-paraphrase-0",
+      "loss": 0.0001173694763565436
+    },
+    {
+      "step": 184,
+      "row_id": "train-61700-task-01-2-paraphrase-1",
+      "loss": 0.0010026170639321208
+    },
+    {
+      "step": 185,
+      "row_id": "train-61702-task-04-0",
+      "loss": 3.2027761335484684e-05
+    },
+    {
+      "step": 186,
+      "row_id": "train-61700-task-02-2",
+      "loss": 0.004202385898679495
+    },
+    {
+      "step": 187,
+      "row_id": "train-61700-task-02-0-paraphrase-1",
+      "loss": 0.002178794238716364
+    },
+    {
+      "step": 188,
+      "row_id": "train-61702-task-02-1",
+      "loss": 0.026833681389689445
+    },
+    {
+      "step": 189,
+      "row_id": "train-61700-task-01-2-paraphrase-2",
+      "loss": 0.00023447582498192787
+    },
+    {
+      "step": 190,
+      "row_id": "train-61700-task-03-2-paraphrase-1",
+      "loss": 0.3729184567928314
+    },
+    {
+      "step": 191,
+      "row_id": "train-61702-task-03-2",
+      "loss": 0.02618224360048771
+    },
+    {
+      "step": 192,
+      "row_id": "train-61702-task-01-1-paraphrase-1",
+      "loss": 4.996010102331638e-05
+    },
+    {
+      "step": 193,
+      "row_id": "train-61700-task-05-0",
+      "loss": 0.003869462525472045
+    },
+    {
+      "step": 194,
+      "row_id": "train-61701-task-01-1",
+      "loss": 0.0002037003869190812
+    },
+    {
+      "step": 195,
+      "row_id": "train-61702-task-00-0-paraphrase-0",
+      "loss": 0.005207904614508152
+    },
+    {
+      "step": 196,
+      "row_id": "train-61700-task-08-0",
+      "loss": 0.32475727796554565
+    },
+    {
+      "step": 197,
+      "row_id": "train-61700-task-07-0",
+      "loss": 0.9870150089263916
+    },
+    {
+      "step": 198,
+      "row_id": "train-61701-task-05-1",
+      "loss": 2.789305835904088e-05
+    },
+    {
+      "step": 199,
+      "row_id": "train-61702-task-06-0",
+      "loss": 0.13767319917678833
+    },
+    {
+      "step": 200,
+      "row_id": "train-61702-task-02-1-paraphrase-0",
+      "loss": 0.007942277006804943
+    },
+    {
+      "step": 201,
+      "row_id": "train-61701-task-04-1",
+      "loss": 0.00011231761163799092
+    },
+    {
+      "step": 202,
+      "row_id": "train-61701-task-02-2-paraphrase-2",
+      "loss": 0.000888973765540868
+    },
+    {
+      "step": 203,
+      "row_id": "train-61700-task-05-1-paraphrase-2",
+      "loss": 0.0018180733313784003
+    },
+    {
+      "step": 204,
+      "row_id": "train-61700-task-08-0-paraphrase-2",
+      "loss": 0.3294644057750702
+    },
+    {
+      "step": 205,
+      "row_id": "train-61702-task-01-1",
+      "loss": 0.015468060970306396
+    },
+    {
+      "step": 206,
+      "row_id": "train-61701-task-01-0",
+      "loss": 0.02037590928375721
+    },
+    {
+      "step": 207,
+      "row_id": "train-61701-task-00-0",
+      "loss": 0.00020118120301049203
+    },
+    {
+      "step": 208,
+      "row_id": "train-61700-task-01-0-paraphrase-2",
+      "loss": 0.0015546687645837665
+    },
+    {
+      "step": 209,
+      "row_id": "train-61700-task-03-1-paraphrase-1",
+      "loss": 0.019267041236162186
+    },
+    {
+      "step": 210,
+      "row_id": "train-61702-task-04-1-paraphrase-0",
+      "loss": 0.00011477982479846105
+    },
+    {
+      "step": 211,
+      "row_id": "train-61700-task-00-2-paraphrase-2",
+      "loss": 0.00019776338012889028
+    },
+    {
+      "step": 212,
+      "row_id": "train-61700-task-05-1",
+      "loss": 0.00028052617562934756
+    },
+    {
+      "step": 213,
+      "row_id": "train-61700-task-00-2",
+      "loss": 0.0003425156755838543
+    },
+    {
+      "step": 214,
+      "row_id": "train-61701-task-02-0",
+      "loss": 0.011145985685288906
+    },
+    {
+      "step": 215,
+      "row_id": "train-61701-task-01-1-paraphrase-0",
+      "loss": 0.00019986694678664207
+    },
+    {
+      "step": 216,
+      "row_id": "train-61700-task-03-2",
+      "loss": 0.181918203830719
+    },
+    {
+      "step": 217,
+      "row_id": "train-61702-task-00-2-paraphrase-0",
+      "loss": 0.0003035228874068707
+    },
+    {
+      "step": 218,
+      "row_id": "train-61702-task-01-0",
+      "loss": 0.0002749002305790782
+    },
+    {
+      "step": 219,
+      "row_id": "train-61702-task-05-1",
+      "loss": 0.0015400443226099014
+    },
+    {
+      "step": 220,
+      "row_id": "train-61700-task-01-0",
+      "loss": 0.07293768227100372
+    },
+    {
+      "step": 221,
+      "row_id": "train-61701-task-05-0",
+      "loss": 5.165273614693433e-05
+    },
+    {
+      "step": 222,
+      "row_id": "train-61701-task-02-2-paraphrase-0",
+      "loss": 0.0010143807157874107
+    },
+    {
+      "step": 223,
+      "row_id": "train-61700-task-00-1-paraphrase-2",
+      "loss": 0.023813920095562935
+    },
+    {
+      "step": 224,
+      "row_id": "train-61702-task-07-0",
+      "loss": 0.0029444273095577955
+    },
+    {
+      "step": 225,
+      "row_id": "train-61702-task-00-2-paraphrase-1",
+      "loss": 8.253999840235338e-05
+    },
+    {
+      "step": 226,
+      "row_id": "train-61702-task-04-0-paraphrase-1",
+      "loss": 3.954900876124157e-06
+    },
+    {
+      "step": 227,
+      "row_id": "train-61702-task-02-2-paraphrase-1",
+      "loss": 0.0014487215084955096
+    },
+    {
+      "step": 228,
+      "row_id": "train-61701-task-08-0-paraphrase-2",
+      "loss": 0.2939684987068176
+    },
+    {
+      "step": 229,
+      "row_id": "train-61701-task-00-2-paraphrase-2",
+      "loss": 0.00010035005834652111
+    },
+    {
+      "step": 230,
+      "row_id": "train-61700-task-03-0-paraphrase-1",
+      "loss": 0.002020783955231309
+    },
+    {
+      "step": 231,
+      "row_id": "train-61700-task-03-2-paraphrase-2",
+      "loss": 0.1068006157875061
+    },
+    {
+      "step": 232,
+      "row_id": "train-61702-task-02-0",
+      "loss": 0.002321787178516388
+    },
+    {
+      "step": 233,
+      "row_id": "train-61701-task-00-2-paraphrase-0",
+      "loss": 0.00011290238035144284
+    },
+    {
+      "step": 234,
+      "row_id": "train-61702-task-07-0-paraphrase-1",
+      "loss": 1.2725728750228882
+    },
+    {
+      "step": 235,
+      "row_id": "train-61701-task-01-0-paraphrase-0",
+      "loss": 0.0021053145173937082
+    },
+    {
+      "step": 236,
+      "row_id": "train-61700-task-01-1-paraphrase-2",
+      "loss": 0.006667871959507465
+    },
+    {
+      "step": 237,
+      "row_id": "train-61701-task-01-1-paraphrase-2",
+      "loss": 0.007711869198828936
+    },
+    {
+      "step": 238,
+      "row_id": "train-61701-task-04-1-paraphrase-0",
+      "loss": 0.0001025882302201353
+    },
+    {
+      "step": 239,
+      "row_id": "train-61701-task-00-0-paraphrase-0",
+      "loss": 0.0003159797051921487
+    },
+    {
+      "step": 240,
+      "row_id": "train-61702-task-01-2-paraphrase-0",
+      "loss": 0.00017556629609316587
+    },
+    {
+      "step": 241,
+      "row_id": "train-61702-task-04-0-paraphrase-0",
+      "loss": 1.325237190030748e-05
+    },
+    {
+      "step": 242,
+      "row_id": "train-61700-task-07-0-paraphrase-1",
+      "loss": 0.7832620739936829
+    },
+    {
+      "step": 243,
+      "row_id": "train-61700-task-02-0-paraphrase-2",
+      "loss": 0.003068380057811737
+    },
+    {
+      "step": 244,
+      "row_id": "train-61700-task-01-0-paraphrase-1",
+      "loss": 0.011232634074985981
+    },
+    {
+      "step": 245,
+      "row_id": "train-61701-task-08-0",
+      "loss": 0.1977880299091339
+    },
+    {
+      "step": 246,
+      "row_id": "train-61700-task-08-0-paraphrase-1",
+      "loss": 0.19922418892383575
+    },
+    {
+      "step": 247,
+      "row_id": "train-61702-task-08-0-paraphrase-0",
+      "loss": 0.07935000956058502
+    },
+    {
+      "step": 248,
+      "row_id": "train-61702-task-08-0-paraphrase-1",
+      "loss": 0.08482932299375534
+    },
+    {
+      "step": 249,
+      "row_id": "train-61702-task-05-0",
+      "loss": 4.375623120722594e-06
+    },
+    {
+      "step": 250,
+      "row_id": "train-61701-task-00-2",
+      "loss": 6.082949403207749e-05
+    },
+    {
+      "step": 251,
+      "row_id": "train-61700-task-00-0-paraphrase-2",
+      "loss": 0.00023494474589824677
+    },
+    {
+      "step": 252,
+      "row_id": "train-61701-task-02-1-paraphrase-0",
+      "loss": 0.0047742752358317375
+    },
+    {
+      "step": 253,
+      "row_id": "train-61701-task-07-0-paraphrase-2",
+      "loss": 0.0012692924356088042
+    },
+    {
+      "step": 254,
+      "row_id": "train-61702-task-03-1-paraphrase-0",
+      "loss": 0.17636586725711823
+    },
+    {
+      "step": 255,
+      "row_id": "train-61702-task-00-1-paraphrase-1",
+      "loss": 0.0005028836312703788
+    },
+    {
+      "step": 256,
+      "row_id": "train-61700-task-01-1-paraphrase-1",
+      "loss": 5.527151733986102e-05
+    },
+    {
+      "step": 257,
+      "row_id": "train-61701-task-04-0",
+      "loss": 4.6771247070864774e-06
+    },
+    {
+      "step": 258,
+      "row_id": "train-61701-task-02-0-paraphrase-2",
+      "loss": 0.007922511547803879
+    },
+    {
+      "step": 259,
+      "row_id": "train-61702-task-01-1-paraphrase-0",
+      "loss": 4.1684113966766745e-05
+    },
+    {
+      "step": 260,
+      "row_id": "train-61702-task-01-0-paraphrase-0",
+      "loss": 0.008444496430456638
+    },
+    {
+      "step": 261,
+      "row_id": "train-61702-task-05-0-paraphrase-0",
+      "loss": 2.5421772079425864e-05
+    },
+    {
+      "step": 262,
+      "row_id": "train-61701-task-08-0-paraphrase-0",
+      "loss": 0.004195130430161953
+    },
+    {
+      "step": 263,
+      "row_id": "train-61700-task-01-2",
+      "loss": 0.00014456933422479779
+    },
+    {
+      "step": 264,
+      "row_id": "train-61701-task-00-0-paraphrase-2",
+      "loss": 8.243076445069164e-05
+    },
+    {
+      "step": 265,
+      "row_id": "train-61701-task-07-0-paraphrase-0",
+      "loss": 0.8752755522727966
+    },
+    {
+      "step": 266,
+      "row_id": "train-61702-task-01-2",
+      "loss": 3.4469354432076216e-05
+    },
+    {
+      "step": 267,
+      "row_id": "train-61702-task-04-1",
+      "loss": 0.022791879251599312
+    },
+    {
+      "step": 268,
+      "row_id": "train-61701-task-06-0-paraphrase-2",
+      "loss": 0.026717409491539
+    },
+    {
+      "step": 269,
+      "row_id": "train-61702-task-00-1",
+      "loss": 0.20885886251926422
+    },
+    {
+      "step": 270,
+      "row_id": "train-61702-task-00-1-paraphrase-0",
+      "loss": 0.0003055050619877875
+    },
+    {
+      "step": 271,
+      "row_id": "train-61701-task-05-1-paraphrase-0",
+      "loss": 8.7417931354139e-05
+    },
+    {
+      "step": 272,
+      "row_id": "train-61701-task-04-0-paraphrase-0",
+      "loss": 7.320647455344442e-06
+    },
+    {
+      "step": 273,
+      "row_id": "train-61700-task-00-0-paraphrase-1",
+      "loss": 0.00014293158892542124
+    },
+    {
+      "step": 274,
+      "row_id": "train-61702-task-05-0-paraphrase-1",
+      "loss": 7.054117759253131e-06
+    },
+    {
+      "step": 275,
+      "row_id": "train-61700-task-03-1-paraphrase-2",
+      "loss": 0.23767784237861633
+    },
+    {
+      "step": 276,
+      "row_id": "train-61702-task-00-0",
+      "loss": 0.00026206375332549214
+    },
+    {
+      "step": 277,
+      "row_id": "train-61700-task-00-2-paraphrase-1",
+      "loss": 0.0001296776463277638
+    },
+    {
+      "step": 278,
+      "row_id": "train-61701-task-00-1",
+      "loss": 8.499253453919664e-05
+    },
+    {
+      "step": 279,
+      "row_id": "train-61700-task-01-1",
+      "loss": 5.615531699731946e-05
+    },
+    {
+      "step": 280,
+      "row_id": "train-61700-task-02-2-paraphrase-2",
+      "loss": 0.017002219334244728
+    },
+    {
+      "step": 281,
+      "row_id": "train-61702-task-02-1-paraphrase-1",
+      "loss": 0.007286765147000551
+    },
+    {
+      "step": 282,
+      "row_id": "train-61701-task-05-0-paraphrase-2",
+      "loss": 3.3308222100458806e-06
+    },
+    {
+      "step": 283,
+      "row_id": "train-61701-task-01-2",
+      "loss": 0.00010679909610189497
+    },
+    {
+      "step": 284,
+      "row_id": "train-61700-task-02-1-paraphrase-2",
+      "loss": 0.0023153971415013075
+    },
+    {
+      "step": 285,
+      "row_id": "train-61702-task-07-0-paraphrase-0",
+      "loss": 0.5243194103240967
+    },
+    {
+      "step": 286,
+      "row_id": "train-61701-task-02-2",
+      "loss": 0.0029074561316519976
+    },
+    {
+      "step": 287,
+      "row_id": "train-61702-task-05-1-paraphrase-1",
+      "loss": 6.879005377413705e-05
+    },
+    {
+      "step": 288,
+      "row_id": "train-61700-task-06-0",
+      "loss": 5.002237230655737e-05
+    },
+    {
+      "step": 289,
+      "row_id": "train-61700-task-04-1",
+      "loss": 0.0010216524824500084
+    },
+    {
+      "step": 290,
+      "row_id": "train-61701-task-04-0-paraphrase-2",
+      "loss": 5.841083748236997e-06
+    },
+    {
+      "step": 291,
+      "row_id": "train-61701-task-01-2-paraphrase-2",
+      "loss": 2.004644920816645e-05
+    },
+    {
+      "step": 292,
+      "row_id": "train-61700-task-02-0",
+      "loss": 0.00030325757688842714
+    },
+    {
+      "step": 293,
+      "row_id": "train-61702-task-02-0-paraphrase-0",
+      "loss": 0.0007083300733938813
+    },
+    {
+      "step": 294,
+      "row_id": "train-61700-task-02-1-paraphrase-1",
+      "loss": 0.0010938446503132582
+    },
+    {
+      "step": 295,
+      "row_id": "train-61700-task-02-2-paraphrase-1",
+      "loss": 0.0014778240583837032
+    },
+    {
+      "step": 296,
+      "row_id": "train-61700-task-04-0-paraphrase-2",
+      "loss": 1.4135579476715066e-05
+    },
+    {
+      "step": 297,
+      "row_id": "train-61702-task-01-2-paraphrase-1",
+      "loss": 6.573929567821324e-05
+    },
+    {
+      "step": 298,
+      "row_id": "train-61702-task-03-2-paraphrase-0",
+      "loss": 0.14339898526668549
+    },
+    {
+      "step": 299,
+      "row_id": "train-61701-task-06-0-paraphrase-0",
+      "loss": 7.917909533716738e-05
+    },
+    {
+      "step": 300,
+      "row_id": "train-61700-task-05-0-paraphrase-2",
+      "loss": 6.794751698180335e-06
+    }
+  ],
+  "train_rows": 162,
+  "dataset_manifest_sha256": "be06e9981fef934c84607ca8b7fde584850beb767da90df53108c67ce63603a8",
+  "training_rows_sha256": "ec6e963735aece923cbe7e1d5b88175e9ea69bbb3ebb1d3103029843e98700b2",
+  "replay_rows": 0,
+  "replay_repeat": 0,
+  "reward_selected_replay_rows": 0,
+  "replay_sha256": null,
+  "parent_adapter_sha256": null,
+  "adapter_sha256": "12efa89a66d1e6ac987769b8f1b2c664786a7ac3c4c4359ed031cdfab8feb313",
+  "reward_prompt_version": null,
+  "versions": {
+    "torch": "2.11.0+cu128",
+    "transformers": "5.19.0",
+    "peft": "0.21.2",
+    "bitsandbytes": "0.50.2"
+  }
+}

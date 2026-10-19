@@ -1,0 +1,40 @@
+{
+  "status": "passed",
+  "model": "Qwen/Qwen3-VL-4B-Instruct",
+  "split": "valid",
+  "row_id": "valid-71700-task-00-1",
+  "note": "Single existing development observation: shared 4-bit 4B base and two newly trained adapters; no robot action, not an independent efficacy evaluation.",
+  "prediction": {
+    "raw": "{\"action\":\"return_home\"}",
+    "action": null,
+    "reward_accepted": false,
+    "reward_threshold": 0.5,
+    "proposals": [
+      {
+        "raw": "{\"action\":\"return_home\"}",
+        "latency_s": 1.7640078000003996,
+        "action": {
+          "action": "return_home"
+        },
+        "reward_score": 0.43782350420951843
+      },
+      {
+        "raw": "{\"action\":\"return_home\"}",
+        "latency_s": 1.1610566999988805,
+        "action": {
+          "action": "return_home"
+        }
+      }
+    ],
+    "distinct_proposals": 1,
+    "reward_adapter": {
+      "path": ".\\adapters\\agent-4b-v1-reward-r0",
+      "sha256": "286347ff4425115a62368f747eef8cfaff192cda9157ad55b0746d3faa005203"
+    },
+    "adapter": {
+      "path": ".\\adapters\\agent-4b-v1-r0",
+      "sha256": "12efa89a66d1e6ac987769b8f1b2c664786a7ac3c4c4359ed031cdfab8feb313",
+      "backend": "torch"
+    }
+  }
+}

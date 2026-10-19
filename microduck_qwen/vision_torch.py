@@ -14,9 +14,9 @@ import time
 from . import ROOT
 from .sim_data import digest
 
-MODEL = "Qwen/Qwen3-VL-2B-Instruct"
-REVISION = "89644892e4d85e24eaac8bacfd4f463576704203"
-MODEL_PATH = ROOT / ".cache/vlm-torch-hub/models--Qwen--Qwen3-VL-2B-Instruct/snapshots" / REVISION
+MODEL = "Qwen/Qwen3-VL-4B-Instruct"
+REVISION = "ebb281ec70b05090aa6165b016eac8ec08e71b17"
+MODEL_PATH = ROOT / ".cache/vlm-torch-hub" / ("models--" + MODEL.replace("/", "--")) / "snapshots" / REVISION
 
 ALTERNATIVE_SKILLS = [
     {"action": "move", "direction": "forward", "distance_m": 0.2},
@@ -81,7 +81,8 @@ def agent_reward_examples(rows):
 def checked_adapter(path, task):
     report = json.loads((Path(path) / "training_report.json").read_text(encoding="utf-8"))
     if (report.get("status"), report.get("task"), report.get("model"), report.get("revision")) != ("completed", task, MODEL, REVISION):
-        raise ValueError("Incompatible completed visual adapter")
+        raise ValueError(f"Incompatible completed {task} adapter: expected {MODEL}@{REVISION}; "
+                         f"got {report.get('model')}@{report.get('revision')}")
     if digest(Path(path) / "adapter_model.safetensors") != report["adapter_sha256"]:
         raise ValueError("Adapter weights hash mismatch")
     if task == "reward" and report.get("reward_prompt_version") != REWARD_PROMPT_VERSION:

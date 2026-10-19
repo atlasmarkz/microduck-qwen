@@ -2,13 +2,17 @@
 
 ## 这版具体做什么
 
-Qwen3-VL-2B 根据编号 RGB 图、中文指令、自己的位姿和本条指令的已完成动作，**逐步选择一个有界技能**。每步执行后重新观察，最多执行 5 步。这是本项目**唯一**的 VLM 数据链路：原先只做选球的 `vision` 指代分支已移除，选球能力并入 `approach` 技能。Windows（PyTorch + CUDA）与 Mac（MLX）两套后端都支持训练与推理。
+Qwen3-VL-4B 根据编号 RGB 图、中文指令、自己的位姿和本条指令的已完成动作，**逐步选择一个有界技能**。每步执行后重新观察，最多执行 5 步。这是本项目**唯一**的 VLM 数据链路：原先只做选球的 `vision` 指代分支已移除，选球能力并入 `approach` 技能。Windows（PyTorch + CUDA）与 Mac（MLX）两套后端都支持训练与推理。
+
+当前 Windows 基座为 `Qwen/Qwen3-VL-4B-Instruct`，Mac 对应 `mlx-community/Qwen3-VL-4B-Instruct-4bit`。2B 适配器不能用于 4B 推理或继续训练；图文数据可以复用。下文的旧 pilot、奖励接入和指令消融结果均为 2B 历史记录，不是 4B 指标。Mac 需要独立训练 MLX 适配器，不能复制 Windows 权重。
 
 技能：前进/字面后退、左右转向、接近当前图像里的球、返回仿真启动位置、搜索、停止、完成、澄清、拒绝未实现功能。一次平移 0.05–0.35 米，转向 5–120 度。本 agent 未接入踢球、抓取、跳舞；这些不能被“走到球旁”冒充完成。
 
 低层仍使用官方预训练 RL 步态；这次更新的是高层 Qwen-VL 的 LoRA，**没有重新训练步态，也没有高层在线 RL**。
 
 ## 本地体验
+
+Windows 新的 4B 实验权重为 `adapters/agent-4b-v1-r0`，奖励权重为 `adapters/agent-4b-v1-reward-r0`；它们保留在本地，不上传 Git。物理任务未全通过，当前仍是实验权重，未被自动选型器选为部署候选。省略 `--adapter` 可使用 4B 冻结基座。
 
 两个终端均进入 `microduck-qwen`。需要上游 MicroDuck 仓库和缓存的固定模型；换机器需先参考 `README.md` / `WINDOWS_VISION.md` 安装，GitHub 不包含这些大文件。下面命令以 Mac（`.venv-vlm`，MLX）为例；Windows 把解释器换成 `.venv/Scripts/python.exe -X utf8`、把 `microduck_qwen.sim` 换成 `microduck_qwen.sim_native` 并补 `--manifest runs/vision-simulator.json` 即可。
 
@@ -21,7 +25,7 @@ Qwen3-VL-2B 根据编号 RGB 图、中文指令、自己的位姿和本条指令
 终端二（使用已训练的 **agent** 权重）：
 
 ```bash
-.venv-vlm/bin/python -m microduck_qwen.agent chat --adapter adapters/agent-pilot-v1-r1
+.venv-vlm/bin/python -m microduck_qwen.agent chat --adapter adapters/agent-4b-v1-r0
 ```
 
 可以从以下训练任务附近的表达开始；具体可靠程度以本页实测记录为准：
@@ -37,7 +41,7 @@ Qwen3-VL-2B 根据编号 RGB 图、中文指令、自己的位姿和本条指令
 先预览而不执行：
 
 ```bash
-.venv-vlm/bin/python -m microduck_qwen.agent plan '后退20厘米' --adapter adapters/agent-pilot-v1-r1
+.venv-vlm/bin/python -m microduck_qwen.agent plan '后退20厘米' --adapter adapters/agent-4b-v1-r0
 ```
 
 执行中按 Ctrl+C 停车；也可以另开终端：
@@ -53,7 +57,7 @@ Qwen3-VL-2B 根据编号 RGB 图、中文指令、自己的位姿和本条指令
 `agent chat` 默认开启停车后对话；单次运行可显式开启：
 
 ```powershell
-.venv/Scripts/python.exe -X utf8 -m microduck_qwen.agent run '前进0.2米，然后回家' --adapter adapters/agent-hard-v3-sft300 --interactive
+.venv/Scripts/python.exe -X utf8 -m microduck_qwen.agent run '前进0.2米，然后回家' --adapter adapters/agent-4b-v1-r0 --interactive
 ```
 
 仿真仍需按本页说明单独启动。Mac 使用 `.venv-vlm/bin/python`。非交互 `run`、`plan`、评测与录制不会等待用户输入。
@@ -73,6 +77,23 @@ Qwen3-VL-2B 根据编号 RGB 图、中文指令、自己的位姿和本条指令
 本机 71 项测试通过，覆盖新图像重试、取消、等待、目标替换、提问预算和部分位移失败不自动重试；真实 MuJoCo＋官方步态实跑了“移动前受阻 → 提问 → 重试仍受阻 → 再提问 → 取消”。该集成自检使用脚本化决策与回答，验证交互和控制行为，不证明自然语言对话模型效果，见 [记录](experiments/dialogue-v1/summary.json)。
 
 ## 数据与训练闭环
+
+### 当前 4B 本机验证（2026-10-19）
+
+本次没有加载旧 2B LoRA；使用固定 4B revision，从基座分别新训 actor 300 步和动作奖励 50 步。复用 `data/agent-hard-v3`（162 条训练行、19 条 valid），NF4 double-quant、BF16、最后 8 层 q/v rank 8，共 655,360 个可训练参数；32 个 LoRA 张量均实际改变。训练分配显存峰值 actor **3.65 GiB**、奖励 **3.34 GiB**，不包含桌面程序和 CUDA 上下文等占用。
+
+```powershell
+.venv/Scripts/python.exe -X utf8 -m microduck_qwen.vision download
+.venv/Scripts/python.exe -X utf8 -m microduck_qwen.agent_cycle --initial-data data/agent-hard-v3 --name agent-4b-reproduce --rounds 1 --steps 300 --reward-steps 50 --reward-guided --scene-mix hard --rollout
+```
+
+该单轮运行验证 4B actor／奖励训练、离线评测与独立物理执行，不含下一轮纠错采集；另用一个既有 valid 观察验证共享 4-bit 基座上两个 LoRA 的切换、采样、评分和恢复 actor。旧 2B actor／奖励适配器均明确拒绝。
+
+valid 动作匹配为基座 **8/19**、新 actor **19/19**；四个开发物理任务 **3/4**，前三项移动／回家与转向组合通过，接近目标后回家任务在首步错误输出 `return_home`，跳过了 `approach`。因此 `selected_adapter=null`，没有自动部署。奖励 valid **45/57**，正例召回 **13/19**，错误动作误接受 **6/38**，不能独立充当正确性判定器。
+
+72 项单元测试通过。Mac 仅切换模型 ID 与固定 revision，未在 Windows 本机验证 MLX。没有新最终测试推理，也没有等算力对照或开放指令可靠性结论；完整训练、原始 valid 输出、物理结果和哈希见 [4B 迁移记录](experiments/agent-4b-v1/summary.json)。
+
+### 迭代流程
 
 ```text
 MuJoCo 随机场景 → 专家实际执行 → 位姿/分割/碰撞验证 → 首轮图文 LoRA
@@ -112,7 +133,7 @@ RTX 3060 8 GiB 上 2B + NF4 QLoRA 实测训练显存峰值：技能任务约 2.3
 ### 奖励辅助自动迭代（Windows）
 
 ```powershell
-.venv/Scripts/python.exe -X utf8 -m microduck_qwen.agent_cycle --initial-data data/agent-hard-v3 --initial-adapter adapters/agent-hard-v3-sft300 --name agent-reward-v1 --rounds 2 --steps 120 --reward-steps 50 --reward-samples 3 --reward-threshold 0.5 --correction-scenes 1 --seed-offset 3000 --scene-mix hard --reward-guided --rollout
+.venv/Scripts/python.exe -X utf8 -m microduck_qwen.agent_cycle --initial-data data/agent-hard-v3 --initial-adapter adapters/agent-4b-v1-r0 --name agent-4b-reward-v1 --rounds 2 --steps 120 --reward-steps 50 --reward-samples 3 --reward-threshold 0.5 --correction-scenes 1 --seed-offset 3000 --scene-mix hard --reward-guided --rollout
 ```
 
 数据、权重必须先在本地采集／训练；示例名称不能与已有输出重复。Windows 默认启用奖励迭代，可用 `--no-reward-guided` 回到原专家纠错流程；Mac 默认保持原流程，目前显式启用奖励会在启动前报错。`--initial-adapter` 可选，指定时继续已有技能权重；省略则从基座训练。首轮奖励从头训练，之后加载上轮奖励适配器，但优化器均重新创建。
@@ -125,13 +146,13 @@ RTX 3060 8 GiB 上 2B + NF4 QLoRA 实测训练显存峰值：技能任务约 2.3
 
 `runs/agent-cycle/<name>/cycle.json` 记录每轮 actor 指标、奖励准确率／正例召回／假接受率及适配器；纠错数据的 `manifest.json` 记录原始采样数、去重数、接受／拒绝、假接受与专家接管次数。奖励附加训练与采样增加计算成本；应与无奖励、等 actor 更新预算的对照比较后再判断收益。
 
-**本机接入自检（2026-10-19）**：在已有 300 步 actor 上继续两轮，每轮 actor 5 步、奖励 10 步，每个观察采样 2 次、阈值 0.5。首轮／次轮 actor valid 为 **16/19、13/19**，同一开发场景的独立物理任务为 **1/4、0/4**，未选出部署权重。两轮奖励 valid 都是 **45/57**，正例召回 **9/19**，错误动作误接受 **2/38**，这次短预算运行没有显示能力提升。
+**历史 2B 本机接入自检（2026-10-19）**：在已有 300 步 actor 上继续两轮，每轮 actor 5 步、奖励 10 步，每个观察采样 2 次、阈值 0.5。首轮／次轮 actor valid 为 **16/19、13/19**，同一开发场景的独立物理任务为 **1/4、0/4**，未选出部署权重。两轮奖励 valid 都是 **45/57**，正例召回 **9/19**，错误动作误接受 **2/38**，这次短预算运行没有显示能力提升。
 
 奖励辅助纠错在一个新训练布局采样 34 次、得到 20 个去重候选，8 步接受、9 步拒绝；1 次错误高分被专家拦下，8/9 条专家轨迹通过物理核验。两轮验证了排序、专家反馈和 actor/RM 续训；该次采集早于显式回放标记的加入，因此其中 actor 奖励额外回放行数为 0。随后用最终代码、同一采集种子单独复跑，实际得到 **8 条**可额外回放样本，1 步真实 actor 训练报告确认 **219 + 8 = 227** 条训练行，且未评分的改写不获得奖励认可标记。这是集成自检，不是独立实验。
 
 最终代码 **64 项单元测试通过**；验证／测试输入与标签保持一致，未进行最终测试推理，也没有等预算收益对照。相对路径、小型训练报告、错误高分原始候选及完整指标见 [接入验证记录](experiments/reward-loop-v1/summary.json)。
 
-### Windows 真机自检（2026-10-19）
+### 历史 2B Windows 本机自检（2026-10-19，仿真非真机）
 
 在 RTX 3060 8 GiB 上按顺序实跑，确认重构后的单链路可用。这是小样本**管线冒烟**，数字不构成能力结论；下文命令省略 `.venv/Scripts/python.exe -X utf8` 前缀，Mac 换成 `.venv-vlm/bin/python` 与 `sim` 入口即可。
 
@@ -153,7 +174,7 @@ RTX 3060 8 GiB 上 2B + NF4 QLoRA 实测训练显存峰值：技能任务约 2.3
 
 流程不会覆盖已有输出，也不会自动部署权重。只有不低于冻结基线，且启用物理评估时全部小测试通过的轮次，才会被报告为 `selected_adapter`。这也不是安全认证或大规模 benchmark。
 
-## 2026-10-15 本机实测
+## 2026-10-15 本机实测（历史 2B）
 
 已完成两轮真实 LoRA，每轮 120 次优化器更新，32 个适配器张量均改变。首轮 42 条训练行来自 3 个训练布局；第二轮在新训练布局 61200 收集 9 个任务、19 条验证通过的纠错行，发生 8 次专家接管，混合训练集增至 61 行。验证集固定 19 行，测试集 14 行未用于推理评估、训练或选型。
 
@@ -171,7 +192,7 @@ R1 实测前进 0.201 米、后退 0.223 米（要求均 0.2 米），回家最�
 
 本次 pilot 尚未使用之后新增的训练措辞增强；R1 提升同时包含更多训练更新和新纠错数据，**没有等训练预算的消融，因此不能单独归因于纠错方法**。小型审计记录见 `experiments/agent-pilot-v1/summary.json`，完整本地记录见 `runs/agent-cycle/agent-pilot-v1/`。推荐仅在上述有限范围内体验 R1，先用 `plan` 检查陌生表达；后续应增加独立布局、语言覆盖和等预算基线。
 
-## 指令到底被读进去了多少（2026-10-19 消融）
+## 指令到底被读进去了多少（2026-10-19，历史 2B 消融）
 
 对每一行 held-out 数据，用**同一张图、同一段历史**预测两次：一次用它自己的指令，一次换成本，另一个任务的指令。
 
@@ -189,9 +210,9 @@ R1 实测前进 0.201 米、后退 0.223 米（要求均 0.2 米），回家最�
 | `turn` | 1/2 | 0/2 |
 | `clarify` | 0/1 | 0/1 |
 
-**结论：模型的瓶颈不是容量，是"指令有没有第二个分句"。** 凡是第一步动作（`move`）和收尾（`done`）都学会了；凡是需要读出"…然后回到起点 / …再右转 45 度"才该发的动作（`return_home`、`turn`）几乎全错，而且错成 `done`。物理 rollout 0/4 也正是这个：走完第一步就发 `done`，或不区分左右。
+**该次 2B 诊断显示错误集中于第二个分句，但不能据此排除模型容量的影响。** 在这批小样本中，第一步移动和收尾多数正确；需要读出"…然后回到起点 / …再右转 45 度"才该发的动作（`return_home`、`turn`）几乎全错，而且常错成 `done`。物理 rollout 0/4 也出现走完第一步就发 `done` 或不区分左右的问题。
 
-原因是任务措辞只有 3 个改写版本，模型可以把「这句话 → 这串动作」整个背下来，不必真的去理解"有没有第二分句"；而 valid/test 用的是**没见过的另一种说法**，这个背下来的映射立刻失效。下一步应先加措辞覆盖和改写数量（让模型无法靠背字符串解决），再考虑更大模型或更多步数。
+一个可能原因是任务措辞只有 3 个改写版本，模型可能依赖整句模板映射；valid/test 使用没见过的另一种说法时泛化不足。这个解释未经消融验证，还可能受到基座能力、训练预算与任务编排设计影响。应分别评测措辞扩展、4B 基座与独立任务执行器，避免将不同因素混为单一原因。
 
 ## 边界与后续
 

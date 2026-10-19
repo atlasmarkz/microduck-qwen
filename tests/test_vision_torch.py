@@ -13,6 +13,15 @@ from microduck_qwen.sim_data import digest
 
 @unittest.skipUnless(find_spec("torch"), "optional PyTorch backend")
 class VisionTorchTests(unittest.TestCase):
+    def test_2b_actor_and_reward_adapters_cannot_enter_4b_backend(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp)
+            for task in ("agent", "reward"):
+                (path / "training_report.json").write_text(json.dumps({"status": "completed", "task": task,
+                    "model": "Qwen/Qwen3-VL-2B-Instruct", "revision": "89644892e4d85e24eaac8bacfd4f463576704203"}))
+                with self.assertRaisesRegex(ValueError, "Incompatible"):
+                    checked_adapter(path, task)
+
     def test_actor_replay_requires_reward_acceptance_and_independent_verification(self):
         valid = {"id": "ok", "split": "train", "verified": True, "reward_verified_accepted": True}
         rows = [valid, dict(valid, id="rejected", reward_verified_accepted=False),

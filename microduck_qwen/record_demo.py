@@ -17,11 +17,12 @@ from .sim_data import digest
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--adapter", type=Path, default=ROOT / "adapters/agent-hard-v3-sft300")
+    parser.add_argument("--adapter", type=Path, default=ROOT / "adapters/agent-4b-v1-r0")
     args = parser.parse_args()
     import mujoco
     from PIL import Image, ImageDraw, ImageFont
     from .agent import AgentPlanner, run_instruction
+    from .vision_torch import MODEL
     from .vision import annotate, capture, propose_balls
     from .vision_scene import make_scene
 
@@ -137,7 +138,7 @@ def main():
                 canvas.paste(live, (700, 350))
                 draw.text((350, 326), "本步实际模型输入", font=small, fill="#9aabc7")
                 draw.text((700, 326), "实时第一视角（编号随帧变化）", font=small, fill="#9aabc7")
-                draw.text((350, 540), "Qwen3-VL-2B LoRA · 官方步态 · 仿真位姿与已知地图", font=small, fill="#9aabc7")
+                draw.text((350, 540), f"{MODEL.split('/')[-1]} LoRA · 官方步态 · 仿真位姿与已知地图", font=small, fill="#9aabc7")
                 frames.append(canvas.quantize(colors=192, dither=Image.Dither.NONE))
                 times.append(time.monotonic())
             if finished.is_set():

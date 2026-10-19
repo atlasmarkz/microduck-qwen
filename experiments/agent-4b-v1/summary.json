@@ -1,0 +1,75 @@
+{
+  "status": "completed",
+  "model": "Qwen/Qwen3-VL-4B-Instruct",
+  "revision": "ebb281ec70b05090aa6165b016eac8ec08e71b17",
+  "mlx_model": "mlx-community/Qwen3-VL-4B-Instruct-4bit",
+  "mlx_revision": "2fd8dacbdb8f1e54b8c005f081ec5bf79c56376b",
+  "mlx_runtime_verified": false,
+  "actor_steps": 300,
+  "reward_steps": 50,
+  "base_valid": {
+    "correct": 8,
+    "total": 19
+  },
+  "rounds": [
+    {
+      "round": 0,
+      "data": ".\\data\\agent-hard-v3",
+      "adapter": ".\\adapters\\agent-4b-v1-r0",
+      "valid_correct": 19,
+      "valid_total": 19,
+      "reward_adapter": ".\\adapters\\agent-4b-v1-reward-r0",
+      "reward_valid": {
+        "split": "valid",
+        "count": 57,
+        "accuracy": 0.7894736842105263,
+        "positive_recall": 0.6842105263157895,
+        "false_accept_rate": 0.15789473684210525,
+        "adapter_sha256": "286347ff4425115a62368f747eef8cfaff192cda9157ad55b0746d3faa005203",
+        "note": "Skill-action reward only; two counterfactual negatives per instruction. Not a held-out task-outcome reward evaluation."
+      },
+      "rollout_correct": 3,
+      "rollout_total": 4
+    }
+  ],
+  "selected_adapter": null,
+  "actor_sha256": "12efa89a66d1e6ac987769b8f1b2c664786a7ac3c4c4359ed031cdfab8feb313",
+  "reward_sha256": "286347ff4425115a62368f747eef8cfaff192cda9157ad55b0746d3faa005203",
+  "trainable_parameters": 655360,
+  "actor_peak_cuda_allocated_bytes": 3916352000,
+  "reward_peak_cuda_allocated_bytes": 3589048832,
+  "old_2b_adapter_rejections": {
+    "agent": "Incompatible completed agent adapter: expected Qwen/Qwen3-VL-4B-Instruct@ebb281ec70b05090aa6165b016eac8ec08e71b17; got Qwen/Qwen3-VL-2B-Instruct@89644892e4d85e24eaac8bacfd4f463576704203",
+    "reward": "Incompatible completed reward adapter: expected Qwen/Qwen3-VL-4B-Instruct@ebb281ec70b05090aa6165b016eac8ec08e71b17; got Qwen/Qwen3-VL-2B-Instruct@89644892e4d85e24eaac8bacfd4f463576704203"
+  },
+  "unit_tests_passed": 72,
+  "shared_base_adapter_switching_verified": true,
+  "demo": {
+    "asset": "assets/agent-demo.gif",
+    "gif_sha256": "7d288f062cc5864175302c9460a3507f36a6cc98aa20cdfd49bcca41361acaa7",
+    "duration_s": 20.41,
+    "frames": 169,
+    "final_home_distance_m": 0.05269127003357868,
+    "actions": [
+      {
+        "action": "move",
+        "direction": "forward",
+        "distance_m": 0.2
+      },
+      {
+        "action": "return_home"
+      },
+      {
+        "action": "done"
+      }
+    ]
+  },
+  "dataset_manifest_sha256": "be06e9981fef934c84607ca8b7fde584850beb767da90df53108c67ce63603a8",
+  "scope": "4B migration and fresh LoRA on existing finite-template data. Fixed development validation and one-layout four-task physical rollout; no new final test, no general reliability claim, no compute-matched 2B/4B comparison.",
+  "source_sha256": {
+    "vision.py": "9fa03a2366e9af4ebf91110ef084688fb67591b3b3e7c1ff39e5e72f35ab70c3",
+    "vision_torch.py": "0c4397276b4623b16e70fd12546d1ffe5757d7c8f8ea89ce4dc285d23d17d8b3",
+    "agent.py": "6fa98164888950541fd19c636741780f666bafe3d97275f023af52d5ddd3ba56",
+    "skills.py": "a476385b0bf2448fb1685237e5b5cfe3cded93354b292cfd1c54903f19e82874"
+  }
+}

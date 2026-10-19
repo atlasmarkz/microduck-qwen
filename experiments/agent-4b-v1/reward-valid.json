@@ -1,0 +1,355 @@
+{
+  "summary": {
+    "split": "valid",
+    "count": 57,
+    "accuracy": 0.7894736842105263,
+    "positive_recall": 0.6842105263157895,
+    "false_accept_rate": 0.15789473684210525,
+    "adapter_sha256": "286347ff4425115a62368f747eef8cfaff192cda9157ad55b0746d3faa005203",
+    "note": "Skill-action reward only; two counterfactual negatives per instruction. Not a held-out task-outcome reward evaluation."
+  },
+  "results": [
+    {
+      "id": "valid-71700-task-00-0",
+      "label": 1,
+      "score": 0.622459352016449,
+      "correct": true
+    },
+    {
+      "id": "valid-71700-task-00-0-negative-0",
+      "label": 0,
+      "score": 0.005220125894993544,
+      "correct": true
+    },
+    {
+      "id": "valid-71700-task-00-0-negative-1",
+      "label": 0,
+      "score": 5.043474402555148e-07,
+      "correct": true
+    },
+    {
+      "id": "valid-71700-task-00-1",
+      "label": 1,
+      "score": 0.43782350420951843,
+      "correct": false
+    },
+    {
+      "id": "valid-71700-task-00-1-negative-0",
+      "label": 0,
+      "score": 8.764247638737288e-08,
+      "correct": true
+    },
+    {
+      "id": "valid-71700-task-00-1-negative-1",
+      "label": 0,
+      "score": 1.1253516163378663e-07,
+      "correct": true
+    },
+    {
+      "id": "valid-71700-task-00-2",
+      "label": 1,
+      "score": 0.9947799444198608,
+      "correct": true
+    },
+    {
+      "id": "valid-71700-task-00-2-negative-0",
+      "label": 0,
+      "score": 8.764247638737288e-08,
+      "correct": true
+    },
+    {
+      "id": "valid-71700-task-00-2-negative-1",
+      "label": 0,
+      "score": 8.764247638737288e-08,
+      "correct": true
+    },
+    {
+      "id": "valid-71700-task-01-0",
+      "label": 1,
+      "score": 0.0009110512328334153,
+      "correct": false
+    },
+    {
+      "id": "valid-71700-task-01-0-negative-0",
+      "label": 0,
+      "score": 8.764247638737288e-08,
+      "correct": true
+    },
+    {
+      "id": "valid-71700-task-01-0-negative-1",
+      "label": 0,
+      "score": 8.315280410897685e-07,
+      "correct": true
+    },
+    {
+      "id": "valid-71700-task-01-1",
+      "label": 1,
+      "score": 0.9890130758285522,
+      "correct": true
+    },
+    {
+      "id": "valid-71700-task-01-1-negative-0",
+      "label": 0,
+      "score": 3.224186784223093e-08,
+      "correct": true
+    },
+    {
+      "id": "valid-71700-task-01-1-negative-1",
+      "label": 0,
+      "score": 0.008577484637498856,
+      "correct": true
+    },
+    {
+      "id": "valid-71700-task-01-2",
+      "label": 1,
+      "score": 0.9996646642684937,
+      "correct": true
+    },
+    {
+      "id": "valid-71700-task-01-2-negative-0",
+      "label": 0,
+      "score": 0.9933071732521057,
+      "correct": false
+    },
+    {
+      "id": "valid-71700-task-01-2-negative-1",
+      "label": 0,
+      "score": 0.7772998809814453,
+      "correct": false
+    },
+    {
+      "id": "valid-71700-task-02-0",
+      "label": 1,
+      "score": 0.9525741338729858,
+      "correct": true
+    },
+    {
+      "id": "valid-71700-task-02-0-negative-0",
+      "label": 0,
+      "score": 1.0677028967620572e-06,
+      "correct": true
+    },
+    {
+      "id": "valid-71700-task-02-0-negative-1",
+      "label": 0,
+      "score": 2.2603242086915998e-06,
+      "correct": true
+    },
+    {
+      "id": "valid-71700-task-02-1",
+      "label": 1,
+      "score": 0.0024726232513785362,
+      "correct": false
+    },
+    {
+      "id": "valid-71700-task-02-1-negative-0",
+      "label": 0,
+      "score": 0.000552778597921133,
+      "correct": true
+    },
+    {
+      "id": "valid-71700-task-02-1-negative-1",
+      "label": 0,
+      "score": 2.3823690753488336e-07,
+      "correct": true
+    },
+    {
+      "id": "valid-71700-task-02-2",
+      "label": 1,
+      "score": 0.9999982118606567,
+      "correct": true
+    },
+    {
+      "id": "valid-71700-task-02-2-negative-0",
+      "label": 0,
+      "score": 0.3775406777858734,
+      "correct": true
+    },
+    {
+      "id": "valid-71700-task-02-2-negative-1",
+      "label": 0,
+      "score": 0.7310585379600525,
+      "correct": false
+    },
+    {
+      "id": "valid-71700-task-03-0",
+      "label": 1,
+      "score": 0.999998927116394,
+      "correct": true
+    },
+    {
+      "id": "valid-71700-task-03-0-negative-0",
+      "label": 0,
+      "score": 0.00033535013790242374,
+      "correct": true
+    },
+    {
+      "id": "valid-71700-task-03-0-negative-1",
+      "label": 0,
+      "score": 0.0011695101857185364,
+      "correct": true
+    },
+    {
+      "id": "valid-71700-task-03-1",
+      "label": 1,
+      "score": 0.0009110512328334153,
+      "correct": false
+    },
+    {
+      "id": "valid-71700-task-03-1-negative-0",
+      "label": 0,
+      "score": 2.1444948288262822e-05,
+      "correct": true
+    },
+    {
+      "id": "valid-71700-task-03-1-negative-1",
+      "label": 0,
+      "score": 0.0004305570910219103,
+      "correct": true
+    },
+    {
+      "id": "valid-71700-task-03-2",
+      "label": 1,
+      "score": 0.851952850818634,
+      "correct": true
+    },
+    {
+      "id": "valid-71700-task-03-2-negative-0",
+      "label": 0,
+      "score": 0.7310585379600525,
+      "correct": false
+    },
+    {
+      "id": "valid-71700-task-03-2-negative-1",
+      "label": 0,
+      "score": 0.005220125894993544,
+      "correct": true
+    },
+    {
+      "id": "valid-71700-task-04-0",
+      "label": 1,
+      "score": 0.9999982118606567,
+      "correct": true
+    },
+    {
+      "id": "valid-71700-task-04-0-negative-0",
+      "label": 0,
+      "score": 2.9023121896898374e-06,
+      "correct": true
+    },
+    {
+      "id": "valid-71700-task-04-0-negative-1",
+      "label": 0,
+      "score": 7.889262633398175e-06,
+      "correct": true
+    },
+    {
+      "id": "valid-71700-task-04-1",
+      "label": 1,
+      "score": 0.562176525592804,
+      "correct": true
+    },
+    {
+      "id": "valid-71700-task-04-1-negative-0",
+      "label": 0,
+      "score": 0.9241418242454529,
+      "correct": false
+    },
+    {
+      "id": "valid-71700-task-04-1-negative-1",
+      "label": 0,
+      "score": 1.370957193103095e-06,
+      "correct": true
+    },
+    {
+      "id": "valid-71700-task-05-0",
+      "label": 1,
+      "score": 0.9999251365661621,
+      "correct": true
+    },
+    {
+      "id": "valid-71700-task-05-0-negative-0",
+      "label": 0,
+      "score": 1.0677028967620572e-06,
+      "correct": true
+    },
+    {
+      "id": "valid-71700-task-05-0-negative-1",
+      "label": 0,
+      "score": 1.4449801710725296e-07,
+      "correct": true
+    },
+    {
+      "id": "valid-71700-task-05-1",
+      "label": 1,
+      "score": 0.851952850818634,
+      "correct": true
+    },
+    {
+      "id": "valid-71700-task-05-1-negative-0",
+      "label": 0,
+      "score": 5.315785500670245e-08,
+      "correct": true
+    },
+    {
+      "id": "valid-71700-task-05-1-negative-1",
+      "label": 0,
+      "score": 0.06008664518594742,
+      "correct": true
+    },
+    {
+      "id": "valid-71700-task-06-0",
+      "label": 1,
+      "score": 0.9999997615814209,
+      "correct": true
+    },
+    {
+      "id": "valid-71700-task-06-0-negative-0",
+      "label": 0,
+      "score": 8.315280410897685e-07,
+      "correct": true
+    },
+    {
+      "id": "valid-71700-task-06-0-negative-1",
+      "label": 0,
+      "score": 0.9999898672103882,
+      "correct": false
+    },
+    {
+      "id": "valid-71700-task-07-0",
+      "label": 1,
+      "score": 0.0007096704212017357,
+      "correct": false
+    },
+    {
+      "id": "valid-71700-task-07-0-negative-0",
+      "label": 0,
+      "score": 0.00033535013790242374,
+      "correct": true
+    },
+    {
+      "id": "valid-71700-task-07-0-negative-1",
+      "label": 0,
+      "score": 9.610241977497935e-05,
+      "correct": true
+    },
+    {
+      "id": "valid-71700-task-08-0",
+      "label": 1,
+      "score": 0.004070138093084097,
+      "correct": false
+    },
+    {
+      "id": "valid-71700-task-08-0-negative-0",
+      "label": 0,
+      "score": 0.3775406777858734,
+      "correct": true
+    },
+    {
+      "id": "valid-71700-task-08-0-negative-1",
+      "label": 0,
+      "score": 0.022977370768785477,
+      "correct": true
+    }
+  ]
+}

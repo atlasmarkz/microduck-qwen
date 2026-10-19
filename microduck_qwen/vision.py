@@ -23,8 +23,8 @@ from PIL import Image, ImageDraw, ImageFont
 from . import ROOT
 from .navigation import JsonConnection, Robot
 
-MODEL = "mlx-community/Qwen3-VL-2B-Instruct-4bit"
-REVISION = "9c4f5209e57b31f4b9dfba735de3fb983739c9cc"
+MODEL = "mlx-community/Qwen3-VL-4B-Instruct-4bit"
+REVISION = "2fd8dacbdb8f1e54b8c005f081ec5bf79c56376b"
 BALL_RADIUS = 0.07
 MIN_VISIBILITY = 0.65
 # A partially occluded target is still approachable above this fraction: the
