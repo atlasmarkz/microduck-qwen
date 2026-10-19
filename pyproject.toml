@@ -14,15 +14,11 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-torch = ["torch==2.11.0", "peft==0.21.2", "numpy>=1.26", "Pillow==12.3.0"]
 vision-torch = ["torch==2.11.0", "torchvision==0.26.0", "peft==0.21.2", "bitsandbytes==0.50.2", "Pillow==12.3.0", "opencv-python>=4.10,<6"]
 simulation = [
     "mujoco==3.16.0", "onnxruntime==1.31.0",
     "better-actuator-models @ https://codeload.github.com/Rhoban/bam/zip/57d13ead53206a6bf0db3d66f86506ae8c2ce01a",
 ]
-
-[project.scripts]
-duck-language = "microduck_qwen.cli:main"
 
 [tool.setuptools.packages.find]
 include = ["microduck_qwen*"]

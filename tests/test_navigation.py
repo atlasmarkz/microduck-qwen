@@ -2,7 +2,6 @@ import math
 import unittest
 
 from microduck_qwen.contract import arena, validate
-from microduck_qwen.dataset import build
 from microduck_qwen.navigation import pathfind, segment_clear
 
 
@@ -43,16 +42,6 @@ class NavigationTests(unittest.TestCase):
             validate({"status":"ok","goals":[{"target":"green_ball","speed":"normal","stop_distance_m":0.3}]})
         with self.assertRaises(ValueError):
             validate({"status":"stop","goals":[],"shell":"anything"})
-
-    def test_template_splits_do_not_share_instructions(self):
-        seen = set()
-        for index,split in enumerate(("train","valid","test")):
-            rows = build(split,42+index)
-            inputs = {r["instruction"] for r in rows}
-            self.assertFalse(inputs & seen)
-            for row in rows:
-                validate(row["expected"])
-            seen |= inputs
 
 
 if __name__ == "__main__":

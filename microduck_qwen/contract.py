@@ -1,27 +1,14 @@
-"""Strict domain contract shared by the teacher, model evaluation and executor."""
+"""Strict navigation-plan contract shared by the controller and the executor."""
 
 import json
 import math
 from pathlib import Path
 
 ARENA_FILE = Path(__file__).with_name("arena.json")
-SYSTEM = '''将中文导航指令转换为JSON，只输出JSON。场景只有一个红球red_ball（球、小球）和一个蓝色标记blue_marker（蓝点）。
-格式：{"status":"ok","goals":[{"target":"red_ball","speed":"normal","stop_distance_m":0.3}]}。
-target只能是red_ball、blue_marker或point；point必须额外包含x和y，表示世界坐标米。speed只能slow、normal、fast，默认normal；慢/小心为slow，快为fast。
-物体目标默认停靠距离0.3米，指定厘米要换算成米；point默认0.15米。按指令顺序列出目标，最多3个。避障始终启用。
-停止输出{"status":"stop","goals":[]}。非导航任务、缺少坐标或未知物体输出{"status":"unsupported","goals":[]}。不要编造目标或坐标。'''
 
 
 def arena():
     return json.loads(ARENA_FILE.read_text(encoding="utf-8"))
-
-
-def messages(instruction: str):
-    return [{"role": "system", "content": SYSTEM}, {"role": "user", "content": instruction}]
-
-
-def compact(plan):
-    return json.dumps(plan, ensure_ascii=False, separators=(",", ":"), allow_nan=False)
 
 
 def _number(value, low, high, name):
