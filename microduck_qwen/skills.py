@@ -6,7 +6,7 @@ from pathlib import Path
 import time
 
 from .navigation import Robot, Observer, execute, clearance, inside
-from .vision import capture, propose_balls, visibility_check, VisualGuard
+from .vision import capture, propose_balls, visibility_check, approachable, VisualGuard
 
 
 def angle(value):
@@ -191,8 +191,8 @@ class SkillExecutor:
                 result["success"] = result["navigation"]["success"] and result["distance_home_m"] <= 0.125 and result["home_yaw_error_deg"] < 12
             elif name == "approach":
                 selected = next((c for c in candidates or [] if c["id"] == action["id"] and c["color"] == action["color"]), None)
-                if selected is None or selected["visibility"] != "visible":
-                    raise RuntimeError("target is not bound to a visible current-frame candidate")
+                if selected is None or not approachable(selected):
+                    raise RuntimeError("target is not bound to a sufficiently visible current-frame candidate")
                 target = selected["world_position"]
                 if not visibility_check(capture(self.info["port"]), target, action["color"])["safe"]:
                     raise RuntimeError("target no longer safely visible")
@@ -203,7 +203,7 @@ class SkillExecutor:
             elif name == "search":
                 result["turns"] = []
                 for index in range(9):
-                    found = [c for c in propose_balls(capture(self.info["port"])) if c["color"] == action["color"] and c["visibility"] == "visible"]
+                    found = [c for c in propose_balls(capture(self.info["port"])) if c["color"] == action["color"] and approachable(c)]
                     if found:
                         result["success"] = True
                         break

@@ -10,6 +10,10 @@ from .contract import arena, validate
 
 ROBOT_RADIUS = 0.14
 PATH_MARGIN = 0.12
+# A guarded approach may walk straight at the object while facing it. That line
+# ends stop_distance_m short of the object, so the object's own body is not on
+# it; this smaller margin only has to keep real blockers off the line.
+FACE_TARGET_MARGIN = 0.05
 GRID = 0.05
 # These are policy conditioning inputs, NOT measured physical speeds. Commands below
 # about 0.2 produce little motion with the installed walking actor.
@@ -120,7 +124,7 @@ def inside(point, scene):
     return xmin <= x <= xmax and ymin <= y <= ymax
 
 
-def segment_clear(a, b, scene):
+def segment_clear(a, b, scene, margin=PATH_MARGIN):
     if not inside(a, scene) or not inside(b, scene):
         return False
     for obstacle in obstacles(scene):
@@ -136,10 +140,32 @@ def segment_clear(a, b, scene):
             )
         )
         nearest = (a[0] + t * dx, a[1] + t * dy)
-        padding = obstacle.get("path_margin", PATH_MARGIN)
+        padding = obstacle.get("path_margin", margin)
         if math.dist(nearest, center) < obstacle["radius"] + ROBOT_RADIUS + padding:
             return False
     return True
+
+
+def face_target_heading(position, target, stop_distance, scene, margin=FACE_TARGET_MARGIN):
+    """Heading that walks a clear straight line at the object, or None.
+
+    The body must face the object for its numbered box to stay in frame as the
+    distance closes; the path-follower heading aims at a 0.05m waypoint instead,
+    which is what used to slide the object out of view on the last metre.
+    """
+    distance = math.dist(position, target)
+    if distance < 1e-6:
+        return None
+    ratio = max(0.0, (distance - stop_distance) / distance)
+    aim = (
+        position[0] + (target[0] - position[0]) * ratio,
+        position[1] + (target[1] - position[1]) * ratio,
+    )
+    if not segment_clear(position, aim, scene, margin):
+        return None
+    if math.dist(position, aim) < 1e-6:
+        aim = (target[0], target[1])
+    return math.atan2(aim[1] - position[1], aim[0] - position[0])
 
 
 def pathfind(start, target, radius, scene):
@@ -304,12 +330,32 @@ def execute(
                     if margin < 0.015:
                         raise RuntimeError("障碍物净空过小，已停止导航")
                     distance = math.dist(position, target)
-                    visual_check = guard(state, goal) if guard is not None else None
-                    if visual_check is not None and not visual_check.get("safe", False):
-                        raise RuntimeError(
-                            "视觉保护停止："
-                            + str(visual_check.get("status", "unknown"))
+                    # A guarded approach walks a clear straight line at the
+                    # object while facing it, so its numbered box stays in
+                    # frame. A blocked leg is a detour around whatever hides
+                    # the object: the planned route, not the sight line, drives
+                    # that leg and the object is expected to slip out of frame
+                    # while the body turns away. The guard therefore only gates
+                    # the leg that is actually driven at the object, which is
+                    # the only leg where losing sight is real evidence.
+                    aimed = (
+                        face_target_heading(
+                            position, target, goal["stop_distance_m"], scene
                         )
+                        if guard is not None
+                        else None
+                    )
+                    visual_check = None
+                    if guard is not None:
+                        if aimed is None:
+                            guard.suspend()
+                        else:
+                            visual_check = guard(state, goal)
+                            if not visual_check.get("safe", False):
+                                raise RuntimeError(
+                                    "视觉保护停止："
+                                    + str(visual_check.get("status", "unknown"))
+                                )
                     if distance <= goal["stop_distance_m"] + arrival_tolerance_m:
                         connection.stop()
                         summary["goals"].append(
@@ -336,8 +382,12 @@ def execute(
                     while len(route) > 1 and math.dist(position, route[1]) < 0.07:
                         route.pop(0)
                     waypoint = route[1] if len(route) > 1 else route[0]
-                    heading = math.atan2(
-                        waypoint[1] - position[1], waypoint[0] - position[0]
+                    heading = (
+                        aimed
+                        if aimed is not None
+                        else math.atan2(
+                            waypoint[1] - position[1], waypoint[0] - position[0]
+                        )
                     )
                     error = math.atan2(
                         math.sin(heading - state["yaw"]),

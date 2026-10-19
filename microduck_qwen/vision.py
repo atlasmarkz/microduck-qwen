@@ -27,6 +27,14 @@ MODEL = "mlx-community/Qwen3-VL-2B-Instruct-4bit"
 REVISION = "9c4f5209e57b31f4b9dfba735de3fb983739c9cc"
 BALL_RADIUS = 0.07
 MIN_VISIBILITY = 0.65
+# A partially occluded target is still approachable above this fraction: the
+# blob is big enough that its world position and its numbered box are sound.
+APPROACH_VISIBILITY_FLOOR = 0.35
+# Consecutive out-of-frame reads tolerated while the body re-aims at a bound
+# target. The target's world position is static and was confirmed at bind time,
+# so a brief loss of sight is not evidence that it moved. Only applied to
+# "out_of_view": "occluded" and "missing" still abort immediately.
+OUT_OF_VIEW_GRACE = 3
 
 
 @dataclass
@@ -190,6 +198,21 @@ def save_frame(directory, frame, candidates, prefix="initial"):
     return marked
 
 
+def approachable(candidate):
+    """A bound target stays approachable while enough of its blob is segmentable.
+
+    Fully visible blobs always qualify. A partially occluded blob still gives a
+    trustworthy world position as long as it is above the floor, which is what
+    the duplicate-colour row needs: the numbered box is visible, so the binding
+    the model chose is still the binding it can be held to. Below the floor the
+    target is treated as not localisable and the caller must refuse or search.
+    """
+    return candidate["visibility"] == "visible" or (
+        candidate["visibility"] == "partial"
+        and candidate["visible_fraction_estimate"] >= APPROACH_VISIBILITY_FLOOR
+    )
+
+
 def visibility_check(frame, target, color):
     candidates = propose_balls(frame)
     matching = [
@@ -204,7 +227,7 @@ def visibility_check(frame, target, color):
             key=lambda c: np.linalg.norm(np.asarray(c["world_position"]) - target),
         )
         return {
-            "safe": candidate["visibility"] == "visible",
+            "safe": approachable(candidate),
             "status": candidate["visibility"],
             "visible_fraction_estimate": candidate["visible_fraction_estimate"],
         }
@@ -227,7 +250,23 @@ def visibility_check(frame, target, color):
     }
 
 
+def apply_grace(check, lost):
+    """Tolerate a bounded run of out-of-frame reads while the body re-aims.
+
+    Returns the (possibly tolerated) check and the updated consecutive count.
+    Any other verdict — including "occluded" and "missing" — resets the run.
+    """
+    if check.get("status") != "out_of_view":
+        return check, 0
+    lost += 1
+    if lost > OUT_OF_VIEW_GRACE:
+        return check, lost
+    return dict(check, safe=True, status="out_of_view_tolerated", tolerated_checks=lost), lost
+
+
 class VisualGuard:
+    """Bounds the last approach by the live visibility of the bound object."""
+
     def __init__(self, port, target, color, directory):
         self.port, self.target, self.color, self.directory = (
             port,
@@ -238,12 +277,25 @@ class VisualGuard:
         self.last_time = 0.0
         self.last = {"safe": False, "status": "unchecked"}
         self.index = 0
+        self.lost = 0
+
+    def suspend(self):
+        """A detour leg is driven by the planned route, so the sight line cannot gate it.
+
+        Dropping the cached verdict makes the first aimed leg re-capture instead
+        of inheriting a verdict taken while the object was legitimately hidden.
+        """
+        self.last = {"safe": False, "status": "suspended"}
+        self.last_time = 0.0
+        self.lost = 0
 
     def __call__(self, state, goal):
         if time.monotonic() - self.last_time < 0.6:
             return self.last
         frame = capture(self.port)
-        self.last = visibility_check(frame, self.target, self.color)
+        self.last, self.lost = apply_grace(
+            visibility_check(frame, self.target, self.color), self.lost
+        )
         self.last_time = time.monotonic()
         save_frame(
             self.directory, frame, propose_balls(frame), f"track-{self.index:04d}"
