@@ -4,7 +4,7 @@ Windows / NVIDIA 的 Qwen3-VL QLoRA、学习型奖励与多场景实验见 [WIND
 
 已完成的 6 场景 smoke tests 与保留失败记录见 [VISION_RESULTS.md](VISION_RESULTS.md)。其中 3 个随机布局完成了正确左球接近，3 个遮挡/缺失案例由安全层拒绝动作；这不等于 VLM 自身正确拒答。
 
-这是可运行的视觉分支，不替换已有 Qwen3-0.6B 文本 SFT。默认仍使用 Qwen3-VL-2B-Instruct 4-bit MLX 冻结基线；现可通过 `--adapter` 显式加载仿真采集数据训练的图文 LoRA。采集、训练、验证与限制见 [SIM_TRAINING.md](SIM_TRAINING.md)，历史内存探针见 [TRAINING_PLAN.md](TRAINING_PLAN.md)。
+这是可运行的视觉链路；纯文本 Qwen3-0.6B 分支已于 2026-10-19 随链路合并移除。默认仍使用 Qwen3-VL-2B-Instruct 4-bit MLX 冻结基线；现可通过 `--adapter` 显式加载仿真采集数据训练的图文 LoRA。采集、训练、验证与限制见 [SIM_TRAINING.md](SIM_TRAINING.md)，历史内存探针见 [TRAINING_PLAN.md](TRAINING_PLAN.md)。
 
 ## 已实现的链路
 
