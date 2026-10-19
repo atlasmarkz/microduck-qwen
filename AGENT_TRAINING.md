@@ -2,7 +2,7 @@
 
 ## 这版具体做什么
 
-新增 `agent` 分支，让 Qwen3-VL-2B 根据编号 RGB 图、中文指令、自己的位姿和本条指令的已完成动作，**逐步选择一个有界技能**。每步执行后重新观察，最多执行 5 步。原 `vision` 分支仍只做选球，不会因增加几个关键词就变成多技能智能体。
+Qwen3-VL-2B 根据编号 RGB 图、中文指令、自己的位姿和本条指令的已完成动作，**逐步选择一个有界技能**。每步执行后重新观察，最多执行 5 步。这是本项目**唯一**的 VLM 数据链路：原先只做选球的 `vision` 指代分支已移除，选球能力并入 `approach` 技能。Windows（PyTorch + CUDA）与 Mac（MLX）两套后端都支持训练与推理。
 
 技能：前进/字面后退、左右转向、接近当前图像里的球、返回仿真启动位置、搜索、停止、完成、澄清、拒绝未实现功能。一次平移 0.05–0.35 米，转向 5–120 度。本 agent 未接入踢球、抓取、跳舞；这些不能被“走到球旁”冒充完成。
 
@@ -10,7 +10,7 @@
 
 ## 本地体验
 
-两个终端均进入 `microduck-qwen`。需要现有 `.venv`、`.venv-vlm`、上游 MicroDuck 仓库和缓存的固定模型；换机器需先参考 `VISION.md` 安装，GitHub 不包含这些大文件。
+两个终端均进入 `microduck-qwen`。需要上游 MicroDuck 仓库和缓存的固定模型；换机器需先参考 `README.md` / `WINDOWS_VISION.md` 安装，GitHub 不包含这些大文件。下面命令以 Mac（`.venv-vlm`，MLX）为例；Windows 把解释器换成 `.venv/Scripts/python.exe -X utf8`、把 `microduck_qwen.sim` 换成 `microduck_qwen.sim_native` 并补 `--manifest runs/vision-simulator.json` 即可。
 
 终端一（重启仿真很重要，旧 manifest 没有启动时的 home）：
 
@@ -18,7 +18,7 @@
 .venv/bin/python -m microduck_qwen.sim --vision --viewer --seed 42
 ```
 
-终端二（使用已训练的 **agent** 权重，不是视觉选球权重）：
+终端二（使用已训练的 **agent** 权重）：
 
 ```bash
 .venv-vlm/bin/python -m microduck_qwen.agent chat --adapter adapters/agent-pilot-v1-r1
@@ -73,6 +73,12 @@ MuJoCo 随机场景 → 专家实际执行 → 位姿/分割/碰撞验证 → �
   --rounds 2 --steps 120 --correction-scenes 1 --seed-offset 1000 --rollout
 ```
 
+Windows（PyTorch + CUDA）走同一闭包，只是命令不同：采集用
+`.venv/Scripts/python.exe -X utf8 -m microduck_qwen.agent_data ...`，单轮技能 SFT 用
+`.venv/Scripts/python.exe -X utf8 -m microduck_qwen.vision_torch train --task agent --data <data> --output <adapter> --steps 100`，
+技能动作奖励用 `--task reward`；`agent_cycle` 会自动选择 `vision_torch`（Windows）或 `vision_sft`（Mac）。
+RTX 3060 8GiB 上 2B + NF4 QLoRA 实测训练显存峰值约 1.95–2.09 GiB。
+
 流程依次做：冻结基线验证、首轮训练、固定验证、独立物理 rollout、新训练场景纠错、继续 LoRA、再次验证。每轮单独进程，避免同时驻留多份 VLM。继续训练加载上轮适配器，**重新创建 AdamW，不恢复优化器状态**。视觉塔与基座冻结，最后 8 层 q/v rank-8 LoRA，共 458,752 个可训练参数；completion-only loss，microbatch 1，累积 1，学习率 5e-5，梯度检查点，序列上限 1024，超长报错而非截断。
 
 原始验证/测试场景与训练场景按 seed 隔离；纠错只增加新训练场景，验证/测试行保持固定。模型输入显式白名单，不接收任务 DSL、目标真值坐标或分割 ID。新旧数据、图像、适配器与配置都有 SHA-256 校验。基于验证集选择只是开发选型，不是最终泛化证明；固定测试集没有用于迭代或选型。
@@ -109,4 +115,4 @@ R1 实测前进 0.201 米、后退 0.223 米（要求均 0.2 米），回家最�
 - `vx` 是步态条件命令，不是实际米/秒。已观察到 -0.30 几乎不后退，-0.40 可后退；仅在本仿真策略上做了校准，不适用于真机安全保证。
 - 自动循环只处理有限任务教师能验证的目标。下一阶段应加入距离/角度课程、更多语言改写和布局、遮挡搜索、失败反馈状态，以及独立任务结果评判；之后才考虑训练 RM 或高层 PPO/GRPO。
 
-运行数据、模型和轨迹在本地 `data/`、`adapters/`、`runs/`，不上传 GitHub。源码和小型审计结果可以同步；RTX 3060 8GB 的 CUDA QLoRA 路线仍需另接训练后端，不把当前 MLX 脚本当作 CUDA 训练器。
+运行数据、模型和轨迹在本地 `data/`、`adapters/`、`runs/`，不上传 GitHub。源码和小型审计结果可以同步；RTX 3060 8GB 的 CUDA QLoRA 训练器已经接入（`vision_torch train --task agent|reward`），与 MLX 共用同一份 `agent_data` 数据与技能 schema，两套权重不互换。

@@ -1,5 +1,7 @@
 # MicroDuck 第一视角视觉导航
 
+> **历史文档（2026-10-19）。** 本文描述的独立视觉指代链路已并入技能 agent（选球即 `approach` 技能）：`vision plan/chat`、`vision_eval`、`vision_data` 等命令与模块已不存在。当前唯一链路见 [AGENT_TRAINING.md](AGENT_TRAINING.md)，总体见 [README.md](README.md)。
+
 Windows / NVIDIA 的 Qwen3-VL QLoRA、学习型奖励与多场景实验见 [WINDOWS_VISION.md](WINDOWS_VISION.md)。本文下方的 MLX 命令与 smoke 记录保留为 Mac 路线。
 
 已完成的 6 场景 smoke tests 与保留失败记录见 [VISION_RESULTS.md](VISION_RESULTS.md)。其中 3 个随机布局完成了正确左球接近，3 个遮挡/缺失案例由安全层拒绝动作；这不等于 VLM 自身正确拒答。
@@ -107,4 +109,4 @@ uv pip install --python .venv-vlm/bin/python -r requirements-vision.txt
 - 视觉实例从 HOME 开始，固定通过原生控制器的初始化渐变，平衡策略接管后释放；只是一种仿真初始化方式，不是额外训练出的起身技能。
 - 控制默认仍为冻结基线；显式 `--adapter` 可加载初轮图文 SFT。内存探针不能当任务权重加载。图文标签来自独立仿真核验，不能直接拿模型自己的输出当正确标签。
 
-源码入口：`vision.py`（感知/模型/执行）、`vision_sensor.py`（RGB-D/实时循环）、`vision_scene.py`（随机场景）、`vision_eval.py`（集成测试）。已有文本导航说明仍在 `README.md`。
+源码入口（当时）：`vision.py`（感知/模型/执行）、`vision_sensor.py`（RGB-D/实时循环）、`vision_scene.py`（随机场景）、`vision_eval.py`（集成测试）；现仅保留 `vision.py` 的感知部分，其余见 [README.md](README.md)。

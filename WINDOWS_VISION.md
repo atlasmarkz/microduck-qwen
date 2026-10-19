@@ -1,5 +1,7 @@
 # Windows 视觉选目标与闭环导航实验
 
+> **历史文档（2026-10-19）。** 本文的命令基于已移除的独立视觉指代链路（`vision chat`、`vision_data`、`vision_torch --task actor`、`vision_explore`）。Windows 后端仍然有效，但改用技能 agent 入口：`vision_torch train --task agent|reward` + `agent chat`，见 [AGENT_TRAINING.md](AGENT_TRAINING.md) 与 [README.md](README.md)。
+
 本轮使用 Qwen3-VL-2B-Instruct 的真实 RGB 输入，输出球的候选编号或停止/拒绝状态；RGB-D 将选中的球定位到世界坐标，已有 A*、闭环控制和官方 ONNX 步态负责移动。视觉模型不生成关节动作。所有命令从仓库根目录执行，路径均相对该目录。
 
 ## 本机查看

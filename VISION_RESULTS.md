@@ -1,5 +1,7 @@
 # 视觉闭环验证记录 · 2026-10-14
 
+> **历史文档（2026-10-19）。** 本文记录的独立视觉指代链路与 `vision_eval` 已移除，命令不再可运行；保留为可复现的失败记录。当前唯一链路见 [AGENT_TRAINING.md](AGENT_TRAINING.md)。
+
 本机 Qwen3-VL-2B-Instruct 4-bit 冻结基线，revision `9c4f5209e57b31f4b9dfba735de3fb983739c9cc`；MLX-VLM 0.7.8，MLX 0.32.3，Transformers 5.19.0。没有视觉后训练，没有重新训练 ONNX 步态。
 
 ## 最终修正后的 6 场景 smoke battery
