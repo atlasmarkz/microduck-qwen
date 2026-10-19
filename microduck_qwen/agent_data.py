@@ -8,6 +8,7 @@ import argparse
 from collections import Counter
 from datetime import datetime
 import json
+import os
 from pathlib import Path
 import shutil
 
@@ -194,6 +195,9 @@ def episode(output, directory, info, split, seed, instruction, specs, planner=No
                          "instruction": instruction, "memory": memory, "expected": expected,
                          "verified": True, "task_type": expected["action"],
                          "label_source": "task DSL + physically verified expert + MuJoCo segmentation"})
+            if planner is not None and "proposals" in prediction:
+                rows[-1]["reward_proposals"] = [p["action"] for p in prediction["proposals"] if p.get("action") is not None]
+                rows[-1]["reward_verified_accepted"] = bool(prediction.get("reward_accepted") and matches)
             if terminal:
                 report["verified"] = True
                 break
@@ -233,12 +237,17 @@ def main():
     parser.add_argument("--scene-mix", choices=("plain", "hard"), default="plain",
                         help="plain reproduces the open-row scenes; hard adds occluded/absent/duplicated-row scenes")
     parser.add_argument("--actor-adapter", type=Path)
+    parser.add_argument("--reward-adapter", type=Path)
+    parser.add_argument("--reward-samples", type=int, default=3)
+    parser.add_argument("--reward-threshold", type=float, default=0.5)
     parser.add_argument("--base-data", type=Path, help="keep old valid/test fixed; collect TRAIN corrections only")
     args = parser.parse_args()
     if not 1 <= args.train_scenes <= 100 or not 1 <= args.valid_scenes <= 100 or not 1 <= args.test_scenes <= 100 or not 0 <= args.seed_offset < 9000:
         parser.error("invalid scene counts/seed offset")
     if bool(args.base_data) != bool(args.actor_adapter):
         parser.error("correction collection requires BOTH base-data and actor-adapter")
+    if args.reward_adapter and (not args.actor_adapter or os.name != "nt"):
+        parser.error("reward-guided collection requires Windows CUDA and an actor adapter")
     output = args.output.resolve()
     if args.base_data and output.is_relative_to(args.base_data.resolve()):
         parser.error("output must not be inside base-data")
@@ -257,7 +266,15 @@ def main():
         for split, rows in base_splits.items():
             splits[split] = [dict(row, image="base/" + row["image"]) for row in rows]
         manifest["parent_manifest_sha256"] = digest(args.base_data / "manifest.json")
-        planner = AgentPlanner(args.actor_adapter)
+        if args.reward_adapter:
+            from .vision_torch import RewardGuidedPlanner
+            planner = RewardGuidedPlanner(args.actor_adapter, args.reward_adapter, args.reward_samples, args.reward_threshold)
+            manifest["reward"] = planner.reward_adapter
+            manifest["reward_sampling"] = {"samples": args.reward_samples, "threshold": args.reward_threshold,
+                                           "temperature": 0.7, "seed": 42, "first_proposal_greedy": True}
+            manifest["method"] = "reward-ranked proposals with independent expert intervention and verified feedback"
+        else:
+            planner = AgentPlanner(args.actor_adapter)
         manifest["actor"] = planner.adapter
         old_seeds = {row["scene_seed"] for rows in splits.values() for row in rows}
         if old_seeds & set(range(61000 + args.seed_offset, 61000 + args.seed_offset + args.train_scenes)):
@@ -282,6 +299,17 @@ def main():
                     for index, (instruction, specs) in enumerate(tasks(split, variant)):
                         directory = scene_dir / f"task-{index:02d}"
                         rows, report = episode(output, directory, info, split, seed, instruction, specs, planner, True)
+                        if args.reward_adapter:
+                            stats = manifest.setdefault("reward_collection", {"sampled_proposals": 0, "distinct_proposals": 0,
+                                "accepted_steps": 0, "rejected_steps": 0, "false_accept_steps": 0, "teacher_interventions": 0})
+                            for step in report["steps"]:
+                                prediction = step.get("prediction", {})
+                                stats["sampled_proposals"] += len(prediction.get("proposals", []))
+                                stats["distinct_proposals"] += prediction.get("distinct_proposals", 0)
+                                accepted = prediction.get("reward_accepted", False)
+                                stats["accepted_steps" if accepted else "rejected_steps"] += 1
+                                stats["false_accept_steps"] += bool(accepted and not step.get("semantic_match", False))
+                                stats["teacher_interventions"] += bool(step.get("teacher_intervened"))
                         if split == "train":
                             # Same physically verified intent/history, explicit template paraphrases.
                             # These are NOT additional physical trajectories or independent samples.
@@ -289,8 +317,11 @@ def main():
                             for alternative in range(3):
                                 text = tasks("train", alternative)[index][0]
                                 if text != instruction:
-                                    augmented.extend(dict(row, id=row["id"] + f"-paraphrase-{alternative}",
-                                                          instruction=text, language_source="finite teacher template paraphrase") for row in rows)
+                                    # Paraphrases were not sampled/scored by the reward model.
+                                    augmented.extend(dict(
+                                        {k: v for k, v in row.items() if k not in ("reward_proposals", "reward_verified_accepted")},
+                                        id=row["id"] + f"-paraphrase-{alternative}", instruction=text,
+                                        language_source="finite teacher template paraphrase") for row in rows)
                             rows.extend(augmented)
                         splits[split].extend(rows)
                         manifest["episodes"].append({"seed": seed, "split": split, "task": index, "verified": report["verified"],

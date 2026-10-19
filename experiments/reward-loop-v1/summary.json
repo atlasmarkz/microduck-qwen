@@ -1,0 +1,216 @@
+{
+  "status": "completed",
+  "scope": "Windows CUDA bounded integration smoke, not an efficacy benchmark",
+  "budget": {
+    "actor_resume_steps_per_round": 5,
+    "reward_steps_per_round": 10,
+    "rounds": 2,
+    "samples_per_observation": 2,
+    "threshold": 0.5,
+    "correction_scene_seed": 63300
+  },
+  "rounds": [
+    {
+      "round": 0,
+      "data": ".\\data\\agent-hard-v3",
+      "adapter": ".\\adapters\\reward-loop-smoke-v1-r0",
+      "valid_correct": 16,
+      "valid_total": 19,
+      "reward_adapter": ".\\adapters\\reward-loop-smoke-v1-reward-r0",
+      "reward_valid": {
+        "split": "valid",
+        "count": 57,
+        "accuracy": 0.7894736842105263,
+        "positive_recall": 0.47368421052631576,
+        "false_accept_rate": 0.05263157894736842,
+        "adapter_sha256": "a2d0ab3a516b062993e98239817dcf92c9c12bc2471635ab1f5b517137f72710",
+        "note": "Skill-action reward only; two counterfactual negatives per instruction. Not a held-out task-outcome reward evaluation."
+      },
+      "rollout_correct": 1,
+      "rollout_total": 4
+    },
+    {
+      "round": 1,
+      "data": ".\\data\\reward-loop-smoke-v1-r1-corrections",
+      "adapter": ".\\adapters\\reward-loop-smoke-v1-r1",
+      "valid_correct": 13,
+      "valid_total": 19,
+      "reward_adapter": ".\\adapters\\reward-loop-smoke-v1-reward-r1",
+      "reward_valid": {
+        "split": "valid",
+        "count": 57,
+        "accuracy": 0.7894736842105263,
+        "positive_recall": 0.47368421052631576,
+        "false_accept_rate": 0.05263157894736842,
+        "adapter_sha256": "0c2cecb1a391fe2cedd41913883e2b4852760f8865a3b81285ffe54c661384f2",
+        "note": "Skill-action reward only; two counterfactual negatives per instruction. Not a held-out task-outcome reward evaluation."
+      },
+      "rollout_correct": 0,
+      "rollout_total": 4
+    }
+  ],
+  "training": [
+    {
+      "round": 0,
+      "task": "actor",
+      "adapter_sha256": "32dd4fc02f8cda2c5248c01040cde39353518f0f9cc5edd359caf4654180c848",
+      "parent_adapter_sha256": "c43d3c81380d976e80d333791aeee6a46359d40723959cd3d45032009b8f03ef",
+      "steps": 5
+    },
+    {
+      "round": 0,
+      "task": "reward",
+      "adapter_sha256": "a2d0ab3a516b062993e98239817dcf92c9c12bc2471635ab1f5b517137f72710",
+      "parent_adapter_sha256": null,
+      "steps": 10
+    },
+    {
+      "round": 1,
+      "task": "actor",
+      "adapter_sha256": "5262fbdc7b8887108a6a22a1c727ea7da1d62c30ce9e56d041d273453c6d4f59",
+      "parent_adapter_sha256": "32dd4fc02f8cda2c5248c01040cde39353518f0f9cc5edd359caf4654180c848",
+      "steps": 5
+    },
+    {
+      "round": 1,
+      "task": "reward",
+      "adapter_sha256": "0c2cecb1a391fe2cedd41913883e2b4852760f8865a3b81285ffe54c661384f2",
+      "parent_adapter_sha256": "a2d0ab3a516b062993e98239817dcf92c9c12bc2471635ab1f5b517137f72710",
+      "steps": 10
+    }
+  ],
+  "collection": {
+    "sampled_proposals": 34,
+    "distinct_proposals": 20,
+    "accepted_steps": 8,
+    "rejected_steps": 9,
+    "false_accept_steps": 1,
+    "teacher_interventions": 10
+  },
+  "verified_expert_episodes": 8,
+  "attempted_expert_episodes": 9,
+  "held_out_rows_unchanged": true,
+  "selected_adapter": null,
+  "unit_tests_passed": 64,
+  "false_accept_traces": [
+    {
+      "instruction": "先往左旋转45度，再往右旋转45度",
+      "episode_verified": true,
+      "step": {
+        "expected": {
+          "action": "turn",
+          "direction": "right",
+          "degrees": 45
+        },
+        "memory": {
+          "home_recorded": true,
+          "odometry_relative_home": {
+            "x": -0.06,
+            "y": 0.0,
+            "yaw_deg": 45.3
+          },
+          "completed": [
+            {
+              "action": "turn",
+              "direction": "left",
+              "degrees": 45
+            }
+          ]
+        },
+        "prediction": {
+          "raw": "{\"action\":\"turn\",\"direction\":\"left\",\"degrees\":45}",
+          "action": {
+            "action": "turn",
+            "direction": "left",
+            "degrees": 45
+          },
+          "reward_accepted": true,
+          "reward_threshold": 0.5,
+          "proposals": [
+            {
+              "raw": "{\"action\":\"turn\",\"direction\":\"right\",\"degrees\":45}",
+              "latency_s": 1.6604614000025322,
+              "action": {
+                "action": "turn",
+                "direction": "right",
+                "degrees": 45
+              },
+              "reward_score": 0.01590639166533947
+            },
+            {
+              "raw": "{\"action\":\"turn\",\"direction\":\"left\",\"degrees\":45}",
+              "latency_s": 1.4803202000002784,
+              "action": {
+                "action": "turn",
+                "direction": "left",
+                "degrees": 45
+              },
+              "reward_score": 0.957912266254425
+            }
+          ],
+          "distinct_proposals": 2,
+          "reward_adapter": {
+            "path": ".\\adapters\\reward-loop-smoke-v1-reward-r0",
+            "sha256": "a2d0ab3a516b062993e98239817dcf92c9c12bc2471635ab1f5b517137f72710"
+          },
+          "adapter": {
+            "path": ".\\adapters\\reward-loop-smoke-v1-r0",
+            "sha256": "32dd4fc02f8cda2c5248c01040cde39353518f0f9cc5edd359caf4654180c848",
+            "backend": "torch"
+          }
+        },
+        "semantic_match": false,
+        "teacher_intervened": true,
+        "execution": {
+          "action": {
+            "action": "turn",
+            "direction": "right",
+            "degrees": 45
+          },
+          "success": true,
+          "observation": "oracle robot odometry and known safety map",
+          "achieved": 0.7568900485320553,
+          "requested": 0.7853981633974483,
+          "units": "radians",
+          "lateral_m": 0.00590437047064637,
+          "start": {
+            "position": [
+              -0.05913050217866533,
+              0.00040511400676686234
+            ],
+            "yaw": 0.7871963649649498
+          },
+          "end": {
+            "position": [
+              -0.0633109421262958,
+              0.004574708854370019
+            ],
+            "yaw": 0.03030631643289451
+          }
+        }
+      }
+    }
+  ],
+  "final_replay_check": {
+    "status": "completed",
+    "note": "Re-recorded collection seed 63300 to verify final replay metadata; not an independent benchmark.",
+    "accepted_rows": 8,
+    "dataset_manifest_sha256": "7f94a56c05cb0c3926a8504ca165a7117394a997ff43c6b100ece6341a4ba231",
+    "collection": {
+      "sampled_proposals": 38,
+      "distinct_proposals": 22,
+      "accepted_steps": 9,
+      "rejected_steps": 10,
+      "false_accept_steps": 1,
+      "teacher_interventions": 11
+    },
+    "held_out_rows_unchanged": true,
+    "unscored_paraphrases_excluded_from_reward_replay": true
+  },
+  "note": "Two-round smoke tested ranking, expert feedback and both adapter resumes. It collected before the explicit reward-acceptance replay flag was added, so actor weighted replay was zero there. The separate final-code check recollected the same seed and verified positive weighted replay in a real one-step actor training run; it is not independent evaluation. No equal-budget efficacy control or final test inference was performed.",
+  "source_sha256": {
+    "agent_cycle.py": "9605deab7ae8d43eb6f51d56b471d9ed8e8e9958ce732f3bd94670eda6674df3",
+    "agent_data.py": "d4fe3e0578879c22f98653203fd4c2f7ea62d303dc0323dfe9cccaa6ecb31af8",
+    "vision_torch.py": "67bfbb9977ea300eebc03a138a6934eca4d99106391588247e47cdeb63458f60"
+  }
+}

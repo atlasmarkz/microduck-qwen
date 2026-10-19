@@ -56,7 +56,7 @@ MuJoCo 随机场景 → 专家实际执行 → 位姿/分割/碰撞验证 → �
 新训练场景 ← 下一轮模型 ← 混合原始数据再训练 ← 模型提议与专家纠错
 ```
 
-本版是 **expert-intervened data aggregation**：收集纠错时，模型提出下一步，有限任务 DSL 教师独立给出正确动作；两者不同时先记录原始预测，再由专家接管。正确提议才按模型动作执行。失败专家轨迹整条排除，原始失败保留。它覆盖专家接管后的访问状态，不是任由错误模型自由探索后再标注的完整 DAgger，也没有训练 UI-Genie 式奖励模型。
+本版是 **expert-intervened data aggregation**：收集纠错时，模型提出下一步，有限任务 DSL 教师独立给出正确动作；两者不同时先记录原始预测，再由专家接管。Windows 的自动迭代现已加入动作奖励排序与专家反馈回流，见下节。失败专家轨迹整条排除，原始失败保留。它覆盖专家接管后的访问状态，不是任由错误模型自由探索后再标注的完整 DAgger，也不是完整 UI-Genie 复现。
 
 独立物理评估不做上述语义接管：模型动作实际执行后，教师仅评分；只保留一般安全边界。模型输出 `done` 必须出现在全部预定动作已正确执行之后才算任务成功。交互时没有任意自然语言的语义真值，因此只显示 `model_done`，不会声称已经客观证明用户目标完成。
 
@@ -84,6 +84,28 @@ Windows（PyTorch + CUDA）走同一闭包，只是命令不同：采集用
 `.venv/Scripts/python.exe -X utf8 -m microduck_qwen.vision_torch train --task agent --data <data> --output <adapter> --steps 100`，
 技能动作奖励用 `--task reward`；`agent_cycle` 会自动选择 `vision_torch`（Windows）或 `vision_sft`（Mac）。
 RTX 3060 8 GiB 上 2B + NF4 QLoRA 实测训练显存峰值：技能任务约 2.35 GiB、奖励任务约 1.91 GiB。
+
+### 奖励辅助自动迭代（Windows）
+
+```powershell
+.venv/Scripts/python.exe -X utf8 -m microduck_qwen.agent_cycle --initial-data data/agent-hard-v3 --initial-adapter adapters/agent-hard-v3-sft300 --name agent-reward-v1 --rounds 2 --steps 120 --reward-steps 50 --reward-samples 3 --reward-threshold 0.5 --correction-scenes 1 --seed-offset 3000 --scene-mix hard --reward-guided --rollout
+```
+
+数据、权重必须先在本地采集／训练；示例名称不能与已有输出重复。Windows 默认启用奖励迭代，可用 `--no-reward-guided` 回到原专家纠错流程；Mac 默认保持原流程，目前显式启用奖励会在启动前报错。`--initial-adapter` 可选，指定时继续已有技能权重；省略则从基座训练。首轮奖励从头训练，之后加载上轮奖励适配器，但优化器均重新创建。
+
+顺序为：冻结基座 valid → actor SFT → actor valid → 奖励 SFT → 奖励 valid → 可选独立物理评估 → 下一轮奖励辅助纠错采集 → actor/RM 续训。测试集不用于训练、采样或轮次选型；选型规则仍要求 actor 不低于基座，启用 `--rollout` 时还须全部开发物理任务通过。奖励 valid 只报告，不通过这次验证调阈值。
+
+每步保留全部原始候选（第一个贪心，其余 temperature 0.7，采样种子 42），合法动作去重后评分，按最高 yes/no 概率选出提议。低于固定阈值时拒绝所有候选并由专家接管；即使高分，通过教师独立动作校验后才放行。正确候选低分会增加接管，错误候选高分也不会变成成功标签。共享一个 4-bit 基座，交替激活 actor/reward LoRA；独立物理评估仍只使用 actor，不使用奖励排序或教师接管。
+
+训练数据保留经核验的专家纠错动作作为 actor 标签；奖励接受且与专家动作相同的样本标记为 `reward_verified_accepted`，整条轨迹核验成功后，在下一轮 actor 训练中额外回放一次（固定二倍行权重、固定优化步数，不改变 valid/test）。报告记录 `reward_selected_replay_rows`，因此奖励会影响 actor 的训练采样分布，专家纠错示范也保留。同一步的实际错误候选进入 `reward_proposals`，只用于奖励训练，与两个固定构造的反事实负例去重合并。只有整条轨迹通过物理核验才回流；失败轨迹和无效 JSON 保留在原始日志，尚未训练失败结果奖励。valid/test 的输入和标签保持固定，图像／适配器哈希沿用原有校验。奖励提示词版本升为 v2（含可观测记忆），旧版奖励适配器会被拒绝，需要重新训练。
+
+`runs/agent-cycle/<name>/cycle.json` 记录每轮 actor 指标、奖励准确率／正例召回／假接受率及适配器；纠错数据的 `manifest.json` 记录原始采样数、去重数、接受／拒绝、假接受与专家接管次数。奖励附加训练与采样增加计算成本；应与无奖励、等 actor 更新预算的对照比较后再判断收益。
+
+**本机接入自检（2026-10-19）**：在已有 300 步 actor 上继续两轮，每轮 actor 5 步、奖励 10 步，每个观察采样 2 次、阈值 0.5。首轮／次轮 actor valid 为 **16/19、13/19**，同一开发场景的独立物理任务为 **1/4、0/4**，未选出部署权重。两轮奖励 valid 都是 **45/57**，正例召回 **9/19**，错误动作误接受 **2/38**，这次短预算运行没有显示能力提升。
+
+奖励辅助纠错在一个新训练布局采样 34 次、得到 20 个去重候选，8 步接受、9 步拒绝；1 次错误高分被专家拦下，8/9 条专家轨迹通过物理核验。两轮验证了排序、专家反馈和 actor/RM 续训；该次采集早于显式回放标记的加入，因此其中 actor 奖励额外回放行数为 0。随后用最终代码、同一采集种子单独复跑，实际得到 **8 条**可额外回放样本，1 步真实 actor 训练报告确认 **219 + 8 = 227** 条训练行，且未评分的改写不获得奖励认可标记。这是集成自检，不是独立实验。
+
+最终代码 **64 项单元测试通过**；验证／测试输入与标签保持一致，未进行最终测试推理，也没有等预算收益对照。相对路径、小型训练报告、错误高分原始候选及完整指标见 [接入验证记录](experiments/reward-loop-v1/summary.json)。
 
 ### Windows 真机自检（2026-10-19）
 

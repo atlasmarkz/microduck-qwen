@@ -1,0 +1,65 @@
+{
+  "status": "completed",
+  "note": "Re-recorded collection seed 63300 to verify final replay metadata; not an independent benchmark.",
+  "accepted_rows": 8,
+  "training_report": {
+    "status": "completed",
+    "task": "agent",
+    "model": "Qwen/Qwen3-VL-2B-Instruct",
+    "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+    "steps": 1,
+    "seed": 42,
+    "batch_size": 1,
+    "learning_rate": 5e-05,
+    "last_layers": 8,
+    "rank": 8,
+    "alpha": 16,
+    "quantization": "NF4 double-quant; BF16 compute",
+    "image_pixels": {
+      "min": 65536,
+      "max": 131072
+    },
+    "max_seq_length": 768,
+    "completion_only_loss": true,
+    "trainable_parameters": 458752,
+    "changed_tensors": 32,
+    "optimizer_state_resumed": false,
+    "elapsed_s": 1.339511299996957,
+    "peak_cuda_allocated_bytes": 2478298112,
+    "valid_loss": 0.051642541946325525,
+    "history": [
+      {
+        "step": 1,
+        "row_id": "train-63300-task-00-1",
+        "loss": 0.1526351124048233
+      }
+    ],
+    "train_rows": 227,
+    "dataset_manifest_sha256": "7f94a56c05cb0c3926a8504ca165a7117394a997ff43c6b100ece6341a4ba231",
+    "training_rows_sha256": "92a028e2f5c7d7f74c16360ae2a714fd93fc1ffcfc294170b44a5631cc9a0147",
+    "replay_rows": 0,
+    "replay_repeat": 0,
+    "reward_selected_replay_rows": 8,
+    "replay_sha256": null,
+    "parent_adapter_sha256": "32dd4fc02f8cda2c5248c01040cde39353518f0f9cc5edd359caf4654180c848",
+    "adapter_sha256": "8b0fd2f8306dad881d074c35e4d53ddf681bc1e995a7a6f7c8370b60d88109b5",
+    "reward_prompt_version": null,
+    "versions": {
+      "torch": "2.11.0+cu128",
+      "transformers": "5.19.0",
+      "peft": "0.21.2",
+      "bitsandbytes": "0.50.2"
+    }
+  },
+  "dataset_manifest_sha256": "7f94a56c05cb0c3926a8504ca165a7117394a997ff43c6b100ece6341a4ba231",
+  "collection": {
+    "sampled_proposals": 38,
+    "distinct_proposals": 22,
+    "accepted_steps": 9,
+    "rejected_steps": 10,
+    "false_accept_steps": 1,
+    "teacher_interventions": 11
+  },
+  "held_out_rows_unchanged": true,
+  "unscored_paraphrases_excluded_from_reward_replay": true
+}

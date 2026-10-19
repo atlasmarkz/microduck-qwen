@@ -55,6 +55,51 @@ class AgentTests(unittest.TestCase):
         memory["completed"] = [{"action": "return_home"}]
         self.assertIn('"completed":[{"action":"return_home"}]', agent_prompt("回到起点", memory))
 
+    def test_reward_false_accept_is_overridden_and_returned_as_negative_feedback(self):
+        from microduck_qwen import agent_data
+        executed = []
+
+        class Executor:
+            def __init__(self, *args, **kwargs):
+                self.robot = self
+                self.scene = {}
+            def stop(self):
+                pass
+            def close(self):
+                pass
+            def healthy(self):
+                return {"trunk": [0, 0, 0.1], "yaw": 0}
+            def run(self, action, candidates=None):
+                executed.append(action)
+                return {"success": True}
+
+        class Planner:
+            action = "done"
+            def predict(self, *args):
+                return {"action": {"action": self.action}, "reward_accepted": True,
+                        "proposals": [{"action": {"action": self.action}, "reward_score": 0.99}]}
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            def save(directory, *args):
+                image = directory / "input.png"
+                image.write_bytes(b"image")
+                return image
+            with patch.object(agent_data, "SkillExecutor", Executor), patch.object(agent_data, "request", return_value={"steps_with_scene_contact": 0}), patch.object(agent_data, "collection_frame", return_value=(None, None)), patch.object(agent_data, "propose_balls", return_value=[]), patch.object(agent_data, "verify_objects", return_value=[]), patch.object(agent_data, "save_frame", side_effect=save):
+                rows, report = agent_data.episode(root, root / "episode", {"port": 1}, "train", 99,
+                                                 "停下来", [{"action": "stop"}], Planner(), True)
+                accepted = Planner()
+                accepted.action = "stop"
+                accepted_rows, _ = agent_data.episode(root, root / "accepted", {"port": 1}, "train", 99,
+                                                     "停下来", [{"action": "stop"}], accepted, True)
+            self.assertTrue(report["verified"])
+            self.assertTrue(report["steps"][0]["teacher_intervened"])
+            self.assertEqual(executed[-1], {"action": "stop"})
+            self.assertEqual(rows[0]["expected"], {"action": "stop"})
+            self.assertEqual(rows[0]["reward_proposals"], [{"action": "done"}])
+            self.assertFalse(rows[0]["reward_verified_accepted"])
+            self.assertTrue(accepted_rows[0]["reward_verified_accepted"])
+
     def test_approach_verification_allows_the_stop_transient(self):
         # Hard-valid seed 71700 measured 0.3211m inside the control loop but
         # 0.3303m once actually at rest, so a bare stop+tolerance bound rejected

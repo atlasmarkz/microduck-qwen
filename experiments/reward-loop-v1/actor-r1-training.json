@@ -1,0 +1,69 @@
+{
+  "status": "completed",
+  "task": "agent",
+  "model": "Qwen/Qwen3-VL-2B-Instruct",
+  "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+  "steps": 5,
+  "seed": 42,
+  "batch_size": 1,
+  "learning_rate": 5e-05,
+  "last_layers": 8,
+  "rank": 8,
+  "alpha": 16,
+  "quantization": "NF4 double-quant; BF16 compute",
+  "image_pixels": {
+    "min": 65536,
+    "max": 131072
+  },
+  "max_seq_length": 768,
+  "completion_only_loss": true,
+  "trainable_parameters": 458752,
+  "changed_tensors": 32,
+  "optimizer_state_resumed": false,
+  "elapsed_s": 4.140926299998682,
+  "peak_cuda_allocated_bytes": 2489725952,
+  "valid_loss": 0.0925133829686705,
+  "history": [
+    {
+      "step": 1,
+      "row_id": "train-63300-task-00-1",
+      "loss": 0.17678126692771912
+    },
+    {
+      "step": 2,
+      "row_id": "train-61700-task-03-1",
+      "loss": 0.03914014622569084
+    },
+    {
+      "step": 3,
+      "row_id": "train-61700-task-00-0-paraphrase-2",
+      "loss": 0.00046175389434210956
+    },
+    {
+      "step": 4,
+      "row_id": "train-63300-task-03-0",
+      "loss": 0.03336389362812042
+    },
+    {
+      "step": 5,
+      "row_id": "train-61701-task-01-1-paraphrase-0",
+      "loss": 0.01166474912315607
+    }
+  ],
+  "train_rows": 213,
+  "dataset_manifest_sha256": "07480f3924dea3359172d23bf59f60400a98563f94e4586c58b806eb0744e35a",
+  "training_rows_sha256": "8eda5c863159bbfa2747acbf791e615c52672ffe40eb772745eaeef5df430c06",
+  "replay_rows": 0,
+  "replay_repeat": 0,
+  "reward_selected_replay_rows": 0,
+  "replay_sha256": null,
+  "parent_adapter_sha256": "32dd4fc02f8cda2c5248c01040cde39353518f0f9cc5edd359caf4654180c848",
+  "adapter_sha256": "5262fbdc7b8887108a6a22a1c727ea7da1d62c30ce9e56d041d273453c6d4f59",
+  "reward_prompt_version": null,
+  "versions": {
+    "torch": "2.11.0+cu128",
+    "transformers": "5.19.0",
+    "peft": "0.21.2",
+    "bitsandbytes": "0.50.2"
+  }
+}

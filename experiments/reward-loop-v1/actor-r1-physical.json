@@ -1,0 +1,44 @@
+{
+  "mode": "independent_actor_rollout",
+  "adapter": {
+    "path": ".\\adapters\\reward-loop-smoke-v1-r1",
+    "sha256": "5262fbdc7b8887108a6a22a1c727ea7da1d62c30ce9e56d041d273453c6d4f59",
+    "backend": "torch"
+  },
+  "split": "valid",
+  "dataset_manifest_sha256": "07480f3924dea3359172d23bf59f60400a98563f94e4586c58b806eb0744e35a",
+  "results": [
+    {
+      "task_id": 0,
+      "correct": false,
+      "error": "failed physical skill or wrong task action (scored AFTER execution)",
+      "episode": ".\\runs\\agent-cycle\\reward-loop-smoke-v1\\r1-rollout\\task-00\\episode.json"
+    },
+    {
+      "task_id": 1,
+      "correct": false,
+      "error": "failed physical skill or wrong task action (scored AFTER execution)",
+      "episode": ".\\runs\\agent-cycle\\reward-loop-smoke-v1\\r1-rollout\\task-01\\episode.json"
+    },
+    {
+      "task_id": 2,
+      "correct": false,
+      "error": "failed physical skill or wrong task action (scored AFTER execution)",
+      "episode": ".\\runs\\agent-cycle\\reward-loop-smoke-v1\\r1-rollout\\task-02\\episode.json"
+    },
+    {
+      "task_id": 3,
+      "correct": false,
+      "error": "ValueError: teacher leftmost target not confidently visible",
+      "episode": ".\\runs\\agent-cycle\\reward-loop-smoke-v1\\r1-rollout\\task-03\\episode.json"
+    }
+  ],
+  "correct": 0,
+  "total": 4,
+  "note": "Development pilot. Rollout teacher is scorer AFTER execution, never a semantic intervention.",
+  "scene_seed": 91010,
+  "scene_mix": "hard",
+  "occlusion": "partial",
+  "clutter": true,
+  "startup_failures": []
+}

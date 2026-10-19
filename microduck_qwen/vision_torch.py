@@ -34,9 +34,16 @@ ALTERNATIVE_SKILLS = [
 ]
 
 
-def reward_prompt(instruction, action):
+REWARD_PROMPT_VERSION = 2
+
+
+def reward_prompt(instruction, action, memory=None):
+    from .agent import checked_memory
+    observable = json.dumps(checked_memory(memory), ensure_ascii=False, separators=(",", ":")) if memory is not None else "not supplied"
     return ("Judge whether this proposed robot skill correctly follows the instruction and visible image. "
         "Partial, absent or ambiguous targets must not be approached. Stop and unsupported instructions need their corresponding status. "
+        "Use completed actions to judge the NEXT step; done is correct only when all requested steps are completed. "
+        f"Observable memory: {observable}\n"
         f"Instruction: {instruction}\nProposed skill: {json.dumps(action, separators=(',', ':'))}\n"
         "Answer exactly yes or no.")
 
@@ -50,15 +57,23 @@ def row_prompt(row):
 
 
 def agent_reward_examples(rows):
-    """Counterfactual skill proposals are labeled independently, never used as agent answers."""
+    """Verified answers plus counterfactual/actual wrong proposals for action rewards."""
+    from .skills import validate_action
     examples = []
     for row in rows:
         expected = row["expected"]
-        examples.append(dict(row, prompt=reward_prompt(row["instruction"], expected), completion="yes", reward_label=1))
+        examples.append(dict(row, prompt=reward_prompt(row["instruction"], expected, row.get("memory")), completion="yes", reward_label=1))
         negatives = [action for action in ALTERNATIVE_SKILLS if action != expected]
         random.Random(row["id"]).shuffle(negatives)
-        for index, action in enumerate(negatives[:2]):
-            examples.append(dict(row, id=f"{row['id']}-negative-{index}", prompt=reward_prompt(row["instruction"], action),
+        actual = [action for action in row.get("reward_proposals", []) if action != expected]
+        seen = set()
+        for index, action in enumerate(actual + negatives[:2]):
+            validate_action(action)
+            key = json.dumps(action, sort_keys=True)
+            if key in seen:
+                continue
+            seen.add(key)
+            examples.append(dict(row, id=f"{row['id']}-negative-{index}", prompt=reward_prompt(row["instruction"], action, row.get("memory")),
                 completion="no", reward_label=0, proposed_action=action))
     return examples
 
@@ -69,7 +84,15 @@ def checked_adapter(path, task):
         raise ValueError("Incompatible completed visual adapter")
     if digest(Path(path) / "adapter_model.safetensors") != report["adapter_sha256"]:
         raise ValueError("Adapter weights hash mismatch")
+    if task == "reward" and report.get("reward_prompt_version") != REWARD_PROMPT_VERSION:
+        raise ValueError("Reward adapter must be retrained with observable memory (prompt v2)")
     return report
+
+
+def actor_rows_with_reward_replay(rows):
+    """One extra copy of reward-accepted AND expert/physics-verified training rows."""
+    return rows + [row for row in rows if row.get("reward_verified_accepted") is True
+                   and row.get("verified") is True and row.get("split") == "train"]
 
 
 def load_model():
@@ -169,6 +192,50 @@ def reward_score(model, processor, images, prompt):
         return torch.softmax(logits[[value[0] for value in ids]].float(), dim=0)[1].item()
 
 
+class RewardGuidedPlanner(TorchAgentPlanner):
+    """Bounded proposals ranked by reward; the collector still verifies each action."""
+
+    def __init__(self, adapter, reward_adapter, samples=3, threshold=0.5):
+        import torch
+        if not 1 <= samples <= 5 or not math.isfinite(threshold) or not 0 <= threshold <= 1:
+            raise ValueError("invalid reward sampling budget/threshold")
+        report = checked_adapter(reward_adapter, "reward")
+        super().__init__(adapter)
+        self.model.load_adapter(str(reward_adapter), adapter_name="reward")
+        self.reward_adapter = {"path": str(reward_adapter), "sha256": report["adapter_sha256"]}
+        self.samples, self.threshold = samples, threshold
+        torch.manual_seed(42)
+
+    def predict(self, instruction, image, memory):
+        from .skills import parse_action
+        proposals, seen = [], {}
+        try:
+            self.model.set_adapter("default")
+            for index in range(self.samples):
+                raw, elapsed = generate_text(self.model, self.processor, image,
+                    row_prompt({"instruction": instruction, "memory": memory}), temperature=0.7 if index else 0.0)
+                entry = {"raw": raw, "latency_s": elapsed}
+                try:
+                    action = parse_action(raw)
+                    entry["action"] = action
+                    seen.setdefault(json.dumps(action, sort_keys=True), entry)
+                except (ValueError, TypeError, KeyError) as error:
+                    entry["error"] = str(error)
+                proposals.append(entry)
+            self.model.set_adapter("reward")
+            for entry in seen.values():
+                entry["reward_score"] = reward_score(self.model, self.processor, image,
+                    reward_prompt(instruction, entry["action"], memory))
+            best = max(seen.values(), key=lambda item: item["reward_score"], default=None)
+            accepted = best is not None and math.isfinite(best["reward_score"]) and best["reward_score"] >= self.threshold
+            return {"raw": best["raw"] if best else "", "action": best["action"] if accepted else None,
+                    "reward_accepted": accepted, "reward_threshold": self.threshold,
+                    "proposals": proposals, "distinct_proposals": len(seen),
+                    "reward_adapter": self.reward_adapter, "adapter": self.adapter}
+        finally:
+            self.model.set_adapter("default")
+
+
 def train(args):
     import torch
     from peft import LoraConfig, PeftModel, get_peft_model, prepare_model_for_kbit_training
@@ -180,8 +247,13 @@ def train(args):
     from .agent_data import load_splits
 
     manifest, splits = load_splits(args.data)
+    reward_selected_replay_rows = 0
     if args.task == "reward":
         splits = {split: agent_reward_examples(rows) for split, rows in splits.items()}
+    else:
+        original_count = len(splits["train"])
+        splits["train"] = actor_rows_with_reward_replay(splits["train"])
+        reward_selected_replay_rows = len(splits["train"]) - original_count
     replay_rows, replay_repeat = 0, 0
     if args.extra:
         extra = [json.loads(line) for line in args.extra.read_text(encoding="utf-8").splitlines()]
@@ -282,9 +354,11 @@ def train(args):
         "train_rows": len(splits["train"]), "dataset_manifest_sha256": digest(args.data / "manifest.json"),
         "training_rows_sha256": hashlib.sha256(json.dumps(splits["train"], sort_keys=True, ensure_ascii=False).encode()).hexdigest(),
         "replay_rows": replay_rows, "replay_repeat": replay_repeat,
+        "reward_selected_replay_rows": reward_selected_replay_rows,
         "replay_sha256": digest(args.extra) if args.extra else None,
         "parent_adapter_sha256": digest(args.resume / "adapter_model.safetensors") if args.resume else None,
         "adapter_sha256": digest(args.output / "adapter_model.safetensors"),
+        "reward_prompt_version": REWARD_PROMPT_VERSION if args.task == "reward" else None,
         "versions": {p: importlib.metadata.version(p) for p in ("torch", "transformers", "peft", "bitsandbytes")}}
     (args.output / "training_report.json").write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(json.dumps({k: v for k, v in report.items() if k != "history"}, ensure_ascii=False), flush=True)

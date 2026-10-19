@@ -1,0 +1,94 @@
+{
+  "status": "completed",
+  "task": "reward",
+  "model": "Qwen/Qwen3-VL-2B-Instruct",
+  "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+  "steps": 10,
+  "seed": 42,
+  "batch_size": 1,
+  "learning_rate": 5e-05,
+  "last_layers": 8,
+  "rank": 8,
+  "alpha": 16,
+  "quantization": "NF4 double-quant; BF16 compute",
+  "image_pixels": {
+    "min": 65536,
+    "max": 131072
+  },
+  "max_seq_length": 768,
+  "completion_only_loss": true,
+  "trainable_parameters": 458752,
+  "changed_tensors": 32,
+  "optimizer_state_resumed": false,
+  "elapsed_s": 6.188539700000547,
+  "peak_cuda_allocated_bytes": 2208235520,
+  "valid_loss": 0.2956711166099698,
+  "history": [
+    {
+      "step": 1,
+      "row_id": "train-61700-task-04-0-paraphrase-1",
+      "loss": 0.023279720917344093
+    },
+    {
+      "step": 2,
+      "row_id": "train-61700-task-00-2-paraphrase-2-negative-0",
+      "loss": 0.0015098877483978868
+    },
+    {
+      "step": 3,
+      "row_id": "train-61701-task-05-1-paraphrase-0-negative-1",
+      "loss": 0.003643319709226489
+    },
+    {
+      "step": 4,
+      "row_id": "train-61701-task-02-2-paraphrase-2-negative-0",
+      "loss": 2.3560242652893066
+    },
+    {
+      "step": 5,
+      "row_id": "train-61701-task-02-1",
+      "loss": 2.92032527923584
+    },
+    {
+      "step": 6,
+      "row_id": "train-61700-task-05-1-paraphrase-2-negative-0",
+      "loss": 0.0007570612360723317
+    },
+    {
+      "step": 7,
+      "row_id": "train-61700-task-03-1-paraphrase-2-negative-1",
+      "loss": 0.0012887187767773867
+    },
+    {
+      "step": 8,
+      "row_id": "train-63300-task-02-1-paraphrase-0",
+      "loss": 4.524378299713135
+    },
+    {
+      "step": 9,
+      "row_id": "train-61700-task-03-2-negative-1",
+      "loss": 0.028304165229201317
+    },
+    {
+      "step": 10,
+      "row_id": "train-63300-task-05-0",
+      "loss": 0.0023394841700792313
+    }
+  ],
+  "train_rows": 652,
+  "dataset_manifest_sha256": "07480f3924dea3359172d23bf59f60400a98563f94e4586c58b806eb0744e35a",
+  "training_rows_sha256": "bf83fe7b716dd2e4dd3a26528256aca10d23c7052e8020757b0e4ae4262e3243",
+  "replay_rows": 0,
+  "replay_repeat": 0,
+  "reward_selected_replay_rows": 0,
+  "replay_sha256": null,
+  "parent_adapter_sha256": "a2d0ab3a516b062993e98239817dcf92c9c12bc2471635ab1f5b517137f72710",
+  "adapter_sha256": "0c2cecb1a391fe2cedd41913883e2b4852760f8865a3b81285ffe54c661384f2",
+  "reward_prompt_version": 2,
+  "versions": {
+    "torch": "2.11.0+cu128",
+    "transformers": "5.19.0",
+    "peft": "0.21.2",
+    "bitsandbytes": "0.50.2"
+  }
+}

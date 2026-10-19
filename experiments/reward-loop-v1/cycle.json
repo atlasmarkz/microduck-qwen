@@ -1,0 +1,705 @@
+{
+  "status": "completed",
+  "commands": [
+    {
+      "command": [
+        ".\\.venv\\Scripts\\python.exe",
+        "-X",
+        "utf8",
+        "-u",
+        "-m",
+        "microduck_qwen.agent_eval",
+        "--data",
+        ".\\data\\agent-hard-v3",
+        "--output",
+        ".\\runs\\agent-cycle\\reward-loop-smoke-v1\\base-valid"
+      ],
+      "log": ".\\runs\\agent-cycle\\reward-loop-smoke-v1\\stage-00.log",
+      "returncode": 0
+    },
+    {
+      "command": [
+        ".\\.venv\\Scripts\\python.exe",
+        "-X",
+        "utf8",
+        "-u",
+        "-m",
+        "microduck_qwen.vision_torch",
+        "train",
+        "--task",
+        "agent",
+        "--data",
+        ".\\data\\agent-hard-v3",
+        "--output",
+        ".\\adapters\\reward-loop-smoke-v1-r0",
+        "--steps",
+        "5",
+        "--resume",
+        "adapters\\agent-hard-v3-sft300"
+      ],
+      "log": ".\\runs\\agent-cycle\\reward-loop-smoke-v1\\stage-01.log",
+      "returncode": 0
+    },
+    {
+      "command": [
+        ".\\.venv\\Scripts\\python.exe",
+        "-X",
+        "utf8",
+        "-u",
+        "-m",
+        "microduck_qwen.agent_eval",
+        "--data",
+        ".\\data\\agent-hard-v3",
+        "--adapter",
+        ".\\adapters\\reward-loop-smoke-v1-r0",
+        "--output",
+        ".\\runs\\agent-cycle\\reward-loop-smoke-v1\\r0-valid"
+      ],
+      "log": ".\\runs\\agent-cycle\\reward-loop-smoke-v1\\stage-02.log",
+      "returncode": 0
+    },
+    {
+      "command": [
+        ".\\.venv\\Scripts\\python.exe",
+        "-X",
+        "utf8",
+        "-u",
+        "-m",
+        "microduck_qwen.vision_torch",
+        "train",
+        "--task",
+        "reward",
+        "--data",
+        ".\\data\\agent-hard-v3",
+        "--output",
+        ".\\adapters\\reward-loop-smoke-v1-reward-r0",
+        "--steps",
+        "10"
+      ],
+      "log": ".\\runs\\agent-cycle\\reward-loop-smoke-v1\\stage-03.log",
+      "returncode": 0
+    },
+    {
+      "command": [
+        ".\\.venv\\Scripts\\python.exe",
+        "-X",
+        "utf8",
+        "-u",
+        "-m",
+        "microduck_qwen.vision_torch",
+        "evaluate-reward",
+        "--data",
+        ".\\data\\agent-hard-v3",
+        "--adapter",
+        ".\\adapters\\reward-loop-smoke-v1-reward-r0",
+        "--output",
+        ".\\runs\\agent-cycle\\reward-loop-smoke-v1\\reward-r0-valid.json",
+        "--split",
+        "valid"
+      ],
+      "log": ".\\runs\\agent-cycle\\reward-loop-smoke-v1\\stage-04.log",
+      "returncode": 0
+    },
+    {
+      "command": [
+        ".\\.venv\\Scripts\\python.exe",
+        "-X",
+        "utf8",
+        "-u",
+        "-m",
+        "microduck_qwen.agent_eval",
+        "--data",
+        ".\\data\\agent-hard-v3",
+        "--adapter",
+        ".\\adapters\\reward-loop-smoke-v1-r0",
+        "--output",
+        ".\\runs\\agent-cycle\\reward-loop-smoke-v1\\r0-rollout",
+        "--rollout",
+        "--scene-mix",
+        "hard"
+      ],
+      "log": ".\\runs\\agent-cycle\\reward-loop-smoke-v1\\stage-05.log",
+      "returncode": 0
+    },
+    {
+      "command": [
+        ".\\.venv\\Scripts\\python.exe",
+        "-X",
+        "utf8",
+        "-u",
+        "-m",
+        "microduck_qwen.agent_data",
+        "--output",
+        ".\\data\\reward-loop-smoke-v1-r1-corrections",
+        "--base-data",
+        ".\\data\\agent-hard-v3",
+        "--actor-adapter",
+        ".\\adapters\\reward-loop-smoke-v1-r0",
+        "--train-scenes",
+        "1",
+        "--seed-offset",
+        "2300",
+        "--scene-mix",
+        "hard",
+        "--reward-adapter",
+        ".\\adapters\\reward-loop-smoke-v1-reward-r0",
+        "--reward-samples",
+        "2",
+        "--reward-threshold",
+        "0.5"
+      ],
+      "log": ".\\runs\\agent-cycle\\reward-loop-smoke-v1\\stage-06.log",
+      "returncode": 0
+    },
+    {
+      "command": [
+        ".\\.venv\\Scripts\\python.exe",
+        "-X",
+        "utf8",
+        "-u",
+        "-m",
+        "microduck_qwen.vision_torch",
+        "train",
+        "--task",
+        "agent",
+        "--data",
+        ".\\data\\reward-loop-smoke-v1-r1-corrections",
+        "--output",
+        ".\\adapters\\reward-loop-smoke-v1-r1",
+        "--steps",
+        "5",
+        "--resume",
+        ".\\adapters\\reward-loop-smoke-v1-r0"
+      ],
+      "log": ".\\runs\\agent-cycle\\reward-loop-smoke-v1\\stage-07.log",
+      "returncode": 0
+    },
+    {
+      "command": [
+        ".\\.venv\\Scripts\\python.exe",
+        "-X",
+        "utf8",
+        "-u",
+        "-m",
+        "microduck_qwen.agent_eval",
+        "--data",
+        ".\\data\\reward-loop-smoke-v1-r1-corrections",
+        "--adapter",
+        ".\\adapters\\reward-loop-smoke-v1-r1",
+        "--output",
+        ".\\runs\\agent-cycle\\reward-loop-smoke-v1\\r1-valid"
+      ],
+      "log": ".\\runs\\agent-cycle\\reward-loop-smoke-v1\\stage-08.log",
+      "returncode": 0
+    },
+    {
+      "command": [
+        ".\\.venv\\Scripts\\python.exe",
+        "-X",
+        "utf8",
+        "-u",
+        "-m",
+        "microduck_qwen.vision_torch",
+        "train",
+        "--task",
+        "reward",
+        "--data",
+        ".\\data\\reward-loop-smoke-v1-r1-corrections",
+        "--output",
+        ".\\adapters\\reward-loop-smoke-v1-reward-r1",
+        "--steps",
+        "10",
+        "--resume",
+        ".\\adapters\\reward-loop-smoke-v1-reward-r0"
+      ],
+      "log": ".\\runs\\agent-cycle\\reward-loop-smoke-v1\\stage-09.log",
+      "returncode": 0
+    },
+    {
+      "command": [
+        ".\\.venv\\Scripts\\python.exe",
+        "-X",
+        "utf8",
+        "-u",
+        "-m",
+        "microduck_qwen.vision_torch",
+        "evaluate-reward",
+        "--data",
+        ".\\data\\reward-loop-smoke-v1-r1-corrections",
+        "--adapter",
+        ".\\adapters\\reward-loop-smoke-v1-reward-r1",
+        "--output",
+        ".\\runs\\agent-cycle\\reward-loop-smoke-v1\\reward-r1-valid.json",
+        "--split",
+        "valid"
+      ],
+      "log": ".\\runs\\agent-cycle\\reward-loop-smoke-v1\\stage-10.log",
+      "returncode": 0
+    },
+    {
+      "command": [
+        ".\\.venv\\Scripts\\python.exe",
+        "-X",
+        "utf8",
+        "-u",
+        "-m",
+        "microduck_qwen.agent_eval",
+        "--data",
+        ".\\data\\reward-loop-smoke-v1-r1-corrections",
+        "--adapter",
+        ".\\adapters\\reward-loop-smoke-v1-r1",
+        "--output",
+        ".\\runs\\agent-cycle\\reward-loop-smoke-v1\\r1-rollout",
+        "--rollout",
+        "--scene-mix",
+        "hard"
+      ],
+      "log": ".\\runs\\agent-cycle\\reward-loop-smoke-v1\\stage-11.log",
+      "returncode": 0
+    }
+  ],
+  "rounds": [
+    {
+      "round": 0,
+      "data": ".\\data\\agent-hard-v3",
+      "adapter": ".\\adapters\\reward-loop-smoke-v1-r0",
+      "valid_correct": 16,
+      "valid_total": 19,
+      "reward_adapter": ".\\adapters\\reward-loop-smoke-v1-reward-r0",
+      "reward_valid": {
+        "split": "valid",
+        "count": 57,
+        "accuracy": 0.7894736842105263,
+        "positive_recall": 0.47368421052631576,
+        "false_accept_rate": 0.05263157894736842,
+        "adapter_sha256": "a2d0ab3a516b062993e98239817dcf92c9c12bc2471635ab1f5b517137f72710",
+        "note": "Skill-action reward only; two counterfactual negatives per instruction. Not a held-out task-outcome reward evaluation."
+      },
+      "rollout_correct": 1,
+      "rollout_total": 4
+    },
+    {
+      "round": 1,
+      "data": ".\\data\\reward-loop-smoke-v1-r1-corrections",
+      "adapter": ".\\adapters\\reward-loop-smoke-v1-r1",
+      "valid_correct": 13,
+      "valid_total": 19,
+      "reward_adapter": ".\\adapters\\reward-loop-smoke-v1-reward-r1",
+      "reward_valid": {
+        "split": "valid",
+        "count": 57,
+        "accuracy": 0.7894736842105263,
+        "positive_recall": 0.47368421052631576,
+        "false_accept_rate": 0.05263157894736842,
+        "adapter_sha256": "0c2cecb1a391fe2cedd41913883e2b4852760f8865a3b81285ffe54c661384f2",
+        "note": "Skill-action reward only; two counterfactual negatives per instruction. Not a held-out task-outcome reward evaluation."
+      },
+      "rollout_correct": 0,
+      "rollout_total": 4
+    }
+  ],
+  "selected_adapter": null,
+  "reward_guided": true,
+  "reward_samples": 2,
+  "reward_threshold": 0.5,
+  "initial_adapter": "adapters\\agent-hard-v3-sft300",
+  "note": "Development-set selection, not final test. Reward ranks proposals; independent expert verifies labels. No online RL or automatic deployment.",
+  "baseline": {
+    "mode": "offline_action_exact_match",
+    "adapter": null,
+    "split": "valid",
+    "dataset_manifest_sha256": "be06e9981fef934c84607ca8b7fde584850beb767da90df53108c67ce63603a8",
+    "results": [
+      {
+        "id": "valid-71700-task-00-0",
+        "task_type": "move",
+        "expected": {
+          "action": "move",
+          "direction": "forward",
+          "distance_m": 0.2
+        },
+        "prediction": {
+          "instruction": "先往前走20厘米，然后回到起点",
+          "raw": "```json\n{\"action\":\"move\",\"direction\":\"forward\",\"distance_m\":0.2}\n```",
+          "latency_s": 2.4739937000013015,
+          "model": "Qwen/Qwen3-VL-2B-Instruct",
+          "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+          "adapter": null,
+          "error": "Expecting value: line 1 column 1 (char 0)"
+        },
+        "correct": false,
+        "semantic_correct_after_fence_removal": true
+      },
+      {
+        "id": "valid-71700-task-00-1",
+        "task_type": "return_home",
+        "expected": {
+          "action": "return_home"
+        },
+        "prediction": {
+          "instruction": "先往前走20厘米，然后回到起点",
+          "raw": "```json\n{\"action\":\"move\",\"direction\":\"forward\",\"distance_m\":0.2}\n```",
+          "latency_s": 1.9826599999978498,
+          "model": "Qwen/Qwen3-VL-2B-Instruct",
+          "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+          "adapter": null,
+          "error": "Expecting value: line 1 column 1 (char 0)"
+        },
+        "correct": false,
+        "semantic_correct_after_fence_removal": false
+      },
+      {
+        "id": "valid-71700-task-00-2",
+        "task_type": "done",
+        "expected": {
+          "action": "done"
+        },
+        "prediction": {
+          "instruction": "先往前走20厘米，然后回到起点",
+          "raw": "```json\n{\"action\":\"move\",\"direction\":\"forward\",\"distance_m\":0.2}\n```",
+          "latency_s": 1.8822772999992594,
+          "model": "Qwen/Qwen3-VL-2B-Instruct",
+          "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+          "adapter": null,
+          "error": "Expecting value: line 1 column 1 (char 0)"
+        },
+        "correct": false,
+        "semantic_correct_after_fence_removal": false
+      },
+      {
+        "id": "valid-71700-task-01-0",
+        "task_type": "move",
+        "expected": {
+          "action": "move",
+          "direction": "backward",
+          "distance_m": 0.2
+        },
+        "prediction": {
+          "instruction": "先向后退20厘米，随后回到出发点",
+          "raw": "```json\n{\"action\":\"move\",\"direction\":\"backward\",\"distance_m\":0.2}\n```",
+          "latency_s": 1.833124199998565,
+          "model": "Qwen/Qwen3-VL-2B-Instruct",
+          "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+          "adapter": null,
+          "error": "Expecting value: line 1 column 1 (char 0)"
+        },
+        "correct": false,
+        "semantic_correct_after_fence_removal": true
+      },
+      {
+        "id": "valid-71700-task-01-1",
+        "task_type": "return_home",
+        "expected": {
+          "action": "return_home"
+        },
+        "prediction": {
+          "instruction": "先向后退20厘米，随后回到出发点",
+          "raw": "```json\n{\"action\":\"move\",\"direction\":\"backward\",\"distance_m\":0.2}\n```",
+          "latency_s": 1.9027524999983143,
+          "model": "Qwen/Qwen3-VL-2B-Instruct",
+          "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+          "adapter": null,
+          "error": "Expecting value: line 1 column 1 (char 0)"
+        },
+        "correct": false,
+        "semantic_correct_after_fence_removal": false
+      },
+      {
+        "id": "valid-71700-task-01-2",
+        "task_type": "done",
+        "expected": {
+          "action": "done"
+        },
+        "prediction": {
+          "instruction": "先向后退20厘米，随后回到出发点",
+          "raw": "```json\n{\"action\":\"move\",\"direction\":\"backward\",\"distance_m\":0.2}\n```",
+          "latency_s": 1.9304756999990786,
+          "model": "Qwen/Qwen3-VL-2B-Instruct",
+          "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+          "adapter": null,
+          "error": "Expecting value: line 1 column 1 (char 0)"
+        },
+        "correct": false,
+        "semantic_correct_after_fence_removal": false
+      },
+      {
+        "id": "valid-71700-task-02-0",
+        "task_type": "turn",
+        "expected": {
+          "action": "turn",
+          "direction": "left",
+          "degrees": 45
+        },
+        "prediction": {
+          "instruction": "先左转45度，再右转45度",
+          "raw": "```json\n{\"action\":\"turn\",\"direction\":\"left\",\"degrees\":45}\n```",
+          "latency_s": 1.6669173999980558,
+          "model": "Qwen/Qwen3-VL-2B-Instruct",
+          "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+          "adapter": null,
+          "error": "Expecting value: line 1 column 1 (char 0)"
+        },
+        "correct": false,
+        "semantic_correct_after_fence_removal": true
+      },
+      {
+        "id": "valid-71700-task-02-1",
+        "task_type": "turn",
+        "expected": {
+          "action": "turn",
+          "direction": "right",
+          "degrees": 45
+        },
+        "prediction": {
+          "instruction": "先左转45度，再右转45度",
+          "raw": "```json\n{\"action\":\"turn\",\"direction\":\"left\",\"degrees\":45}\n```",
+          "latency_s": 1.6903041000005032,
+          "model": "Qwen/Qwen3-VL-2B-Instruct",
+          "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+          "adapter": null,
+          "error": "Expecting value: line 1 column 1 (char 0)"
+        },
+        "correct": false,
+        "semantic_correct_after_fence_removal": false
+      },
+      {
+        "id": "valid-71700-task-02-2",
+        "task_type": "done",
+        "expected": {
+          "action": "done"
+        },
+        "prediction": {
+          "instruction": "先左转45度，再右转45度",
+          "raw": "```json\n{\"action\":\"turn\",\"direction\":\"left\",\"degrees\":45}\n```",
+          "latency_s": 1.9948506000000634,
+          "model": "Qwen/Qwen3-VL-2B-Instruct",
+          "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+          "adapter": null,
+          "error": "Expecting value: line 1 column 1 (char 0)"
+        },
+        "correct": false,
+        "semantic_correct_after_fence_removal": false
+      },
+      {
+        "id": "valid-71700-task-03-0",
+        "task_type": "approach",
+        "expected": {
+          "action": "approach",
+          "color": "green",
+          "id": 1
+        },
+        "prediction": {
+          "instruction": "靠近照片里最左侧的球，之后返回起点",
+          "raw": "```json\n{\"action\":\"approach\",\"color\":\"green\",\"id\":1}\n```",
+          "latency_s": 2.05070269999851,
+          "model": "Qwen/Qwen3-VL-2B-Instruct",
+          "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+          "adapter": null,
+          "error": "Expecting value: line 1 column 1 (char 0)"
+        },
+        "correct": false,
+        "semantic_correct_after_fence_removal": true
+      },
+      {
+        "id": "valid-71700-task-03-1",
+        "task_type": "return_home",
+        "expected": {
+          "action": "return_home"
+        },
+        "prediction": {
+          "instruction": "靠近照片里最左侧的球，之后返回起点",
+          "raw": "{\"action\":\"approach\",\"color\":\"green\",\"id\":1}",
+          "latency_s": 1.824007499999425,
+          "model": "Qwen/Qwen3-VL-2B-Instruct",
+          "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+          "adapter": null,
+          "action": {
+            "action": "approach",
+            "color": "green",
+            "id": 1
+          }
+        },
+        "correct": false,
+        "semantic_correct_after_fence_removal": false
+      },
+      {
+        "id": "valid-71700-task-03-2",
+        "task_type": "done",
+        "expected": {
+          "action": "done"
+        },
+        "prediction": {
+          "instruction": "靠近照片里最左侧的球，之后返回起点",
+          "raw": "{\"action\":\"approach\",\"color\":\"green\",\"id\":1}",
+          "latency_s": 1.481097800002317,
+          "model": "Qwen/Qwen3-VL-2B-Instruct",
+          "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+          "adapter": null,
+          "action": {
+            "action": "approach",
+            "color": "green",
+            "id": 1
+          }
+        },
+        "correct": false,
+        "semantic_correct_after_fence_removal": false
+      },
+      {
+        "id": "valid-71700-task-04-0",
+        "task_type": "move",
+        "expected": {
+          "action": "move",
+          "direction": "forward",
+          "distance_m": 0.2
+        },
+        "prediction": {
+          "instruction": "往前移动20厘米",
+          "raw": "{\"action\":\"move\",\"direction\":\"forward\",\"distance_m\":0.2}",
+          "latency_s": 1.6334857000001648,
+          "model": "Qwen/Qwen3-VL-2B-Instruct",
+          "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+          "adapter": null,
+          "action": {
+            "action": "move",
+            "direction": "forward",
+            "distance_m": 0.2
+          }
+        },
+        "correct": true,
+        "semantic_correct_after_fence_removal": true
+      },
+      {
+        "id": "valid-71700-task-04-1",
+        "task_type": "done",
+        "expected": {
+          "action": "done"
+        },
+        "prediction": {
+          "instruction": "往前移动20厘米",
+          "raw": "{\"action\":\"move\",\"direction\":\"forward\",\"distance_m\":0.2}",
+          "latency_s": 1.5931375000000116,
+          "model": "Qwen/Qwen3-VL-2B-Instruct",
+          "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+          "adapter": null,
+          "action": {
+            "action": "move",
+            "direction": "forward",
+            "distance_m": 0.2
+          }
+        },
+        "correct": false,
+        "semantic_correct_after_fence_removal": false
+      },
+      {
+        "id": "valid-71700-task-05-0",
+        "task_type": "move",
+        "expected": {
+          "action": "move",
+          "direction": "backward",
+          "distance_m": 0.2
+        },
+        "prediction": {
+          "instruction": "向后退20厘米",
+          "raw": "{\"action\":\"move\",\"direction\":\"backward\",\"distance_m\":0.2}",
+          "latency_s": 1.475737000000663,
+          "model": "Qwen/Qwen3-VL-2B-Instruct",
+          "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+          "adapter": null,
+          "action": {
+            "action": "move",
+            "direction": "backward",
+            "distance_m": 0.2
+          }
+        },
+        "correct": true,
+        "semantic_correct_after_fence_removal": true
+      },
+      {
+        "id": "valid-71700-task-05-1",
+        "task_type": "done",
+        "expected": {
+          "action": "done"
+        },
+        "prediction": {
+          "instruction": "向后退20厘米",
+          "raw": "{\"action\":\"move\",\"direction\":\"backward\",\"distance_m\":0.2}",
+          "latency_s": 1.4441713000014715,
+          "model": "Qwen/Qwen3-VL-2B-Instruct",
+          "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+          "adapter": null,
+          "action": {
+            "action": "move",
+            "direction": "backward",
+            "distance_m": 0.2
+          }
+        },
+        "correct": false,
+        "semantic_correct_after_fence_removal": false
+      },
+      {
+        "id": "valid-71700-task-06-0",
+        "task_type": "stop",
+        "expected": {
+          "action": "stop"
+        },
+        "prediction": {
+          "instruction": "立即停止移动",
+          "raw": "{\"action\":\"stop\"}",
+          "latency_s": 0.6200817999997525,
+          "model": "Qwen/Qwen3-VL-2B-Instruct",
+          "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+          "adapter": null,
+          "action": {
+            "action": "stop"
+          }
+        },
+        "correct": true,
+        "semantic_correct_after_fence_removal": true
+      },
+      {
+        "id": "valid-71700-task-07-0",
+        "task_type": "unsupported",
+        "expected": {
+          "action": "unsupported"
+        },
+        "prediction": {
+          "instruction": "帮我把球踢走",
+          "raw": "```json\n{\"action\":\"approach\",\"color\":\"green\",\"id\":3}\n```",
+          "latency_s": 1.6441980999989028,
+          "model": "Qwen/Qwen3-VL-2B-Instruct",
+          "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+          "adapter": null,
+          "error": "Expecting value: line 1 column 1 (char 0)"
+        },
+        "correct": false,
+        "semantic_correct_after_fence_removal": false
+      },
+      {
+        "id": "valid-71700-task-08-0",
+        "task_type": "clarify",
+        "expected": {
+          "action": "clarify"
+        },
+        "prediction": {
+          "instruction": "到那个地方去",
+          "raw": "{\"action\":\"approach\",\"color\":\"green\",\"id\":3}",
+          "latency_s": 1.2838229000008141,
+          "model": "Qwen/Qwen3-VL-2B-Instruct",
+          "revision": "89644892e4d85e24eaac8bacfd4f463576704203",
+          "adapter": null,
+          "action": {
+            "action": "approach",
+            "color": "green",
+            "id": 3
+          }
+        },
+        "correct": false,
+        "semantic_correct_after_fence_removal": false
+      }
+    ],
+    "correct": 3,
+    "total": 19,
+    "note": "Development pilot. Rollout teacher is scorer AFTER execution, never a semantic intervention.",
+    "semantic_correct_after_fence_removal": 7
+  }
+}

@@ -1,0 +1,206 @@
+{
+  "format": "simulation_agent_v1",
+  "status": "completed",
+  "episodes": [
+    {
+      "seed": 63300,
+      "split": "train",
+      "task": 0,
+      "verified": true,
+      "occlusion": "none",
+      "clutter": true,
+      "rows": 9,
+      "error": null,
+      "interventions": 2
+    },
+    {
+      "seed": 63300,
+      "split": "train",
+      "task": 1,
+      "verified": true,
+      "occlusion": "none",
+      "clutter": true,
+      "rows": 9,
+      "error": null,
+      "interventions": 1
+    },
+    {
+      "seed": 63300,
+      "split": "train",
+      "task": 2,
+      "verified": true,
+      "occlusion": "none",
+      "clutter": true,
+      "rows": 9,
+      "error": null,
+      "interventions": 2
+    },
+    {
+      "seed": 63300,
+      "split": "train",
+      "task": 3,
+      "verified": true,
+      "occlusion": "none",
+      "clutter": true,
+      "rows": 9,
+      "error": null,
+      "interventions": 2
+    },
+    {
+      "seed": 63300,
+      "split": "train",
+      "task": 4,
+      "verified": false,
+      "occlusion": "none",
+      "clutter": true,
+      "rows": 0,
+      "error": "RuntimeError: cannot restore task start",
+      "interventions": 0
+    },
+    {
+      "seed": 63300,
+      "split": "train",
+      "task": 5,
+      "verified": true,
+      "occlusion": "none",
+      "clutter": true,
+      "rows": 6,
+      "error": null,
+      "interventions": 1
+    },
+    {
+      "seed": 63300,
+      "split": "train",
+      "task": 6,
+      "verified": true,
+      "occlusion": "none",
+      "clutter": true,
+      "rows": 3,
+      "error": null,
+      "interventions": 0
+    },
+    {
+      "seed": 63300,
+      "split": "train",
+      "task": 7,
+      "verified": true,
+      "occlusion": "none",
+      "clutter": true,
+      "rows": 3,
+      "error": null,
+      "interventions": 1
+    },
+    {
+      "seed": 63300,
+      "split": "train",
+      "task": 8,
+      "verified": true,
+      "occlusion": "none",
+      "clutter": true,
+      "rows": 3,
+      "error": null,
+      "interventions": 1
+    }
+  ],
+  "splits": {
+    "train": {
+      "sha256": "5362783ee894f5429bff13bbfc702768b48c4824684623a7d037b316d4962f27",
+      "examples": 213,
+      "scene_seeds": [
+        61700,
+        61701,
+        61702,
+        63300
+      ],
+      "actions": {
+        "move": 45,
+        "return_home": 33,
+        "done": 66,
+        "turn": 24,
+        "approach": 9,
+        "stop": 12,
+        "unsupported": 12,
+        "clarify": 12
+      }
+    },
+    "valid": {
+      "sha256": "34625d482cc06ee78c1d19d02ab878161666001884939d23916bdfead593575c",
+      "examples": 19,
+      "scene_seeds": [
+        71700
+      ],
+      "actions": {
+        "move": 4,
+        "return_home": 3,
+        "done": 6,
+        "turn": 2,
+        "approach": 1,
+        "stop": 1,
+        "unsupported": 1,
+        "clarify": 1
+      }
+    },
+    "test": {
+      "sha256": "7f00f0f3273a243105f0afe4ab3da81342228198a3e633c877fbb92e412a34c9",
+      "examples": 16,
+      "scene_seeds": [
+        81700
+      ],
+      "actions": {
+        "move": 4,
+        "return_home": 2,
+        "done": 5,
+        "turn": 2,
+        "stop": 1,
+        "unsupported": 1,
+        "clarify": 1
+      }
+    }
+  },
+  "inputs": [
+    "numbered RGB",
+    "instruction",
+    "own oracle odometry",
+    "completed actions"
+  ],
+  "method": "reward-ranked proposals with independent expert intervention and verified feedback",
+  "scene_mix": "hard",
+  "seed_offset": 2300,
+  "source_sha256": {
+    "agent_data.py": "64c1773324304df560cfb4b0acd1ba6ca8c591eabd9a112b82bb860b83c81045",
+    "skills.py": "2219423d2071fc6d5d5d9781c65271c06d8dc760cdea2faba10c2820c9918d5d",
+    "navigation.py": "6e3397c6be3477e76d0e2132b674d3dfb0a9ca478b22aa907c7ddb976a8e0868",
+    "vision.py": "457b22662b3ba9926b34add30ff56b500ca5fd2b4f55a0e4af1f6c9f464b0615",
+    "sim_data.py": "62e9fc801db7d59580b8a24e9d0e76cedb21f34197e043eef151b25aacf3ce12",
+    "sim_runner.py": "a8b82dba6df76c9aaf56dd412e0d743b3c43ac3430acd7b2d0f364aea5717ef1",
+    "vision_scene.py": "20df2752d3d5c5412e94b066616245ff38a4c2744620684fc8ebcb82e5ef2470",
+    "sim.py": "ce50631b9c890987fda4ec46fbfe45e973e0c54c102c8a7a1b238e7b445dfbd2",
+    "sim_body.py": "e0a89cda9f757d060d859611aa76dc9c7a6ab4c9d67e9fcbfd51078f83edba87"
+  },
+  "parent_manifest_sha256": "be06e9981fef934c84607ca8b7fde584850beb767da90df53108c67ce63603a8",
+  "reward": {
+    "path": ".\\adapters\\reward-loop-smoke-v1-reward-r0",
+    "sha256": "a2d0ab3a516b062993e98239817dcf92c9c12bc2471635ab1f5b517137f72710"
+  },
+  "reward_sampling": {
+    "samples": 2,
+    "threshold": 0.5,
+    "temperature": 0.7,
+    "seed": 42,
+    "first_proposal_greedy": true
+  },
+  "actor": {
+    "path": ".\\adapters\\reward-loop-smoke-v1-r0",
+    "sha256": "32dd4fc02f8cda2c5248c01040cde39353518f0f9cc5edd359caf4654180c848",
+    "backend": "torch"
+  },
+  "startup_failures": [],
+  "reward_collection": {
+    "sampled_proposals": 34,
+    "distinct_proposals": 20,
+    "accepted_steps": 8,
+    "rejected_steps": 9,
+    "false_accept_steps": 1,
+    "teacher_interventions": 10
+  }
+}
