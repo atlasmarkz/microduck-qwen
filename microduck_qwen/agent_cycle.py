@@ -20,6 +20,8 @@ def main():
     parser.add_argument("--steps", type=int, default=120)
     parser.add_argument("--correction-scenes", type=int, default=1)
     parser.add_argument("--seed-offset", type=int, default=100)
+    parser.add_argument("--scene-mix", choices=("plain", "hard"), default="plain",
+                        help="scene difficulty for correction collection and rollouts")
     parser.add_argument("--rollout", action="store_true", help="also test 4 independent physical tasks each round")
     args = parser.parse_args()
     if not 1 <= args.rounds <= 3 or not 1 <= args.steps <= 300 or not 1 <= args.correction_scenes <= 10 or not 100 <= args.seed_offset <= 5000:
@@ -63,7 +65,8 @@ def main():
             if index:
                 corrected = ROOT / "data" / f"{args.name}-r{index}-corrections"
                 run("agent_data", "--output", corrected, "--base-data", data, "--actor-adapter", parent,
-                    "--train-scenes", args.correction_scenes, "--seed-offset", args.seed_offset + index * 100)
+                    "--train-scenes", args.correction_scenes, "--seed-offset", args.seed_offset + index * 100,
+                    "--scene-mix", args.scene_mix)
                 data = corrected
             adapter = ROOT / "adapters" / f"{args.name}-r{index}"
             if os.name == "nt":
@@ -84,7 +87,8 @@ def main():
                      "valid_correct": metrics["correct"], "valid_total": metrics["total"]}
             if args.rollout:
                 rollout = output / f"r{index}-rollout"
-                run("agent_eval", "--data", data, "--adapter", adapter, "--output", rollout, "--rollout")
+                run("agent_eval", "--data", data, "--adapter", adapter, "--output", rollout, "--rollout",
+                    "--scene-mix", args.scene_mix)
                 physical = json.loads((rollout / "report.json").read_text())
                 entry.update(rollout_correct=physical["correct"], rollout_total=physical["total"])
             score = entry["valid_correct"] / entry["valid_total"]

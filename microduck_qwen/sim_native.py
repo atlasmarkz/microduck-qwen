@@ -195,6 +195,7 @@ def main():
                 manifest.write_text(json.dumps({"backend": "native-onnx-bam", "port": args.port,
                     "socket": ["127.0.0.1", args.control_port], "viewer": args.viewer,
                     "vision": args.vision, "seed": args.seed, "occlusion": args.occlusion,
+                    "clutter": args.clutter,
                     "scene_file": str(scene_path.resolve()) if scene_path else None,
                     "collection_ground_truth": args.collect_gt,
                     "policy": args.policy.resolve().relative_to(ROOT).as_posix(),

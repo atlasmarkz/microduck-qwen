@@ -24,7 +24,7 @@ def stop_process(process):
             process.wait()
 
 
-def start_scene(case_directory, seed, occlusion, port, collect_gt=False):
+def start_scene(case_directory, seed, occlusion, port, collect_gt=False, clutter=False):
     failures = []
     for attempt in range(2):
         manifest = case_directory / f"simulator-{attempt}.json"
@@ -46,7 +46,7 @@ def start_scene(case_directory, seed, occlusion, port, collect_gt=False):
                 str(port),
                 "--manifest",
                 str(manifest),
-            ] + (["--collect-gt"] if collect_gt else []),
+            ] + (["--collect-gt"] if collect_gt else []) + (["--clutter"] if clutter else []),
             cwd=ROOT,
             stdout=log,
             stderr=subprocess.STDOUT,

@@ -32,7 +32,7 @@ Qwen3-VL-2B 根据编号 RGB 图、中文指令、自己的位姿和本条指令
 - 走到画面左边的球旁边，然后回到初始位置
 - 停下来
 
-以上只有 7 条固定模板（本轮新增场景并不在训练分布内）。想换更难的场景，可在仿真命令上加 `--occlusion partial|full|absent`（最左侧目标被遮挡／缺失）或 `--clutter`（5 球，两对同色，必须靠图中编号区分，另加两根柱体）；两者可叠加。注意 `agent_data` 采集写死了 `occlusion=none` 且不支持 `--clutter`，所以这些场景目前只用于测试，不参与训练。
+以上只有 7 条固定模板（本轮新增场景并不在训练分布内）。想换更难的场景，可在仿真命令上加 `--occlusion partial|full|absent`（最左侧目标被遮挡／缺失）或 `--clutter`（5 球，两对同色，必须靠图中编号区分，另加两根柱体）；两者可叠加。采集端用 `--scene-mix hard` 就能把同一批难场景纳入训练，见下文「数据与训练闭环」。
 
 先预览而不执行：
 
@@ -66,6 +66,8 @@ MuJoCo 随机场景 → 专家实际执行 → 位姿/分割/碰撞验证 → �
 .venv-vlm/bin/python -m microduck_qwen.agent_data \
   --output data/agent-new-v1 --train-scenes 3 --valid-scenes 1 --test-scenes 1 --seed-offset 500
 ```
+
+加 `--scene-mix hard` 可换到更难场景（默认 `plain` 复现上面的敞开的 3 球行）：训练场景依次用「同色双球行 + 无遮挡 / 完全遮挡 / 缺失最左球」，验证用「部分遮挡 + 同色双球」，测试用「完全遮挡 + 同色双球」。每行数据与 manifest 都记录 `scene_occlusion` / `scene_clutter`，`agent_eval --rollout` 与 `agent_cycle` 也接同一个 `--scene-mix`，保证采集、训练、评测同分布。教师策略不变：最左目标不可见或只是部分可见时，直接拒绝生成标签（宁可丢这条任务，也不教一个做不到的动作）。
 
 一次启动最多三轮的有预算流程，默认两轮，每轮 120 次优化器更新：
 

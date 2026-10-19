@@ -19,6 +19,28 @@ from .sim_data import collection_frame, digest, request, verify_objects
 from .sim_runner import start_scene, stop_process
 
 
+# Hard scene profiles as (occlusion, clutter). Split offsets below keep the splits on
+# different difficulty and, with disjoint seed ranges, keep them leakage-free.
+#   train 0..2 -> none/full/absent with the duplicated-colour row
+#   valid      -> partial occlusion with the duplicated-colour row
+#   test       -> full occlusion with the duplicated-colour row (the watched scene)
+SCENE_PROFILES = [
+    ("none", True),
+    ("full", True),
+    ("absent", True),
+    ("partial", True),
+    ("full", True),
+    ("none", False),
+]
+PROFILE_BASE = {"train": 0, "valid": 3, "test": 4}
+
+
+def scene_profile(split, index, mix):
+    if mix == "plain":
+        return "none", False
+    return SCENE_PROFILES[(PROFILE_BASE[split] + index) % len(SCENE_PROFILES)]
+
+
 def model_rows(rows, directory):
     return [{"image": str((directory / row["image"]).resolve()), "messages": [
         {"role": "user", "content": agent_prompt(row["instruction"], row["memory"])},
@@ -153,6 +175,7 @@ def episode(output, directory, info, split, seed, instruction, specs, planner=No
                 if distance > 0.325:
                     raise RuntimeError("approach failed independent true-distance check")
             rows.append({"id": f"{split}-{seed}-{directory.name}-{index}", "scene_seed": seed, "split": split,
+                         "scene_occlusion": info.get("occlusion"), "scene_clutter": bool(info.get("clutter")),
                          "image": str(image.relative_to(output)), "image_sha256": digest(image),
                          "instruction": instruction, "memory": memory, "expected": expected,
                          "verified": True, "task_type": expected["action"],
@@ -193,6 +216,8 @@ def main():
     parser.add_argument("--test-scenes", type=int, default=1)
     parser.add_argument("--seed-offset", type=int, default=10)
     parser.add_argument("--port", type=int, default=7862)
+    parser.add_argument("--scene-mix", choices=("plain", "hard"), default="plain",
+                        help="plain reproduces the open-row scenes; hard adds occluded/absent/duplicated-row scenes")
     parser.add_argument("--actor-adapter", type=Path)
     parser.add_argument("--base-data", type=Path, help="keep old valid/test fixed; collect TRAIN corrections only")
     args = parser.parse_args()
@@ -207,7 +232,7 @@ def main():
     manifest = {"format": "simulation_agent_v1", "status": "collecting", "episodes": [], "splits": {},
                 "inputs": ["numbered RGB", "instruction", "own oracle odometry", "completed actions"],
                 "method": "expert-intervened data aggregation; not unrestricted DAgger or learned reward model",
-                "seed_offset": args.seed_offset}
+                "scene_mix": args.scene_mix, "seed_offset": args.seed_offset}
     manifest["source_sha256"] = {name: digest(ROOT / "microduck_qwen" / name) for name in
         ("agent_data.py", "skills.py", "navigation.py", "vision.py", "sim_data.py", "sim_runner.py", "vision_scene.py", "sim.py", "sim_body.py")}
     splits = {split: [] for split in ("train", "valid", "test")}
@@ -232,9 +257,11 @@ def main():
                 seed = base + args.seed_offset + i
                 scene_dir = output / "episodes" / f"{split}-{seed}"
                 scene_dir.mkdir(parents=True)
+                occlusion, clutter = scene_profile(split, i, args.scene_mix)
                 process = log = None
                 try:
-                    process, log, info, failures = start_scene(scene_dir, seed, "none", args.port, collect_gt=True)
+                    process, log, info, failures = start_scene(scene_dir, seed, occlusion, args.port,
+                                                              collect_gt=True, clutter=clutter)
                     shutil.copyfile(info["scene_file"], scene_dir / "scene.json")
                     manifest.setdefault("startup_failures", []).extend(failures)
                     variant = 1 + i % 2 if args.base_data else i % 3
@@ -253,6 +280,7 @@ def main():
                             rows.extend(augmented)
                         splits[split].extend(rows)
                         manifest["episodes"].append({"seed": seed, "split": split, "task": index, "verified": report["verified"],
+                            "occlusion": occlusion, "clutter": clutter,
                             "rows": len(rows), "error": report.get("error"),
                             "interventions": sum(s.get("teacher_intervened", False) for s in report["steps"])})
                         write_splits(output, manifest, splits)

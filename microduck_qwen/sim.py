@@ -233,6 +233,7 @@ def main():
             "scene_file": str(scene_path) if scene_path else None,
             "seed": args.seed if args.vision else None,
             "occlusion": args.occlusion if args.vision else None,
+            "clutter": args.clutter if args.vision else None,
             "startup": "held HOME until balancing policy ready"
             if args.vision
             else "sitstand",

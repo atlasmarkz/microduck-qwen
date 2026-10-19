@@ -5,7 +5,7 @@ import unittest
 from unittest.mock import patch
 
 from microduck_qwen.agent import agent_prompt, adapter_metadata, checked_memory
-from microduck_qwen.agent_data import model_rows, load_splits, tasks, teacher_action, write_splits
+from microduck_qwen.agent_data import model_rows, load_splits, scene_profile, tasks, teacher_action, write_splits
 from microduck_qwen.skills import memory_state, parse_action, validate_action
 from microduck_qwen.skills import SkillExecutor
 from microduck_qwen.agent_eval import semantic_match
@@ -135,6 +135,17 @@ class AgentTests(unittest.TestCase):
             self.assertEqual(result["status"], "model_done")
             self.assertFalse(result["task_success_verified"])
 
+
+    def test_hard_scene_mix_covers_occlusion_and_clutter_per_split(self):
+        for split, index in (("train", 0), ("valid", 2), ("test", 5)):
+            self.assertEqual(scene_profile(split, index, "plain"), ("none", False))
+        self.assertEqual([scene_profile("train", i, "hard") for i in range(3)],
+                         [("none", True), ("full", True), ("absent", True)])
+        self.assertEqual(scene_profile("valid", 0, "hard"), ("partial", True))
+        self.assertEqual(scene_profile("test", 0, "hard"), ("full", True))
+        for split in ("train", "valid", "test"):
+            occlusion, clutter = scene_profile(split, 0, "hard")
+            self.assertTrue(occlusion != "none" or clutter, split)
 
     def test_torch_agent_row_prompt_matches_agent_and_hides_truth(self):
         from microduck_qwen.vision_torch import row_prompt

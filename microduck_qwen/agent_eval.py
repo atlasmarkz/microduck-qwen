@@ -7,7 +7,7 @@ from pathlib import Path
 
 from . import ROOT
 from .agent import AgentPlanner
-from .agent_data import episode, load_splits, tasks
+from .agent_data import episode, load_splits, scene_profile, tasks
 from .sim_data import digest
 from .sim_runner import start_scene, stop_process
 from .skills import parse_action
@@ -37,6 +37,8 @@ def main():
     parser.add_argument("--seed", type=int, default=91010)
     parser.add_argument("--port", type=int, default=7872)
     parser.add_argument("--task-ids", type=int, nargs="+", default=[0, 1, 2, 3])
+    parser.add_argument("--scene-mix", choices=("plain", "hard"), default="plain",
+                        help="rollout scene difficulty; must match the collected data")
     args = parser.parse_args()
     manifest, splits = load_splits(args.data)
     if args.rollout and args.seed in {row["scene_seed"] for values in splits.values() for row in values}:
@@ -55,8 +57,11 @@ def main():
     process = log = None
     try:
         if args.rollout:
-            process, log, info, failures = start_scene(output, args.seed, "none", args.port, collect_gt=True)
-            report.update(scene_seed=args.seed, startup_failures=failures)
+            occlusion, clutter = scene_profile(args.split, 0, args.scene_mix)
+            process, log, info, failures = start_scene(output, args.seed, occlusion, args.port,
+                                                       collect_gt=True, clutter=clutter)
+            report.update(scene_seed=args.seed, scene_mix=args.scene_mix,
+                          occlusion=occlusion, clutter=clutter, startup_failures=failures)
             for i in args.task_ids:
                 instruction, specs = tasks(args.split)[i]
                 _, entry = episode(output, output / f"task-{i:02d}", info, args.split, args.seed, instruction, specs, planner, False)
