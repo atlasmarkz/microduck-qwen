@@ -1,0 +1,248 @@
+{
+  "status": "passed",
+  "scope": "Real MuJoCo/ONNX skills and map-based blocking; scripted planner and replies, no VLM/dialogue-model efficacy claim.",
+  "questions": 2,
+  "blocked_attempts": 2,
+  "report": {
+    "instruction": "沿当前方向前进，受阻时询问",
+    "active_instruction": "沿当前方向前进，受阻时询问",
+    "steps": [
+      {
+        "memory": {
+          "home_recorded": true,
+          "odometry_relative_home": {
+            "x": -0.0,
+            "y": -0.0,
+            "yaw_deg": 0.0
+          },
+          "completed": []
+        },
+        "prediction": {
+          "action": {
+            "action": "move",
+            "direction": "forward",
+            "distance_m": 0.35
+          },
+          "source": "scripted integration probe, not VLM inference"
+        },
+        "planning_instruction": "沿当前方向前进，受阻时询问",
+        "execution": {
+          "action": {
+            "action": "move",
+            "direction": "forward",
+            "distance_m": 0.35
+          },
+          "success": true,
+          "observation": "oracle robot odometry and known safety map",
+          "achieved": 0.3373801300165923,
+          "requested": 0.35,
+          "units": "meters",
+          "lateral_m": 0.018028870931338883,
+          "start": {
+            "position": [
+              0.0020644448205548206,
+              0.00012337170615161157
+            ],
+            "yaw": -0.00421210329662483
+          },
+          "end": {
+            "position": [
+              0.33951752121591827,
+              0.016731006949515063
+            ],
+            "yaw": -0.08985511000312833
+          }
+        }
+      },
+      {
+        "memory": {
+          "home_recorded": true,
+          "odometry_relative_home": {
+            "x": 0.34,
+            "y": 0.02,
+            "yaw_deg": -5.9
+          },
+          "completed": [
+            {
+              "action": "move",
+              "direction": "forward",
+              "distance_m": 0.35
+            }
+          ]
+        },
+        "prediction": {
+          "action": {
+            "action": "move",
+            "direction": "forward",
+            "distance_m": 0.35
+          },
+          "source": "scripted integration probe, not VLM inference"
+        },
+        "planning_instruction": "沿当前方向前进，受阻时询问",
+        "execution": {
+          "action": {
+            "action": "move",
+            "direction": "forward",
+            "distance_m": 0.35
+          },
+          "success": true,
+          "observation": "oracle robot odometry and known safety map",
+          "achieved": 0.3369737085438745,
+          "requested": 0.35,
+          "units": "meters",
+          "lateral_m": 0.016450119620795144,
+          "start": {
+            "position": [
+              0.3375021562067173,
+              0.01594794932084079
+            ],
+            "yaw": -0.10787121457168211
+          },
+          "end": {
+            "position": [
+              0.6742882735586526,
+              -0.00397685542999694
+            ],
+            "yaw": -0.06892681414722401
+          }
+        }
+      },
+      {
+        "memory": {
+          "home_recorded": true,
+          "odometry_relative_home": {
+            "x": 0.67,
+            "y": 0.0,
+            "yaw_deg": -2.2
+          },
+          "completed": [
+            {
+              "action": "move",
+              "direction": "forward",
+              "distance_m": 0.35
+            },
+            {
+              "action": "move",
+              "direction": "forward",
+              "distance_m": 0.35
+            }
+          ]
+        },
+        "prediction": {
+          "action": {
+            "action": "move",
+            "direction": "forward",
+            "distance_m": 0.35
+          },
+          "source": "scripted integration probe, not VLM inference"
+        },
+        "planning_instruction": "沿当前方向前进，受阻时询问",
+        "execution": {
+          "action": {
+            "action": "move",
+            "direction": "forward",
+            "distance_m": 0.35
+          },
+          "success": false,
+          "observation": "oracle robot odometry and known safety map",
+          "error": "NeedsUserInput: requested translation is unsafe in known map",
+          "needs_user_input": true,
+          "no_motion": true,
+          "retry_safe": true
+        }
+      },
+      {
+        "memory": {
+          "home_recorded": true,
+          "odometry_relative_home": {
+            "x": 0.67,
+            "y": 0.0,
+            "yaw_deg": -1.9
+          },
+          "completed": [
+            {
+              "action": "move",
+              "direction": "forward",
+              "distance_m": 0.35
+            },
+            {
+              "action": "move",
+              "direction": "forward",
+              "distance_m": 0.35
+            }
+          ]
+        },
+        "prediction": {
+          "action": {
+            "action": "move",
+            "direction": "forward",
+            "distance_m": 0.35
+          },
+          "source": "user_retry_after_fresh_observation"
+        },
+        "planning_instruction": "沿当前方向前进，受阻时询问",
+        "execution": {
+          "action": {
+            "action": "move",
+            "direction": "forward",
+            "distance_m": 0.35
+          },
+          "success": false,
+          "observation": "oracle robot odometry and known safety map",
+          "error": "NeedsUserInput: requested translation is unsafe in known map",
+          "needs_user_input": true,
+          "no_motion": true,
+          "retry_safe": true
+        }
+      }
+    ],
+    "directory": ".\\runs\\agent\\20261019-190620-022924",
+    "status": "user_cancelled",
+    "task_success_verified": false,
+    "interactions": [
+      {
+        "reason": "当前移动路径在已知安全地图中受阻，动作尚未开始。",
+        "question": "机器人已停车。当前移动路径在已知安全地图中受阻，动作尚未开始。\n可输入“重试”（会重新检查安全条件）、补充具体指令（改目标请输入“改为…”），或输入“取消”。\n你 > ",
+        "completed": [
+          {
+            "action": "move",
+            "direction": "forward",
+            "distance_m": 0.35
+          },
+          {
+            "action": "move",
+            "direction": "forward",
+            "distance_m": 0.35
+          }
+        ],
+        "retry_allowed": true,
+        "answer": "重试"
+      },
+      {
+        "reason": "当前移动路径在已知安全地图中受阻，动作尚未开始。",
+        "question": "机器人已停车。当前移动路径在已知安全地图中受阻，动作尚未开始。\n可输入“重试”（会重新检查安全条件）、补充具体指令（改目标请输入“改为…”），或输入“取消”。\n你 > ",
+        "completed": [
+          {
+            "action": "move",
+            "direction": "forward",
+            "distance_m": 0.35
+          },
+          {
+            "action": "move",
+            "direction": "forward",
+            "distance_m": 0.35
+          }
+        ],
+        "retry_allowed": true,
+        "answer": "取消"
+      }
+    ],
+    "note": "No free-text semantic oracle. done is a model claim, not verified task success."
+  },
+  "unit_tests_passed": 71,
+  "limitations": [
+    "Scripted planner and replies, no VLM dialogue efficacy evaluation",
+    "Only pre-execution blocking is offered retry",
+    "No automatic detour or partial-motion resume"
+  ]
+}

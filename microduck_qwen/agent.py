@@ -91,14 +91,70 @@ class AgentPlanner:
         return result
 
 
-def run_instruction(planner, instruction, info, max_steps=5, preview=False):
+def run_instruction(planner, instruction, info, max_steps=5, preview=False, ask=None):
     directory = ROOT / "runs/agent" / datetime.now().strftime("%Y%m%d-%H%M%S-%f")
     directory.mkdir(parents=True)
-    report = {"instruction": instruction, "steps": [], "directory": str(directory),
-              "status": "started", "task_success_verified": False,
+    report = {"instruction": instruction, "active_instruction": instruction, "steps": [], "directory": str(directory),
+              "status": "started", "task_success_verified": False, "interactions": [],
               "note": "No free-text semantic oracle. done is a model claim, not verified task success."}
     completed = []
     executor = None
+    planning_instruction, pending_action = instruction, None
+
+    def request_input(reason, retry_action=None):
+        nonlocal planning_instruction, pending_action
+        if ask is None:
+            return False
+        executor.robot.stop()
+        while len(report["interactions"]) < 3:
+            report["status"] = "waiting_for_user"
+            prompt = (f"机器人已停车。{reason}\n"
+                      + ("可输入“重试”（会重新检查安全条件）、" if retry_action else "可")
+                      + "补充具体指令（改目标请输入“改为…”），或输入“取消”。\n你 > ")
+            event = {"reason": reason, "question": prompt, "completed": list(completed),
+                     "retry_allowed": retry_action is not None}
+            report["interactions"].append(event)
+            (directory / "result.json").write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n")
+            try:
+                answer = ask(prompt).strip()
+            except EOFError:
+                report["status"] = "user_cancelled"
+                return False
+            event["answer"] = answer
+            if answer.lower() in ("取消", "停止", "停下", "退出", "cancel", "stop", "exit"):
+                report["status"] = "user_cancelled"
+                return False
+            executor.healthy()  # Cancellation and state freshness also apply after waiting.
+            if not answer or answer in ("等待", "等一下", "等一会"):
+                continue
+            if answer in ("重试", "继续", "再试一次"):
+                if retry_action is None:
+                    reason = "当前目标仍不明确，请提供目标颜色、位置或明确的新指令。"
+                    continue
+                pending_action = dict(retry_action)
+            else:
+                if len(answer) > 160:
+                    reason = "补充内容过长，请用不超过160字说明下一步意图。"
+                    continue
+                # Keep the original goal and measured successful history; never treat
+                # a failed attempt as completed or silently retry partial movement.
+                if answer.startswith(("改为", "改成")):
+                    replacement = answer[2:].lstrip("：: ")
+                    if not replacement:
+                        reason = "请在“改为”后提供明确的新目标。"
+                        continue
+                    planning_instruction = replacement
+                    report["active_instruction"] = replacement
+                    event["replaced_goal"] = replacement
+                    completed.clear()
+                else:
+                    planning_instruction = (planning_instruction + "\n执行反馈=" + reason
+                        + "\n用户最新补充=" + answer + "\n结合已完成动作和当前图像重新选择下一步；安全约束始终有效。")
+            report["status"] = "resuming"
+            return True
+        report["status"] = "dialogue_limit_stopped"
+        return False
+
     with (ROOT / "runs/navigation.lock").open("a") as lock:
         try:
             lock_exclusive(lock)
@@ -112,8 +168,12 @@ def run_instruction(planner, instruction, info, max_steps=5, preview=False):
                 candidates = propose_balls(frame)
                 image = save_frame(directory, frame, candidates, f"step-{index:03d}")
                 memory = memory_state(info, executor.healthy(), completed)
-                prediction = planner.predict(instruction, image, memory)
-                step = {"memory": memory, "prediction": prediction}
+                if pending_action is not None:
+                    prediction = {"action": pending_action, "source": "user_retry_after_fresh_observation"}
+                    pending_action = None
+                else:
+                    prediction = planner.predict(planning_instruction, image, memory)
+                step = {"memory": memory, "prediction": prediction, "planning_instruction": planning_instruction}
                 report["steps"].append(step)
                 print(json.dumps(prediction, ensure_ascii=False), flush=True)
                 action = prediction.get("action")
@@ -125,11 +185,21 @@ def run_instruction(planner, instruction, info, max_steps=5, preview=False):
                     report["status"] = "preview_only"
                     break
                 step["execution"] = executor.run(action, candidates)
+                if action["action"] == "clarify" and ask is not None:
+                    if request_input("当前指令的目标或参数不明确，请补充说明。"):
+                        continue
+                    break
                 if action["action"] in ("done", "clarify", "unsupported", "stop"):
                     report["status"] = "model_" + action["action"]
                     break
                 if not step["execution"]["success"]:
                     report["status"] = "skill_failed_stopped"
+                    execution = step["execution"]
+                    if execution.get("needs_user_input"):
+                        reason = ("当前移动路径在已知安全地图中受阻，动作尚未开始。" if action["action"] == "move"
+                                  else "目标无法与当前清晰可见对象绑定，动作尚未开始。")
+                        if request_input(reason, action if execution.get("retry_safe") else None):
+                            continue
                     break
                 completed.append(action)
             else:
@@ -154,9 +224,12 @@ def main():
     parser.add_argument("--adapter", type=Path)
     parser.add_argument("--manifest", type=Path, default=ROOT / "runs/vision-simulator.json")
     parser.add_argument("--max-steps", type=int, default=5)
+    parser.add_argument("--interactive", action="store_true", help="allow run to ask for clarification while stopped; chat enables this by default")
     args = parser.parse_args()
     if not 1 <= args.max_steps <= 8:
         parser.error("max-steps must be 1..8")
+    if args.interactive and args.command in ("plan", "stop"):
+        parser.error("interactive questions are available only for run/chat")
     info = json.loads(args.manifest.read_text())
     if args.command == "stop":
         (ROOT / "runs/cancel_navigation").write_text(str(time.time_ns()))
@@ -178,13 +251,14 @@ def main():
                 if text in ("exit", "quit", "退出"):
                     break
                 if text:
-                    run_instruction(planner, text, info, args.max_steps)
+                    run_instruction(planner, text, info, args.max_steps, ask=input)
             except (KeyboardInterrupt, EOFError):
                 break
             except Exception as error:
                 print(f"未执行：{error}", flush=True)
     else:
-        run_instruction(planner, args.instruction, info, args.max_steps, args.command == "plan")
+        run_instruction(planner, args.instruction, info, args.max_steps, args.command == "plan",
+                        ask=input if args.interactive else None)
 
 
 if __name__ == "__main__":

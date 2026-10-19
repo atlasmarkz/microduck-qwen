@@ -9,6 +9,10 @@ from .navigation import Robot, Observer, execute, clearance, inside
 from .vision import capture, propose_balls, visibility_check, approachable, VisualGuard
 
 
+class NeedsUserInput(RuntimeError):
+    """A pre-execution ambiguity or blocked path; no motion has been issued."""
+
+
 def angle(value):
     return math.atan2(math.sin(value), math.cos(value))
 
@@ -124,7 +128,7 @@ class SkillExecutor:
             for i in range(21):
                 point = [a + (b - a) * i / 20 for a, b in zip(origin, target)]
                 if not inside(point, self.scene) or clearance(point, self.scene) < 0.04:
-                    raise RuntimeError("requested translation is unsafe in known map")
+                    raise NeedsUserInput("requested translation is unsafe in known map")
         while True:
             state = self.healthy()
             displacement = [a - b for a, b in zip(state["trunk"][:2], origin)]
@@ -192,10 +196,10 @@ class SkillExecutor:
             elif name == "approach":
                 selected = next((c for c in candidates or [] if c["id"] == action["id"] and c["color"] == action["color"]), None)
                 if selected is None or not approachable(selected):
-                    raise RuntimeError("target is not bound to a sufficiently visible current-frame candidate")
+                    raise NeedsUserInput("target is not bound to a sufficiently visible current-frame candidate")
                 target = selected["world_position"]
                 if not visibility_check(capture(self.info["port"]), target, action["color"])["safe"]:
-                    raise RuntimeError("target no longer safely visible")
+                    raise NeedsUserInput("target no longer safely visible")
                 plan = {"status": "ok", "goals": [{"target": "point", "x": target[0], "y": target[1], "speed": "slow", "stop_distance_m": 0.30}]}
                 result["navigation"] = execute(plan, self.robot, self.observer, output.with_suffix(".jsonl"), timeout_s=40, scene=self.scene, cancel_file=self.cancel_file,
                     guard=VisualGuard(self.info["port"], target, action["color"], self.directory))
@@ -216,6 +220,9 @@ class SkillExecutor:
                 result["found"] = result["success"]
         except Exception as error:
             result["error"] = f"{type(error).__name__}: {error}"
+            if isinstance(error, NeedsUserInput):
+                result.update(needs_user_input=True, no_motion=True,
+                              retry_safe=name in ("move", "turn"))
         finally:
             try:
                 self.robot.stop()
