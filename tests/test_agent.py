@@ -5,7 +5,15 @@ import unittest
 from unittest.mock import patch
 
 from microduck_qwen.agent import agent_prompt, adapter_metadata, checked_memory
-from microduck_qwen.agent_data import model_rows, load_splits, scene_profile, tasks, teacher_action, write_splits
+from microduck_qwen.agent_data import (
+    APPROACH_TRUE_DISTANCE_M,
+    model_rows,
+    load_splits,
+    scene_profile,
+    tasks,
+    teacher_action,
+    write_splits,
+)
 from microduck_qwen.skills import memory_state, parse_action, validate_action
 from microduck_qwen.skills import SkillExecutor
 from microduck_qwen.agent_eval import semantic_match
@@ -46,6 +54,14 @@ class AgentTests(unittest.TestCase):
         memory = self.memory()
         memory["completed"] = [{"action": "return_home"}]
         self.assertIn('"completed":[{"action":"return_home"}]', agent_prompt("回到起点", memory))
+
+    def test_approach_verification_allows_the_stop_transient(self):
+        # Hard-valid seed 71700 measured 0.3211m inside the control loop but
+        # 0.3303m once actually at rest, so a bare stop+tolerance bound rejected
+        # a sound demonstration. The allowance has to cover that transient and
+        # still reject a stop beside the neighbouring ball of the row.
+        self.assertGreater(APPROACH_TRUE_DISTANCE_M, 0.3303)
+        self.assertLess(APPROACH_TRUE_DISTANCE_M, 0.45)
 
     def test_teacher_does_not_replace_occluded_leftmost(self):
         objects = [{"pixel": [0, 0], "status": "partial"}, {"pixel": [100, 0], "status": "visible"}]
