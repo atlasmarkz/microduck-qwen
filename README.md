@@ -42,7 +42,7 @@ flowchart LR
 
 **统一使用 `Qwen/Qwen3-VL-2B-Instruct`**（Windows CUDA 固定 revision `89644892e4d85e24eaac8bacfd4f463576704203`；Mac MLX 使用 `mlx-community/Qwen3-VL-2B-Instruct-4bit`）。
 
-- RTX 3060 8 GiB：2B + NF4 QLoRA（冻结视觉塔、最后 8 层 q/v rank 8，458,752 参数）实测训练显存峰值约 1.95–2.09 GiB，余量充足。
+- RTX 3060 8 GiB：2B + NF4 QLoRA（冻结视觉塔、最后 8 层 q/v rank 8，458,752 参数）实测训练显存峰值：技能任务约 2.35 GiB、奖励任务约 1.91 GiB，余量充足。
 - 4B 在 8 GiB 上只能 batch 1、无余量，风险大于收益；7B 以上只能推理、不能训练。
 - 模型 ID 为代码常量，后续替换更大的 VLM 只需改一行。
 
@@ -58,7 +58,7 @@ python -m venv .venv
 .venv/Scripts/python.exe -m unittest discover -s tests -v
 ```
 
-技能控制需要另一终端常驻仿真（命令细节见 [WINDOWS_VISION.md](WINDOWS_VISION.md)）：
+技能控制需要另一终端常驻仿真（命令与真机自检见 [AGENT_TRAINING.md](AGENT_TRAINING.md)）：
 
 ```powershell
 # 终端一：第一视角相机与 MuJoCo 可视化
@@ -84,6 +84,8 @@ uv pip install --python .venv-vlm/bin/python -r requirements-vision.txt
 ## 实测结果
 
 **技能 agent（Mac，2026-10-15）**：固定验证集动作完全匹配，冻结基线 **1/19**、R0 **12/19**、R1 **18/19**；开发布局 91010 上 4 个物理任务，R0 **0/4**、R1 **4/4**。没有等训练预算的消融，不能单独归因于纠错方法。
+
+**Windows 单链路冒烟（RTX 3060，2026-10-19）**：用小样本（1 训练场景）验证了采集 → 技能 SFT → 奖励 → 离线评估 → 物理闭环整条链路可跑；valid 由冻结基座 **3/19** 提升到 150 步 **15/19**。这是管线自检，不是能力结论；完整命令见 [AGENT_TRAINING.md](AGENT_TRAINING.md)。
 
 **历史视觉指代结果（链路已移除，保留可复现记录）**：Windows 独立测试 56 条记录里，冻结基座 33/56、普通 SFT 49/56；提升来自停止/拒绝模板适配，选球 grounding 未改善。详见 [WINDOWS_VISION.md](WINDOWS_VISION.md) 与 [VISION_RESULTS.md](VISION_RESULTS.md)。
 

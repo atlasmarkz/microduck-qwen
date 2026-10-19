@@ -77,7 +77,21 @@ Windows（PyTorch + CUDA）走同一闭包，只是命令不同：采集用
 `.venv/Scripts/python.exe -X utf8 -m microduck_qwen.agent_data ...`，单轮技能 SFT 用
 `.venv/Scripts/python.exe -X utf8 -m microduck_qwen.vision_torch train --task agent --data <data> --output <adapter> --steps 100`，
 技能动作奖励用 `--task reward`；`agent_cycle` 会自动选择 `vision_torch`（Windows）或 `vision_sft`（Mac）。
-RTX 3060 8GiB 上 2B + NF4 QLoRA 实测训练显存峰值约 1.95–2.09 GiB。
+RTX 3060 8 GiB 上 2B + NF4 QLoRA 实测训练显存峰值：技能任务约 2.35 GiB、奖励任务约 1.91 GiB。
+
+### Windows 真机自检（2026-10-19）
+
+在 RTX 3060 8 GiB 上按顺序实跑，确认重构后的单链路可用。这是小样本**管线冒烟**，数字不构成能力结论；下文命令省略 `.venv/Scripts/python.exe -X utf8` 前缀，Mac 换成 `.venv-vlm/bin/python` 与 `sim` 入口即可。
+
+| 环节 | 命令要点 | 观察结果 |
+| --- | --- | --- |
+| 感知 | `sim_native --vision` + `capture`/`propose_balls` | 640×360 帧，红/蓝/绿 3 球全部检出 |
+| 采集 | `agent_data --train-scenes 1 --valid-scenes 1 --test-scenes 1 --seed-offset 500` | 27 个专家任务全部 verified，0 次干预 |
+| 技能 SFT | `vision_torch train --task agent --steps 150` | 458,752 可训练参数，valid_loss 0.122，峰值 2.35 GiB |
+| 奖励 SFT | `vision_torch train --task reward --steps 10` | train_rows 171 = 57×3，峰值 1.91 GiB |
+| 奖励评测 | `vision_torch evaluate-reward --split valid` | accuracy 0.70，正例召回 0.32，假接受率 0.11 |
+| 离线动作 | `agent_eval --split valid` / `--split test` | 冻结基座 3/19 → 150 步 15/19（valid）、11/19（test） |
+| 物理闭环 | `agent_eval --rollout --split test` | 模型输出合法 JSON、技能真实执行到位，再按教师动作判分并停止 |
 
 流程依次做：冻结基线验证、首轮训练、固定验证、独立物理 rollout、新训练场景纠错、继续 LoRA、再次验证。每轮单独进程，避免同时驻留多份 VLM。继续训练加载上轮适配器，**重新创建 AdamW，不恢复优化器状态**。视觉塔与基座冻结，最后 8 层 q/v rank-8 LoRA，共 458,752 个可训练参数；completion-only loss，microbatch 1，累积 1，学习率 5e-5，梯度检查点，序列上限 1024，超长报错而非截断。
 
