@@ -3,6 +3,7 @@
 import argparse
 from datetime import datetime
 import json
+import os
 from pathlib import Path
 import time
 
@@ -57,6 +58,12 @@ def adapter_metadata(path):
 
 
 class AgentPlanner:
+    def __new__(cls, adapter=None):
+        if os.name == "nt":
+            from .vision_torch import TorchAgentPlanner
+            return TorchAgentPlanner(adapter)
+        return super().__new__(cls)
+
     def __init__(self, adapter=None):
         from mlx_vlm import load
         from mlx_vlm.utils import load_config

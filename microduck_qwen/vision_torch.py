@@ -34,6 +34,14 @@ def outcome_prompt(instruction):
         f"Instruction: {instruction}\nAnswer exactly yes or no.")
 
 
+def row_prompt(task, row):
+    """Single-image prompt for a training row; agent rows also carry observable memory."""
+    if task == "agent":
+        from .agent import agent_prompt
+        return agent_prompt(row["instruction"], row["memory"])
+    return visual_prompt(row["instruction"])
+
+
 def checked_adapter(path, task):
     report = json.loads((Path(path) / "training_report.json").read_text(encoding="utf-8"))
     if (report.get("status"), report.get("task"), report.get("model"), report.get("revision")) != ("completed", task, MODEL, REVISION):
@@ -144,6 +152,18 @@ def encoded(processor, image, prompt, completion=None, limit=768):
     return inputs
 
 
+def generate_text(model, processor, image, prompt, max_new_tokens=96, temperature=0.0):
+    import torch
+
+    inputs = encoded(processor, image, prompt).to(model.device)
+    options = {"temperature": temperature} if temperature else {}
+    started = time.perf_counter()
+    with torch.inference_mode():
+        output = model.generate(**inputs, max_new_tokens=max_new_tokens, do_sample=bool(temperature), use_cache=True, **options)
+    raw = processor.tokenizer.decode(output[0, inputs["input_ids"].shape[1]:], skip_special_tokens=True)
+    return raw, time.perf_counter() - started
+
+
 class TorchVisionPlanner:
     def __init__(self, adapter=None):
         self.adapter = None
@@ -156,15 +176,7 @@ class TorchVisionPlanner:
             self.model = PeftModel.from_pretrained(self.model, str(adapter)).eval()
 
     def generate(self, image, prompt, temperature=0.0):
-        import torch
-
-        inputs = encoded(self.processor, image, prompt).to(self.model.device)
-        options = {"temperature": temperature} if temperature else {}
-        started = time.perf_counter()
-        with torch.inference_mode():
-            output = self.model.generate(**inputs, max_new_tokens=96, do_sample=bool(temperature), use_cache=True, **options)
-        raw = self.processor.tokenizer.decode(output[0, inputs["input_ids"].shape[1]:], skip_special_tokens=True)
-        return raw, time.perf_counter() - started
+        return generate_text(self.model, self.processor, image, prompt, temperature=temperature)
 
     def predict(self, instruction, image, candidates, temperature=0.0):
         raw, elapsed = self.generate(image, visual_prompt(instruction), temperature)
@@ -175,6 +187,33 @@ class TorchVisionPlanner:
         except (ValueError, TypeError, KeyError) as error:
             raise VisualOutputError(str(error), result) from error
         result.update(answer=answer, visual_choice=choice)
+        return result
+
+
+class TorchAgentPlanner:
+    """Windows counterpart of agent.AgentPlanner: one bounded skill JSON per observation."""
+
+    def __init__(self, adapter=None):
+        self.adapter = None
+        self.model, self.processor = load_model()
+        if adapter:
+            from peft import PeftModel
+
+            report = checked_adapter(adapter, "agent")
+            self.adapter = {"path": str(adapter), "sha256": report["adapter_sha256"], "backend": "torch"}
+            self.model = PeftModel.from_pretrained(self.model, str(adapter)).eval()
+
+    def predict(self, instruction, image, memory):
+        from .skills import parse_action
+
+        prompt = row_prompt("agent", {"instruction": instruction, "memory": memory})
+        raw, elapsed = generate_text(self.model, self.processor, image, prompt, max_new_tokens=110)
+        result = {"instruction": instruction, "raw": raw, "latency_s": elapsed, "model": MODEL,
+            "revision": REVISION, "adapter": self.adapter}
+        try:
+            result["action"] = parse_action(raw)
+        except (ValueError, TypeError, KeyError) as error:
+            result["error"] = str(error)
         return result
 
 
@@ -198,7 +237,10 @@ def train(args):
         raise ValueError("Positive finite training budget and learning rate required")
     if args.output.exists():
         raise FileExistsError(args.output)
-    manifest, splits = load_splits(args.data)
+    loader = load_splits
+    if args.task == "agent":
+        from .agent_data import load_splits as loader
+    manifest, splits = loader(args.data)
     if args.task == "reward":
         splits = {split: reward_examples([r for r in rows if r["frame"] == 0], args.data) for split, rows in splits.items()}
         splits["train"] += trajectory_reward_examples(args.data, manifest) * 8
@@ -249,7 +291,7 @@ def train(args):
                 if not history.is_relative_to(args.data.resolve()) or digest(history) != row["history_sha256"]:
                     raise ValueError("History image path or hash invalid")
                 image = [history, image]
-            prompt = row.get("prompt", visual_prompt(row["instruction"]))
+            prompt = row.get("prompt") or row_prompt(args.task, row)
             completion = row.get("completion", json.dumps(row["expected"], separators=(",", ":")))
             if len(cache) >= 8:
                 cache.pop(next(iter(cache)))
@@ -378,7 +420,7 @@ def main():
     training = subparsers.add_parser("train")
     training.add_argument("--data", type=Path, required=True)
     training.add_argument("--output", type=Path, required=True)
-    training.add_argument("--task", choices=["actor", "reward"], default="actor")
+    training.add_argument("--task", choices=["actor", "reward", "agent"], default="actor")
     training.add_argument("--steps", type=int, default=100)
     training.add_argument("--learning-rate", type=float, default=5e-5)
     training.add_argument("--resume", type=Path)

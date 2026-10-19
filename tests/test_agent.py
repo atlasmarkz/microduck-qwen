@@ -136,5 +136,22 @@ class AgentTests(unittest.TestCase):
             self.assertFalse(result["task_success_verified"])
 
 
+    def test_torch_agent_row_prompt_matches_agent_and_hides_truth(self):
+        from microduck_qwen.vision_torch import row_prompt
+        row = {"instruction": "后退0.2米", "memory": self.memory(),
+               "expected": {"action": "move", "direction": "backward", "distance_m": 0.2},
+               "scene_seed": 987654321, "teacher_specs": "SECRET"}
+        prompt = row_prompt("agent", row)
+        self.assertEqual(prompt, agent_prompt("后退0.2米", self.memory()))
+        for secret in ("SECRET", "987654321"):
+            self.assertNotIn(secret, prompt)
+
+    def test_torch_row_prompt_uses_visual_prompt_for_non_agent_tasks(self):
+        from microduck_qwen.vision import visual_prompt
+        from microduck_qwen.vision_torch import row_prompt
+        self.assertEqual(row_prompt("actor", {"instruction": "走到红球旁边"}), visual_prompt("走到红球旁边"))
+        self.assertEqual(row_prompt("reward", {"instruction": "走到红球旁边"}), visual_prompt("走到红球旁边"))
+
+
 if __name__ == "__main__":
     unittest.main()
