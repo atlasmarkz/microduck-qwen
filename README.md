@@ -19,6 +19,8 @@
 
 ## 系统构成
 
+完整架构图（运行时控制回路 + 训练管线）：[Figma 画板](https://www.figma.com/board/qH12MKvOO1VEFYaHxvcu6R)，静态副本 [docs/architecture.svg](docs/architecture.svg)。
+
 ```mermaid
 flowchart LR
     U["中文指令"] --> V["Qwen3-VL-4B + LoRA<br/>每步一个技能 JSON"]
