@@ -19,7 +19,9 @@
 
 ## 系统构成
 
-完整架构图（运行时控制回路 + 训练管线）：[Figma 画板](https://www.figma.com/board/qH12MKvOO1VEFYaHxvcu6R)，静态副本 [docs/architecture.svg](docs/architecture.svg)。
+完整分层架构图（Figma 源文件：[MicroDuck Qwen Architecture](https://www.figma.com/design/6TgbBmgfgOc52QLZvH5eTN)）：
+
+![MicroDuck Qwen 架构图](docs/architecture.png)
 
 ```mermaid
 flowchart LR
