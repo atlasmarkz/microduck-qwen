@@ -45,6 +45,19 @@ class VisionTests(unittest.TestCase):
         frame.depth[:] = float("nan")
         self.assertEqual(propose_targets(frame), [])
 
+    def test_yellow_ball_is_a_ball_not_a_pillar(self):
+        """Yellow is only a colour: a ball-sized round yellow blob must be a ball target."""
+        metadata = self.metadata()
+        metadata.update(camera_position=[0, 0, 0.15], camera_rotation=[[0, 0, -1], [-1, 0, 0], [0, 1, 0]])
+        frame = Frame(np.zeros((80, 100, 3), np.uint8), np.ones((80, 100), np.float32), metadata)
+        frame.rgb[41:55, 43:57] = [230, 210, 15]
+        candidates = propose_targets(frame)
+        self.assertEqual(len(candidates), 1)
+        target = candidates[0]
+        self.assertEqual((target["color"], target["kind"]), ("yellow", "ball"))
+        self.assertAlmostEqual(target["world_position"][2], 0.07, delta=0.02)
+        self.assertTrue(approachable(target))
+
     def metadata(self):
         return {
             "width": 100,

@@ -12,7 +12,10 @@ import os
 from pathlib import Path
 import shutil
 
+import random
+
 from . import ROOT
+from .agent_language import colour_tasks, paraphrases
 from .agent import AgentPlanner, agent_prompt, checked_memory
 from .skills import SkillExecutor, memory_state, validate_action
 from .vision import propose_targets, save_frame
@@ -48,7 +51,7 @@ APPROACH_TRUE_DISTANCE_M = APPROACH_STOP_M + ARRIVAL_TOLERANCE_M + COAST_ALLOWAN
 
 
 def scene_profile(split, index, mix):
-    if mix in ("plain", "yellow"):
+    if mix in ("plain", "yellow", "varied"):
         return "none", False
     return SCENE_PROFILES[(PROFILE_BASE[split] + index) % len(SCENE_PROFILES)]
 
@@ -135,6 +138,16 @@ def tasks(split, variant=0):
 
 
 def teacher_action(spec, verified):
+    if "teacher_color" in spec:
+        color = spec["teacher_color"]
+        matches = [o for o in verified if o["color"] == color]
+        # Exactly one confidently visible object of that colour; otherwise refuse the label.
+        if len(matches) != 1 or matches[0]["status"] != "visible" or matches[0]["candidate"]["visibility"] != "visible":
+            raise ValueError(f"teacher colour target {color} not uniquely and confidently visible")
+        candidate = matches[0]["candidate"]
+        if color == "yellow":
+            return validate_action({"action": "approach", "color": "yellow", "kind": "ball", "selector": "only"})
+        return validate_action({"action": "approach", "color": color, "id": candidate["id"]})
     if "teacher_target" not in spec:
         return validate_action(spec.copy())
     visible = [obj for obj in verified if obj["status"] != "not_visible"]
@@ -146,7 +159,7 @@ def teacher_action(spec, verified):
     return {"action": "approach", "color": obj["color"], "id": obj["candidate"]["id"]}
 
 
-def episode(output, directory, info, split, seed, instruction, specs, planner=None, intervene=True):
+def episode(output, directory, info, split, seed, instruction, specs, planner=None, intervene=True, meta=None):
     directory.mkdir(parents=True)
     report = {"instruction": instruction, "teacher_specs": specs, "steps": [], "verified": False,
               "intervene": intervene, "mode": "expert" if planner is None else "shielded_actor" if intervene else "independent_actor"}
@@ -194,7 +207,8 @@ def episode(output, directory, info, split, seed, instruction, specs, planner=No
                 report["error"] = "failed physical skill or wrong task action (scored AFTER execution)"
                 break
             if action["action"] == "approach":
-                obj = next(o for o in verified if o["candidate"] and o["candidate"]["id"] == action["id"] and o["color"] == action["color"])
+                obj = next(o for o in verified if o["candidate"] and o["color"] == action["color"]
+                           and ("id" not in action or o["candidate"]["id"] == action["id"]))
                 target = executor.scene["objects"][obj["name"]]
                 import math
                 distance = math.dist(executor.healthy()["trunk"][:2], [target["x"], target["y"]])
@@ -206,7 +220,7 @@ def episode(output, directory, info, split, seed, instruction, specs, planner=No
                          "scene_yellow_course": bool(info.get("yellow_course")),
                          "image": str(image.relative_to(output)), "image_sha256": digest(image),
                          "instruction": instruction, "memory": memory, "expected": expected,
-                         "verified": True, "task_type": expected["action"],
+                         "verified": True, "task_type": expected["action"], "task_meta": meta,
                          "label_source": "task DSL + physically verified expert + MuJoCo segmentation"})
             if planner is not None and "proposals" in prediction:
                 rows[-1]["reward_proposals"] = [p["action"] for p in prediction["proposals"] if p.get("action") is not None]
@@ -247,9 +261,12 @@ def main():
     parser.add_argument("--test-scenes", type=int, default=1)
     parser.add_argument("--seed-offset", type=int, default=10)
     parser.add_argument("--port", type=int, default=7862)
-    parser.add_argument("--scene-mix", choices=("plain", "hard", "yellow"), default="plain",
+    parser.add_argument("--scene-mix", choices=("plain", "hard", "yellow", "varied"), default="plain",
                         help="plain reproduces the open-row scenes; hard adds occluded/absent/duplicated-row scenes")
     parser.add_argument("--actor-adapter", type=Path)
+    parser.add_argument("--holdout-color", choices=("red", "blue", "green", "yellow"),
+                        help="varied mix: never target this colour in train; valid/test target only it (composition test)")
+    parser.add_argument("--language-per-color", type=int, default=2, help="varied mix: colour-approach tasks per colour per scene")
     parser.add_argument("--task-ids", type=int, nargs="+", help="subset of finite teacher tasks; yellow defaults to task 9")
     parser.add_argument("--reward-adapter", type=Path)
     parser.add_argument("--reward-samples", type=int, default=3)
@@ -274,7 +291,7 @@ def main():
                 "method": "expert-intervened data aggregation; not unrestricted DAgger or learned reward model",
                 "scene_mix": args.scene_mix, "seed_offset": args.seed_offset}
     manifest["source_sha256"] = {name: digest(ROOT / "microduck_qwen" / name) for name in
-        ("agent_data.py", "skills.py", "bypass.py", "navigation.py", "vision.py", "sim_data.py", "sim_runner.py", "vision_scene.py", "sim.py", "sim_body.py")}
+        ("agent_data.py", "agent_language.py", "skills.py", "bypass.py", "navigation.py", "vision.py", "sim_data.py", "sim_runner.py", "vision_scene.py", "sim.py", "sim_body.py")}
     splits = {split: [] for split in ("train", "valid", "test")}
     planner = None
     if args.base_data:
@@ -309,15 +326,21 @@ def main():
                 process = log = None
                 try:
                     process, log, info, failures = start_scene(scene_dir, seed, occlusion, args.port,
-                                                              collect_gt=True, clutter=clutter, yellow_course=args.scene_mix == "yellow")
+                                                              collect_gt=True, clutter=clutter, yellow_course=args.scene_mix == "yellow",
+                                                              varied=args.scene_mix == "varied")
                     shutil.copyfile(info["scene_file"], scene_dir / "scene.json")
                     manifest.setdefault("startup_failures", []).extend(failures)
                     variant = 1 + i % 2 if args.base_data else i % 3
-                    for index, (instruction, specs) in enumerate(tasks(split, variant)):
-                        if index not in task_ids:
-                            continue
+                    entries = [(index, instruction, specs, None) for index, (instruction, specs) in enumerate(tasks(split, variant))
+                               if index in task_ids]
+                    if args.scene_mix == "varied":
+                        scene_colors = [o["color"] for o in json.loads(Path(info["scene_file"]).read_text())["objects"].values()]
+                        language_rng = random.Random(seed)
+                        entries += [(100 + k, text, language_specs, meta) for k, (text, language_specs, meta) in enumerate(
+                            colour_tasks(split, scene_colors, language_rng, args.language_per_color, args.holdout_color))]
+                    for index, instruction, specs, meta in entries:
                         directory = scene_dir / f"task-{index:02d}"
-                        rows, report = episode(output, directory, info, split, seed, instruction, specs, planner, True)
+                        rows, report = episode(output, directory, info, split, seed, instruction, specs, planner, True, meta)
                         if args.reward_adapter:
                             stats = manifest.setdefault("reward_collection", {"sampled_proposals": 0, "distinct_proposals": 0,
                                 "accepted_steps": 0, "rejected_steps": 0, "false_accept_steps": 0, "teacher_interventions": 0})
@@ -333,8 +356,9 @@ def main():
                             # Same physically verified intent/history, explicit template paraphrases.
                             # These are NOT additional physical trajectories or independent samples.
                             augmented = []
-                            for alternative in range(3):
-                                text = tasks("train", alternative)[index][0]
+                            alternatives = ([tasks("train", alternative)[index][0] for alternative in range(3)] if meta is None
+                                             else paraphrases(meta["color"], meta["tail"], instruction, rng=language_rng))
+                            for alternative, text in enumerate(alternatives):
                                 if text != instruction:
                                     # Paraphrases were not sampled/scored by the reward model.
                                     augmented.extend(dict(
@@ -356,6 +380,10 @@ def main():
                         log.close()
         if any(not rows for rows in splits.values()):
             raise ValueError("empty split; inspect retained failures")
+        if args.holdout_color:
+            seen = {split: sum(1 for r in rows if (r.get("task_meta") or {}).get("color") == args.holdout_color) for split, rows in splits.items()}
+            if seen["train"] or not seen["valid"] or not seen["test"]:
+                raise ValueError(f"holdout colour {args.holdout_color} must be absent from train and present in valid/test: {seen}")
         manifest["status"] = "completed"
         write_splits(output, manifest, splits)
         load_splits(output)

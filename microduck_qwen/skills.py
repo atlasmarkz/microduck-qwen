@@ -29,7 +29,8 @@ def validate_action(action):
     name = action.get("action")
     keys = {
         "move": {"action", "direction", "distance_m"}, "turn": {"action", "direction", "degrees"},
-        "approach": {"action", "color", "selector" if "selector" in action else "id"}, "search": {"action", "color"},
+        "approach": {"action", "color", "selector" if "selector" in action else "id"} | ({"kind"} & set(action)),
+        "search": {"action", "color"},
         "return_home": {"action"}, "stop": {"action"}, "done": {"action"},
         "clarify": {"action"}, "unsupported": {"action"},
         "bypass_return": {"action", "side"},
@@ -47,6 +48,8 @@ def validate_action(action):
     if name in ("approach", "search") and action["color"] not in ("red", "blue", "green", "yellow"):
         raise ValueError("supported targets are red/blue/green balls and yellow pillars")
     if name == "approach":
+        if "kind" in action and action["kind"] not in ("ball", "pillar"):
+            raise ValueError("invalid target kind")
         if "selector" in action:
             if action["selector"] not in ("nearest", "leftmost", "rightmost", "only"):
                 raise ValueError("invalid target selector")
@@ -71,7 +74,8 @@ def parse_action(raw):
 
 
 def bind_target(action, candidates, position):
-    choices = [c for c in candidates or [] if c["color"] == action["color"]]
+    choices = [c for c in candidates or [] if c["color"] == action["color"]
+               and ("kind" not in action or c.get("kind", "ball") == action["kind"])]
     if "id" in action:
         selected = next((c for c in choices if c["id"] == action["id"]), None)
     else:
@@ -236,7 +240,7 @@ class SkillExecutor:
                 target = selected["world_position"]
                 if not visibility_check(capture(self.info["port"]), target, action["color"])["safe"]:
                     raise NeedsUserInput("target no longer safely visible")
-                distance = 0.45 if action["color"] == "yellow" else 0.30
+                distance = 0.45 if selected.get("kind") == "pillar" else 0.30
                 plan = {"status": "ok", "goals": [{"target": "point", "x": target[0], "y": target[1], "speed": "slow", "stop_distance_m": distance}]}
                 result["navigation"] = execute(plan, self.robot, self.observer, output.with_suffix(".jsonl"), timeout_s=40, scene=self.scene, cancel_file=self.cancel_file,
                     guard=VisualGuard(self.info["port"], target, action["color"], self.directory))

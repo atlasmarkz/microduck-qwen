@@ -42,6 +42,7 @@ def agent_prompt(instruction, memory):
             '{"action":"turn","direction":"left或right","degrees":90}；'
             '{"action":"approach","color":"red或blue或green或yellow","id":图中编号}；'
             '或{"action":"approach","color":"yellow","selector":"nearest或leftmost或rightmost或only"}；'
+            '黄色目标有球和柱子两种，可加"kind":"ball或pillar"区分，如{"action":"approach","color":"yellow","kind":"ball","selector":"only"}；'
             '{"action":"search","color":"red或blue或green或yellow"}；'
             '{"action":"return_home"}；{"action":"stop"}；{"action":"done"}；'
             '{"action":"bypass_return","side":"auto或left或right"}；'

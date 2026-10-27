@@ -116,6 +116,7 @@ def main():
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--occlusion", choices=["none", "partial", "full", "absent"], default="none")
     parser.add_argument("--clutter", action="store_true", help="duplicate ball colors and add side pillars")
+    parser.add_argument("--varied-colors", action="store_true", help="draw ball colours from red/blue/green/yellow instead of a fixed trio")
     parser.add_argument("--yellow-course", action="store_true", help="two/three yellow obstacles with room to pass and return")
     parser.add_argument("--manifest", type=Path, default=ROOT / "runs/simulator.json")
     parser.add_argument("--seconds", type=float, default=0, help="bounded smoke run; 0 keeps running")
@@ -140,7 +141,7 @@ def main():
         from .vision_scene import make_scene
 
         scene_path = args.manifest.with_suffix(".scene.json")
-        scene_path.write_text(json.dumps(make_scene(args.seed, args.occlusion, args.clutter, args.yellow_course), indent=2), encoding="utf-8")
+        scene_path.write_text(json.dumps(make_scene(args.seed, args.occlusion, args.clutter, args.yellow_course, args.varied_colors), indent=2), encoding="utf-8")
         os.environ["MICRODUCK_VISION_SCENE"] = str(scene_path.resolve())
         if args.collect_gt:
             os.environ["MICRODUCK_COLLECT_GT"] = "1"
@@ -199,6 +200,7 @@ def main():
                     "socket": ["127.0.0.1", args.control_port], "viewer": args.viewer,
                     "vision": args.vision, "seed": args.seed, "occlusion": args.occlusion,
                     "clutter": args.clutter,
+                    "varied_colors": args.varied_colors,
                     "yellow_course": args.yellow_course,
                     "scene_file": str(scene_path.resolve()) if scene_path else None,
                     "collection_ground_truth": args.collect_gt,

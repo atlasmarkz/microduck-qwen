@@ -146,6 +146,7 @@ def propose_balls(frame):
             candidates.append(
                 {
                     "color": color,
+                    "kind": "ball",
                     "bbox": [x, y, x + w, y + height],
                     "pixel": [float(u), float(vv)],
                     "world_position": position.tolist(),
@@ -163,13 +164,39 @@ def propose_balls(frame):
     return candidates
 
 
+def yellow_is_ball(detection, metadata):
+    """Yellow is a colour, not a category: a round blob of ball size is a ball.
+
+    Physical extent comes from pixel bbox and measured depth (no simulator IDs).
+    A 7 cm sphere spans about 0.14 m in both directions; the 10 cm-radius,
+    30 cm-high pillar spans 0.20 x 0.30 m. Anything not clearly ball-sized and
+    round stays a pillar, which is the conservative (refusal-prone) side.
+    """
+    x0, y0, x1, y1 = detection["bbox"]
+    width = (x1 - x0) * detection["depth"] / metadata["fx"]
+    height = (y1 - y0) * detection["depth"] / metadata["fy"]
+    return max(width, height) <= 0.18 and 0.75 <= width / max(height, 1e-6) <= 1.35
+
+
 def propose_targets(frame):
-    """Number calibrated balls and yellow 10 cm-radius, 30 cm-high pillars together."""
+    """Number calibrated balls (any colour, incl. yellow) and yellow 10 cm-radius, 30 cm-high pillars."""
     from .bypass import yellow_detections
 
     candidates = propose_balls(frame)
     for detection in yellow_detections(frame):
         surface = np.asarray(detection["surface_position"])
+        if yellow_is_ball(detection, frame.metadata):
+            ray = surface - np.asarray(frame.metadata["camera_position"])
+            position = surface + BALL_RADIUS * ray / np.linalg.norm(ray)
+            if not 0.03 < position[2] < 0.16:
+                continue  # Floor reflection, not a sphere centre above the ground.
+            expected = math.pi * (frame.metadata["fy"] * BALL_RADIUS / (detection["depth"] + BALL_RADIUS)) ** 2
+            fraction = min(1.0, detection["pixels"] / max(1.0, expected))
+            candidates.append({"color": "yellow", "kind": "ball", "bbox": detection["bbox"],
+                "pixel": detection["pixel"], "world_position": position.tolist(),
+                "surface_depth_m": detection["depth"], "visible_fraction_estimate": fraction,
+                "visibility": "visible" if fraction >= MIN_VISIBILITY and detection["valid_depth_fraction"] >= 0.8 else "partial"})
+            continue
         if not 0.04 < surface[2] < 0.35:
             continue  # Reflections on the floor are not pillars.
         ray = surface[:2] - np.asarray(frame.metadata["camera_position"][:2])
@@ -236,7 +263,7 @@ def approachable(candidate):
     the model chose is still the binding it can be held to. Below the floor the
     target is treated as not localisable and the caller must refuse or search.
     """
-    if candidate.get("color") == "yellow":
+    if candidate.get("kind") == "pillar":
         return candidate["visibility"] == "visible"
     return candidate["visibility"] == "visible" or (
         candidate["visibility"] == "partial"

@@ -3,7 +3,7 @@
 import random
 
 
-def make_scene(seed=42, occlusion="none", clutter=False, yellow_course=False):
+def make_scene(seed=42, occlusion="none", clutter=False, yellow_course=False, varied=False):
     if occlusion not in ("none", "partial", "full", "absent"):
         raise ValueError("unknown occlusion scenario")
     rng = random.Random(seed)
@@ -22,6 +22,10 @@ def make_scene(seed=42, occlusion="none", clutter=False, yellow_course=False):
         ("green", [0.04, 0.8, 0.12, 1]),
     ]
     rng.shuffle(colors)
+    if varied:
+        # Colour is a property, not a role: draw three of four colours (yellow ball
+        # included) so no colour is tied to a fixed slot or is always present.
+        colors = rng.sample(colors + [("yellow", [0.95, 0.85, 0.05, 1])], 3)
     objects = {}
     # Image-left is +y when facing +x. Jitter changes both range and azimuth.
     for index, y in enumerate((0.36, 0.0, -0.36)):
@@ -101,6 +105,7 @@ def make_scene(seed=42, occlusion="none", clutter=False, yellow_course=False):
         "seed": seed,
         "occlusion": occlusion,
         "clutter": clutter,
+        "varied": varied,
         "evaluation_only_initial_left_target": "ball_0"
         if "ball_0" in objects
         else None,
