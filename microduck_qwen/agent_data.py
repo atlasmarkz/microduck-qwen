@@ -184,6 +184,11 @@ def teacher_action(spec, verified):
     obj = min(visible, key=lambda item: item["pixel"][0])
     if obj["status"] != "visible" or obj["candidate"]["visibility"] != "visible":
         raise ValueError("teacher leftmost target not confidently visible")
+    if obj["color"] == "yellow":
+        # Yellow targets are bound by selector, never a guessed id; refuse when it is ambiguous.
+        if sum(1 for o in visible if o["color"] == "yellow" and o["candidate"]) != 1:
+            raise ValueError("several yellow balls in view; teacher leftmost target is ambiguous")
+        return validate_action({"action": "approach", "color": "yellow", "kind": "ball", "selector": "only"})
     return {"action": "approach", "color": obj["color"], "id": obj["candidate"]["id"]}
 
 

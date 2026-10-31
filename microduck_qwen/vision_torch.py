@@ -168,11 +168,11 @@ class TorchAgentPlanner:
             self.adapter = {"path": str(adapter), "sha256": report["adapter_sha256"], "backend": "torch"}
             self.model = PeftModel.from_pretrained(self.model, str(adapter)).eval()
 
-    def predict(self, instruction, image, memory):
+    def predict(self, instruction, image, memory, temperature=0.0):
         from .skills import parse_action
 
         prompt = row_prompt({"instruction": instruction, "memory": memory})
-        raw, elapsed = generate_text(self.model, self.processor, image, prompt)
+        raw, elapsed = generate_text(self.model, self.processor, image, prompt, temperature=temperature)
         result = {"instruction": instruction, "raw": raw, "latency_s": elapsed, "model": MODEL,
             "revision": REVISION, "adapter": self.adapter}
         try:
