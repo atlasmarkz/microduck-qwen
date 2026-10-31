@@ -35,6 +35,8 @@ def agent_prompt(instruction, memory):
     checked_memory(memory)
     feedback = ("\n执行器反馈：接近目标已成功完成，机器人已停稳。不要重复接近；要求停下则stop，要求回家则return_home。"
                 if memory["completed"] and memory["completed"][-1]["action"] == "approach" else "")
+    if memory["completed"] and memory["completed"][-1]["action"] == "explore":
+        feedback = "\n执行器反馈：探索已成功找到目标颜色并停稳，目标在当前图像中。现在用approach的selector=nearest靠近，不要重复explore。"
     if memory["completed"] and memory["completed"][-1]["action"] in ("bypass_return", "return_home"):
         feedback = "\n执行器反馈：绕行与回家等已完成动作已经成功验收，机器人已停稳。仅处理指令剩余要求；没有剩余要求则done，禁止重复已完成的绕行或回家。"
     return ("MicroDuck仿真。根据图像、指令和本条指令已完成动作，输出下一步的单个JSON，不要解释。"
@@ -44,11 +46,12 @@ def agent_prompt(instruction, memory):
             '或{"action":"approach","color":"yellow","selector":"nearest或leftmost或rightmost或only"}；'
             '黄色目标有球和柱子两种，可加"kind":"ball或pillar"区分，如{"action":"approach","color":"yellow","kind":"ball","selector":"only"}；'
             '{"action":"search","color":"red或blue或green或yellow"}；'
+            '{"action":"explore","color":"red或blue或green或yellow"}；'
             '{"action":"return_home"}；{"action":"stop"}；{"action":"done"}；'
             '{"action":"bypass_return","side":"auto或left或right"}；'
             '{"action":"clarify"}；{"action":"unsupported"}。'
             "移动距离0.05至0.35米，转角5至120度；未指定时移动0.2米或转90度。"
-            "靠近仅限清晰可见目标；找不到可搜索，遮挡不冒进。回初始位置用return_home（没有home时clarify）。"
+            "靠近仅限清晰可见目标；找不到可搜索，遮挡不冒进；目标颜色不在当前视野且要求去别处寻找时用explore（会穿过门洞找到后停下，之后再approach，用selector=nearest）。回初始位置用return_home（没有home时clarify）。"
             "黄色柱子禁止猜id，必须用selector：最近nearest、最左leftmost、最右rightmost，未指定用only（多根时执行器会停车询问）；接近柱子不绕行。接近后要求停下用stop，不回家。"
             "按顺序完成，已经完成不要重复；全部完成才done。踢球、跳舞、抓取等未实现技能用unsupported。"
             "依次绕过黄色障碍物并回原位用bypass_return：按任务开始距离由近到远，从一侧经过各柱后方并自动回本条任务起点；未指定侧用auto，指定左/右用left/right；不是绕整圈。此技能成功后直接done，不再重复return_home。"

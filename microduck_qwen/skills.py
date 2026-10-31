@@ -31,6 +31,7 @@ def validate_action(action):
         "move": {"action", "direction", "distance_m"}, "turn": {"action", "direction", "degrees"},
         "approach": {"action", "color", "selector" if "selector" in action else "id"} | ({"kind"} & set(action)),
         "search": {"action", "color"},
+        "explore": {"action", "color"},
         "return_home": {"action"}, "stop": {"action"}, "done": {"action"},
         "clarify": {"action"}, "unsupported": {"action"},
         "bypass_return": {"action", "side"},
@@ -45,7 +46,7 @@ def validate_action(action):
         if action["direction"] not in ("left", "right"):
             raise ValueError("invalid turn direction")
         number(action["degrees"], 5, 120)
-    if name in ("approach", "search") and action["color"] not in ("red", "blue", "green", "yellow"):
+    if name in ("approach", "search", "explore") and action["color"] not in ("red", "blue", "green", "yellow"):
         raise ValueError("supported targets are red/blue/green balls and yellow pillars")
     if name == "approach":
         if "kind" in action and action["kind"] not in ("ball", "pillar"):
@@ -245,6 +246,9 @@ class SkillExecutor:
                 result["navigation"] = execute(plan, self.robot, self.observer, output.with_suffix(".jsonl"), timeout_s=40, scene=self.scene, cancel_file=self.cancel_file,
                     guard=VisualGuard(self.info["port"], target, action["color"], self.directory))
                 result["success"] = result["navigation"]["success"]
+            elif name == "explore":
+                from .explore import run_explore
+                result.update(run_explore(self, action, output))
             elif name == "search":
                 result["turns"] = []
                 for index in range(9):

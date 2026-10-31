@@ -15,7 +15,7 @@ import shutil
 import random
 
 from . import ROOT
-from .agent_language import colour_tasks, paraphrases
+from .agent_language import colour_tasks, explore_paraphrases, explore_tasks, paraphrases
 from .agent import AgentPlanner, agent_prompt, checked_memory
 from .skills import NeedsUserInput, SkillExecutor, bind_target, memory_state, validate_action
 from .vision import propose_targets, save_frame
@@ -145,7 +145,27 @@ def tasks(split, variant=0):
     return result
 
 
+def explore_entries(info, split, seed, per_color=1):
+    """Explore-and-approach tasks for the colours that exist in the world but are not in the first view."""
+    frame, _ = collection_frame(info["port"])
+    seen = {c["color"] for c in propose_targets(frame) if c.get("kind", "ball") == "ball"}
+    scene = json.loads(Path(info["scene_file"]).read_text())
+    hidden = {o["color"] for o in scene["objects"].values()} - seen
+    return [(200 + k, text, specs, meta) for k, (text, specs, meta) in
+            enumerate(explore_tasks(split, hidden, random.Random(seed), per_color))]
+
+
 def teacher_action(spec, verified):
+    if "teacher_nearest" in spec:
+        color = spec["teacher_nearest"]
+        matches = [o for o in verified if o["color"] == color and o["status"] == "visible"
+                   and o["candidate"]["visibility"] == "visible"]
+        if not matches:
+            raise ValueError(f"no confidently visible {color} ball to approach")
+        action = {"action": "approach", "color": color, "selector": "nearest"}
+        if color == "yellow":
+            action["kind"] = "ball"
+        return validate_action(action)
     if "teacher_color" in spec:
         color = spec["teacher_color"]
         matches = [o for o in verified if o["color"] == color]
@@ -325,6 +345,8 @@ def main():
     parser.add_argument("--actor-adapter", type=Path)
     parser.add_argument("--holdout-color", choices=("red", "blue", "green", "yellow"),
                         help="varied mix: never target this colour in train; valid/test target only it (composition test)")
+    parser.add_argument("--explore-tasks", type=int, default=0,
+                        help="world mix: explore-and-approach tasks per colour hidden from the first view")
     parser.add_argument("--language-per-color", type=int, default=2, help="varied mix: colour-approach tasks per colour per scene")
     parser.add_argument("--task-ids", type=int, nargs="+", help="subset of finite teacher tasks; yellow defaults to task 9")
     parser.add_argument("--reward-adapter", type=Path)
@@ -394,6 +416,9 @@ def main():
                     variant = 1 + i % 2 if args.base_data else i % 3
                     entries = [(index, instruction, specs, None) for index, (instruction, specs) in enumerate(tasks(split, variant))
                                if index in task_ids]
+                    language_rng = random.Random(seed)
+                    if args.scene_mix == "world" and args.explore_tasks:
+                        entries += explore_entries(info, split, seed, args.explore_tasks)
                     if args.scene_mix == "varied":
                         scene_colors = [o["color"] for o in json.loads(Path(info["scene_file"]).read_text())["objects"].values()]
                         language_rng = random.Random(seed)
@@ -418,6 +443,8 @@ def main():
                             # These are NOT additional physical trajectories or independent samples.
                             augmented = []
                             alternatives = ([tasks("train", alternative)[index][0] for alternative in range(3)] if meta is None
+                                             else explore_paraphrases(meta["color"], meta["tail"], instruction, rng=language_rng)
+                                             if meta["kind"] == "explore_find"
                                              else paraphrases(meta["color"], meta["tail"], instruction, rng=language_rng))
                             for alternative, text in enumerate(alternatives):
                                 if text != instruction:

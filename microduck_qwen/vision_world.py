@@ -130,14 +130,22 @@ def make_world(seed=42, rooms=(2, 2), density=1.0):
     gate = next((d for d in doors if d["forward"]), None)
     if gate:
         add_ball(gate["x"] + rng.uniform(0.9, 1.3), max(-0.45, min(0.45, gate["y"] * 0.5 + rng.uniform(-0.15, 0.15))),
-                 rng.choice(list(BALL_COLORS)))
+                 rng.choice(names[:3]))
+    # The colour missing from the start row exists in exactly one other room, so "find the X
+    # ball" is a real search task that needs doorways, not a nearby ball.
+    others = [(r, c) for r in range(rows) for c in range(cols) if (r, c) != start]
+    if others:
+        r, c = rng.choice(others)
+        spot = free_spot(r, c, 0.07)
+        if spot:
+            add_ball(*spot, names[3])
     # Everywhere else: scattered balls and gray pillars, scaled by density.
     for r in range(rows):
         for c in range(cols):
             for _ in range(round(2 * density) + (1 if density and (r, c) != start else 0)):
                 spot = free_spot(r, c, 0.07)
                 if spot:
-                    add_ball(*spot, rng.choice(list(BALL_COLORS)))
+                    add_ball(*spot, rng.choice(names[:3]))
             for _ in range(round(1.5 * density)):
                 spot = free_spot(r, c, 0.10)
                 # Keep the start room's frontal area free for the three-ball row.

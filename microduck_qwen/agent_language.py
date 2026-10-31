@@ -58,6 +58,38 @@ def colour_tasks(split, scene_colors, rng, per_color=1, holdout_color=None):
     return tasks
 
 
+# "Find it somewhere else" tasks: the colour is not in view, so the first skill is explore.
+EXPLORE_TEMPLATES = {
+    "train": ["这里看不到{c}球，去别的房间找到它并靠近", "去找一个{c}球，找到后走到它旁边", "到其他地方找{c}球，然后靠近它"],
+    "valid": ["在别处找到{c}球并靠近它", "出去寻找{c}球，找到就走过去"],
+    "test": ["帮我找一个{c}球，找到后靠过去", "去外面找{c}球然后接近"],
+}
+
+
+def explore_phrasings(split, color):
+    words, tails = COLOR_WORDS[split][color], TAILS[split]
+    return [(t.format(c=w) + tail, kind) for t in EXPLORE_TEMPLATES[split] for w in words
+            for kind, phrases in tails.items() for tail in phrases]
+
+
+def explore_tasks(split, hidden_colors, rng, per_color=1):
+    """(instruction, specs, meta) to find and approach each colour that is NOT in the first view."""
+    tasks = []
+    for color in sorted(set(hidden_colors)):
+        forms = explore_phrasings(split, color)
+        for text, tail in rng.sample(forms, min(per_color, len(forms))):
+            specs = [{"action": "explore", "color": color}, {"teacher_nearest": color}] + (
+                [{"action": "return_home"}] if tail == "home" else [{"action": "stop"}] if tail == "stop" else [])
+            tasks.append((text, specs, {"color": color, "tail": tail, "kind": "explore_find"}))
+    return tasks
+
+
+def explore_paraphrases(color, tail, text, count=3, rng=None):
+    rng = rng or random.Random(text)
+    pool = [t for t, k in explore_phrasings("train", color) if k == tail and t != text]
+    return rng.sample(pool, min(count, len(pool)))
+
+
 def paraphrases(color, tail, text, count=3, rng=None):
     """Extra TRAIN-pool surface forms for the same verified trajectory (not new physics)."""
     rng = rng or random.Random(text)

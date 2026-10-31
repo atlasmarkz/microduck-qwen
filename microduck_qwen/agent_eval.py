@@ -7,7 +7,7 @@ from pathlib import Path
 
 from . import ROOT
 from .agent import AgentPlanner
-from .agent_data import episode, load_splits, scene_profile, tasks, world_arguments
+from .agent_data import episode, explore_entries, load_splits, scene_profile, tasks, world_arguments
 from .sim_data import digest
 from .sim_runner import start_scene, stop_process
 from .skills import parse_action
@@ -48,6 +48,8 @@ def main():
     parser.add_argument("--seed", type=int, default=91010)
     parser.add_argument("--rollout-seeds", type=int, default=1,
                         help="independent layouts for --rollout (seed, seed+1, ...); each is a separate simulator scene")
+    parser.add_argument("--explore-tasks", type=int, default=0,
+                        help="world mix: also run explore-and-approach tasks per colour hidden from the first view")
     parser.add_argument("--port", type=int, default=7872)
     parser.add_argument("--task-ids", type=int, nargs="+", default=[0, 1, 2, 3])
     parser.add_argument("--scene-mix", choices=("plain", "hard", "yellow", "world"), default="plain",
@@ -89,11 +91,13 @@ def main():
                 report["startup_failures"].extend(failures)
                 report["scenes"].append({"seed": seed, "occlusion": occlusion, "clutter": clutter})
                 try:
-                    for i in args.task_ids:
-                        instruction, specs = tasks(args.split)[i]
+                    jobs = [(i, *tasks(args.split)[i], None) for i in args.task_ids]
+                    if args.explore_tasks:
+                        jobs += explore_entries(info, args.split, seed, args.explore_tasks)
+                    for i, instruction, specs, meta in jobs:
                         directory = scene_dir / f"task-{i:02d}"
-                        _, entry = episode(output, directory, info, args.split, seed, instruction, specs, planner, False)
-                        result = {"seed": seed, "task_id": i, "correct": entry["verified"], "error": entry.get("error"),
+                        _, entry = episode(output, directory, info, args.split, seed, instruction, specs, planner, False, meta)
+                        result = {"seed": seed, "task_id": i, "instruction": instruction, "correct": entry["verified"], "error": entry.get("error"),
                                   "layers": entry.get("layers"), "episode": str(directory / "episode.json")}
                         report["results"].append(result)
                         report["correct"] += result["correct"]
