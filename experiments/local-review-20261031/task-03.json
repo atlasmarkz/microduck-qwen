@@ -1,0 +1,140 @@
+{
+  "instruction": "靠近照片里最左侧的球，之后返回起点",
+  "teacher_specs": [
+    {
+      "teacher_target": "left"
+    },
+    {
+      "action": "return_home"
+    }
+  ],
+  "steps": [
+    {
+      "expected": {
+        "action": "approach",
+        "color": "green",
+        "id": 4
+      },
+      "memory": {
+        "home_recorded": true,
+        "odometry_relative_home": {
+          "x": -0.08,
+          "y": 0.06,
+          "yaw_deg": 1.7
+        },
+        "completed": []
+      },
+      "prediction": {
+        "instruction": "靠近照片里最左侧的球，之后返回起点",
+        "raw": "{\"action\":\"approach\",\"color\":\"green\",\"selector\":\"leftmost\"}",
+        "latency_s": 2.1330545999990136,
+        "model": "Qwen/Qwen3-VL-4B-Instruct",
+        "revision": "ebb281ec70b05090aa6165b016eac8ec08e71b17",
+        "adapter": {
+          "path": "adapters\\agent-yellow-v1",
+          "sha256": "1afcbaad9e8f91d64cecfaee1f04e3200f1057bd71be7718b93a8ed6dfab1a94",
+          "backend": "torch"
+        },
+        "action": {
+          "action": "approach",
+          "color": "green",
+          "selector": "leftmost"
+        }
+      },
+      "semantic_match": false,
+      "teacher_intervened": false,
+      "execution": {
+        "action": {
+          "action": "approach",
+          "color": "green",
+          "selector": "leftmost"
+        },
+        "success": true,
+        "observation": "oracle robot odometry and known safety map",
+        "bound_target": {
+          "color": "green",
+          "kind": "ball",
+          "bbox": [
+            175,
+            155,
+            212,
+            188
+          ],
+          "pixel": [
+            193.15047021943573,
+            170.9007314524556
+          ],
+          "world_position": [
+            1.2035340770591536,
+            0.6277839822492173,
+            0.06884488350350715
+          ],
+          "surface_depth_m": 1.1361114978790283,
+          "visible_fraction_estimate": 1.0,
+          "visibility": "visible",
+          "id": 4
+        },
+        "navigation": {
+          "success": true,
+          "goals": [
+            {
+              "goal": {
+                "target": "point",
+                "x": 1.2035340770591536,
+                "y": 0.6277839822492173,
+                "speed": "slow",
+                "stop_distance_m": 0.3
+              },
+              "distance_m": 0.3188826051731827,
+              "elapsed_s": 11.485000000000582,
+              "path_length_m": 1.6508219276068605,
+              "min_clearance_m": 0.07468561387957506,
+              "position": [
+                0.8874638868666289,
+                0.5855258380200017
+              ]
+            }
+          ],
+          "observation": "MuJoCo ground-truth pose and fixed scene map"
+        }
+      }
+    }
+  ],
+  "verified": false,
+  "intervene": false,
+  "mode": "independent_actor",
+  "reset": {
+    "action": {
+      "action": "return_home"
+    },
+    "success": true,
+    "observation": "oracle robot odometry and known safety map",
+    "navigation": {
+      "success": true,
+      "goals": [
+        {
+          "goal": {
+            "target": "point",
+            "x": 0.002095174313935256,
+            "y": 0.00012426120713048932,
+            "speed": "slow",
+            "stop_distance_m": 0.1
+          },
+          "distance_m": 0.09610113519475996,
+          "elapsed_s": 0.0,
+          "path_length_m": 0.0,
+          "min_clearance_m": 0.5720809297845894,
+          "position": [
+            -0.07464975554718309,
+            0.057965802735115
+          ]
+        }
+      ],
+      "observation": "MuJoCo ground-truth pose and fixed scene map"
+    },
+    "distance_home_m": 0.09610113519475996,
+    "home_yaw_error_deg": 1.7333720264658365
+  },
+  "error": "failed physical skill or wrong task action (scored AFTER execution)",
+  "scene_contact_steps_delta": 0
+}

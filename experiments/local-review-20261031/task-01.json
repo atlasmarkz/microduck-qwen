@@ -1,0 +1,230 @@
+{
+  "instruction": "先向后退20厘米，随后回到出发点",
+  "teacher_specs": [
+    {
+      "action": "move",
+      "direction": "backward",
+      "distance_m": 0.2
+    },
+    {
+      "action": "return_home"
+    }
+  ],
+  "steps": [
+    {
+      "expected": {
+        "action": "move",
+        "direction": "backward",
+        "distance_m": 0.2
+      },
+      "memory": {
+        "home_recorded": true,
+        "odometry_relative_home": {
+          "x": 0.1,
+          "y": -0.0,
+          "yaw_deg": -6.3
+        },
+        "completed": []
+      },
+      "prediction": {
+        "instruction": "先向后退20厘米，随后回到出发点",
+        "raw": "{\"action\":\"move\",\"direction\":\"backward\",\"distance_m\":0.2}",
+        "latency_s": 2.332595299998502,
+        "model": "Qwen/Qwen3-VL-4B-Instruct",
+        "revision": "ebb281ec70b05090aa6165b016eac8ec08e71b17",
+        "adapter": {
+          "path": "adapters\\agent-yellow-v1",
+          "sha256": "1afcbaad9e8f91d64cecfaee1f04e3200f1057bd71be7718b93a8ed6dfab1a94",
+          "backend": "torch"
+        },
+        "action": {
+          "action": "move",
+          "direction": "backward",
+          "distance_m": 0.2
+        }
+      },
+      "semantic_match": true,
+      "teacher_intervened": false,
+      "execution": {
+        "action": {
+          "action": "move",
+          "direction": "backward",
+          "distance_m": 0.2
+        },
+        "success": true,
+        "observation": "oracle robot odometry and known safety map",
+        "achieved": 0.2171760372572762,
+        "requested": 0.2,
+        "units": "meters",
+        "lateral_m": 0.02171926621836665,
+        "start": {
+          "position": [
+            0.10146440574254666,
+            -0.001114811140384276
+          ],
+          "yaw": -0.13581535843660508
+        },
+        "end": {
+          "position": [
+            -0.1107709647140712,
+            0.049809693874198674
+          ],
+          "yaw": -0.2411243121069076
+        }
+      }
+    },
+    {
+      "expected": {
+        "action": "return_home"
+      },
+      "memory": {
+        "home_recorded": true,
+        "odometry_relative_home": {
+          "x": -0.12,
+          "y": 0.04,
+          "yaw_deg": -12.5
+        },
+        "completed": [
+          {
+            "action": "move",
+            "direction": "backward",
+            "distance_m": 0.2
+          }
+        ]
+      },
+      "prediction": {
+        "instruction": "先向后退20厘米，随后回到出发点",
+        "raw": "{\"action\":\"return_home\"}",
+        "latency_s": 1.374902799998381,
+        "model": "Qwen/Qwen3-VL-4B-Instruct",
+        "revision": "ebb281ec70b05090aa6165b016eac8ec08e71b17",
+        "adapter": {
+          "path": "adapters\\agent-yellow-v1",
+          "sha256": "1afcbaad9e8f91d64cecfaee1f04e3200f1057bd71be7718b93a8ed6dfab1a94",
+          "backend": "torch"
+        },
+        "action": {
+          "action": "return_home"
+        }
+      },
+      "semantic_match": true,
+      "teacher_intervened": false,
+      "execution": {
+        "action": {
+          "action": "return_home"
+        },
+        "success": true,
+        "observation": "oracle robot odometry and known safety map",
+        "navigation": {
+          "success": true,
+          "goals": [
+            {
+              "goal": {
+                "target": "point",
+                "x": 0.002095174313935256,
+                "y": 0.00012426120713048932,
+                "speed": "slow",
+                "stop_distance_m": 0.1
+              },
+              "distance_m": 0.09806677384471595,
+              "elapsed_s": 0.5,
+              "path_length_m": 0.05167992373797321,
+              "min_clearance_m": 0.5796917436379753,
+              "position": [
+                -0.08100724481532447,
+                0.052192294271339
+              ]
+            }
+          ],
+          "observation": "MuJoCo ground-truth pose and fixed scene map"
+        },
+        "distance_home_m": 0.09806677384471595,
+        "home_yaw_error_deg": 0.3944483797217028
+      }
+    },
+    {
+      "expected": {
+        "action": "done"
+      },
+      "memory": {
+        "home_recorded": true,
+        "odometry_relative_home": {
+          "x": -0.08,
+          "y": 0.05,
+          "yaw_deg": 1.1
+        },
+        "completed": [
+          {
+            "action": "move",
+            "direction": "backward",
+            "distance_m": 0.2
+          },
+          {
+            "action": "return_home"
+          }
+        ]
+      },
+      "prediction": {
+        "instruction": "先向后退20厘米，随后回到出发点",
+        "raw": "{\"action\":\"done\"}",
+        "latency_s": 1.1765182000017376,
+        "model": "Qwen/Qwen3-VL-4B-Instruct",
+        "revision": "ebb281ec70b05090aa6165b016eac8ec08e71b17",
+        "adapter": {
+          "path": "adapters\\agent-yellow-v1",
+          "sha256": "1afcbaad9e8f91d64cecfaee1f04e3200f1057bd71be7718b93a8ed6dfab1a94",
+          "backend": "torch"
+        },
+        "action": {
+          "action": "done"
+        }
+      },
+      "semantic_match": true,
+      "teacher_intervened": false,
+      "execution": {
+        "action": {
+          "action": "done"
+        },
+        "success": false,
+        "observation": "oracle robot odometry and known safety map",
+        "no_motion": true
+      }
+    }
+  ],
+  "verified": true,
+  "intervene": false,
+  "mode": "independent_actor",
+  "reset": {
+    "action": {
+      "action": "return_home"
+    },
+    "success": true,
+    "observation": "oracle robot odometry and known safety map",
+    "navigation": {
+      "success": true,
+      "goals": [
+        {
+          "goal": {
+            "target": "point",
+            "x": 0.002095174313935256,
+            "y": 0.00012426120713048932,
+            "speed": "slow",
+            "stop_distance_m": 0.1
+          },
+          "distance_m": 0.0987350104613524,
+          "elapsed_s": 0.0,
+          "path_length_m": 0.0,
+          "min_clearance_m": 0.42566618097068043,
+          "position": [
+            0.10080001854443342,
+            -0.0023162338730654325
+          ]
+        }
+      ],
+      "observation": "MuJoCo ground-truth pose and fixed scene map"
+    },
+    "distance_home_m": 0.10010437351412158,
+    "home_yaw_error_deg": 6.0264889362561584
+  },
+  "scene_contact_steps_delta": 0
+}

@@ -1,0 +1,44 @@
+{
+  "mode": "independent_actor_rollout",
+  "adapter": {
+    "path": "adapters\\agent-yellow-v1",
+    "sha256": "1afcbaad9e8f91d64cecfaee1f04e3200f1057bd71be7718b93a8ed6dfab1a94",
+    "backend": "torch"
+  },
+  "split": "valid",
+  "dataset_manifest_sha256": "14df93c6bd46c447f089aff5462396234198d1ccf7ffb1c20dfc1fbb10d04a8c",
+  "results": [
+    {
+      "task_id": 0,
+      "correct": true,
+      "error": null,
+      "episode": ".\\runs\\local-review-20261031\\task-00\\episode.json"
+    },
+    {
+      "task_id": 1,
+      "correct": true,
+      "error": null,
+      "episode": ".\\runs\\local-review-20261031\\task-01\\episode.json"
+    },
+    {
+      "task_id": 2,
+      "correct": true,
+      "error": null,
+      "episode": ".\\runs\\local-review-20261031\\task-02\\episode.json"
+    },
+    {
+      "task_id": 3,
+      "correct": false,
+      "error": "failed physical skill or wrong task action (scored AFTER execution)",
+      "episode": ".\\runs\\local-review-20261031\\task-03\\episode.json"
+    }
+  ],
+  "correct": 3,
+  "total": 4,
+  "note": "Development pilot. Rollout teacher is scorer AFTER execution, never a semantic intervention.",
+  "scene_seed": 93010,
+  "scene_mix": "hard",
+  "occlusion": "partial",
+  "clutter": true,
+  "startup_failures": []
+}
