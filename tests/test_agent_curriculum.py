@@ -6,7 +6,7 @@ import unittest
 from unittest.mock import patch
 
 from microduck_qwen import agent_curriculum
-from microduck_qwen.agent_curriculum import decide, held_out_seed
+from microduck_qwen.agent_curriculum import decide, free_seed_offset, held_out_seed
 
 
 class DecisionTests(unittest.TestCase):
@@ -24,6 +24,12 @@ class DecisionTests(unittest.TestCase):
         self.assertFalse(accepted)
         self.assertIn("forgot", reasons[0])
         self.assertFalse(decide((6, 12), (9, 12), {0: (12, 12)}, {}, 0.25)[0])
+
+    def test_correction_offset_skips_seeds_already_in_the_parent_data(self):
+        rows = lambda *seeds: [{"scene_seed": seed} for seed in seeds]
+        self.assertEqual(free_seed_offset({"train": rows(60000)}, 0, 2), 100)
+        self.assertEqual(free_seed_offset({"train": rows(61100, 61101), "valid": rows(71100)}, 0, 2), 200)
+        self.assertEqual(free_seed_offset({"train": rows(61700)}, 3, 1), 800)
 
     def test_held_out_seeds_are_per_level_and_outside_training_ranges(self):
         seeds = [held_out_seed(level) for level in range(4)]

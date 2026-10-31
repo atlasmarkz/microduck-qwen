@@ -27,6 +27,17 @@ def held_out_seed(level):
     return HELD_OUT_BASE + 100 * level
 
 
+def free_seed_offset(splits, level, scenes):
+    """First correction seed offset (agent_data: 61000 + offset) clear of every scene seed in the parent data."""
+    used = {row["scene_seed"] for rows in splits.values() for row in rows}
+    offset = 100 + 200 * level
+    while any(61000 + offset + i in used for i in range(scenes)):
+        offset += 100
+    if offset > 5000:
+        raise ValueError("no free correction seed range")
+    return offset
+
+
 def decide(before, after, earlier_before, earlier_after, tolerance):
     """Accept a trained adapter only if it helps (or holds) its level and forgets nothing badly.
 
@@ -113,10 +124,11 @@ def main():
                 save()
                 continue
             cycle_name = f"{args.name}-L{level}"
+            offset = free_seed_offset(load_splits(data)[1], level, args.correction_scenes)
             run("agent_cycle", "--initial-data", data, "--initial-adapter", adapter, "--name", cycle_name,
                 "--rounds", args.rounds, "--steps", args.steps, "--no-reward-guided", "--collect-first",
                 "--scene-mix", "world", "--world-level", level, "--correction-scenes", args.correction_scenes,
-                "--seed-offset", 100 + 200 * level)
+                "--seed-offset", offset)
             cycle = json.loads((ROOT / "runs/agent-cycle" / cycle_name / "cycle.json").read_text())
             entry["cycle"] = str(ROOT / "runs/agent-cycle" / cycle_name / "cycle.json")
             if not cycle.get("selected_adapter"):
