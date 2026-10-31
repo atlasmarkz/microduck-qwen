@@ -28,6 +28,9 @@ def main():
     parser.add_argument("--scene-mix", choices=("plain", "hard", "yellow"), default="plain",
                         help="scene difficulty for correction collection and rollouts")
     parser.add_argument("--rollout", action="store_true", help="also test 4 independent physical tasks each round")
+    parser.add_argument("--rollout-seeds", type=int, default=1, help="independent layouts per rollout round")
+    parser.add_argument("--rollout-min-rate", type=float, default=1.0,
+                        help="physical success rate a round needs to qualify (1.0 = every task, the historical gate)")
     args = parser.parse_args()
     if args.reward_guided and os.name != "nt":
         parser.error("reward-guided iteration currently requires the Windows CUDA backend")
@@ -35,6 +38,8 @@ def main():
         parser.error("invalid bounded reward budget/threshold")
     if not 1 <= args.rounds <= 3 or not 1 <= args.steps <= 300 or not 1 <= args.correction_scenes <= 10 or not 100 <= args.seed_offset <= 5000:
         parser.error("bounded small-Mac iteration budget exceeded")
+    if not 1 <= args.rollout_seeds <= 50 or not 0 <= args.rollout_min_rate <= 1:
+        parser.error("invalid rollout seeds/min rate")
     if Path(args.name).name != args.name or args.name in (".", ".."):
         parser.error("name must be one path component")
     manifest, splits = load_splits(args.initial_data)
@@ -117,13 +122,15 @@ def main():
             if args.rollout:
                 rollout = output / f"r{index}-rollout"
                 run("agent_eval", "--data", data, "--adapter", adapter, "--output", rollout, "--rollout",
-                    "--scene-mix", args.scene_mix, *(["--task-ids", 9] if args.scene_mix == "yellow" else []))
+                    "--scene-mix", args.scene_mix, "--rollout-seeds", args.rollout_seeds,
+                    *(["--task-ids", 9] if args.scene_mix == "yellow" else []))
                 physical = json.loads((rollout / "report.json").read_text())
-                entry.update(rollout_correct=physical["correct"], rollout_total=physical["total"])
+                entry.update(rollout_correct=physical["correct"], rollout_total=physical["total"],
+                             rollout_wilson95=physical.get("wilson95"), rollout_layers=physical.get("layers"))
             score = entry["valid_correct"] / entry["valid_total"]
             qualifies = score >= report["baseline"]["correct"] / report["baseline"]["total"]
             if args.rollout:
-                qualifies &= entry["rollout_correct"] == entry["rollout_total"]
+                qualifies &= entry["rollout_total"] > 0 and entry["rollout_correct"] / entry["rollout_total"] >= args.rollout_min_rate
             if qualifies and score > best:
                 best, report["selected_adapter"] = score, str(adapter)
             report["rounds"].append(entry)

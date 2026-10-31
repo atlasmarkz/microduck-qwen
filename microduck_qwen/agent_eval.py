@@ -27,6 +27,17 @@ def semantic_match(raw, expected):
         return False
 
 
+def wilson_interval(correct, total, z=1.96):
+    """95% Wilson score interval for a success rate; (0, 1) when nothing was measured."""
+    if total <= 0:
+        return 0.0, 1.0
+    p = correct / total
+    denominator = 1 + z * z / total
+    centre = (p + z * z / (2 * total)) / denominator
+    half = z * ((p * (1 - p) / total + z * z / (4 * total * total)) ** 0.5) / denominator
+    return max(0.0, centre - half), min(1.0, centre + half)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--data", type=Path, required=True)
@@ -35,13 +46,18 @@ def main():
     parser.add_argument("--split", choices=("valid", "test"), default="valid")
     parser.add_argument("--rollout", action="store_true")
     parser.add_argument("--seed", type=int, default=91010)
+    parser.add_argument("--rollout-seeds", type=int, default=1,
+                        help="independent layouts for --rollout (seed, seed+1, ...); each is a separate simulator scene")
     parser.add_argument("--port", type=int, default=7872)
     parser.add_argument("--task-ids", type=int, nargs="+", default=[0, 1, 2, 3])
     parser.add_argument("--scene-mix", choices=("plain", "hard", "yellow"), default="plain",
                         help="rollout scene difficulty; must match the collected data")
     args = parser.parse_args()
     manifest, splits = load_splits(args.data)
-    if args.rollout and args.seed in {row["scene_seed"] for values in splits.values() for row in values}:
+    if not 1 <= args.rollout_seeds <= 50:
+        parser.error("--rollout-seeds must be 1..50")
+    rollout_seeds = [args.seed + k for k in range(args.rollout_seeds)]
+    if args.rollout and set(rollout_seeds) & {row["scene_seed"] for values in splits.values() for row in values}:
         parser.error("rollout seed must be outside all training/development/test scenes")
     if any(i < 0 or i >= len(tasks(args.split)) for i in args.task_ids):
         parser.error("invalid task ID")
@@ -57,20 +73,38 @@ def main():
     process = log = None
     try:
         if args.rollout:
-            occlusion, clutter = scene_profile(args.split, 0, args.scene_mix)
-            process, log, info, failures = start_scene(output, args.seed, occlusion, args.port,
-                                                       collect_gt=True, clutter=clutter, yellow_course=args.scene_mix == "yellow")
-            report.update(scene_seed=args.seed, scene_mix=args.scene_mix,
-                          occlusion=occlusion, clutter=clutter, startup_failures=failures)
-            for i in args.task_ids:
-                instruction, specs = tasks(args.split)[i]
-                _, entry = episode(output, output / f"task-{i:02d}", info, args.split, args.seed, instruction, specs, planner, False)
-                result = {"task_id": i, "correct": entry["verified"], "error": entry.get("error"), "episode": str(output / f"task-{i:02d}/episode.json")}
-                report["results"].append(result)
-                report["correct"] += result["correct"]
-                report["total"] += 1
-                save()
-                print(json.dumps(result, ensure_ascii=False), flush=True)
+            report.update(scene_seed=args.seed, scene_seeds=rollout_seeds, scene_mix=args.scene_mix,
+                          startup_failures=[], scenes=[],
+                          layers={name: 0 for name in ("format_ok", "action_type_ok", "target_ok", "physical_ok", "task_ok")})
+            for k, seed in enumerate(rollout_seeds):
+                # One seed keeps the historical flat layout; several get one directory each.
+                scene_dir = output if args.rollout_seeds == 1 else output / f"seed-{seed}"
+                scene_dir.mkdir(exist_ok=True)
+                occlusion, clutter = scene_profile(args.split, k, args.scene_mix)
+                process, log, info, failures = start_scene(scene_dir, seed, occlusion, args.port,
+                                                           collect_gt=True, clutter=clutter, yellow_course=args.scene_mix == "yellow")
+                report["startup_failures"].extend(failures)
+                report["scenes"].append({"seed": seed, "occlusion": occlusion, "clutter": clutter})
+                try:
+                    for i in args.task_ids:
+                        instruction, specs = tasks(args.split)[i]
+                        directory = scene_dir / f"task-{i:02d}"
+                        _, entry = episode(output, directory, info, args.split, seed, instruction, specs, planner, False)
+                        result = {"seed": seed, "task_id": i, "correct": entry["verified"], "error": entry.get("error"),
+                                  "layers": entry.get("layers"), "episode": str(directory / "episode.json")}
+                        report["results"].append(result)
+                        report["correct"] += result["correct"]
+                        report["total"] += 1
+                        for name, ok in (result["layers"] or {}).items():
+                            report["layers"][name] += bool(ok)
+                        low, high = wilson_interval(report["correct"], report["total"])
+                        report["wilson95"] = [round(low, 4), round(high, 4)]
+                        save()
+                        print(json.dumps(result, ensure_ascii=False), flush=True)
+                finally:
+                    stop_process(process)
+                    log.close()
+                    process = log = None
         else:
             for row in splits[args.split]:
                 prediction = planner.predict(row["instruction"], args.data / row["image"], row["memory"])

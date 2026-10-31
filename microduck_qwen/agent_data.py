@@ -17,7 +17,7 @@ import random
 from . import ROOT
 from .agent_language import colour_tasks, paraphrases
 from .agent import AgentPlanner, agent_prompt, checked_memory
-from .skills import SkillExecutor, memory_state, validate_action
+from .skills import NeedsUserInput, SkillExecutor, bind_target, memory_state, validate_action
 from .vision import propose_targets, save_frame
 from .sim_data import collection_frame, digest, request, verify_objects
 from .sim_runner import start_scene, stop_process
@@ -159,6 +159,39 @@ def teacher_action(spec, verified):
     return {"action": "approach", "color": obj["color"], "id": obj["candidate"]["id"]}
 
 
+def same_action(action, expected, candidates, position):
+    """Whether an actor action is the teacher's action, judged by what it does.
+
+    Approach targets are compared after binding: `selector=leftmost` and the
+    teacher's `id=4` are the same action when both bind the same current-frame
+    candidate. Anything that fails to bind, or binds a different object, is a
+    different action. Every other action must match exactly. Used only to SCORE
+    independent rollouts; labels and execution still use the strict schema.
+    """
+    if action == expected:
+        return True
+    if not action or action.get("action") != "approach" or expected.get("action") != "approach":
+        return False
+    try:
+        chosen = bind_target(action, candidates, position)
+        wanted = bind_target(expected, candidates, position)
+    except NeedsUserInput:
+        return False
+    return chosen["id"] == wanted["id"] and chosen["color"] == wanted["color"]
+
+
+def score_layers(report):
+    """Separate why an independent episode failed: format, action type, target, motion, task."""
+    steps = report["steps"]
+    return {
+        "format_ok": report.get("error") != "invalid actor JSON",
+        "action_type_ok": all(s.get("action_type_ok", True) for s in steps),
+        "target_ok": all(s.get("target_ok", True) for s in steps),
+        "physical_ok": all(s.get("physical_ok", False) for s in steps if "execution" in s),
+        "task_ok": bool(report["verified"]),
+    }
+
+
 def episode(output, directory, info, split, seed, instruction, specs, planner=None, intervene=True, meta=None):
     directory.mkdir(parents=True)
     report = {"instruction": instruction, "teacher_specs": specs, "steps": [], "verified": False,
@@ -198,17 +231,30 @@ def episode(output, directory, info, split, seed, instruction, specs, planner=No
                         report["error"] = "invalid actor JSON"
                         report["steps"].append(step)
                         break
+            equivalent = True
+            if not intervene:
+                # Judge by effect, before the body moves: binding uses this frame and pose.
+                equivalent = same_action(action, expected, candidates, executor.healthy()["trunk"][:2])
+                both_approach = action["action"] == expected["action"] == "approach"
+                step.update(equivalent_to_teacher=equivalent, exact_match=action == expected,
+                            action_type_ok=action["action"] == expected["action"],
+                            # Target correctness only exists for approach steps; any other
+                            # mismatch is an action-type or parameter error, not a wrong target.
+                            target_ok=equivalent or not both_approach)
             result = executor.run(action, candidates)
             step["execution"] = result
             report["steps"].append(step)
             terminal = action["action"] in ("done", "stop", "clarify", "unsupported")
             physical_ok = result["success"] or terminal
-            if not physical_ok or (not intervene and action != expected):
+            step["physical_ok"] = bool(physical_ok)
+            if not physical_ok or not equivalent:
                 report["error"] = "failed physical skill or wrong task action (scored AFTER execution)"
                 break
             if action["action"] == "approach":
+                bound = result.get("bound_target")
+                ident = bound["id"] if bound else action.get("id")
                 obj = next(o for o in verified if o["candidate"] and o["color"] == action["color"]
-                           and ("id" not in action or o["candidate"]["id"] == action["id"]))
+                           and o["candidate"]["id"] == ident)
                 target = executor.scene["objects"][obj["name"]]
                 import math
                 distance = math.dist(executor.healthy()["trunk"][:2], [target["x"], target["y"]])
@@ -238,6 +284,8 @@ def episode(output, directory, info, split, seed, instruction, specs, planner=No
         try:
             executor.close()
         finally:
+            if not intervene:
+                report["layers"] = score_layers(report)
             (directory / "episode.json").write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n")
     # Failed episodes never become successful demos; raw failures retained in sidecar.
     return rows if report["verified"] else [], report

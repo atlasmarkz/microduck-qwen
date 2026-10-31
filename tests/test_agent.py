@@ -239,6 +239,46 @@ class AgentTests(unittest.TestCase):
         from microduck_qwen.vision_torch import row_prompt
         self.assertEqual(row_prompt({"prompt": "已经构造好的提示"}), "已经构造好的提示")
 
+    def test_equivalent_target_forms_are_one_action_and_other_targets_are_not(self):
+        from microduck_qwen.agent_data import same_action
+        left = {"id": 4, "color": "red", "world_position": [1.0, 0.4, 0.07], "pixel": [50, 40], "visibility": "visible"}
+        mid = {"id": 2, "color": "red", "world_position": [1.0, 0.0, 0.07], "pixel": [150, 40], "visibility": "visible"}
+        blue = {"id": 1, "color": "blue", "world_position": [1.0, -0.4, 0.07], "pixel": [250, 40], "visibility": "visible"}
+        scene = [mid, left, blue]
+        teacher = {"action": "approach", "color": "red", "id": 4}
+        leftmost = {"action": "approach", "color": "red", "selector": "leftmost"}
+        self.assertTrue(same_action(leftmost, teacher, scene, [0, 0]))
+        self.assertTrue(same_action(teacher, teacher, scene, [0, 0]))
+        # Same colour, different object; wrong colour; unbindable id: all different actions.
+        self.assertFalse(same_action({"action": "approach", "color": "red", "selector": "rightmost"}, teacher, scene, [0, 0]))
+        self.assertFalse(same_action({"action": "approach", "color": "blue", "id": 1}, teacher, scene, [0, 0]))
+        self.assertFalse(same_action({"action": "approach", "color": "red", "id": 9}, teacher, scene, [0, 0]))
+        self.assertFalse(same_action({"action": "approach", "color": "red", "selector": "only"}, teacher, scene, [0, 0]))
+        # Non-approach actions stay strictly compared.
+        move = {"action": "move", "direction": "forward", "distance_m": 0.2}
+        self.assertTrue(same_action(dict(move), move, scene, [0, 0]))
+        self.assertFalse(same_action(dict(move, distance_m=0.25), move, scene, [0, 0]))
+        self.assertFalse(same_action({"action": "done"}, teacher, scene, [0, 0]))
+
+    def test_layered_scoring_separates_format_type_target_and_motion(self):
+        from microduck_qwen.agent_data import score_layers
+        ok = {"steps": [{"equivalent_to_teacher": True, "action_type_ok": True, "execution": {}, "physical_ok": True}], "verified": True}
+        self.assertEqual(score_layers(ok), dict(format_ok=True, action_type_ok=True, target_ok=True, physical_ok=True, task_ok=True))
+        wrong_target = {"steps": [{"target_ok": False, "action_type_ok": True, "execution": {}, "physical_ok": True}], "verified": False}
+        layers = score_layers(wrong_target)
+        self.assertTrue(layers["action_type_ok"] and layers["physical_ok"])
+        self.assertFalse(layers["target_ok"] or layers["task_ok"])
+        self.assertFalse(score_layers({"steps": [], "verified": False, "error": "invalid actor JSON"})["format_ok"])
+
+    def test_wilson_interval_brackets_the_rate_and_widens_for_small_samples(self):
+        from microduck_qwen.agent_eval import wilson_interval
+        self.assertEqual(wilson_interval(0, 0), (0.0, 1.0))
+        low, high = wilson_interval(3, 4)
+        self.assertTrue(low < 0.75 < high)
+        self.assertGreater(high - low, wilson_interval(30, 40)[1] - wilson_interval(30, 40)[0])
+        self.assertEqual(wilson_interval(10, 10)[1], 1.0)
+        self.assertLess(wilson_interval(10, 10)[0], 1.0)
+
 
 if __name__ == "__main__":
     unittest.main()
