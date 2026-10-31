@@ -5,6 +5,7 @@ Motor conversion mirrors microduck_rl/scripts/infer_policy.py; upstream files ar
 
 from .contract import arena
 import json
+import math
 import os
 import time
 from pathlib import Path
@@ -86,6 +87,19 @@ def configure_body():
                 contype=1 if obj["collidable"] else 0,
                 conaffinity=1 if obj["collidable"] else 0,
             )
+        for wall in scene.get("walls", []):
+            dx, dy = wall["x2"] - wall["x1"], wall["y2"] - wall["y1"]
+            yaw = math.atan2(dy, dx)
+            spec.worldbody.add_geom(
+                name=wall["name"],
+                type=mujoco.mjtGeom.mjGEOM_BOX,
+                pos=[(wall["x1"] + wall["x2"]) / 2, (wall["y1"] + wall["y2"]) / 2, wall["height"] / 2],
+                size=[math.hypot(dx, dy) / 2 + wall["thickness"] / 2, wall["thickness"] / 2, wall["height"] / 2],
+                quat=[math.cos(yaw / 2), 0, 0, math.sin(yaw / 2)],
+                rgba=wall["rgba"],
+                contype=1,
+                conaffinity=1,
+            )
         for obj in scene["obstacles"]:
             spec.worldbody.add_geom(
                 name=obj["name"],
@@ -134,7 +148,7 @@ def configure_body():
             self.collection_stats = {"steps_with_scene_contact": 0, "minimum_contact_distance_m": None}
             self.scene_geoms = {i for i in range(self.model.ngeom)
                                 if (self.model.geom(i).name or "").startswith("goal_")
-                                or (self.model.geom(i).name or "") in {o["name"] for o in scene["obstacles"]}}
+                                or (self.model.geom(i).name or "") in {o["name"] for o in scene["obstacles"] + scene.get("walls", [])}}
 
         def step(self, times=1):
             with self.lock:

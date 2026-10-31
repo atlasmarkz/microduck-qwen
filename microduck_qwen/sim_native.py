@@ -118,11 +118,15 @@ def main():
     parser.add_argument("--clutter", action="store_true", help="duplicate ball colors and add side pillars")
     parser.add_argument("--varied-colors", action="store_true", help="draw ball colours from red/blue/green/yellow instead of a fixed trio")
     parser.add_argument("--yellow-course", action="store_true", help="two/three yellow obstacles with room to pass and return")
+    parser.add_argument("--world", type=int, nargs=2, metavar=("ROWS", "COLS"), help="multi-room world of ROWS x COLS rooms")
+    parser.add_argument("--density", type=float, default=1.0, help="world clutter density 0..4")
     parser.add_argument("--manifest", type=Path, default=ROOT / "runs/simulator.json")
     parser.add_argument("--seconds", type=float, default=0, help="bounded smoke run; 0 keeps running")
     args = parser.parse_args()
     if args.yellow_course and (not args.vision or args.clutter or args.occlusion != "none"):
         parser.error("--yellow-course requires --vision and no ball occlusion/clutter flags")
+    if args.world and (not args.vision or args.clutter or args.yellow_course or args.occlusion != "none" or args.varied_colors):
+        parser.error("--world requires --vision and excludes the other scene profiles")
     args.control_port = args.control_port or args.port + 10
     if args.collect_gt and not args.vision:
         parser.error("--collect-gt requires --vision")
@@ -139,9 +143,12 @@ def main():
     scene_path = None
     if args.vision:
         from .vision_scene import make_scene
+        from .vision_world import make_world
 
         scene_path = args.manifest.with_suffix(".scene.json")
-        scene_path.write_text(json.dumps(make_scene(args.seed, args.occlusion, args.clutter, args.yellow_course, args.varied_colors), indent=2), encoding="utf-8")
+        scene = (make_world(args.seed, tuple(args.world), args.density) if args.world else
+                 make_scene(args.seed, args.occlusion, args.clutter, args.yellow_course, args.varied_colors))
+        scene_path.write_text(json.dumps(scene, indent=2), encoding="utf-8")
         os.environ["MICRODUCK_VISION_SCENE"] = str(scene_path.resolve())
         if args.collect_gt:
             os.environ["MICRODUCK_COLLECT_GT"] = "1"
@@ -202,6 +209,7 @@ def main():
                     "clutter": args.clutter,
                     "varied_colors": args.varied_colors,
                     "yellow_course": args.yellow_course,
+                    "world": args.world,
                     "scene_file": str(scene_path.resolve()) if scene_path else None,
                     "collection_ground_truth": args.collect_gt,
                     "policy": args.policy.resolve().relative_to(ROOT).as_posix(),

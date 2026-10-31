@@ -24,7 +24,7 @@ def stop_process(process):
             process.wait()
 
 
-def start_scene(case_directory, seed, occlusion, port, collect_gt=False, clutter=False, yellow_course=False, varied=False):
+def start_scene(case_directory, seed, occlusion, port, collect_gt=False, clutter=False, yellow_course=False, varied=False, world=None, density=1.0):
     failures = []
     for attempt in range(2):
         manifest = case_directory / f"simulator-{attempt}.json"
@@ -46,7 +46,8 @@ def start_scene(case_directory, seed, occlusion, port, collect_gt=False, clutter
                 str(port),
                 "--manifest",
                 str(manifest),
-            ] + (["--collect-gt"] if collect_gt else []) + (["--clutter"] if clutter else []) + (["--yellow-course"] if yellow_course else []) + (["--varied-colors"] if varied else []),
+            ] + (["--collect-gt"] if collect_gt else []) + (["--clutter"] if clutter else []) + (["--yellow-course"] if yellow_course else []) + (["--varied-colors"] if varied else [])
+            + (["--world", str(world[0]), str(world[1]), "--density", str(density)] if world else []),
             cwd=ROOT,
             stdout=log,
             stderr=subprocess.STDOUT,

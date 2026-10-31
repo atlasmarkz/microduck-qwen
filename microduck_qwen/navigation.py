@@ -6,6 +6,8 @@ import math
 import socket
 import time
 
+import numpy as np
+
 from .contract import arena, validate
 
 ROBOT_RADIUS = 0.14
@@ -102,13 +104,83 @@ class Observer:
         self.connection.close()
 
 
+_CACHE = {}
+
+
+def _cached(owner, tag, build):
+    """Memoise per scene object. The entry keeps the owner alive, so its id cannot be reused."""
+    hit = _CACHE.get((id(owner), tag))
+    if hit is not None and hit[0] is owner:
+        return hit[1]
+    if len(_CACHE) > 64:
+        _CACHE.clear()
+    value = build()
+    _CACHE[(id(owner), tag)] = (owner, value)
+    return value
+
+
+def _wall_circles(scene):
+    """Planned walls as overlapping circles, so one collision model covers every obstacle."""
+    def build():
+        circles = []
+        for wall in scene["walls"]:
+            if not wall.get("planning", True):
+                continue
+            radius = wall["thickness"] / 2
+            length = math.dist((wall["x1"], wall["y1"]), (wall["x2"], wall["y2"]))
+            pieces = max(1, math.ceil(length / radius))
+            for k in range(pieces + 1):
+                t = k / pieces
+                circles.append({"name": f"{wall['name']}#{k}", "radius": radius,
+                                "x": wall["x1"] + (wall["x2"] - wall["x1"]) * t,
+                                "y": wall["y1"] + (wall["y2"] - wall["y1"]) * t})
+        return circles
+    return _cached(scene["walls"], "wall-circles", build)
+
+
 def obstacles(scene):
-    return scene["obstacles"] + [
+    found = scene["obstacles"] + [
         obj for obj in scene["objects"].values() if obj["collidable"]
     ]
+    return found + _wall_circles(scene) if "walls" in scene else found
+
+
+def _circle_arrays(scene, margin):
+    """(x, y, radius, inflated radius) arrays; world scenes only, evaluated in one numpy pass."""
+    def build():
+        items = obstacles(scene)
+        xs = np.array([o["x"] for o in items], dtype=float)
+        ys = np.array([o["y"] for o in items], dtype=float)
+        rs = np.array([o["radius"] for o in items], dtype=float)
+        pads = np.array([o.get("path_margin", margin) for o in items], dtype=float)
+        return xs, ys, rs, rs + ROBOT_RADIUS + pads
+    return _cached(scene, ("circles", margin), build)
+
+
+def _relaxed_clear(a, b, scene):
+    """Short initial bridge only: static obstacles and walls at 3 cm padding, balls ignored."""
+    def build():
+        items = scene["obstacles"] + (_wall_circles(scene) if "walls" in scene else [])
+        xs = np.array([o["x"] for o in items], dtype=float)
+        ys = np.array([o["y"] for o in items], dtype=float)
+        return xs, ys, np.array([o["radius"] + ROBOT_RADIUS + min(0.03, o.get("path_margin", 0.03)) for o in items], dtype=float)
+    xs, ys, limit = _cached(scene, "relaxed", build)
+    if not inside(a, scene) or not inside(b, scene):
+        return False
+    if not len(xs):
+        return True
+    dx, dy = b[0] - a[0], b[1] - a[1]
+    length2 = dx * dx + dy * dy
+    t = np.zeros(len(xs)) if not length2 else np.clip(((xs - a[0]) * dx + (ys - a[1]) * dy) / length2, 0.0, 1.0)
+    return bool((np.hypot(a[0] + t * dx - xs, a[1] + t * dy - ys) >= limit).all())
 
 
 def clearance(point, scene):
+    if "walls" in scene:
+        xs, ys, rs, _ = _circle_arrays(scene, PATH_MARGIN)
+        if not len(xs):
+            return 100.0
+        return float((np.hypot(xs - point[0], ys - point[1]) - rs - ROBOT_RADIUS).min())
     return min(
         (
             math.dist(point, (o["x"], o["y"])) - o["radius"] - ROBOT_RADIUS
@@ -127,6 +199,14 @@ def inside(point, scene):
 def segment_clear(a, b, scene, margin=PATH_MARGIN):
     if not inside(a, scene) or not inside(b, scene):
         return False
+    if "walls" in scene:
+        xs, ys, _, limit = _circle_arrays(scene, margin)
+        if not len(xs):
+            return True
+        dx, dy = b[0] - a[0], b[1] - a[1]
+        length2 = dx * dx + dy * dy
+        t = np.zeros(len(xs)) if not length2 else np.clip(((xs - a[0]) * dx + (ys - a[1]) * dy) / length2, 0.0, 1.0)
+        return bool((np.hypot(a[0] + t * dx - xs, a[1] + t * dy - ys) >= limit).all())
     for obstacle in obstacles(scene):
         center = (obstacle["x"], obstacle["y"])
         dx, dy = b[0] - a[0], b[1] - a[1]
@@ -168,8 +248,87 @@ def face_target_heading(position, target, stop_distance, scene, margin=FACE_TARG
     return math.atan2(aim[1] - position[1], aim[0] - position[0])
 
 
+def _free_grid(scene, grid):
+    """Boolean cell map of positions the robot centre may occupy, built once per scene."""
+    def build():
+        xmin, xmax, ymin, ymax = scene["bounds"]
+        nx, ny = round((xmax - xmin) / grid), round((ymax - ymin) / grid)
+        gx, gy = xmin + np.arange(nx + 1) * grid, ymin + np.arange(ny + 1) * grid
+        free = (gx[:, None] <= xmax + 1e-9) & (gy[None, :] <= ymax + 1e-9)
+        xs, ys, _, limit = _circle_arrays(scene, PATH_MARGIN)
+        for x, y, reach in zip(xs, ys, limit):
+            i0, i1 = max(0, int((x - reach - xmin) // grid)), min(nx, int((x + reach - xmin) // grid) + 1)
+            j0, j1 = max(0, int((y - reach - ymin) // grid)), min(ny, int((y + reach - ymin) // grid) + 1)
+            if i0 > i1 or j0 > j1:
+                continue
+            blocked = (gx[i0:i1 + 1, None] - x) ** 2 + (gy[None, j0:j1 + 1] - y) ** 2 < reach * reach
+            free[i0:i1 + 1, j0:j1 + 1] &= ~blocked
+        return nx, ny, free.tolist()
+    return _cached(scene, ("free-grid", grid), build)
+
+
+def _pathfind_world(start, target, radius, scene):
+    """A* over the cached cell map of a world scene (many obstacles, long routes)."""
+    xmin, xmax, ymin, ymax = scene["bounds"]
+    grid = scene.get("grid", GRID)
+    nx, ny, free = _free_grid(scene, grid)
+    point = lambda c: (xmin + c[0] * grid, ymin + c[1] * grid)
+    cell = lambda p: (min(nx, max(0, round((p[0] - xmin) / grid))), min(ny, max(0, round((p[1] - ymin) / grid))))
+    if not inside(start, scene):
+        raise ValueError("机器人已离开导航地图范围")
+    if math.dist(start, target) <= radius:
+        return [start]
+    first = cell(start)
+    if not free[first[0]][first[1]] or not segment_clear(start, point(first), scene):
+        # (balls the robot already stands inside the padding of must not veto the bridge)
+        # A valid continuous pose can round into an inflated cell: bridge to a nearby free cell
+        # with the same reduced 3 cm padding the small-scene planner uses.
+        near = [(first[0] + dx, first[1] + dy) for dx in range(-3, 4) for dy in range(-3, 4)]
+        near = [c for c in near if 0 <= c[0] <= nx and 0 <= c[1] <= ny and free[c[0]][c[1]]
+                and _relaxed_clear(start, point(c), scene)]
+        if not near:
+            raise ValueError("机器人距离障碍太近，无法生成安全的初始路径")
+        first = min(near, key=lambda c: math.dist(start, point(c)))
+    queue, cost, parent, goal = [(0.0, first)], {first: 0.0}, {}, None
+    steps = ((1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (1, -1), (-1, 1), (-1, -1))
+    while queue:
+        _, current = heapq.heappop(queue)
+        if math.dist(point(current), target) <= radius:
+            goal = current
+            break
+        for dx, dy in steps:
+            other = (current[0] + dx, current[1] + dy)
+            if not (0 <= other[0] <= nx and 0 <= other[1] <= ny) or not free[other[0]][other[1]]:
+                continue
+            if dx and dy and not (free[current[0] + dx][current[1]] and free[current[0]][current[1] + dy]):
+                continue  # no diagonal corner cutting
+            new_cost = cost[current] + math.hypot(dx, dy) * grid
+            if new_cost < cost.get(other, float("inf")):
+                cost[other], parent[other] = new_cost, current
+                heapq.heappush(queue, (new_cost + max(0.0, math.dist(point(other), target) - radius), other))
+    if goal is None:
+        raise ValueError("目标的停靠区域不可达；请调整目标或停靠距离")
+    reverse = [point(goal)]
+    while goal != first:
+        goal = parent[goal]
+        reverse.append(point(goal))
+    route = [start] + list(reversed(reverse))
+    smooth, index = [start], 0
+    while index < len(route) - 1:
+        next_index = index + 1
+        for candidate in range(len(route) - 1, index, -1):
+            if segment_clear(smooth[-1], route[candidate], scene):
+                next_index = candidate
+                break
+        smooth.append(route[next_index])
+        index = next_index
+    return smooth
+
+
 def pathfind(start, target, radius, scene):
     """A* to a free cell inside the requested stopping region; no diagonal corner cutting."""
+    if "walls" in scene:
+        return _pathfind_world(start, target, radius, scene)
     xmin, xmax, ymin, ymax = scene["bounds"]
     nx, ny = round((xmax - xmin) / GRID), round((ymax - ymin) / GRID)
 
