@@ -12,6 +12,7 @@ from .contract import arena, validate
 
 ROBOT_RADIUS = 0.14
 PATH_MARGIN = 0.12
+WALL_PATH_MARGIN = 0.20
 # A guarded approach may walk straight at the object while facing it. That line
 # ends stop_distance_m short of the object, so the object's own body is not on
 # it; this smaller margin only has to keep real blockers off the line.
@@ -131,7 +132,9 @@ def _wall_circles(scene):
             pieces = max(1, math.ceil(length / radius))
             for k in range(pieces + 1):
                 t = k / pieces
-                circles.append({"name": f"{wall['name']}#{k}", "radius": radius,
+                # Doorways are 1.1 m wide: a wider standoff than the default keeps the gait's
+                # lateral wobble from brushing a door post on long, cornered routes.
+                circles.append({"name": f"{wall['name']}#{k}", "radius": radius, "path_margin": WALL_PATH_MARGIN,
                                 "x": wall["x1"] + (wall["x2"] - wall["x1"]) * t,
                                 "y": wall["y1"] + (wall["y2"] - wall["y1"]) * t})
         return circles

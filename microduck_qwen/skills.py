@@ -197,7 +197,10 @@ class SkillExecutor:
 
     def _return_to_pose(self, home, output):
         plan = {"status": "ok", "goals": [{"target": "point", "x": home["x"], "y": home["y"], "speed": "slow", "stop_distance_m": 0.10}]}
-        result = {"navigation": execute(plan, self.robot, self.observer, output.with_suffix(".jsonl"), timeout_s=60,
+        here = self.healthy()["trunk"][:2]
+        # 60 s covers the small arenas; a cross-world return needs time in proportion to the trip.
+        budget = max(60, 30 + 12 * math.dist(here, (home["x"], home["y"])))
+        result = {"navigation": execute(plan, self.robot, self.observer, output.with_suffix(".jsonl"), timeout_s=budget,
                   scene=self.scene, cancel_file=self.cancel_file, arrival_tolerance_m=0, cancel_started_ns=self.started_ns)}
         delta = angle(home["yaw"] - self.healthy()["yaw"])
         if abs(delta) > math.radians(5):

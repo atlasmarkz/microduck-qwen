@@ -181,6 +181,10 @@ def main():
             with viewer.lock():
                 viewer.cam.lookat[:] = [0.5, 0.0, 0.12]
                 viewer.cam.distance, viewer.cam.azimuth, viewer.cam.elevation = 2.4, 135, -25
+                if args.world:  # frame the whole multi-room floor plan from above
+                    bounds = json.loads(scene_path.read_text(encoding="utf-8"))["bounds"]
+                    viewer.cam.lookat[:] = [(bounds[0] + bounds[1]) / 2, (bounds[2] + bounds[3]) / 2, 0.0]
+                    viewer.cam.distance, viewer.cam.azimuth, viewer.cam.elevation = 1.6 * max(bounds[1] - bounds[0], bounds[3] - bounds[2]), 90, -70
         for listener in servers:
             threading.Thread(target=listener.serve_forever, daemon=True).start()
         body.set_torque(True)

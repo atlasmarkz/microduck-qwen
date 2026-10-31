@@ -146,7 +146,7 @@ def attempt(planner, executor, info, directory, output, seed, instruction, meta,
     return (rows if report["verified"] else []), report
 
 
-def collect_world(planner, output, seed, port, level, minutes, per_color, max_steps):
+def collect_world(planner, output, seed, port, level, minutes, per_color, max_steps, attempts=3):
     directory = output / "worlds" / f"world-{seed}"
     directory.mkdir(parents=True)
     process, log, info, _ = start_scene(directory, seed, "none", port, collect_gt=True,
@@ -167,7 +167,7 @@ def collect_world(planner, output, seed, port, level, minutes, per_color, max_st
         rng = random.Random(seed)
         for k, (text, meta) in enumerate(self_tasks(inventory, visible, rng, per_color)):
             outcome = {"instruction": text, "meta": meta, "attempts": []}
-            for n, temperature in enumerate((0.0, 0.7)):
+            for n, temperature in enumerate([0.0] + [0.7] * (attempts - 1)):
                 new_rows, report = attempt(planner, executor, info, directory / f"task-{k:02d}-try{n}", output, seed,
                                            text, meta, max_steps, temperature, inventory)
                 outcome["attempts"].append({"temperature": temperature, "verified": report["verified"],
@@ -181,6 +181,7 @@ def collect_world(planner, output, seed, port, level, minutes, per_color, max_st
                     break
             summary["tasks"].append(outcome)
         summary["rows"] = len(rows)
+        (directory / "rows.jsonl").write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows), encoding="utf-8")
     finally:
         if executor:
             executor.close()
@@ -189,12 +190,21 @@ def collect_world(planner, output, seed, port, level, minutes, per_color, max_st
     return rows, summary
 
 
-def merge(base, output, rows, name):
-    """Base dataset (valid/test untouched) plus the self-verified rows as extra train rows."""
+def merge(base, output, rows, name, source):
+    """Base dataset (valid/test untouched) plus the self-verified rows as extra train rows.
+
+    `source` is the directory the rows' image paths are relative to; images are copied in.
+    """
     base_manifest, splits = load_splits(base)
     shutil.copytree(base, output / "base")
     splits = {s: [dict(r, image="base/" + r["image"]) for r in values] for s, values in splits.items()}
-    splits["train"].extend(rows)
+    copied = []
+    for row in rows:
+        target = output / "self" / row["image"]
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(source / row["image"], target)
+        copied.append(dict(row, image=str(Path("self") / row["image"])))
+    splits["train"].extend(copied)
     manifest = {"format": "simulation_agent_v1", "status": "completed", "splits": {}, "episodes": [],
                 "method": "self-play, environment-verified rejection sampling; valid/test fixed from parent",
                 "parent_manifest_sha256": digest(base / "manifest.json"), "name": name}
@@ -214,12 +224,15 @@ def main():
     parser.add_argument("--explore-minutes", type=float, default=5.0, help="free exploration per world")
     parser.add_argument("--tasks-per-color", type=int, default=1)
     parser.add_argument("--max-steps", type=int, default=6)
+    parser.add_argument("--attempts", type=int, default=3, help="per task: one greedy attempt, then sampled ones until one verifies")
     parser.add_argument("--steps", type=int, default=150, help="training steps per round")
     parser.add_argument("--eval-seeds", type=int, default=2)
     parser.add_argument("--eval-seed", type=int, default=98000)
     parser.add_argument("--eval-task-ids", type=int, nargs="+", default=[3, 4])
     parser.add_argument("--forgetting-tolerance", type=float, default=0.25)
     parser.add_argument("--port", type=int, default=7930)
+    parser.add_argument("--resume-collection", type=Path,
+                        help="round directory whose worlds/*/rows.jsonl are reused instead of collecting again (round 0 only)")
     args = parser.parse_args()
     if not 0.2 <= args.explore_minutes <= 60 or not 1 <= args.rounds <= 5 or not 1 <= args.worlds <= 10:
         parser.error("explore-minutes 0.2..60, rounds 1..5, worlds 1..10")
@@ -261,36 +274,45 @@ def main():
     try:
         from .vision_torch import TorchAgentPlanner
 
-        current = measure(adapter, data, "r0-start")
+        current = measure(adapter, data, "r0-start") if not args.resume_collection else json.loads(
+            (args.resume_collection.parent.parent / args.resume_collection.parent.name / "self_evolve.json").read_text())["start"]
         report["start"] = current
         for index in range(args.rounds):
             entry = {"round": index, "adapter_in": str(adapter), "worlds": []}
             report["rounds"].append(entry)
-            planner = TorchAgentPlanner(adapter)
             rows, round_dir = [], output / f"round-{index}"
             round_dir.mkdir()
+            planner = None
+            if args.resume_collection and index == 0:
+                round_dir = args.resume_collection.resolve()
+                for path in sorted(round_dir.glob("worlds/*/rows.jsonl")):
+                    rows.extend(json.loads(line) for line in path.read_text(encoding="utf-8").splitlines())
+                entry["resumed_from"] = str(round_dir)
+            else:
+                planner = TorchAgentPlanner(adapter)
             try:
-                for w in range(args.worlds):
+                for w in range(0 if planner is None else args.worlds):
                     seed = SELF_SEED_BASE + index * 100 + w
                     new_rows, summary = collect_world(planner, round_dir, seed, args.port, args.level,
-                                                      args.explore_minutes, args.tasks_per_color, args.max_steps)
+                                                      args.explore_minutes, args.tasks_per_color, args.max_steps, args.attempts)
                     rows.extend(new_rows)
                     entry["worlds"].append(summary)
                     save()
             finally:
-                del planner
+                planner = None
                 import gc, torch
                 gc.collect()
                 torch.cuda.empty_cache()
             entry["self_rows"] = len(rows)
             tasks = [t for w in entry["worlds"] for t in w["tasks"]]
-            entry["tasks"] = {"posed": len(tasks), "verified": sum(any(a["verified"] for a in t["attempts"]) for t in tasks)}
+            if tasks:
+                entry["tasks"] = {"posed": len(tasks), "verified": sum(any(a["verified"] for a in t["attempts"]) for t in tasks)}
             if not rows:
                 entry["action"] = "no_verified_rows"
                 save()
                 continue
             merged = ROOT / "data" / f"{args.name}-r{index}"
-            merge(data, merged, rows, f"{args.name}-r{index}")
+            merge(data, merged, rows, f"{args.name}-r{index}", round_dir)
             candidate = ROOT / "adapters" / f"{args.name}-r{index}"
             run("vision_torch", "train", "--task", "agent", "--data", merged, "--output", candidate,
                 "--steps", args.steps, "--resume", adapter)
