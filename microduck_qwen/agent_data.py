@@ -21,6 +21,7 @@ from .skills import NeedsUserInput, SkillExecutor, bind_target, memory_state, va
 from .vision import propose_targets, save_frame
 from .sim_data import collection_frame, digest, request, verify_objects
 from .sim_runner import start_scene, stop_process
+from .vision_world import WORLD_LEVELS
 
 
 # Hard scene profiles as (occlusion, clutter). Split offsets below keep the splits on
@@ -50,8 +51,15 @@ COAST_ALLOWANCE_M = 0.05
 APPROACH_TRUE_DISTANCE_M = APPROACH_STOP_M + ARRIVAL_TOLERANCE_M + COAST_ALLOWANCE_M
 
 
+def world_arguments(mix, level):
+    """start_scene keywords for the world mix; empty for every other mix."""
+    if mix != "world":
+        return {}
+    return {"world": WORLD_LEVELS[level]["rooms"], "density": WORLD_LEVELS[level]["density"]}
+
+
 def scene_profile(split, index, mix):
-    if mix in ("plain", "yellow", "varied"):
+    if mix in ("plain", "yellow", "varied", "world"):
         return "none", False
     return SCENE_PROFILES[(PROFILE_BASE[split] + index) % len(SCENE_PROFILES)]
 
@@ -309,8 +317,11 @@ def main():
     parser.add_argument("--test-scenes", type=int, default=1)
     parser.add_argument("--seed-offset", type=int, default=10)
     parser.add_argument("--port", type=int, default=7862)
-    parser.add_argument("--scene-mix", choices=("plain", "hard", "yellow", "varied"), default="plain",
-                        help="plain reproduces the open-row scenes; hard adds occluded/absent/duplicated-row scenes")
+    parser.add_argument("--scene-mix", choices=("plain", "hard", "yellow", "varied", "world"), default="plain",
+                        help="plain reproduces the open-row scenes; hard adds occluded/absent/duplicated-row scenes; "
+                             "world uses multi-room worlds of --world-level")
+    parser.add_argument("--world-level", type=int, default=0, choices=range(len(WORLD_LEVELS)),
+                        help="world mix only: curriculum level (rooms and clutter grow with it)")
     parser.add_argument("--actor-adapter", type=Path)
     parser.add_argument("--holdout-color", choices=("red", "blue", "green", "yellow"),
                         help="varied mix: never target this colour in train; valid/test target only it (composition test)")
@@ -337,9 +348,10 @@ def main():
     manifest = {"format": "simulation_agent_v1", "status": "collecting", "episodes": [], "splits": {},
                 "inputs": ["numbered RGB", "instruction", "own oracle odometry", "completed actions"],
                 "method": "expert-intervened data aggregation; not unrestricted DAgger or learned reward model",
-                "scene_mix": args.scene_mix, "seed_offset": args.seed_offset}
+                "scene_mix": args.scene_mix, "seed_offset": args.seed_offset,
+                "world_level": args.world_level if args.scene_mix == "world" else None}
     manifest["source_sha256"] = {name: digest(ROOT / "microduck_qwen" / name) for name in
-        ("agent_data.py", "agent_language.py", "skills.py", "bypass.py", "navigation.py", "vision.py", "sim_data.py", "sim_runner.py", "vision_scene.py", "sim.py", "sim_body.py")}
+        ("agent_data.py", "agent_language.py", "skills.py", "bypass.py", "navigation.py", "vision.py", "sim_data.py", "sim_runner.py", "vision_scene.py", "vision_world.py", "sim.py", "sim_body.py")}
     splits = {split: [] for split in ("train", "valid", "test")}
     planner = None
     if args.base_data:
@@ -375,7 +387,8 @@ def main():
                 try:
                     process, log, info, failures = start_scene(scene_dir, seed, occlusion, args.port,
                                                               collect_gt=True, clutter=clutter, yellow_course=args.scene_mix == "yellow",
-                                                              varied=args.scene_mix == "varied")
+                                                              varied=args.scene_mix == "varied",
+                                                              **world_arguments(args.scene_mix, args.world_level))
                     shutil.copyfile(info["scene_file"], scene_dir / "scene.json")
                     manifest.setdefault("startup_failures", []).extend(failures)
                     variant = 1 + i % 2 if args.base_data else i % 3

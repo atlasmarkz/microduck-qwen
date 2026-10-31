@@ -25,8 +25,12 @@ def main():
     parser.add_argument("--reward-threshold", type=float, default=0.5)
     parser.add_argument("--correction-scenes", type=int, default=1)
     parser.add_argument("--seed-offset", type=int, default=100)
-    parser.add_argument("--scene-mix", choices=("plain", "hard", "yellow"), default="plain",
+    parser.add_argument("--scene-mix", choices=("plain", "hard", "yellow", "world"), default="plain",
                         help="scene difficulty for correction collection and rollouts")
+    parser.add_argument("--world-level", type=int, default=0, choices=range(4), help="world mix only: curriculum level")
+    parser.add_argument("--collect-first", action="store_true",
+                        help="collect expert-corrected scenes before round 0 (needs --initial-adapter); default trains round 0 on the given data")
+    parser.add_argument("--rollout-seed", type=int, default=91010, help="first held-out layout seed for rollouts")
     parser.add_argument("--rollout", action="store_true", help="also test 4 independent physical tasks each round")
     parser.add_argument("--rollout-seeds", type=int, default=1, help="independent layouts per rollout round")
     parser.add_argument("--rollout-min-rate", type=float, default=1.0,
@@ -38,6 +42,10 @@ def main():
         parser.error("invalid bounded reward budget/threshold")
     if not 1 <= args.rounds <= 3 or not 1 <= args.steps <= 300 or not 1 <= args.correction_scenes <= 10 or not 100 <= args.seed_offset <= 5000:
         parser.error("bounded small-Mac iteration budget exceeded")
+    if args.collect_first and not args.initial_adapter:
+        parser.error("--collect-first needs --initial-adapter to propose actions")
+    if args.collect_first and args.reward_guided:
+        parser.error("--collect-first cannot use reward guidance before a reward model exists")
     if not 1 <= args.rollout_seeds <= 50 or not 0 <= args.rollout_min_rate <= 1:
         parser.error("invalid rollout seeds/min rate")
     if Path(args.name).name != args.name or args.name in (".", ".."):
@@ -78,12 +86,13 @@ def main():
         baseline = output / "base-valid"
         run("agent_eval", "--data", data, "--output", baseline)
         report["baseline"] = json.loads((baseline / "report.json").read_text())
+        world_flags = ["--world-level", args.world_level] if args.scene_mix == "world" else []
         for index in range(args.rounds):
-            if index:
+            if index or args.collect_first:
                 corrected = ROOT / "data" / f"{args.name}-r{index}-corrections"
                 flags = ["--output", corrected, "--base-data", data, "--actor-adapter", parent,
                     "--train-scenes", args.correction_scenes, "--seed-offset", args.seed_offset + index * 100,
-                    "--scene-mix", args.scene_mix]
+                    "--scene-mix", args.scene_mix, *world_flags]
                 if args.reward_guided:
                     flags.extend(["--reward-adapter", reward_parent, "--reward-samples", args.reward_samples,
                                   "--reward-threshold", args.reward_threshold])
@@ -123,6 +132,7 @@ def main():
                 rollout = output / f"r{index}-rollout"
                 run("agent_eval", "--data", data, "--adapter", adapter, "--output", rollout, "--rollout",
                     "--scene-mix", args.scene_mix, "--rollout-seeds", args.rollout_seeds,
+                    "--seed", args.rollout_seed, *world_flags,
                     *(["--task-ids", 9] if args.scene_mix == "yellow" else []))
                 physical = json.loads((rollout / "report.json").read_text())
                 entry.update(rollout_correct=physical["correct"], rollout_total=physical["total"],

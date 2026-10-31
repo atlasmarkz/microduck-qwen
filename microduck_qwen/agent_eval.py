@@ -7,7 +7,7 @@ from pathlib import Path
 
 from . import ROOT
 from .agent import AgentPlanner
-from .agent_data import episode, load_splits, scene_profile, tasks
+from .agent_data import episode, load_splits, scene_profile, tasks, world_arguments
 from .sim_data import digest
 from .sim_runner import start_scene, stop_process
 from .skills import parse_action
@@ -50,8 +50,9 @@ def main():
                         help="independent layouts for --rollout (seed, seed+1, ...); each is a separate simulator scene")
     parser.add_argument("--port", type=int, default=7872)
     parser.add_argument("--task-ids", type=int, nargs="+", default=[0, 1, 2, 3])
-    parser.add_argument("--scene-mix", choices=("plain", "hard", "yellow"), default="plain",
+    parser.add_argument("--scene-mix", choices=("plain", "hard", "yellow", "world"), default="plain",
                         help="rollout scene difficulty; must match the collected data")
+    parser.add_argument("--world-level", type=int, default=0, help="world mix only: curriculum level 0..3")
     args = parser.parse_args()
     manifest, splits = load_splits(args.data)
     if not 1 <= args.rollout_seeds <= 50:
@@ -74,6 +75,7 @@ def main():
     try:
         if args.rollout:
             report.update(scene_seed=args.seed, scene_seeds=rollout_seeds, scene_mix=args.scene_mix,
+                          world_level=args.world_level if args.scene_mix == "world" else None,
                           startup_failures=[], scenes=[],
                           layers={name: 0 for name in ("format_ok", "action_type_ok", "target_ok", "physical_ok", "task_ok")})
             for k, seed in enumerate(rollout_seeds):
@@ -82,7 +84,8 @@ def main():
                 scene_dir.mkdir(exist_ok=True)
                 occlusion, clutter = scene_profile(args.split, k, args.scene_mix)
                 process, log, info, failures = start_scene(scene_dir, seed, occlusion, args.port,
-                                                           collect_gt=True, clutter=clutter, yellow_course=args.scene_mix == "yellow")
+                                                           collect_gt=True, clutter=clutter, yellow_course=args.scene_mix == "yellow",
+                                                           **world_arguments(args.scene_mix, args.world_level))
                 report["startup_failures"].extend(failures)
                 report["scenes"].append({"seed": seed, "occlusion": occlusion, "clutter": clutter})
                 try:
