@@ -5,7 +5,7 @@ import math
 from pathlib import Path
 import time
 
-from .navigation import Robot, Observer, execute, clearance, inside
+from .navigation import Robot, Observer, execute, clearance, inside, nearest_obstacle
 from .vision import capture, propose_targets, visibility_check, approachable, VisualGuard
 
 
@@ -195,7 +195,38 @@ class SkillExecutor:
                 self.robot.move(0.30 if signed > 0 else -self.backward_command, correction)
             time.sleep(0.08)
 
+    def escape_cramped(self, trigger=0.05, target=0.10, timeout_s=10.0):
+        """Back away from an obstacle the body is pressed against, so navigation can start again.
+
+        Turn to face away from the nearest obstacle, then walk until the clearance recovers.
+        Uses the known safety map like the other safety checks; returns whether it moved.
+        """
+        if self.cancel_file is not None and self.cancel_file.exists() and int(self.cancel_file.read_text()) > self.started_ns:
+            raise RuntimeError("cancelled by stop command")
+        started, moved = time.monotonic(), False
+        while time.monotonic() - started < timeout_s:
+            state = self.observer.read()
+            if state["trunk_z"] < 0.085 or state["imu"]["gravity"][2] > -0.65:
+                raise RuntimeError("fallen or unstable; stopped")
+            position = state["trunk"][:2]
+            near = nearest_obstacle(position, self.scene)
+            margin = near[2] if near else 100.0
+            if margin >= (target if moved else trigger):
+                break
+            moved = True
+            away = math.atan2(position[1] - near[1], position[0] - near[0])
+            error = angle(away - state["yaw"])
+            if abs(error) > 0.5:
+                self.robot.move(0, math.copysign(1.2, error))
+            else:
+                self.robot.move(0.25, max(-1.0, min(1.0, 1.5 * error)))
+            time.sleep(0.08)
+        self.robot.stop()
+        time.sleep(0.25)
+        return moved
+
     def _return_to_pose(self, home, output):
+        self.escape_cramped()
         plan = {"status": "ok", "goals": [{"target": "point", "x": home["x"], "y": home["y"], "speed": "slow", "stop_distance_m": 0.10}]}
         here = self.healthy()["trunk"][:2]
         # 60 s covers the small arenas; a cross-world return needs time in proportion to the trip.
@@ -239,6 +270,7 @@ class SkillExecutor:
                 from .bypass import run_bypass
                 result.update(run_bypass(self, action, output))
             elif name == "approach":
+                self.escape_cramped()
                 selected = bind_target(action, candidates, self.healthy()["trunk"][:2])
                 result["bound_target"] = selected
                 target = selected["world_position"]

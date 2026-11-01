@@ -193,6 +193,15 @@ def clearance(point, scene):
     )
 
 
+def nearest_obstacle(point, scene):
+    """(x, y, margin) of the obstacle whose inflated surface is closest to `point`, or None."""
+    items = obstacles(scene)
+    if not items:
+        return None
+    best = min(items, key=lambda o: math.dist(point, (o["x"], o["y"])) - o["radius"])
+    return best["x"], best["y"], clearance(point, scene)
+
+
 def inside(point, scene):
     x, y = point
     xmin, xmax, ymin, ymax = scene["bounds"]
