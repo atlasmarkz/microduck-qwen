@@ -126,8 +126,15 @@ def tasks(split, variant=0):
              "接近图片左侧的球，再返回出发位置", "往前挪0.2米", "倒退0.2米", "原地停住", "踢走绿色的球", "去那边"],
             ["向前行进二十厘米后回原点", "向后移动二十厘米后回原点", "左旋四十五度后右旋四十五度",
              "先接近图中最左边的球，然后回原点", "向前行进二十厘米", "向后移动二十厘米", "不要再移动了", "跳一支舞", "到那儿"],
+            ["往前走二十厘米，之后回到起点", "往后退二十厘米，之后回到起点", "向左转45度再向右转45度",
+             "去最左边那个球旁边，之后回到起点", "往前走20cm", "往后退20cm", "先停一下", "帮我把球扔掉", "过去那边"],
+            ["麻烦向前走0.2米，走完回到初始位置", "请向后退0.2米，退完回到出发点", "先朝左转个45度，再朝右转45度",
+             "画面最左边的球，走过去，然后回起点", "请往前挪动0.2米", "请往后挪动0.2米", "别动", "把绿球拿起来", "那边那个地方"],
+            ["Move forward 20 cm, then return to the start", "Back up 20 cm, then go back to the starting point",
+             "Turn left 45 degrees, then turn right 45 degrees", "Go to the leftmost ball, then return to the start",
+             "Walk forward 20 cm", "Back up 20 cm", "Stop moving", "Pick up the blue ball", "Go over there"],
         ]
-        result = [(text, specs) for text, (_, specs) in zip(variants[(variant - 1) % 2], result)]
+        result = [(text, specs) for text, (_, specs) in zip(variants[(variant - 1) % len(variants)], result)]
     if split == "test":
         test_text = ["前行20厘米后返回最初的位置", "先后退20厘米再返回最初的位置", "左转45度后请右转45度",
                      "走近画面最左球后回到最初位置", "前行20厘米", "后退20厘米", "停止行进", "把红球踢开", "去那个位置"]
@@ -418,7 +425,7 @@ def main():
                                                               **world_arguments(args.scene_mix, args.world_level))
                     shutil.copyfile(info["scene_file"], scene_dir / "scene.json")
                     manifest.setdefault("startup_failures", []).extend(failures)
-                    variant = 1 + i % 2 if args.base_data else i % 3
+                    variant = 1 + i % 5 if args.base_data else i % 6
                     entries = [(index, instruction, specs, None) for index, (instruction, specs) in enumerate(tasks(split, variant))
                                if index in task_ids]
                     language_rng = random.Random(seed)

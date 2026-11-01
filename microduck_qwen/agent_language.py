@@ -9,6 +9,8 @@ validation/test pass measures colour composition, not recall.
 
 import random
 
+from .phrasebank import bank
+
 COLORS = ("red", "blue", "green", "yellow")
 COLOR_WORDS = {
     "train": {"red": ["红色"], "blue": ["蓝色"], "green": ["绿色"], "yellow": ["黄色"]},
@@ -37,8 +39,9 @@ def approach_spec(color, ident=None):
 def phrasings(split, color, rng):
     """All (instruction, tail_kind) surface forms for a colour in a split."""
     words, templates, tails = COLOR_WORDS[split][color], TEMPLATES[split], TAILS[split]
-    return [(t.format(c=w) + tail, kind) for t in templates for w in words
-            for kind, phrases in tails.items() for tail in phrases]
+    fixed = [(t.format(c=w) + tail, kind) for t in templates for w in words
+             for kind, phrases in tails.items() for tail in phrases]
+    return fixed + bank(split, color, "approach")
 
 
 def colour_tasks(split, scene_colors, rng, per_color=1, holdout_color=None):
@@ -60,16 +63,20 @@ def colour_tasks(split, scene_colors, rng, per_color=1, holdout_color=None):
 
 # "Find it somewhere else" tasks: the colour is not in view, so the first skill is explore.
 EXPLORE_TEMPLATES = {
-    "train": ["这里看不到{c}球，去别的房间找到它并靠近", "去找一个{c}球，找到后走到它旁边", "到其他地方找{c}球，然后靠近它"],
-    "valid": ["在别处找到{c}球并靠近它", "出去寻找{c}球，找到就走过去"],
-    "test": ["帮我找一个{c}球，找到后靠过去", "去外面找{c}球然后接近"],
+    # Half of each pool names no search verb at all ("walk to the ball in the other room"): the room is
+    # the cue that the ball is not in view, so the first skill must still be explore, not approach.
+    "train": ["这里看不到{c}球，去别的房间找到它并靠近", "去找一个{c}球，找到后走到它旁边", "到其他地方找{c}球，然后靠近它",
+              "走到另一个房间的{c}球旁边", "去隔壁房间的{c}球那里", "到别的房间，靠近那个{c}球"],
+    "valid": ["在别处找到{c}球并靠近它", "出去寻找{c}球，找到就走过去", "靠近其他房间里的{c}球", "去另一间屋子里的{c}球旁边"],
+    "test": ["帮我找一个{c}球，找到后靠过去", "去外面找{c}球然后接近", "走到别的房间那个{c}球的旁边", "我要去另一个房间的{c}球那儿"],
 }
 
 
 def explore_phrasings(split, color):
     words, tails = COLOR_WORDS[split][color], TAILS[split]
-    return [(t.format(c=w) + tail, kind) for t in EXPLORE_TEMPLATES[split] for w in words
-            for kind, phrases in tails.items() for tail in phrases]
+    fixed = [(t.format(c=w) + tail, kind) for t in EXPLORE_TEMPLATES[split] for w in words
+             for kind, phrases in tails.items() for tail in phrases]
+    return fixed + bank(split, color, "explore")
 
 
 def explore_tasks(split, hidden_colors, rng, per_color=1):

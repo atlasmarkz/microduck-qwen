@@ -95,7 +95,7 @@ class ExploreSkillTests(unittest.TestCase):
             self.assertEqual(specs[1], {"teacher_nearest": "blue"})
             self.assertEqual(meta["kind"], "explore_find")
             self.assertEqual(len(specs) == 3, meta["tail"] != "none")
-            self.assertIn("蓝色", text)
+            self.assertTrue("蓝" in text or "blue" in text, text)
         self.assertEqual(explore_tasks("train", set(), random.Random(0)), [])
         # Held-out phrasing never reuses a training sentence.
         train = {t for t, _, _ in explore_tasks("train", {"red"}, random.Random(1), per_color=99)}
