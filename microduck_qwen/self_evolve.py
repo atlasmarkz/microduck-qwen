@@ -44,6 +44,25 @@ APPROACH_OK_M = 0.30 + 0.025 + 0.05
 HOME_OK_M = 0.125
 HOME_YAW_OK_DEG = 12.0
 LABEL = "self-play: actor's own action, verified by perception + odometry + contact bumper; no teacher"
+HINDSIGHT = ("self-play with hindsight terminal correction: every skill succeeded and was verified; only the final "
+             "done/stop was wrong and is replaced by the one the self-posed task implies; no teacher")
+TERMINAL = ("done", "stop", "clarify", "unsupported")
+
+
+def hindsight_terminal(meta, steps, reasons, rows):
+    """If everything verified except the closing done/stop, relabel just that last row. Returns True if so.
+
+    The self-posed task knows how it ends (`tail`), and the skills before it were all checked against
+    perception/odometry/contact, so the right closing action at that state is known without a teacher.
+    """
+    wanted = "stop" if meta["tail"] == "stop" else "done"
+    if reasons != [f"did not end with {wanted}"] or not rows or not steps:
+        return False
+    if steps[-1]["action"]["action"] not in TERMINAL or rows[-1]["expected"]["action"] not in TERMINAL:
+        return False
+    rows[-1]["expected"] = {"action": wanted}
+    rows[-1]["label_source"] = HINDSIGHT
+    return True
 
 
 def self_tasks(inventory, visible_colors, rng, per_color):
@@ -138,15 +157,17 @@ def attempt(planner, executor, info, directory, output, seed, instruction, meta,
         delta = request(port, "collection_stats")["steps_with_scene_contact"] - contact0
         ok, reasons = self_verify(meta, steps, delta, inventory)
         report.update(verified=ok, reasons=reasons, contact_steps=delta)
+        if not ok and hindsight_terminal(meta, steps, reasons, rows):
+            report["hindsight"] = True
     except Exception as error:
         report["error"] = f"{type(error).__name__}: {error}"
         rows = []
     finally:
         (directory / "attempt.json").write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n")
-    return (rows if report["verified"] else []), report
+    return (rows if report["verified"] or report.get("hindsight") else []), report
 
 
-def collect_world(planner, output, seed, port, level, minutes, per_color, max_steps, attempts=3):
+def collect_world(planner, output, seed, port, level, minutes, per_color, max_steps, attempts=3, explore_extra=0):
     directory = output / "worlds" / f"world-{seed}"
     directory.mkdir(parents=True)
     process, log, info, _ = start_scene(directory, seed, "none", port, collect_gt=True,
@@ -167,17 +188,19 @@ def collect_world(planner, output, seed, port, level, minutes, per_color, max_st
         rng = random.Random(seed)
         for k, (text, meta) in enumerate(self_tasks(inventory, visible, rng, per_color)):
             outcome = {"instruction": text, "meta": meta, "attempts": []}
-            for n, temperature in enumerate([0.0] + [0.7] * (attempts - 1)):
+            tries = attempts + (explore_extra if meta["kind"] == "explore_find" else 0)
+            for n, temperature in enumerate([0.0] + [0.7] * (tries - 1)):
                 new_rows, report = attempt(planner, executor, info, directory / f"task-{k:02d}-try{n}", output, seed,
                                            text, meta, max_steps, temperature, inventory)
                 outcome["attempts"].append({"temperature": temperature, "verified": report["verified"],
+                                            "hindsight": bool(report.get("hindsight")),
                                             "reasons": report.get("reasons"), "error": report.get("error")})
                 if new_rows:
                     for j, row in enumerate(new_rows):
                         rows.append(dict(row, id=f"self-{seed}-{k}-{n}-{j}", scene_seed=seed, split="train",
                                          scene_occlusion="none", scene_clutter=False, scene_yellow_course=False,
                                          verified=True, task_type=row["expected"]["action"], task_meta=meta,
-                                         label_source=LABEL))
+                                         label_source=row.get("label_source", LABEL)))
                     break
             summary["tasks"].append(outcome)
         summary["rows"] = len(rows)
@@ -190,7 +213,18 @@ def collect_world(planner, output, seed, port, level, minutes, per_color, max_st
     return rows, summary
 
 
-def merge(base, output, rows, name, source):
+def balance(rows, factor=2, floor=6):
+    """Cap each task kind at `factor` x the rarest kind (at least `floor`), so easy tasks cannot swamp hard ones."""
+    kinds = {}
+    for row in rows:
+        kinds.setdefault(row["task_meta"]["kind"], []).append(row)
+    if len(kinds) < 2:
+        return rows
+    cap = max(floor, factor * min(len(v) for v in kinds.values()))
+    return [row for group in kinds.values() for row in group[:cap]]
+
+
+def merge(base, output, rows, name, source, repeat=1):
     """Base dataset (valid/test untouched) plus the self-verified rows as extra train rows.
 
     `source` is the directory the rows' image paths are relative to; images are copied in.
@@ -204,7 +238,7 @@ def merge(base, output, rows, name, source):
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(source / row["image"], target)
         copied.append(dict(row, image=str(Path("self") / row["image"])))
-    splits["train"].extend(copied)
+    splits["train"].extend(dict(row, id=f"{row['id']}-r{k}") if k else row for k in range(repeat) for row in copied)
     manifest = {"format": "simulation_agent_v1", "status": "completed", "splits": {}, "episodes": [],
                 "method": "self-play, environment-verified rejection sampling; valid/test fixed from parent",
                 "parent_manifest_sha256": digest(base / "manifest.json"), "name": name}
@@ -226,7 +260,11 @@ def main():
     parser.add_argument("--max-steps", type=int, default=6)
     parser.add_argument("--attempts", type=int, default=3, help="per task: one greedy attempt, then sampled ones until one verifies")
     parser.add_argument("--steps", type=int, default=150, help="training steps per round")
-    parser.add_argument("--eval-seeds", type=int, default=2)
+    parser.add_argument("--eval-seeds", type=int, default=12, help="held-out layouts (3 tasks each); 2 was too few to resolve changes")
+    parser.add_argument("--explore-extra-attempts", type=int, default=3, help="extra sampled attempts for the hard explore tasks")
+    parser.add_argument("--self-repeat", type=int, default=3, help="copies of each self row in the training set")
+    parser.add_argument("--noise-slack", type=float, default=0.05,
+                        help="tolerated held-out drop; the measured same-adapter spread is a few tasks")
     parser.add_argument("--eval-seed", type=int, default=98000)
     parser.add_argument("--eval-task-ids", type=int, nargs="+", default=[3, 4])
     parser.add_argument("--forgetting-tolerance", type=float, default=0.25)
@@ -294,7 +332,8 @@ def main():
                 for w in range(0 if planner is None else args.worlds):
                     seed = SELF_SEED_BASE + index * 100 + w
                     new_rows, summary = collect_world(planner, round_dir, seed, args.port, args.level,
-                                                      args.explore_minutes, args.tasks_per_color, args.max_steps, args.attempts)
+                                                      args.explore_minutes, args.tasks_per_color, args.max_steps, args.attempts,
+                                                      args.explore_extra_attempts)
                     rows.extend(new_rows)
                     entry["worlds"].append(summary)
                     save()
@@ -303,22 +342,26 @@ def main():
                 import gc, torch
                 gc.collect()
                 torch.cuda.empty_cache()
+            raw_rows = len(rows)
+            rows = balance(rows)
+            entry["self_rows_before_balance"] = raw_rows
             entry["self_rows"] = len(rows)
             tasks = [t for w in entry["worlds"] for t in w["tasks"]]
             if tasks:
-                entry["tasks"] = {"posed": len(tasks), "verified": sum(any(a["verified"] for a in t["attempts"]) for t in tasks)}
+                entry["tasks"] = {"posed": len(tasks), "verified": sum(any(a["verified"] for a in t["attempts"]) for t in tasks),
+                                  "hindsight": sum(any(a.get("hindsight") for a in t["attempts"]) for t in tasks)}
             if not rows:
                 entry["action"] = "no_verified_rows"
                 save()
                 continue
             merged = ROOT / "data" / f"{args.name}-r{index}"
-            merge(data, merged, rows, f"{args.name}-r{index}", round_dir)
+            merge(data, merged, rows, f"{args.name}-r{index}", round_dir, args.self_repeat)
             candidate = ROOT / "adapters" / f"{args.name}-r{index}"
             run("vision_torch", "train", "--task", "agent", "--data", merged, "--output", candidate,
                 "--steps", args.steps, "--resume", adapter)
             after = measure(candidate, merged, f"r{index}-after")
             accepted, reasons = decide((current["correct"], current["total"]), (after["correct"], after["total"]),
-                                       {}, {}, args.forgetting_tolerance)
+                                       {}, {}, args.forgetting_tolerance, slack=args.noise_slack)
             entry.update(after=after, action="accepted" if accepted else "rejected", reasons=reasons,
                          adapter_out=str(candidate if accepted else adapter))
             if accepted:

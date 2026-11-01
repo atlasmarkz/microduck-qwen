@@ -1,7 +1,8 @@
 import random
 import unittest
 
-from microduck_qwen.self_evolve import self_tasks, self_verify
+from microduck_qwen.agent_curriculum import decide
+from microduck_qwen.self_evolve import balance, hindsight_terminal, self_tasks, self_verify
 
 INVENTORY = [{"color": "blue", "x": 1.0, "y": 4.6}, {"color": "red", "x": 1.0, "y": 0.3}]
 FIND = {"color": "blue", "tail": "none", "kind": "explore_find"}
@@ -78,6 +79,38 @@ class SelfTaskTests(unittest.TestCase):
 
     def test_nothing_perceived_means_nothing_to_pose(self):
         self.assertEqual(self_tasks([], {"red"}, random.Random(0), 2), [])
+
+
+class HindsightAndBalanceTests(unittest.TestCase):
+    def rows_for(self, steps):
+        return [{"expected": s["action"]} for s in steps]
+
+    def test_only_a_wrong_closing_action_is_relabelled(self):
+        steps = good_find()[:-1] + [step({"action": "stop"})]
+        rows = self.rows_for(steps)
+        ok, reasons = self_verify(FIND, steps, 0, INVENTORY)
+        self.assertFalse(ok)
+        self.assertTrue(hindsight_terminal(FIND, steps, reasons, rows))
+        self.assertEqual(rows[-1]["expected"], {"action": "done"})
+        self.assertEqual(rows[0]["expected"], {"action": "explore", "color": "blue"})
+
+    def test_other_failures_and_non_terminal_endings_are_never_relabelled(self):
+        steps = good_find()[:-1]  # ended on a skill, not on a closing action
+        ok, reasons = self_verify(FIND, steps, 0, INVENTORY)
+        self.assertFalse(hindsight_terminal(FIND, steps, reasons, self.rows_for(steps)))
+        broken = [step({"action": "explore", "color": "blue"}, success=False)] + good_find()[1:-1] + [step({"action": "stop"})]
+        ok, reasons = self_verify(FIND, broken, 0, INVENTORY)
+        self.assertFalse(hindsight_terminal(FIND, broken, reasons, self.rows_for(broken)))
+
+    def test_balance_caps_the_easy_kind(self):
+        rows = [{"task_meta": {"kind": "colour_approach"}, "n": i} for i in range(30)] +                [{"task_meta": {"kind": "explore_find"}, "n": i} for i in range(4)]
+        kept = balance(rows)
+        self.assertEqual(sum(r["task_meta"]["kind"] == "explore_find" for r in kept), 4)
+        self.assertEqual(sum(r["task_meta"]["kind"] == "colour_approach" for r in kept), 8)
+
+    def test_noise_slack_tolerates_small_drops_only(self):
+        self.assertTrue(decide((30, 36), (29, 36), {}, {}, 0.25, slack=0.05)[0])
+        self.assertFalse(decide((30, 36), (26, 36), {}, {}, 0.25, slack=0.05)[0])
 
 
 if __name__ == "__main__":

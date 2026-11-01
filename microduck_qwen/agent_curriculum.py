@@ -38,7 +38,7 @@ def free_seed_offset(splits, level, scenes):
     return offset
 
 
-def decide(before, after, earlier_before, earlier_after, tolerance):
+def decide(before, after, earlier_before, earlier_after, tolerance, slack=0.0):
     """Accept a trained adapter only if it helps (or holds) its level and forgets nothing badly.
 
     `before`/`after` are (correct, total) at the trained level; `earlier_*` map level -> (correct, total).
@@ -46,7 +46,7 @@ def decide(before, after, earlier_before, earlier_after, tolerance):
     """
     reasons = []
     rate = lambda pair: pair[0] / pair[1] if pair[1] else 0.0
-    if rate(after) < rate(before):
+    if rate(before) - rate(after) > slack + 1e-9:
         reasons.append(f"held-out rate fell {rate(before):.2f} -> {rate(after):.2f}")
     for level, old in earlier_before.items():
         new = earlier_after.get(level)
