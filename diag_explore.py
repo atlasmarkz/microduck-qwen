@@ -23,7 +23,7 @@ try:
     balls = [(o["color"], round(o["x"], 2), round(o["y"], 2), o["room"]) for o in scene["objects"].values()]
     hidden = sorted({b[0] for b in balls} - seen)
     print("SEED", seed, "balls", balls, "hidden", hidden, flush=True)
-    for color in hidden * 2:
+    for color in hidden:
         ex.run({"action": "return_home"})
         r = ex.run({"action": "explore", "color": color})
         print("RESULT", {k: str(v)[:200] for k, v in r.items() if k in ("success", "error", "observation")}, flush=True)

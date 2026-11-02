@@ -44,6 +44,8 @@ class Explorer:
         self.mapper = OccupancyMap()
         self.inventory = []
         self.avoid = []
+        self.suspects = []   # target-coloured balls seen only partly: where to look again (ApexNav's "suspected targets")
+        self.checked = []
         self.iterations = []
         self.turn_trace = output.with_suffix(".turn.jsonl")
         self.port = executor.info["port"]
@@ -54,6 +56,11 @@ class Explorer:
         self.mapper.update_from_frame(frame)
         candidates = propose_targets(frame)
         remember(self.inventory, candidates)
+        for c in candidates:
+            if color and c["color"] == color and c.get("kind", "ball") == "ball" and c["visibility"] != "visible":
+                x, y = c["world_position"][:2]
+                if not any(math.hypot(x - sx, y - sy) < SAME_BALL_M for sx, sy in self.suspects + self.checked):
+                    self.suspects.append((float(x), float(y)))
         return visible_targets(frame, color) if color else []
 
     def scan(self, color=None):
@@ -72,8 +79,30 @@ class Explorer:
                     raise RuntimeError("explore scan turn failed")
         return []
 
+    def check_suspect(self, color):
+        """Walk toward the nearest partly-seen ball of the target colour and look again. [] if none is left."""
+        if not self.suspects:
+            return []
+        position = self.executor.healthy()["trunk"][:2]
+        x, y = min(self.suspects, key=lambda p: math.hypot(p[0] - position[0], p[1] - position[1]))
+        self.suspects.remove((x, y))
+        self.checked.append((x, y))
+        record = {"suspect": [round(x, 2), round(y, 2)]}
+        self.iterations.append(record)
+        try:
+            plan = {"status": "ok", "goals": [{"target": "point", "x": x, "y": y, "speed": "slow", "stop_distance_m": 0.9}]}
+            execute(plan, self.executor.robot, self.executor.observer, self.output.with_suffix(f".suspect{len(self.checked)}.jsonl"),
+                    timeout_s=40, scene=self.mapper.as_scene(), cancel_file=self.executor.cancel_file,
+                    cancel_started_ns=self.executor.started_ns, observation_label="depth-built occupancy map; oracle pose")
+            record["reached"] = True
+        except (ValueError, TimeoutError) as error:
+            record.update(reached=False, error=f"{type(error).__name__}: {error}")
+        self.executor.robot.stop()
+        return self.scan(color)
+
     def step(self, index):
         """Walk to the nearest reachable frontier. Returns the record, or None if none is left."""
+        self.executor.escape_cramped()
         position = self.executor.healthy()["trunk"][:2]
         # Normal clearance first; then forget past failures; then accept tighter clearance.
         for inflate, avoid in ((INFLATE_M, self.avoid), (INFLATE_M, ()), (TIGHT_INFLATE_M, ())):
@@ -97,11 +126,17 @@ class Explorer:
                         observation_label="depth-built occupancy map; oracle pose")
                 self.look()  # new sight lines open as the body moves
             record["reached"] = True
-        except (ValueError, TimeoutError) as error:
+        except (ValueError, TimeoutError, RuntimeError) as error:
+            # The depth map can under-draw a wall, so the true-scene safety stop may fire mid-route: that
+            # frontier failed, not the whole search. Cancel, a fall and a stalled simulator still end it.
+            if isinstance(error, RuntimeError) and any(w in str(error) for w in ("cancelled", "fallen", "stale")):
+                raise
             record.update(reached=False, error=f"{type(error).__name__}: {error}", failed_chunk=start,
                           chunk=[[round(float(x), 2), round(float(y), 2)] for x, y in chunk])
         self.avoid.append((float(goal[0]), float(goal[1])))
         self.executor.robot.stop()
+        if not record.get("reached", True):
+            self.executor.escape_cramped()
         return record
 
     def finish(self, started):
@@ -122,10 +157,15 @@ def run_explore(executor, action, output):
         for index in range(MAX_ITERATIONS):
             if seen or time.monotonic() - started > BUDGET_S:
                 break
+            seen = explorer.check_suspect(color)
+            if seen:
+                break
             if explorer.step(index) is None:
                 result["stopped"] = "no reachable frontier left"
                 break
             seen = explorer.scan(color)
+        while not seen and explorer.suspects and time.monotonic() - started <= BUDGET_S:
+            seen = explorer.check_suspect(color)
         result["found"] = bool(seen)
         if seen:
             result["candidate_colors"] = sorted({c["color"] for c in seen})
