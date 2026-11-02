@@ -96,9 +96,17 @@ def main():
                         jobs += explore_entries(info, args.split, seed, args.explore_tasks)
                     for i, instruction, specs, meta in jobs:
                         directory = scene_dir / f"task-{i:02d}"
-                        _, entry = episode(output, directory, info, args.split, seed, instruction, specs, planner, False, meta)
+                        # Failing to get back to the start between tasks is a harness/locomotion fault, not a wrong
+                        # answer: retry it, and report any that persist separately from model errors.
+                        for retry in range(3):
+                            _, entry = episode(output, directory, info, args.split, seed, instruction, specs, planner, False, meta)
+                            if "cannot restore task start" not in str(entry.get("error")):
+                                break
+                        infra = "cannot restore task start" in str(entry.get("error"))
                         result = {"seed": seed, "task_id": i, "instruction": instruction, "correct": entry["verified"], "error": entry.get("error"),
-                                  "layers": entry.get("layers"), "episode": str(directory / "episode.json")}
+                                  "layers": entry.get("layers"), "episode": str(directory / "episode.json"),
+                                  "infra_retries": retry, "infra_failure": infra}
+                        report["infra_failures"] = report.get("infra_failures", 0) + infra
                         report["results"].append(result)
                         report["correct"] += result["correct"]
                         report["total"] += 1

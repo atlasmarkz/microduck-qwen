@@ -231,8 +231,20 @@ class SkillExecutor:
         here = self.healthy()["trunk"][:2]
         # 60 s covers the small arenas; a cross-world return needs time in proportion to the trip.
         budget = max(60, 30 + 12 * math.dist(here, (home["x"], home["y"])))
-        result = {"navigation": execute(plan, self.robot, self.observer, output.with_suffix(".jsonl"), timeout_s=budget,
-                  scene=self.scene, cancel_file=self.cancel_file, arrival_tolerance_m=0, cancel_started_ns=self.started_ns)}
+        # A clearance stop or a stalled leg usually means the body is wedged against something: back away
+        # and plan again from where it is, instead of failing the whole return (and every task after it).
+        for attempt in range(3):
+            try:
+                navigation = execute(plan, self.robot, self.observer, output.with_suffix(f".r{attempt}.jsonl"), timeout_s=budget,
+                                     scene=self.scene, cancel_file=self.cancel_file, arrival_tolerance_m=0,
+                                     cancel_started_ns=self.started_ns)
+                break
+            except (RuntimeError, TimeoutError) as error:
+                if attempt == 2 or "cancelled" in str(error) or "fallen" in str(error):
+                    raise
+                self.robot.stop()
+                self.escape_cramped(trigger=0.08, target=0.14)
+        result = {"navigation": navigation, "return_attempts": attempt + 1}
         delta = angle(home["yaw"] - self.healthy()["yaw"])
         if abs(delta) > math.radians(5):
             with output.with_suffix(".turn.jsonl").open("w") as trace:

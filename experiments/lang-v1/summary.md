@@ -31,3 +31,19 @@ Explore tasks 20/48 -> 21/48; "no reachable frontier" failures 18 -> 9. No net g
 between-task `return_home` failures (2 -> 6: clearance stop or 65-87 s navigation timeouts), 2 `clarify` outputs, and runs where
 explore succeeded but the later approach/closing step failed. One diagnostic seed (98003) went 0/3 -> 2/2 on explore alone.
 Noise between identical runs is about +/-4 tasks of 40, so neither direction is established.
+
+## return_home retry + harness retry (same adapter, same 80 tasks)
+
+`return_home` now backs away (`escape_cramped`) and re-plans on a clearance stop or leg timeout (up to 3 tries); the evaluator retries
+an episode whose between-task reset failed and counts persistent ones separately (`infra_failures`; the 98000 run predates that
+evaluator change, the 98100 run has it).
+
+| | seed 98000 | seed 98100 | total | explore tasks |
+|---|---|---|---|---|
+| before fixes | 27/40 | 25/40 | 52/80 | 20/48 |
+| explore fix | 31/40 | 21/40 | 52/80 | 21/48 |
+| + return_home retry | 30/40 | 30/40 | 60/80 (75%) | 28/48 |
+
+Between-task reset failures 6 -> 0; remaining failures are mostly "no reachable frontier left" (10) and wrong physical results (7).
+60/80 vs 52/80 has overlapping 95% intervals and run-to-run spread is about +/-4 per 40, so this is a consistent trend over three
+runs of the same adapter, not a significance claim. No retraining was involved: all gains are execution-layer robustness.
