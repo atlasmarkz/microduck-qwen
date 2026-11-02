@@ -283,6 +283,7 @@ class SkillExecutor:
                 result["success"] = result["navigation"]["success"]
             elif name == "explore":
                 from .explore import run_explore
+                self.escape_cramped()
                 result.update(run_explore(self, action, output))
             elif name == "search":
                 result["turns"] = []

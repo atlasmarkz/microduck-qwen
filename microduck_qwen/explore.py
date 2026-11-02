@@ -11,7 +11,7 @@ import time
 
 import numpy as np
 
-from .mapping import OccupancyMap
+from .mapping import INFLATE_M, OccupancyMap
 from .navigation import execute
 from .vision import approachable, capture, propose_targets
 
@@ -19,6 +19,7 @@ MAX_ITERATIONS = 6
 BUDGET_S = 240.0
 CHUNK = 3  # waypoints per navigation call (~1.5 m), then re-look
 SAME_BALL_M = 0.35
+TIGHT_INFLATE_M = 0.25  # last resort when no frontier is reachable at the normal clearance (doorways are 1.1 m)
 
 
 def visible_targets(frame, color):
@@ -74,8 +75,12 @@ class Explorer:
     def step(self, index):
         """Walk to the nearest reachable frontier. Returns the record, or None if none is left."""
         position = self.executor.healthy()["trunk"][:2]
-        path = self.mapper.plan_to_frontier(position, self.avoid)
-        if path is None:
+        # Normal clearance first; then forget past failures; then accept tighter clearance.
+        for inflate, avoid in ((INFLATE_M, self.avoid), (INFLATE_M, ()), (TIGHT_INFLATE_M, ())):
+            path = self.mapper.plan_to_frontier(position, avoid, inflate_m=inflate)
+            if path is not None:
+                break
+        else:
             return None
         goal = path[-1]
         record = {"from": [round(float(v), 2) for v in position],
@@ -87,13 +92,14 @@ class Explorer:
                 plan = {"status": "ok", "goals": [{"target": "point", "x": float(x), "y": float(y), "speed": "slow",
                                                   "stop_distance_m": 0.10} for x, y in chunk]}
                 execute(plan, self.executor.robot, self.executor.observer, self.output.with_suffix(f".nav{index}-{start}.jsonl"),
-                        timeout_s=30, scene=self.mapper.as_scene(), cancel_file=self.executor.cancel_file,
+                        timeout_s=30, scene=self.mapper.as_scene(inflate), cancel_file=self.executor.cancel_file,
                         cancel_started_ns=self.executor.started_ns,
                         observation_label="depth-built occupancy map; oracle pose")
                 self.look()  # new sight lines open as the body moves
             record["reached"] = True
         except (ValueError, TimeoutError) as error:
-            record.update(reached=False, error=f"{type(error).__name__}: {error}")
+            record.update(reached=False, error=f"{type(error).__name__}: {error}", failed_chunk=start,
+                          chunk=[[round(float(x), 2), round(float(y), 2)] for x, y in chunk])
         self.avoid.append((float(goal[0]), float(goal[1])))
         self.executor.robot.stop()
         return record

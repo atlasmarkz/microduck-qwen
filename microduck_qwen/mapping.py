@@ -128,7 +128,7 @@ class OccupancyMap:
         keep = [i for i in range(1, count) if stats[i, cv2.CC_STAT_AREA] >= min_cluster]
         return [np.argwhere(labels.T == i) for i in keep]
 
-    def plan_to_frontier(self, position, avoid=(), min_distance=0.4, avoid_radius=0.6):
+    def plan_to_frontier(self, position, avoid=(), min_distance=0.4, avoid_radius=0.6, inflate_m=INFLATE_M):
         """Waypoints (world x, y) to the cheapest reachable frontier, or None.
 
         Dijkstra over known-free, uninflated-blocked cells; `avoid` lists world points whose
@@ -136,7 +136,7 @@ class OccupancyMap:
         """
         import heapq
 
-        blocked = self.blocked()
+        blocked = self.blocked(inflate_m)
         start = tuple(int(v) for v in self.index(position[0], position[1]))
         if not self._inside(*start):
             return None
@@ -188,13 +188,19 @@ class OccupancyMap:
             spaced.append(points[-1])
         return spaced
 
-    def as_scene(self):
-        """A planning scene made only of perceived obstacles, for navigation.execute()."""
+    def as_scene(self, inflate_m=INFLATE_M):
+        """A planning scene made only of perceived obstacles, for navigation.execute().
+
+        `inflate_m` is the same clearance the frontier planner used, so a route it found is not
+        then rejected as unreachable by the navigator's own (otherwise fixed) padding.
+        """
+        pad = max(0.03, inflate_m - 0.05 - 0.14)  # cell radius and robot radius are already counted
         cells = np.argwhere(self.grid == OCCUPIED)
         obstacles = []
         for index, (ix, iy) in enumerate(cells):
             x, y = self.center(ix, iy)
-            obstacles.append({"name": f"cell_{index}", "x": float(x), "y": float(y), "radius": self.cell / 2})
+            obstacles.append({"name": f"cell_{index}", "x": float(x), "y": float(y), "radius": self.cell / 2,
+                              "path_margin": pad})
         half = self.n * self.cell / 2
         return {"bounds": [-half, half, -half, half], "objects": {}, "obstacles": obstacles,
                 "walls": [], "grid": self.cell}
