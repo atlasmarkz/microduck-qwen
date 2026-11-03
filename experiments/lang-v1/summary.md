@@ -47,3 +47,15 @@ evaluator change, the 98100 run has it).
 Between-task reset failures 6 -> 0; remaining failures are mostly "no reachable frontier left" (10) and wrong physical results (7).
 60/80 vs 52/80 has overlapping 95% intervals and run-to-run spread is about +/-4 per 40, so this is a consistent trend over three
 runs of the same adapter, not a significance claim. No retraining was involved: all gains are execution-layer robustness.
+
+## Target memory and surviving safety stops (same adapter, same 80 tasks)
+
+| | seed 98000 | seed 98100 | total | explore tasks |
+|---|---|---|---|---|
+| + return_home retry | 30/40 | 30/40 | 60/80 | 28/48 |
+| + target memory (partly seen balls) | 29/40 | 32/40 | 61/80 | 29/48 |
+| + continue after mid-route safety stop | 31/40 | 30/40 | 61/80 | 29/48 |
+
+Target memory fired twice in 80 tasks; no measurable effect. Surviving mid-route safety stops fixed the reproduced layout
+(seed 98005, 0 -> found) but "no reachable frontier left" stayed at 10-11 of the ~19 failures across the 80 tasks, so that was not
+the main cause overall. The remaining failures are not yet explained; 6-7 are wrong action types by the model (retraining territory).
