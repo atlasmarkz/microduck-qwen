@@ -78,3 +78,18 @@ Remaining 16 failures: 6 wrong action type by the model, 4 wrong physical outcom
 2 other. Mean explore time stays ~130 s. Run-to-run spread is about +/-4 per 40, so 64 vs 61 is within noise on its own; the removal of the
 "no reachable frontier" class (11 -> 0) is the mechanism-level evidence. Geometry near the doorway behind the three-ball start row is
 tight; some runs still hit safety stops there.
+
+## lang-v2: corrected-data retrain on top of the faithful map
+
+Expert-corrected aggregation with `lang-v1` as actor (world scenes seeds 69000-69007, colour tasks 69500-69505), 300 steps from `lang-v1`
+(`data/lang-v2`, 3074 training rows). Same 80 held-out tasks and same code as the 64/80 run.
+
+| | seed 98000 | seed 98100 | total | explore tasks | wrong action type |
+|---|---|---|---|---|---|
+| lang-v1 | 34/40 | 30/40 | 64/80 | 32/48 | 6 |
+| lang-v2 | 29/40 | 34/40 | 63/80 | 32/48 | 1 |
+
+The retrain did what it targeted (wrong-action-type failures 6 -> 1) but the total did not move: the freed tasks now fail on
+"iteration/time budget used" (2 -> 7) and "no confidently visible ball" (1 -> 3), i.e. exploration that does not finish inside 12 iterations /
+300 s. Seed 98000 was re-run once after a simulator start failure (partial 10/10 discarded).
+The next bottleneck is exploration efficiency, not the language model.
