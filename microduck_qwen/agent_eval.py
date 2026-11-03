@@ -3,6 +3,7 @@
 import argparse
 from datetime import datetime
 import json
+import shutil
 from pathlib import Path
 
 from . import ROOT
@@ -99,6 +100,8 @@ def main():
                         # Failing to get back to the start between tasks is a harness/locomotion fault, not a wrong
                         # answer: retry it, and report any that persist separately from model errors.
                         for retry in range(3):
+                            if directory.exists():
+                                shutil.rmtree(directory)  # a retry starts from a clean episode directory
                             _, entry = episode(output, directory, info, args.split, seed, instruction, specs, planner, False, meta)
                             if "cannot restore task start" not in str(entry.get("error")):
                                 break

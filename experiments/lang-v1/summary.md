@@ -59,3 +59,22 @@ runs of the same adapter, not a significance claim. No retraining was involved: 
 Target memory fired twice in 80 tasks; no measurable effect. Surviving mid-route safety stops fixed the reproduced layout
 (seed 98005, 0 -> found) but "no reachable frontier left" stayed at 10-11 of the ~19 failures across the 80 tasks, so that was not
 the main cause overall. The remaining failures are not yet explained; 6-7 are wrong action types by the model (retraining territory).
+
+## Faithful map: no free-space carving through walls (same adapter, same 80 tasks)
+
+Rendering a failing run's map showed the cause of "no reachable frontier left": the camera sits above the 0.4 m walls, so rays with
+no return (they pass over a wall or the world edge) were carved as free ground, which leaked free space outside the world and put the
+nearest "frontiers" where nothing could be reached. Rays without a return are no longer carved. Consequences handled: ball cells get
+less inflation than walls (the navigator keeps 3.5 cm around balls but 20 cm around walls), the navigator gets 5 cm less padding than
+the frontier planner (its lattice is half a cell off the map's), explore allows 12 iterations / 300 s, and `escape_cramped` + safety-stop
+survival remain. The evaluator's retry bug (re-creating an existing episode directory) was fixed on the way.
+
+| | seed 98000 | seed 98100 | total | explore tasks | "no reachable frontier" |
+|---|---|---|---|---|---|
+| + safety-stop survival | 31/40 | 30/40 | 61/80 | 29/48 | 11 |
+| + faithful map | 34/40 | 30/40 | 64/80 (80%) | 32/48 (67%) | 0 |
+
+Remaining 16 failures: 6 wrong action type by the model, 4 wrong physical outcome, 2 iteration/time budget, 2 between-task reset failures,
+2 other. Mean explore time stays ~130 s. Run-to-run spread is about +/-4 per 40, so 64 vs 61 is within noise on its own; the removal of the
+"no reachable frontier" class (11 -> 0) is the mechanism-level evidence. Geometry near the doorway behind the three-ball start row is
+tight; some runs still hit safety stops there.

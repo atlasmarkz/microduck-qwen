@@ -17,6 +17,10 @@ MAX_HEIGHT = 0.80     # hits above this are ignored (ceiling-like returns)
 # Matches the planner used by navigation.execute on the perceived map: robot radius 0.14,
 # path margin 0.12 and the 5 cm cell radius, so waypoints are never inside its blocked zone.
 INFLATE_M = 0.32
+# A ball is a small obstacle (radius 0.07); the navigator keeps only a 3.5 cm margin around balls but
+# 20 cm around walls, so cells that belong to a perceived ball get that much less inflation.
+BALL_MARK_M = 0.12
+BALL_RELIEF_M = 0.05
 
 
 class OccupancyMap:
@@ -25,6 +29,7 @@ class OccupancyMap:
         self.n = int(round(size_m / cell))
         self.origin = -size_m / 2
         self.grid = np.zeros((self.n, self.n), dtype=np.uint8)
+        self.soft = np.zeros((self.n, self.n), dtype=bool)   # occupied cells that belong to a perceived ball
 
     def index(self, x, y):
         return (np.floor((np.asarray(x) - self.origin) / self.cell).astype(int),
@@ -101,8 +106,22 @@ class OccupancyMap:
 
         world = to_world(np.where(near, z, 1.0))
         world[~near] = np.nan
-        open_ends = to_world(np.full_like(z, max_range))[valid & ~near][:, :2]
-        self.update_from_points(origin[:2], world.reshape(-1, 3), max_range, open_ends)
+        # Rays with no return are NOT carved as free: the camera sits above the 0.4 m walls, so such a ray
+        # passes over a wall (or the world's edge) and says nothing about the ground beneath it. Carving
+        # them leaked "free" space through walls and created unreachable frontiers outside the world.
+        # Free space comes from hits only: a ray to a floor or obstacle point is clear up to that point.
+        self.update_from_points(origin[:2], world.reshape(-1, 3), max_range, None)
+
+    def mark_balls(self, centers):
+        """Flag occupied cells within BALL_MARK_M of a perceived ball centre as ball cells (less inflation)."""
+        reach = int(math.ceil(BALL_MARK_M / self.cell))
+        for x, y in centers:
+            ix, iy = (int(v) for v in self.index(x, y))
+            for dx in range(-reach, reach + 1):
+                for dy in range(-reach, reach + 1):
+                    a, b = ix + dx, iy + dy
+                    if self._inside(a, b) and self.grid[a, b] == OCCUPIED and math.hypot(dx, dy) * self.cell <= BALL_MARK_M:
+                        self.soft[a, b] = True
 
     def blocked(self, inflate_m=INFLATE_M):
         """Cells the robot centre may not enter: occupied (inflated) or never observed."""
@@ -110,7 +129,12 @@ class OccupancyMap:
 
         reach = int(math.ceil(inflate_m / self.cell))
         kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2 * reach + 1, 2 * reach + 1))
-        grown = cv2.dilate((self.grid == OCCUPIED).astype(np.uint8), kernel) > 0
+        occupied = self.grid == OCCUPIED
+        grown = cv2.dilate((occupied & ~self.soft).astype(np.uint8), kernel) > 0
+        if self.soft.any():
+            soft_reach = int(math.ceil(max(0.20, inflate_m - BALL_RELIEF_M) / self.cell))
+            soft_kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2 * soft_reach + 1, 2 * soft_reach + 1))
+            grown |= cv2.dilate((occupied & self.soft).astype(np.uint8), soft_kernel) > 0
         return grown | (self.grid == UNKNOWN)
 
     def frontier_cells(self, min_cluster=3):
@@ -194,13 +218,14 @@ class OccupancyMap:
         `inflate_m` is the same clearance the frontier planner used, so a route it found is not
         then rejected as unreachable by the navigator's own (otherwise fixed) padding.
         """
-        pad = max(0.03, inflate_m - 0.05 - 0.14)  # cell radius and robot radius are already counted
+        pad = max(0.01, inflate_m - 0.05 - 0.14)  # cell radius and robot radius are already counted
         cells = np.argwhere(self.grid == OCCUPIED)
         obstacles = []
         for index, (ix, iy) in enumerate(cells):
             x, y = self.center(ix, iy)
+            soft = self.soft[ix, iy]
             obstacles.append({"name": f"cell_{index}", "x": float(x), "y": float(y), "radius": self.cell / 2,
-                              "path_margin": pad})
+                              "path_margin": max(0.01, pad - BALL_RELIEF_M) if soft else pad})
         half = self.n * self.cell / 2
         return {"bounds": [-half, half, -half, half], "objects": {}, "obstacles": obstacles,
                 "walls": [], "grid": self.cell}

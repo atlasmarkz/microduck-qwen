@@ -15,11 +15,12 @@ from .mapping import INFLATE_M, OccupancyMap
 from .navigation import execute
 from .vision import approachable, capture, propose_targets
 
-MAX_ITERATIONS = 6
-BUDGET_S = 240.0
+MAX_ITERATIONS = 12
+BUDGET_S = 300.0
 CHUNK = 3  # waypoints per navigation call (~1.5 m), then re-look
 SAME_BALL_M = 0.35
-TIGHT_INFLATE_M = 0.25  # last resort when no frontier is reachable at the normal clearance (doorways are 1.1 m)
+NAV_SLACK_M = 0.05  # the navigator's 5 cm lattice sits half a cell off the map's, which costs it up to this much width
+TIGHT_INFLATE_M = 0.20  # last resort when no frontier is reachable at the normal clearance (balls beside a doorway need it)
 
 
 def visible_targets(frame, color):
@@ -56,6 +57,7 @@ class Explorer:
         self.mapper.update_from_frame(frame)
         candidates = propose_targets(frame)
         remember(self.inventory, candidates)
+        self.mapper.mark_balls([c["world_position"][:2] for c in candidates if c.get("kind", "ball") == "ball"])
         for c in candidates:
             if color and c["color"] == color and c.get("kind", "ball") == "ball" and c["visibility"] != "visible":
                 x, y = c["world_position"][:2]
@@ -121,7 +123,7 @@ class Explorer:
                 plan = {"status": "ok", "goals": [{"target": "point", "x": float(x), "y": float(y), "speed": "slow",
                                                   "stop_distance_m": 0.10} for x, y in chunk]}
                 execute(plan, self.executor.robot, self.executor.observer, self.output.with_suffix(f".nav{index}-{start}.jsonl"),
-                        timeout_s=30, scene=self.mapper.as_scene(inflate), cancel_file=self.executor.cancel_file,
+                        timeout_s=30, scene=self.mapper.as_scene(inflate - NAV_SLACK_M), cancel_file=self.executor.cancel_file,
                         cancel_started_ns=self.executor.started_ns,
                         observation_label="depth-built occupancy map; oracle pose")
                 self.look()  # new sight lines open as the body moves
