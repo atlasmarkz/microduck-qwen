@@ -11,7 +11,7 @@ import time
 
 import numpy as np
 
-from .mapping import INFLATE_M, OccupancyMap
+from .mapping import INFLATE_M, MIN_PAD_M, OccupancyMap
 from .navigation import execute
 from .vision import approachable, capture, propose_targets
 
@@ -20,7 +20,8 @@ BUDGET_S = 300.0
 CHUNK = 3  # waypoints per navigation call (~1.5 m), then re-look
 SAME_BALL_M = 0.35
 NAV_SLACK_M = 0.05  # the navigator's 5 cm lattice sits half a cell off the map's, which costs it up to this much width
-TIGHT_INFLATE_M = 0.20  # last resort when no frontier is reachable at the normal clearance (balls beside a doorway need it)
+TIGHT_INFLATE_M = 0.26
+TIGHTEST_INFLATE_M = 0.22  # only when nothing else is reachable; the navigator then keeps just 3 cm of pad  # last resort when no frontier is reachable at the normal clearance (balls beside a doorway need it)
 
 
 def visible_targets(frame, color):
@@ -107,7 +108,7 @@ class Explorer:
         self.executor.escape_cramped()
         position = self.executor.healthy()["trunk"][:2]
         # Normal clearance first; then forget past failures; then accept tighter clearance.
-        for inflate, avoid in ((INFLATE_M, self.avoid), (INFLATE_M, ()), (TIGHT_INFLATE_M, ())):
+        for inflate, avoid in ((INFLATE_M, self.avoid), (INFLATE_M, ()), (TIGHT_INFLATE_M, ()), (TIGHTEST_INFLATE_M, ())):
             path = self.mapper.plan_to_frontier(position, avoid, inflate_m=inflate)
             if path is not None:
                 break
@@ -123,7 +124,7 @@ class Explorer:
                 plan = {"status": "ok", "goals": [{"target": "point", "x": float(x), "y": float(y), "speed": "slow",
                                                   "stop_distance_m": 0.10} for x, y in chunk]}
                 execute(plan, self.executor.robot, self.executor.observer, self.output.with_suffix(f".nav{index}-{start}.jsonl"),
-                        timeout_s=30, scene=self.mapper.as_scene(inflate - NAV_SLACK_M), cancel_file=self.executor.cancel_file,
+                        timeout_s=30, scene=self.mapper.as_scene(inflate - NAV_SLACK_M, 0.03 if inflate <= TIGHTEST_INFLATE_M else MIN_PAD_M), cancel_file=self.executor.cancel_file,
                         cancel_started_ns=self.executor.started_ns,
                         observation_label="depth-built occupancy map; oracle pose")
                 self.look()  # new sight lines open as the body moves
@@ -144,6 +145,7 @@ class Explorer:
     def finish(self, started):
         self.executor.robot.stop()
         np.save(self.output.with_suffix(".map.npy"), self.mapper.grid)
+        np.save(self.output.with_suffix(".soft.npy"), self.mapper.soft)
         return {"explored_cells": self.mapper.explored_cells(), "elapsed_s": time.monotonic() - started,
                 "iterations": self.iterations, "inventory": self.inventory}
 

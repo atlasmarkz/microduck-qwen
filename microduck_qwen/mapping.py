@@ -21,6 +21,10 @@ INFLATE_M = 0.32
 # 20 cm around walls, so cells that belong to a perceived ball get that much less inflation.
 BALL_MARK_M = 0.12
 BALL_RELIEF_M = 0.05
+# Cell radius 0.05 + robot radius 0.14 + this margin is the least the navigator may plan with: its guard stops
+# at 1.5 cm clearance, so a path planned closer than ~5 cm trips it on ordinary tracking wobble.
+MIN_PAD_M = 0.05
+MIN_REACH_M = 0.05 + 0.14 + MIN_PAD_M
 
 
 class OccupancyMap:
@@ -132,7 +136,7 @@ class OccupancyMap:
         occupied = self.grid == OCCUPIED
         grown = cv2.dilate((occupied & ~self.soft).astype(np.uint8), kernel) > 0
         if self.soft.any():
-            soft_reach = int(math.ceil(max(0.20, inflate_m - BALL_RELIEF_M) / self.cell))
+            soft_reach = int(math.ceil(max(min(MIN_REACH_M, inflate_m), inflate_m - BALL_RELIEF_M) / self.cell))
             soft_kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2 * soft_reach + 1, 2 * soft_reach + 1))
             grown |= cv2.dilate((occupied & self.soft).astype(np.uint8), soft_kernel) > 0
         return grown | (self.grid == UNKNOWN)
@@ -212,20 +216,20 @@ class OccupancyMap:
             spaced.append(points[-1])
         return spaced
 
-    def as_scene(self, inflate_m=INFLATE_M):
+    def as_scene(self, inflate_m=INFLATE_M, min_pad=MIN_PAD_M):
         """A planning scene made only of perceived obstacles, for navigation.execute().
 
         `inflate_m` is the same clearance the frontier planner used, so a route it found is not
         then rejected as unreachable by the navigator's own (otherwise fixed) padding.
         """
-        pad = max(0.01, inflate_m - 0.05 - 0.14)  # cell radius and robot radius are already counted
+        pad = max(min_pad, inflate_m - 0.05 - 0.14)  # cell radius and robot radius are already counted
         cells = np.argwhere(self.grid == OCCUPIED)
         obstacles = []
         for index, (ix, iy) in enumerate(cells):
             x, y = self.center(ix, iy)
             soft = self.soft[ix, iy]
             obstacles.append({"name": f"cell_{index}", "x": float(x), "y": float(y), "radius": self.cell / 2,
-                              "path_margin": max(0.01, pad - BALL_RELIEF_M) if soft else pad})
+                              "path_margin": max(min_pad, pad - BALL_RELIEF_M) if soft else pad})
         half = self.n * self.cell / 2
         return {"bounds": [-half, half, -half, half], "objects": {}, "obstacles": obstacles,
                 "walls": [], "grid": self.cell}
