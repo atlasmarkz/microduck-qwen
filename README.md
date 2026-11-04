@@ -213,3 +213,8 @@ uv pip install --python .venv-vlm/bin/python -r requirements-vision.txt
 源码在 `microduck_qwen/`，虚拟环境在 `.venv/`（Windows）或 `.venv-vlm/`（Mac），模型缓存放在 `.cache/`，权重在 `adapters/`，数据在 `data/`，运行记录在 `runs/`。这些生成文件不提交到 Git。复制到新机器后应重建虚拟环境，不要复用其他设备的虚拟环境。
 
 原始来源：[Qwen3-VL 模型](https://huggingface.co/Qwen/Qwen3-VL-4B-Instruct)、[MLX-VLM](https://github.com/Blaizzy/mlx-vlm)、[MicroDuck](https://github.com/pollen-robotics/microduck)、[官方仿真](https://github.com/pollen-robotics/microduck_rl)。
+
+## 贡献者 / Contributors
+
+- [Mark Zhang（@atlasmarkz）](https://github.com/atlasmarkz)：项目作者与维护者。
+- Codex（OpenAI）：AI 协作贡献者，协助整理项目主题标签与贡献者文档。
