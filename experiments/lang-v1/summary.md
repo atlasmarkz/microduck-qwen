@@ -93,3 +93,20 @@ The retrain did what it targeted (wrong-action-type failures 6 -> 1) but the tot
 "iteration/time budget used" (2 -> 7) and "no confidently visible ball" (1 -> 3), i.e. exploration that does not finish inside 12 iterations /
 300 s. Seed 98000 was re-run once after a simulator start failure (partial 10/10 discarded).
 The next bottleneck is exploration efficiency, not the language model.
+
+## Navigator pad floor and four clearance tiers (adapter lang-v2, same 80 tasks)
+
+Failure analysis of the 10 budget-exhausted explores showed 7 were the same tight spot hit repeatedly: the navigator guard stops at 1.5 cm
+clearance, and paths planned with <5 cm pad (pad floor was 1 cm, ball relief on top) tripped it on ordinary tracking wobble. Pad floor is now
+5 cm (3 cm only on the last-resort 0.22 m tier); a 0.26 m tier sits before it.
+
+| | seed 98000 | seed 98100 | total | explore tasks | mean explore time |
+|---|---|---|---|---|---|
+| lang-v1, faithful map | 34/40 | 30/40 | 64/80 | 32/48 | 130 s |
+| lang-v2, faithful map | 29/40 | 34/40 | 63/80 | 32/48 | 129 s |
+| lang-v2, pad floor | 37/40 | 32/40 | 69/80 (86%) | 41/48 (85%) | 117 s |
+
+Budget-exhausted failures 7 -> 0. New weakness: task 4 ("move forward 20 cm") fell to 12/16 because after the move the model says `unsupported`
+instead of `done` in 4 episodes (lang-v2 had 15/16, lang-v1 16/16); the corrected-data retrain added "unsupported" examples and this is the
+likely side effect (not verified). Other failures: 5 wrong-type incl. those 4, 4 "no reachable frontier" (the tight-door layout 98101), 2 physical.
+Spread between identical runs is about +/-4 per 40; 69 vs 63-64 is outside that, but it is two seed groups of one world level, simulator only.
