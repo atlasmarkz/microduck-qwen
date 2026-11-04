@@ -9,14 +9,14 @@
           "odometry_relative_home": {
             "x": 0.0,
             "y": 0.0,
-            "yaw_deg": 0.0
+            "yaw_deg": -0.1
           },
           "completed": []
         },
         "prediction": {
           "instruction": "去别的房间找蓝色的球，走到它旁边，然后回起点",
           "raw": "{\"action\":\"explore\",\"color\":\"blue\"}",
-          "latency_s": 11.52139549999265,
+          "latency_s": 7.276259800011758,
           "model": "Qwen/Qwen3-VL-4B-Instruct",
           "revision": "ebb281ec70b05090aa6165b016eac8ec08e71b17",
           "adapter": {
@@ -43,13 +43,13 @@
           "candidate_colors": [
             "blue"
           ],
-          "explored_cells": 2909,
-          "elapsed_s": 44.26600000000326,
+          "explored_cells": 3013,
+          "elapsed_s": 44.64000000001397,
           "iterations": [
             {
               "from": [
-                0.01,
-                0.02
+                0.0,
+                0.01
               ],
               "frontier": [
                 0.05,
@@ -62,63 +62,68 @@
           "inventory": [
             {
               "color": "red",
-              "x": 1.0637791968378942,
-              "y": -0.4181966693038099
+              "x": 1.063736710456843,
+              "y": -0.4184229319933463
             },
             {
               "color": "green",
-              "x": 3.079590171197341,
-              "y": -0.11408941903299159
+              "x": 3.079888875290738,
+              "y": -0.11406498239155138
             },
             {
               "color": "green",
-              "x": 1.1574270155625161,
-              "y": 0.3157007408234621
+              "x": 1.1573295350194954,
+              "y": 0.3157187707605791
             },
             {
               "color": "yellow",
-              "x": 2.6419524093735833,
-              "y": -0.7219104707568645
+              "x": 2.641807107563906,
+              "y": -0.7227918241829342
             },
             {
               "color": "yellow",
-              "x": 0.9887154614834691,
-              "y": 0.04309798845912873
+              "x": 0.9886570190092464,
+              "y": 0.042841373894777296
             },
             {
               "color": "red",
-              "x": 0.6510365504044034,
-              "y": 0.7840397176979638
+              "x": 0.6629376513027456,
+              "y": 0.7729669650156875
             },
             {
               "color": "green",
-              "x": -0.9445627954664435,
-              "y": 0.4244978083996346
+              "x": -0.9451436900579627,
+              "y": 0.4244828582303428
+            },
+            {
+              "color": "red",
+              "x": 0.10014902997200407,
+              "y": 3.6558416103341282
             },
             {
               "color": "blue",
-              "x": 0.838301045524568,
-              "y": 4.063289062345831
+              "x": 0.8394965885320332,
+              "y": 4.065267285565311
             },
             {
               "color": "yellow",
-              "x": 0.1320775627838185,
-              "y": 4.43249069533701
+              "x": 2.9602951459787388,
+              "y": 3.529524671668356
             },
             {
               "color": "yellow",
-              "x": 2.959807218526547,
-              "y": 3.5325753447829693
+              "x": 0.12480018049466109,
+              "y": 4.432452113818044
             },
             {
               "color": "red",
-              "x": -1.155170543790152,
-              "y": 2.8618953196805306
+              "x": -1.1556381489158118,
+              "y": 2.8616544961194026
             },
             {
               "color": "yellow",
-              "x": 4.0210939198968,
-              "y": 3.816241546274136
+              "x": 4.02253146659413,
+              "y": 3.813369558400195
             }
           ]
         }
@@ -128,8 +133,8 @@
           "home_recorded": true,
           "odometry_relative_home": {
             "x": 0.14,
-            "y": 2.16,
-            "yaw_deg": 42.2
+            "y": 2.18,
+            "yaw_deg": 39.2
           },
           "completed": [
             {
@@ -141,7 +146,7 @@
         "prediction": {
           "instruction": "去别的房间找蓝色的球，走到它旁边，然后回起点",
           "raw": "{\"action\":\"approach\",\"color\":\"blue\",\"selector\":\"nearest\"}",
-          "latency_s": 2.8830569999990985,
+          "latency_s": 2.91060209996067,
           "model": "Qwen/Qwen3-VL-4B-Instruct",
           "revision": "ebb281ec70b05090aa6165b016eac8ec08e71b17",
           "adapter": {
@@ -168,21 +173,21 @@
             "color": "blue",
             "kind": "ball",
             "bbox": [
-              154,
+              132,
               151,
-              180,
-              175
+              160,
+              177
             ],
             "pixel": [
-              166.26915113871635,
-              162.39337474120083
+              145.3780260707635,
+              162.88640595903166
             ],
             "world_position": [
-              0.8421072600057882,
-              4.063491472713994,
-              0.06830595281296051
+              0.8417803133265633,
+              4.063479677275913,
+              0.06839925822313653
             ],
-            "surface_depth_m": 1.644853115081787,
+            "surface_depth_m": 1.5840095281600952,
             "visible_fraction_estimate": 1.0,
             "visibility": "visible",
             "id": 2
@@ -193,18 +198,18 @@
               {
                 "goal": {
                   "target": "point",
-                  "x": 0.8421072600057882,
-                  "y": 4.063491472713994,
+                  "x": 0.8417803133265633,
+                  "y": 4.063479677275913,
                   "speed": "slow",
                   "stop_distance_m": 0.3
                 },
-                "distance_m": 0.3153313384424804,
-                "elapsed_s": 17.125,
-                "path_length_m": 2.465283176788133,
-                "min_clearance_m": 0.06396460400035134,
+                "distance_m": 0.313804935129236,
+                "elapsed_s": 17.51600000000326,
+                "path_length_m": 2.5102202276108647,
+                "min_clearance_m": 0.08649445742892656,
                 "position": [
-                  0.7217637407219434,
-                  3.7720274262686306
+                  0.7256905248977211,
+                  3.771937744899092
                 ]
               }
             ],
@@ -218,7 +223,7 @@
           "odometry_relative_home": {
             "x": 0.73,
             "y": 3.77,
-            "yaw_deg": 61.3
+            "yaw_deg": 68.7
           },
           "completed": [
             {
@@ -235,7 +240,7 @@
         "prediction": {
           "instruction": "去别的房间找蓝色的球，走到它旁边，然后回起点",
           "raw": "{\"action\":\"return_home\"}",
-          "latency_s": 1.650976000004448,
+          "latency_s": 1.7362566000083461,
           "model": "Qwen/Qwen3-VL-4B-Instruct",
           "revision": "ebb281ec70b05090aa6165b016eac8ec08e71b17",
           "adapter": {
@@ -265,21 +270,21 @@
                   "speed": "slow",
                   "stop_distance_m": 0.1
                 },
-                "distance_m": 0.09555772772118305,
-                "elapsed_s": 39.5,
-                "path_length_m": 5.582954473144037,
-                "min_clearance_m": 0.0689121276769894,
+                "distance_m": 0.09614910012773535,
+                "elapsed_s": 40.48399999999674,
+                "path_length_m": 5.823502176226785,
+                "min_clearance_m": 0.06567122615181009,
                 "position": [
-                  0.016271571401804363,
-                  0.094162175481197
+                  0.012379701239198673,
+                  0.09534879366096595
                 ]
               }
             ],
             "observation": "MuJoCo ground-truth pose and fixed scene map"
           },
           "return_attempts": 1,
-          "distance_home_m": 0.07705268459598744,
-          "home_yaw_error_deg": 3.5266938064776228
+          "distance_home_m": 0.08102511562789678,
+          "home_yaw_error_deg": 2.438527715773232
         }
       },
       {
@@ -288,7 +293,7 @@
           "odometry_relative_home": {
             "x": 0.02,
             "y": 0.08,
-            "yaw_deg": -3.3
+            "yaw_deg": -3.4
           },
           "completed": [
             {
@@ -308,7 +313,7 @@
         "prediction": {
           "instruction": "去别的房间找蓝色的球，走到它旁边，然后回起点",
           "raw": "{\"action\":\"done\"}",
-          "latency_s": 1.5266910000354983,
+          "latency_s": 1.6186903999769129,
           "model": "Qwen/Qwen3-VL-4B-Instruct",
           "revision": "ebb281ec70b05090aa6165b016eac8ec08e71b17",
           "adapter": {
@@ -331,7 +336,7 @@
         }
       }
     ],
-    "directory": ".\\runs\\agent\\20261104-225345-838356",
+    "directory": ".\\runs\\agent\\20261105-000259-089627",
     "status": "model_done",
     "task_success_verified": false,
     "interactions": [],
@@ -342,7 +347,7 @@
       "yaw": 0.0
     }
   },
-  "frame_count": 64,
+  "frame_count": 63,
   "instruction": "去别的房间找蓝色的球，走到它旁边，然后回起点",
   "seed": 98107,
   "clutter": false,
@@ -355,13 +360,13 @@
   },
   "decisions": [
     {
-      "image": ".\\runs\\agent\\20261104-225345-838356\\step-000-candidates.png",
+      "image": ".\\runs\\agent\\20261105-000259-089627\\step-000-candidates.png",
       "memory": {
         "home_recorded": true,
         "odometry_relative_home": {
           "x": 0.0,
           "y": 0.0,
-          "yaw_deg": 0.0
+          "yaw_deg": -0.1
         },
         "completed": []
       },
@@ -369,7 +374,7 @@
       "prediction": {
         "instruction": "去别的房间找蓝色的球，走到它旁边，然后回起点",
         "raw": "{\"action\":\"explore\",\"color\":\"blue\"}",
-        "latency_s": 11.52139549999265,
+        "latency_s": 7.276259800011758,
         "model": "Qwen/Qwen3-VL-4B-Instruct",
         "revision": "ebb281ec70b05090aa6165b016eac8ec08e71b17",
         "adapter": {
@@ -384,13 +389,13 @@
       }
     },
     {
-      "image": ".\\runs\\agent\\20261104-225345-838356\\step-001-candidates.png",
+      "image": ".\\runs\\agent\\20261105-000259-089627\\step-001-candidates.png",
       "memory": {
         "home_recorded": true,
         "odometry_relative_home": {
           "x": 0.14,
-          "y": 2.16,
-          "yaw_deg": 42.2
+          "y": 2.18,
+          "yaw_deg": 39.2
         },
         "completed": [
           {
@@ -403,7 +408,7 @@
       "prediction": {
         "instruction": "去别的房间找蓝色的球，走到它旁边，然后回起点",
         "raw": "{\"action\":\"approach\",\"color\":\"blue\",\"selector\":\"nearest\"}",
-        "latency_s": 2.8830569999990985,
+        "latency_s": 2.91060209996067,
         "model": "Qwen/Qwen3-VL-4B-Instruct",
         "revision": "ebb281ec70b05090aa6165b016eac8ec08e71b17",
         "adapter": {
@@ -419,13 +424,13 @@
       }
     },
     {
-      "image": ".\\runs\\agent\\20261104-225345-838356\\step-002-candidates.png",
+      "image": ".\\runs\\agent\\20261105-000259-089627\\step-002-candidates.png",
       "memory": {
         "home_recorded": true,
         "odometry_relative_home": {
           "x": 0.73,
           "y": 3.77,
-          "yaw_deg": 61.3
+          "yaw_deg": 68.7
         },
         "completed": [
           {
@@ -443,7 +448,7 @@
       "prediction": {
         "instruction": "去别的房间找蓝色的球，走到它旁边，然后回起点",
         "raw": "{\"action\":\"return_home\"}",
-        "latency_s": 1.650976000004448,
+        "latency_s": 1.7362566000083461,
         "model": "Qwen/Qwen3-VL-4B-Instruct",
         "revision": "ebb281ec70b05090aa6165b016eac8ec08e71b17",
         "adapter": {
@@ -457,13 +462,13 @@
       }
     },
     {
-      "image": ".\\runs\\agent\\20261104-225345-838356\\step-003-candidates.png",
+      "image": ".\\runs\\agent\\20261105-000259-089627\\step-003-candidates.png",
       "memory": {
         "home_recorded": true,
         "odometry_relative_home": {
           "x": 0.02,
           "y": 0.08,
-          "yaw_deg": -3.3
+          "yaw_deg": -3.4
         },
         "completed": [
           {
@@ -484,7 +489,7 @@
       "prediction": {
         "instruction": "去别的房间找蓝色的球，走到它旁边，然后回起点",
         "raw": "{\"action\":\"done\"}",
-        "latency_s": 1.5266910000354983,
+        "latency_s": 1.6186903999769129,
         "model": "Qwen/Qwen3-VL-4B-Instruct",
         "revision": "ebb281ec70b05090aa6165b016eac8ec08e71b17",
         "adapter": {
@@ -498,10 +503,10 @@
       }
     }
   ],
-  "duration_s": 31.44,
-  "max_displacement_m": 3.86078867250421,
-  "final_home_distance_m": 0.07860776609315931,
-  "gif_sha256": "044b06b37221a600479e06ab853037f95bc4846a935a855ef80fc0dadcee8495",
+  "duration_s": 24.89,
+  "max_displacement_m": 3.862809954490111,
+  "final_home_distance_m": 0.07918047004286027,
+  "gif_sha256": "8c1d61632653931091ef21abf2f408b0b5b00977786f429d1fc28f3c01238384",
   "collection_ground_truth": false,
-  "note": "Live model inference and physics; model_done is not independently verified task success. No teacher intervention. Wall-clock frame timing preserved. GIF was re-encoded after recording for size: 780x420, 64 colours, every second frame kept (original 1040x560, 127 frames, not published). Playback is 4x real time (labelled on screen); model decisions and physics are unchanged."
+  "note": "Live model inference and physics; model_done is not independently verified task success. No teacher intervention. Playback is 5x real time (labelled on screen)."
 }
