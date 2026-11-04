@@ -133,6 +133,12 @@ def tasks(split, variant=0):
             ["Move forward 20 cm, then return to the start", "Back up 20 cm, then go back to the starting point",
              "Turn left 45 degrees, then turn right 45 degrees", "Go to the leftmost ball, then return to the start",
              "Walk forward 20 cm", "Back up 20 cm", "Stop moving", "Pick up the blue ball", "Go over there"],
+            # Extra move-only phrasings ("移动"/"挪动"/"前移" wording) so a finished move ends in done, not unsupported.
+            # None of these equals a valid/test phrase.
+            ["向前移动0.2米，再回到起点", "向后移动0.2米，再回到起点", "左转四十五度，再右转四十五度",
+             "走到最左边球旁边，再回到起点", "向前移动0.2米", "向后移动0.2米", "站住别走了", "把红球踢出去", "去前面那里"],
+            ["往前移动二十厘米，然后回到起点", "往后移动二十厘米，然后回到起点", "向左转个45度，再向右转个45度",
+             "接近最左边的球，然后回到起点", "往前挪动20厘米", "往后挪动20厘米", "马上停下", "用脚踢开绿球", "到那边去"],
         ]
         result = [(text, specs) for text, (_, specs) in zip(variants[(variant - 1) % len(variants)], result)]
     if split == "test":
@@ -425,7 +431,7 @@ def main():
                                                               **world_arguments(args.scene_mix, args.world_level))
                     shutil.copyfile(info["scene_file"], scene_dir / "scene.json")
                     manifest.setdefault("startup_failures", []).extend(failures)
-                    variant = 1 + i % 5 if args.base_data else i % 6
+                    variant = 1 + i % 7 if args.base_data else i % 6
                     entries = [(index, instruction, specs, None) for index, (instruction, specs) in enumerate(tasks(split, variant))
                                if index in task_ids]
                     language_rng = random.Random(seed)
@@ -454,7 +460,7 @@ def main():
                             # Same physically verified intent/history, explicit template paraphrases.
                             # These are NOT additional physical trajectories or independent samples.
                             augmented = []
-                            alternatives = ([tasks("train", alternative)[index][0] for alternative in range(3)] if meta is None
+                            alternatives = ([tasks("train", alternative)[index][0] for alternative in (0, 1, 2, 6, 7)] if meta is None
                                              else explore_paraphrases(meta["color"], meta["tail"], instruction, rng=language_rng)
                                              if meta["kind"] == "explore_find"
                                              else paraphrases(meta["color"], meta["tail"], instruction, rng=language_rng))

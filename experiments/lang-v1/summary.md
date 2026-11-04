@@ -110,3 +110,19 @@ Budget-exhausted failures 7 -> 0. New weakness: task 4 ("move forward 20 cm") fe
 instead of `done` in 4 episodes (lang-v2 had 15/16, lang-v1 16/16); the corrected-data retrain added "unsupported" examples and this is the
 likely side effect (not verified). Other failures: 5 wrong-type incl. those 4, 4 "no reachable frontier" (the tight-door layout 98101), 2 physical.
 Spread between identical runs is about +/-4 per 40; 69 vs 63-64 is outside that, but it is two seed groups of one world level, simulator only.
+
+## lang-v3: move-only phrasing data on top of lang-v2 (same code, same 80 tasks)
+
+Targeted fix for "after `move`, the model says `unsupported`": two more move-only phrasing variants in the training tasks (移动/挪动 wording; none equals a
+valid/test phrase), corrected-data aggregation with `lang-v2` as actor (7 varied scenes, seed offset 8700, tasks 0 1 2 4 5 6 7 8), 300 steps from `lang-v2`.
+
+| | seed 98000 | seed 98100 | total | "往前移动20厘米" | left-ball + return | explore tasks |
+|---|---|---|---|---|---|---|
+| lang-v2 (pad floor) | 37/40 | 32/40 | 69/80 | 12/16 | 16/16 | 41/48 |
+| lang-v3 | 36/40 | 30/40 | 66/80 | **16/16** | 16/16 | 34/48 |
+
+The targeted failure is gone (12/16 -> 16/16), but that task has one held-out phrase and the new training phrasings are close to it, so the gain is
+probably optimistic. Explore tasks dropped 41 -> 34: 2 `invalid actor JSON` (format failures, new), 2 wrong action type, 3 "no confidently visible ball",
+3 layout 98101 (tight doorway, unchanged), others physical. Total 66 vs 69 is inside the +/-4 per 40 run-to-run spread, but the explore drop (-7 of 48) is
+larger than that and the new format failures point at the retrain, not the executor. Decision: lang-v3 is not adopted; lang-v2 stays the default.
+Not done: a variant that keeps the explore data share fixed while adding move-only rows, or a lower learning rate / fewer steps.

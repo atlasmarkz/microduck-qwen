@@ -19,6 +19,10 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--adapter", type=Path, default=ROOT / "adapters/agent-4b-v1-r0")
     parser.add_argument("--yellow-course", action="store_true", help="record ordered yellow-obstacle passing and return")
+    parser.add_argument("--world", action="store_true", help="record find-a-ball exploration in a 2x2 multi-room world")
+    parser.add_argument("--world-seed", type=int, default=98000)
+    parser.add_argument("--color", default="蓝色", help="--world: colour phrase to look for")
+    parser.add_argument("--speed", type=int, default=4, help="--world: playback speed-up of the GIF (labelled on screen)")
     args = parser.parse_args()
     import mujoco
     from PIL import Image, ImageDraw, ImageFont
@@ -27,12 +31,18 @@ def main():
     from .vision import annotate, capture, propose_targets
     from .vision_scene import make_scene
 
-    instruction = "依次绕过黄色障碍物并回到原位" if args.yellow_course else "前进0.2米，再回到初始位置"
-    seed = 230001 if args.yellow_course else 230000
+    instruction = ("依次绕过黄色障碍物并回到原位" if args.yellow_course else
+                   f"去别的房间找{args.color}的球，走到它旁边，然后回起点" if args.world else "前进0.2米，再回到初始位置")
+    seed = args.world_seed if args.world else 230001 if args.yellow_course else 230000
     run = ROOT / "runs/agent-demo-recording" / time.strftime("%Y%m%d-%H%M%S")
     run.mkdir(parents=True, exist_ok=False)
     scene = run / "scene.json"
-    scene.write_text(json.dumps(make_scene(seed, "none", not args.yellow_course, args.yellow_course)), encoding="utf-8")
+    if args.world:
+        from .vision_world import make_world
+        scene_data = make_world(seed, (2, 2), 1.0)
+    else:
+        scene_data = make_scene(seed, "none", not args.yellow_course, args.yellow_course)
+    scene.write_text(json.dumps(scene_data), encoding="utf-8")
     os.environ["MICRODUCK_VISION_SCENE"] = str(scene)
     os.environ.pop("MICRODUCK_COLLECT_GT", None)
     planner = AgentPlanner(args.adapter)
@@ -55,6 +65,11 @@ def main():
     if args.yellow_course:
         camera.lookat[:] = [1.3, 0, 0.12]
         camera.distance, camera.elevation = 3.8, -45
+    if args.world:
+        xs = [v for w in scene_data["walls"] for v in (w["x1"], w["x2"])]
+        ys = [v for w in scene_data["walls"] for v in (w["y1"], w["y2"])]
+        camera.lookat[:] = [(min(xs) + max(xs)) / 2, (min(ys) + max(ys)) / 2, 0.0]
+        camera.distance, camera.azimuth, camera.elevation = 11.0, 90, -82
     font = ImageFont.truetype("msyh.ttc", 17)
     small = ImageFont.truetype("msyh.ttc", 14)
     listeners, frames, times, decisions = [], [], [], []
@@ -102,7 +117,7 @@ def main():
         ended = None
         count = 0
         max_displacement = 0.0
-        while time.monotonic() - started < (240 if args.yellow_course else 90):
+        while time.monotonic() - started < (600 if args.world else 240 if args.yellow_course else 90):
             elapsed = time.monotonic() - started
             if elapsed >= 1.5 and worker is None:
                 worker = threading.Thread(target=execute, daemon=True)
@@ -112,7 +127,7 @@ def main():
             pose = body.sensors()["trunk"]
             distance = math.hypot(pose[0] - home["x"], pose[1] - home["y"])
             max_displacement = max(max_displacement, distance)
-            if count % (25 if args.yellow_course else 5) == 0:
+            if count % (50 if args.world else 25 if args.yellow_course else 5) == 0:
                 body.camera.render(world)
                 renderer.update_scene(world.data, camera=camera)
                 canvas = Image.new("RGB", (1040, 560), "#0c1424")
@@ -132,6 +147,8 @@ def main():
                 if status == "model_done" and not any(d.get("prediction", {}).get("action", {}).get("action") in ("return_home", "bypass_return") for d in decisions):
                     status = "提前结束：未执行回家"
                 draw.text((24, 454), f"状态：{status}", font=small, fill="#90edc2")
+                if args.world:
+                    draw.text((24, 510), f"{args.speed}× 倍速播放 · 已运行 {elapsed:.0f} s", font=small, fill="#ffc778")
                 draw.text((24, 487), "done 仅为模型声明，非成功认证", font=small, fill="#ffc778")
                 live_frame = capture(observation.server_address[1])
                 live = annotate(live_frame, propose_targets(live_frame)).resize((320, 180))
@@ -161,8 +178,13 @@ def main():
             completed = [s.get("execution", {}) for s in result["episode"]["steps"]
                          if s.get("prediction", {}).get("action", {}).get("action") == "bypass_return"]
             assert len(completed) == 1 and completed[0]["success"] and completed[0]["trace_verification"]["success"], "bypass recording failed physical verification"
-        durations = [max(20, round((b - a) * 100) * 10) for a, b in zip(times, times[1:])] + [100]
-        output = ROOT / "assets" / ("yellow-obstacles-4b-v1.gif" if args.yellow_course else "agent-demo.gif")
+        speed = args.speed if args.world else 1
+        if args.world:
+            actions = [d.get("prediction", {}).get("action", {}).get("action") for d in decisions]
+            assert "explore" in actions and "return_home" in actions and distance < 0.4, f"world recording incomplete: {actions}, {distance:.2f} m from start"
+        durations = [max(20, round((b - a) * 100 / speed) * 10) for a, b in zip(times, times[1:])] + [100]
+        output = ROOT / "assets" / ("explore-rooms-4b-v1.gif" if args.world else
+                                    "yellow-obstacles-4b-v1.gif" if args.yellow_course else "agent-demo.gif")
         frames[0].save(output, save_all=True, append_images=frames[1:], duration=durations, loop=0, optimize=True)
         with Image.open(output) as gif:
             assert gif.is_animated and gif.n_frames > 30 and gif.size == (1040, 560)
@@ -174,7 +196,7 @@ def main():
             result["frame_count"] = gif.n_frames
         for i, name in ((0, "start"), (len(frames) // 2, "middle"), (-1, "end")):
             frames[i].save(run / f"{name}.png")
-        result.update(instruction=instruction, seed=seed, clutter=not args.yellow_course, yellow_course=args.yellow_course, occlusion="none",
+        result.update(instruction=instruction, seed=seed, clutter=not (args.yellow_course or args.world), yellow_course=args.yellow_course, occlusion="none",
                       adapter=planner.adapter, decisions=decisions, duration_s=encoded_ms / 1000,
                       max_displacement_m=max_displacement, final_home_distance_m=distance,
                       gif_sha256=digest(output), collection_ground_truth=False,
