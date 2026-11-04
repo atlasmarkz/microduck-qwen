@@ -1,0 +1,507 @@
+{
+  "episode": {
+    "instruction": "去别的房间找蓝色的球，走到它旁边，然后回起点",
+    "active_instruction": "去别的房间找蓝色的球，走到它旁边，然后回起点",
+    "steps": [
+      {
+        "memory": {
+          "home_recorded": true,
+          "odometry_relative_home": {
+            "x": 0.0,
+            "y": 0.0,
+            "yaw_deg": 0.0
+          },
+          "completed": []
+        },
+        "prediction": {
+          "instruction": "去别的房间找蓝色的球，走到它旁边，然后回起点",
+          "raw": "{\"action\":\"explore\",\"color\":\"blue\"}",
+          "latency_s": 11.52139549999265,
+          "model": "Qwen/Qwen3-VL-4B-Instruct",
+          "revision": "ebb281ec70b05090aa6165b016eac8ec08e71b17",
+          "adapter": {
+            "path": "adapters\\lang-v2",
+            "sha256": "7cf763c7d045c3a9fe42066ca73ae2797104827e62c468dfd446ce576c429f61",
+            "backend": "torch"
+          },
+          "action": {
+            "action": "explore",
+            "color": "blue"
+          }
+        },
+        "planning_instruction": "去别的房间找蓝色的球，走到它旁边，然后回起点",
+        "execution": {
+          "action": {
+            "action": "explore",
+            "color": "blue"
+          },
+          "success": true,
+          "observation": "oracle robot odometry and known safety map",
+          "found": true,
+          "color": "blue",
+          "map": "depth-built occupancy; oracle pose",
+          "candidate_colors": [
+            "blue"
+          ],
+          "explored_cells": 2909,
+          "elapsed_s": 44.26600000000326,
+          "iterations": [
+            {
+              "from": [
+                0.01,
+                0.02
+              ],
+              "frontier": [
+                0.05,
+                2.25
+              ],
+              "waypoints": 5,
+              "reached": true
+            }
+          ],
+          "inventory": [
+            {
+              "color": "red",
+              "x": 1.0637791968378942,
+              "y": -0.4181966693038099
+            },
+            {
+              "color": "green",
+              "x": 3.079590171197341,
+              "y": -0.11408941903299159
+            },
+            {
+              "color": "green",
+              "x": 1.1574270155625161,
+              "y": 0.3157007408234621
+            },
+            {
+              "color": "yellow",
+              "x": 2.6419524093735833,
+              "y": -0.7219104707568645
+            },
+            {
+              "color": "yellow",
+              "x": 0.9887154614834691,
+              "y": 0.04309798845912873
+            },
+            {
+              "color": "red",
+              "x": 0.6510365504044034,
+              "y": 0.7840397176979638
+            },
+            {
+              "color": "green",
+              "x": -0.9445627954664435,
+              "y": 0.4244978083996346
+            },
+            {
+              "color": "blue",
+              "x": 0.838301045524568,
+              "y": 4.063289062345831
+            },
+            {
+              "color": "yellow",
+              "x": 0.1320775627838185,
+              "y": 4.43249069533701
+            },
+            {
+              "color": "yellow",
+              "x": 2.959807218526547,
+              "y": 3.5325753447829693
+            },
+            {
+              "color": "red",
+              "x": -1.155170543790152,
+              "y": 2.8618953196805306
+            },
+            {
+              "color": "yellow",
+              "x": 4.0210939198968,
+              "y": 3.816241546274136
+            }
+          ]
+        }
+      },
+      {
+        "memory": {
+          "home_recorded": true,
+          "odometry_relative_home": {
+            "x": 0.14,
+            "y": 2.16,
+            "yaw_deg": 42.2
+          },
+          "completed": [
+            {
+              "action": "explore",
+              "color": "blue"
+            }
+          ]
+        },
+        "prediction": {
+          "instruction": "去别的房间找蓝色的球，走到它旁边，然后回起点",
+          "raw": "{\"action\":\"approach\",\"color\":\"blue\",\"selector\":\"nearest\"}",
+          "latency_s": 2.8830569999990985,
+          "model": "Qwen/Qwen3-VL-4B-Instruct",
+          "revision": "ebb281ec70b05090aa6165b016eac8ec08e71b17",
+          "adapter": {
+            "path": "adapters\\lang-v2",
+            "sha256": "7cf763c7d045c3a9fe42066ca73ae2797104827e62c468dfd446ce576c429f61",
+            "backend": "torch"
+          },
+          "action": {
+            "action": "approach",
+            "color": "blue",
+            "selector": "nearest"
+          }
+        },
+        "planning_instruction": "去别的房间找蓝色的球，走到它旁边，然后回起点",
+        "execution": {
+          "action": {
+            "action": "approach",
+            "color": "blue",
+            "selector": "nearest"
+          },
+          "success": true,
+          "observation": "oracle robot odometry and known safety map",
+          "bound_target": {
+            "color": "blue",
+            "kind": "ball",
+            "bbox": [
+              154,
+              151,
+              180,
+              175
+            ],
+            "pixel": [
+              166.26915113871635,
+              162.39337474120083
+            ],
+            "world_position": [
+              0.8421072600057882,
+              4.063491472713994,
+              0.06830595281296051
+            ],
+            "surface_depth_m": 1.644853115081787,
+            "visible_fraction_estimate": 1.0,
+            "visibility": "visible",
+            "id": 2
+          },
+          "navigation": {
+            "success": true,
+            "goals": [
+              {
+                "goal": {
+                  "target": "point",
+                  "x": 0.8421072600057882,
+                  "y": 4.063491472713994,
+                  "speed": "slow",
+                  "stop_distance_m": 0.3
+                },
+                "distance_m": 0.3153313384424804,
+                "elapsed_s": 17.125,
+                "path_length_m": 2.465283176788133,
+                "min_clearance_m": 0.06396460400035134,
+                "position": [
+                  0.7217637407219434,
+                  3.7720274262686306
+                ]
+              }
+            ],
+            "observation": "MuJoCo ground-truth pose and fixed scene map"
+          }
+        }
+      },
+      {
+        "memory": {
+          "home_recorded": true,
+          "odometry_relative_home": {
+            "x": 0.73,
+            "y": 3.77,
+            "yaw_deg": 61.3
+          },
+          "completed": [
+            {
+              "action": "explore",
+              "color": "blue"
+            },
+            {
+              "action": "approach",
+              "color": "blue",
+              "selector": "nearest"
+            }
+          ]
+        },
+        "prediction": {
+          "instruction": "去别的房间找蓝色的球，走到它旁边，然后回起点",
+          "raw": "{\"action\":\"return_home\"}",
+          "latency_s": 1.650976000004448,
+          "model": "Qwen/Qwen3-VL-4B-Instruct",
+          "revision": "ebb281ec70b05090aa6165b016eac8ec08e71b17",
+          "adapter": {
+            "path": "adapters\\lang-v2",
+            "sha256": "7cf763c7d045c3a9fe42066ca73ae2797104827e62c468dfd446ce576c429f61",
+            "backend": "torch"
+          },
+          "action": {
+            "action": "return_home"
+          }
+        },
+        "planning_instruction": "去别的房间找蓝色的球，走到它旁边，然后回起点",
+        "execution": {
+          "action": {
+            "action": "return_home"
+          },
+          "success": true,
+          "observation": "oracle robot odometry and known safety map",
+          "navigation": {
+            "success": true,
+            "goals": [
+              {
+                "goal": {
+                  "target": "point",
+                  "x": 0.0,
+                  "y": 0.0,
+                  "speed": "slow",
+                  "stop_distance_m": 0.1
+                },
+                "distance_m": 0.09555772772118305,
+                "elapsed_s": 39.5,
+                "path_length_m": 5.582954473144037,
+                "min_clearance_m": 0.0689121276769894,
+                "position": [
+                  0.016271571401804363,
+                  0.094162175481197
+                ]
+              }
+            ],
+            "observation": "MuJoCo ground-truth pose and fixed scene map"
+          },
+          "return_attempts": 1,
+          "distance_home_m": 0.07705268459598744,
+          "home_yaw_error_deg": 3.5266938064776228
+        }
+      },
+      {
+        "memory": {
+          "home_recorded": true,
+          "odometry_relative_home": {
+            "x": 0.02,
+            "y": 0.08,
+            "yaw_deg": -3.3
+          },
+          "completed": [
+            {
+              "action": "explore",
+              "color": "blue"
+            },
+            {
+              "action": "approach",
+              "color": "blue",
+              "selector": "nearest"
+            },
+            {
+              "action": "return_home"
+            }
+          ]
+        },
+        "prediction": {
+          "instruction": "去别的房间找蓝色的球，走到它旁边，然后回起点",
+          "raw": "{\"action\":\"done\"}",
+          "latency_s": 1.5266910000354983,
+          "model": "Qwen/Qwen3-VL-4B-Instruct",
+          "revision": "ebb281ec70b05090aa6165b016eac8ec08e71b17",
+          "adapter": {
+            "path": "adapters\\lang-v2",
+            "sha256": "7cf763c7d045c3a9fe42066ca73ae2797104827e62c468dfd446ce576c429f61",
+            "backend": "torch"
+          },
+          "action": {
+            "action": "done"
+          }
+        },
+        "planning_instruction": "去别的房间找蓝色的球，走到它旁边，然后回起点",
+        "execution": {
+          "action": {
+            "action": "done"
+          },
+          "success": false,
+          "observation": "oracle robot odometry and known safety map",
+          "no_motion": true
+        }
+      }
+    ],
+    "directory": ".\\runs\\agent\\20261104-225345-838356",
+    "status": "model_done",
+    "task_success_verified": false,
+    "interactions": [],
+    "note": "No free-text semantic oracle. done is a model claim, not verified task success.",
+    "task_start_pose": {
+      "x": 0.0,
+      "y": 0.0,
+      "yaw": 0.0
+    }
+  },
+  "frame_count": 64,
+  "instruction": "去别的房间找蓝色的球，走到它旁边，然后回起点",
+  "seed": 98107,
+  "clutter": false,
+  "yellow_course": false,
+  "occlusion": "none",
+  "adapter": {
+    "path": "adapters\\lang-v2",
+    "sha256": "7cf763c7d045c3a9fe42066ca73ae2797104827e62c468dfd446ce576c429f61",
+    "backend": "torch"
+  },
+  "decisions": [
+    {
+      "image": ".\\runs\\agent\\20261104-225345-838356\\step-000-candidates.png",
+      "memory": {
+        "home_recorded": true,
+        "odometry_relative_home": {
+          "x": 0.0,
+          "y": 0.0,
+          "yaw_deg": 0.0
+        },
+        "completed": []
+      },
+      "status": "predicted",
+      "prediction": {
+        "instruction": "去别的房间找蓝色的球，走到它旁边，然后回起点",
+        "raw": "{\"action\":\"explore\",\"color\":\"blue\"}",
+        "latency_s": 11.52139549999265,
+        "model": "Qwen/Qwen3-VL-4B-Instruct",
+        "revision": "ebb281ec70b05090aa6165b016eac8ec08e71b17",
+        "adapter": {
+          "path": "adapters\\lang-v2",
+          "sha256": "7cf763c7d045c3a9fe42066ca73ae2797104827e62c468dfd446ce576c429f61",
+          "backend": "torch"
+        },
+        "action": {
+          "action": "explore",
+          "color": "blue"
+        }
+      }
+    },
+    {
+      "image": ".\\runs\\agent\\20261104-225345-838356\\step-001-candidates.png",
+      "memory": {
+        "home_recorded": true,
+        "odometry_relative_home": {
+          "x": 0.14,
+          "y": 2.16,
+          "yaw_deg": 42.2
+        },
+        "completed": [
+          {
+            "action": "explore",
+            "color": "blue"
+          }
+        ]
+      },
+      "status": "predicted",
+      "prediction": {
+        "instruction": "去别的房间找蓝色的球，走到它旁边，然后回起点",
+        "raw": "{\"action\":\"approach\",\"color\":\"blue\",\"selector\":\"nearest\"}",
+        "latency_s": 2.8830569999990985,
+        "model": "Qwen/Qwen3-VL-4B-Instruct",
+        "revision": "ebb281ec70b05090aa6165b016eac8ec08e71b17",
+        "adapter": {
+          "path": "adapters\\lang-v2",
+          "sha256": "7cf763c7d045c3a9fe42066ca73ae2797104827e62c468dfd446ce576c429f61",
+          "backend": "torch"
+        },
+        "action": {
+          "action": "approach",
+          "color": "blue",
+          "selector": "nearest"
+        }
+      }
+    },
+    {
+      "image": ".\\runs\\agent\\20261104-225345-838356\\step-002-candidates.png",
+      "memory": {
+        "home_recorded": true,
+        "odometry_relative_home": {
+          "x": 0.73,
+          "y": 3.77,
+          "yaw_deg": 61.3
+        },
+        "completed": [
+          {
+            "action": "explore",
+            "color": "blue"
+          },
+          {
+            "action": "approach",
+            "color": "blue",
+            "selector": "nearest"
+          }
+        ]
+      },
+      "status": "predicted",
+      "prediction": {
+        "instruction": "去别的房间找蓝色的球，走到它旁边，然后回起点",
+        "raw": "{\"action\":\"return_home\"}",
+        "latency_s": 1.650976000004448,
+        "model": "Qwen/Qwen3-VL-4B-Instruct",
+        "revision": "ebb281ec70b05090aa6165b016eac8ec08e71b17",
+        "adapter": {
+          "path": "adapters\\lang-v2",
+          "sha256": "7cf763c7d045c3a9fe42066ca73ae2797104827e62c468dfd446ce576c429f61",
+          "backend": "torch"
+        },
+        "action": {
+          "action": "return_home"
+        }
+      }
+    },
+    {
+      "image": ".\\runs\\agent\\20261104-225345-838356\\step-003-candidates.png",
+      "memory": {
+        "home_recorded": true,
+        "odometry_relative_home": {
+          "x": 0.02,
+          "y": 0.08,
+          "yaw_deg": -3.3
+        },
+        "completed": [
+          {
+            "action": "explore",
+            "color": "blue"
+          },
+          {
+            "action": "approach",
+            "color": "blue",
+            "selector": "nearest"
+          },
+          {
+            "action": "return_home"
+          }
+        ]
+      },
+      "status": "predicted",
+      "prediction": {
+        "instruction": "去别的房间找蓝色的球，走到它旁边，然后回起点",
+        "raw": "{\"action\":\"done\"}",
+        "latency_s": 1.5266910000354983,
+        "model": "Qwen/Qwen3-VL-4B-Instruct",
+        "revision": "ebb281ec70b05090aa6165b016eac8ec08e71b17",
+        "adapter": {
+          "path": "adapters\\lang-v2",
+          "sha256": "7cf763c7d045c3a9fe42066ca73ae2797104827e62c468dfd446ce576c429f61",
+          "backend": "torch"
+        },
+        "action": {
+          "action": "done"
+        }
+      }
+    }
+  ],
+  "duration_s": 31.44,
+  "max_displacement_m": 3.86078867250421,
+  "final_home_distance_m": 0.07860776609315931,
+  "gif_sha256": "044b06b37221a600479e06ab853037f95bc4846a935a855ef80fc0dadcee8495",
+  "collection_ground_truth": false,
+  "note": "Live model inference and physics; model_done is not independently verified task success. No teacher intervention. Wall-clock frame timing preserved. GIF was re-encoded after recording for size: 780x420, 64 colours, every second frame kept (original 1040x560, 127 frames, not published). Playback is 4x real time (labelled on screen); model decisions and physics are unchanged."
+}

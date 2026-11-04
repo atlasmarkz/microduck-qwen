@@ -5,6 +5,14 @@
 > 这是本项目**唯一**的 VLM 数据链路。早期纯文本 Qwen 分支（无图像）与只做选球的视觉指代分支都已移除；选球能力并入 `approach` 技能。
 > **Windows（PyTorch + CUDA）与 Mac（MLX）两套部署都保留。**
 
+![Qwen3-VL-4B 实录：在 2×2 房间世界里找到蓝球、走近并返回起点](assets/explore-rooms-4b-v1.gif)
+
+**多房间探索实录（2026-11-04）。** 输入「去别的房间找蓝色的球，走到它旁边，然后回起点」，`lang-v2` 权重输出 `explore / blue → approach / blue / nearest → return_home → done`：先用深度图增量建图并朝最近的可达前沿探索，看到蓝球后走近，再返回起点，最终距起点约 **0.079 m**。种子 98107，真实运行当前 `agent.run_instruction`，全程没有教师接管；GIF 为 **4 倍速**（画面已标注），原始运行约 125 秒。这是一次成功的单次运行，不是成功率：该世界等级下留出评测的找球任务为 41/48（见下文）；`done` 仍只是模型声明。位姿、相机外参与安全真值仍来自仿真。为控制体积，GIF 重新编码为 780×420、隔帧保留，原始动作与哈希见 [记录](assets/explore-rooms-4b-v1.json)。重录命令：
+
+```powershell
+.venv/Scripts/python.exe -X utf8 -m microduck_qwen.record_demo --adapter adapters/lang-v2 --world --world-seed 98107
+```
+
 ![Qwen3-VL-4B 实录：依次绕过三根黄色障碍物并返回任务起点](assets/yellow-obstacles-4b-v1.gif)
 
 **当前复杂任务 4B 实录（2026-10-19）。** 输入「依次绕过黄色障碍物并回到原位」，模型输出 `bypass_return / auto → done`；执行器按近到远经过三根黄柱后方，再回到本条任务起点。实际轨迹通过侧向穿越与顺序验收，最终距任务起点约 **0.095 m**、朝向误差 **8.22°**。演示使用续训 120 步的 `agent-yellow-v1`，约 81 秒，全程没有教师接管，保留真实时间。左下为实际模型输入，右下为实时第一视角；六个绕行路点与返程由几何执行器控制，VLM 共做两次技能决策。原始动作、结果及 GIF 哈希见 [演示记录](assets/yellow-obstacles-4b-v1.json)。位姿、相机外参与静态地图仍为仿真真值；`done` 仅是模型声明，新权重有旧任务退化，尚未替换通用默认权重。

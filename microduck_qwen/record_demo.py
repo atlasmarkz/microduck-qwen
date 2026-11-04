@@ -127,6 +127,8 @@ def main():
             pose = body.sensors()["trunk"]
             distance = math.hypot(pose[0] - home["x"], pose[1] - home["y"])
             max_displacement = max(max_displacement, distance)
+            if count % 5 == 0:
+                body.camera.render(world)  # keep the robot camera fresh between GIF frames
             if count % (50 if args.world else 25 if args.yellow_course else 5) == 0:
                 body.camera.render(world)
                 renderer.update_scene(world.data, camera=camera)
