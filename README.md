@@ -63,5 +63,3 @@ python -m venv .venv
 ```
 
 ---
-
-<sub>作者与维护者：[Mark Zhang（@atlasmarkz）](https://github.com/atlasmarkz) · AI 协作：Codex（OpenAI）· 模型：[Qwen3-VL](https://huggingface.co/Qwen/Qwen3-VL-4B-Instruct) · 机器人：[MicroDuck](https://github.com/pollen-robotics/microduck) · 仿真：[microduck_rl](https://github.com/pollen-robotics/microduck_rl)</sub>
