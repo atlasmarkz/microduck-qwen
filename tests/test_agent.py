@@ -164,6 +164,17 @@ class AgentTests(unittest.TestCase):
             self.assertFalse({t[0] for t in tasks("train", variant)} & {t[0] for t in tasks("test")})
         self.assertFalse({t[0] for t in tasks("valid")} & {t[0] for t in tasks("test")})
 
+    def test_alternative_heldout_phrasings_are_disjoint_from_every_training_and_test_phrasing(self):
+        from microduck_qwen.agent_data import HELDOUT_VARIANTS
+        training = {t[0] for variant in range(12) for t in tasks("train", variant)}
+        seen = training | {t[0] for t in tasks("test")}
+        for k in range(1, len(HELDOUT_VARIANTS) + 1):
+            held = tasks("valid", k)
+            self.assertEqual([t[1] for t in held], [t[1] for t in tasks("valid")])  # same teacher specs per task
+            texts = {t[0] for t in held[:9]}
+            self.assertFalse(texts & seen, texts & seen)
+            seen |= texts
+
     def test_format_only_gain_is_reported_separately(self):
         raw = '```json\n{"action":"done"}\n```'
         with self.assertRaises(ValueError):

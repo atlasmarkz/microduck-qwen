@@ -131,3 +131,60 @@ class WorldSearchTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class RecoveryTests(unittest.TestCase):
+    def gap_map(self):
+        """A closed, known free pocket whose only way on is a 0.2 m gap: too narrow at normal clearance."""
+        m = OccupancyMap()
+
+        def fill(x0, x1, y0, y1, value):
+            for a in range(int(m.index(x0, 0)[0]), int(m.index(x1, 0)[0])):
+                for b in range(int(m.index(0, y0)[1]), int(m.index(0, y1)[1])):
+                    m.grid[a, b] = value
+
+        fill(-1.2, 1.55, -1.7, 1.7, OCCUPIED)   # pocket walls (outer ring)
+        fill(-1.0, 1.55, -1.5, 1.5, FREE)
+        fill(1.55, 1.75, -1.5, 1.5, OCCUPIED)
+        fill(1.55, 1.75, 0.0, 0.2, FREE)        # the gap
+        fill(1.75, 2.2, -0.3, 0.5, FREE)        # known floor beyond it, unknown all around
+        return m
+
+    def test_a_gap_too_narrow_for_normal_clearance_leaves_no_reachable_frontier(self):
+        m = self.gap_map()
+        self.assertIsNone(m.plan_to_frontier((0.0, 0.0), inflate_m=0.32))
+
+    def test_vantage_point_is_the_reachable_cell_nearest_the_unreachable_frontier(self):
+        m = self.gap_map()
+        target = m.vantage_targets((0.0, 0.0), 0.32)
+        self.assertIsNotNone(target)
+        (cell, (x, y)), = target.items()
+        self.assertEqual(tuple(int(v) for v in m.index(x, y)), cell)
+        self.assertFalse(m.blocked(0.32)[cell])  # standable at normal clearance
+        self.assertGreater(x, 0.8)  # as close to the gap as the clearance allows
+        path = m.plan_to_frontier((0.0, 0.0), (), min_distance=0.3, inflate_m=0.32, targets_override=target)
+        self.assertIsNotNone(path)
+        self.assertAlmostEqual(path[-1][0], x, places=6)
+
+    def test_no_vantage_when_the_frontier_is_already_reachable(self):
+        m = OccupancyMap()
+        m.update_from_points((0.0, 0.0), wall_points(), open_ends=[[3.5, y] for y in np.linspace(-2.5, 2.5, 30)])
+        self.assertIsNotNone(m.plan_to_frontier((0.0, 0.0)))
+        self.assertIsNone(m.vantage_targets((0.0, 0.0)))
+
+
+class ReacquireTests(unittest.TestCase):
+    def ball(self, x, y, color="blue", visibility="visible", kind="ball"):
+        return {"color": color, "kind": kind, "visibility": visibility, "world_position": [x, y, 0.07]}
+
+    def test_rebinding_picks_the_same_ball_by_position_not_another_ball_of_the_colour(self):
+        from microduck_qwen.skills import rebind_near
+        near, far = self.ball(2.1, 0.1), self.ball(2.0, 1.4)
+        self.assertIs(rebind_near([far, near], "blue", "ball", (2.0, 0.0)), near)
+        self.assertIsNone(rebind_near([far], "blue", "ball", (2.0, 0.0)))  # the only blue ball is elsewhere
+
+    def test_rebinding_ignores_other_colours_unseen_balls_and_other_kinds(self):
+        from microduck_qwen.skills import rebind_near
+        candidates = [self.ball(2.0, 0.0, color="red"), self.ball(2.0, 0.1, visibility="hidden"),
+                      self.ball(2.0, 0.05, kind="pillar")]
+        self.assertIsNone(rebind_near(candidates, "blue", "ball", (2.0, 0.0)))

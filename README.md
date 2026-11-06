@@ -24,17 +24,17 @@
 | 改进前 | 52/80（65%） | 20/48 |
 | 当前 | **69/80（86%）** | **41/48（85%）** |
 
-提升主要来自建图与导航执行层，而不是重训。结果来自两组种子、单一世界等级的仿真评测，同配置两次运行约有 ±4/40 的波动；位姿与安全真值取自仿真，没有真机验证。
+提升主要来自建图与导航执行层，而不是重训；从 52 到 69 的总提升经成对检验（McNemar）是显著的（p=0.002），但之后各步更小的差别在 80 个任务上分不出。结果来自两组种子、单一世界等级的仿真评测；位姿与安全真值取自仿真，没有真机验证。
 
 ## 架构
 
 <p align="center">
-  <img src="docs/architecture.png" alt="系统架构" width="100%">
+  <img src="assets/architecture.png" alt="系统架构" width="100%">
 </p>
 
 - 模型：`Qwen/Qwen3-VL-4B-Instruct` + LoRA，每步只输出一个技能：`move` · `turn` · `approach` · `search` · `explore` · `return_home` · `stop` · `done` · `clarify` · `unsupported` · `bypass_return`。
 - 执行：深度图建图 + 前沿探索 + A* 路径，净空过小时护栏停车；官方 ONNX 步态跑在 MuJoCo 里。
-- 训练：专家纠错数据聚合（模型自己做，专家只在出错时接管，只有物理验证通过的轨迹进入训练），命令与格式见 [AGENT_TRAINING.md](AGENT_TRAINING.md)；逐步实验记录见 [experiments/lang-v1/summary.md](experiments/lang-v1/summary.md)。
+- 训练：专家纠错数据聚合（模型自己做，专家只在出错时接管，只有物理验证通过的轨迹进入训练），命令与格式见 [AGENT_TRAINING.md](docs/AGENT_TRAINING.md)；逐步实验记录见 [experiments/lang-v1/summary.md](experiments/lang-v1/summary.md)，借鉴的论文见 [docs/related-work.md](docs/related-work.md)。
 
 ## 快速开始
 
@@ -50,16 +50,19 @@ python -m venv .venv
 
 仿真依赖放在仓库同级目录：`../microduck_rl/.venv/`（MuJoCo、ONNX Runtime、官方 body server）与 `../duck-sim-state/policies/current/`（官方 ONNX 策略）。
 
-录制上面的演示（权重不随仓库分发，先按 [AGENT_TRAINING.md](AGENT_TRAINING.md) 训练 `adapters/lang-v2`）：
+录制上面的演示（权重不随仓库分发，先按 [AGENT_TRAINING.md](docs/AGENT_TRAINING.md) 训练 `adapters/lang-v2`）：
 
-```powershell
-.venv/Scripts/python.exe -X utf8 -m microduck_qwen.record_demo --adapter adapters/lang-v2 --world --world-seed 98107
+```bash
+bash scripts/record_demo_world.sh adapters/lang-v2 98107
 ```
 
-复现留出评测：
+复现留出评测（80 个任务，两组种子各 8 个布局），并用成对检验比较两次评测：
 
-```powershell
-.venv/Scripts/python.exe -X utf8 -m microduck_qwen.agent_eval --data data/lang-v2 --adapter adapters/lang-v2 --output runs/lang/eval-98000 --rollout --scene-mix world --world-level 2 --seed 98000 --rollout-seeds 8 --task-ids 3 4 --explore-tasks 3
+```bash
+bash scripts/eval_world.sh adapters/lang-v2 data/lang-v2 eval
+python -m microduck_qwen.compare_runs runs/lang/eval-98000 runs/lang/eval-98100 --b runs/lang/other-98000 runs/lang/other-98100
 ```
+
+仓库结构：`microduck_qwen/` 源码，`tests/` 测试，`scripts/` 评测与数据/训练流程脚本，`tools/` 诊断工具，`docs/` 文档（`docs/archive/` 是早期实验的历史文档），`experiments/` 实验记录，`assets/` 图与演示。
 
 ---

@@ -9,6 +9,11 @@ from .navigation import Robot, Observer, execute, clearance, inside, nearest_obs
 from .vision import capture, propose_targets, visibility_check, approachable, VisualGuard
 
 
+APPROACH_ATTEMPTS = 3          # first try plus two recoveries
+REBIND_RADIUS_M = 0.5          # the same physical ball must reappear this close to where it was bound
+RECOVERABLE_STOPS = ("净空", "视觉保护停止")  # clearance stop / target lost; not cancel, fall or a stalled simulator
+
+
 class NeedsUserInput(RuntimeError):
     """A pre-execution ambiguity or blocked path; no motion has been issued."""
 
@@ -94,6 +99,16 @@ def bind_target(action, candidates, position):
     if selected is None or not approachable(selected):
         raise NeedsUserInput("target is not bound to a sufficiently visible current-frame candidate")
     return selected
+
+
+def rebind_near(candidates, color, kind, anchor, radius=REBIND_RADIUS_M):
+    """The same physical target in a fresh frame: same colour and kind, sufficiently visible, close to `anchor`.
+
+    Re-acquiring by position keeps a recovery from silently switching to a different ball.
+    """
+    choices = [c for c in candidates or [] if c["color"] == color and c.get("kind", "ball") == kind
+               and approachable(c) and math.dist(c["world_position"][:2], anchor) <= radius]
+    return min(choices, key=lambda c: math.dist(c["world_position"][:2], anchor)) if choices else None
 
 
 def memory_state(info, state, completed):
@@ -225,6 +240,62 @@ class SkillExecutor:
         time.sleep(0.25)
         return moved
 
+    def _reacquire(self, selected, action, output, attempt):
+        """After a guard stop: back off, face where the target was, look again and rebind the same target.
+
+        Skill-level verify-and-recover, as in RePLan (Skreta et al., 2024, arXiv:2401.04157) and EMAC+
+        (arXiv:2505.19905): the failure is handed back to a recovery step instead of ending the episode.
+        Re-acquiring the target before the last leg follows MG-Nav's final-approach re-localisation
+        (arXiv:2511.22609) and detection-driven goal refinement for a target that leaves the view
+        (CVPR-W 2026 quadruped work); here the goal is refreshed from a new detection of the same ball.
+        """
+        anchor, kind = selected["world_position"][:2], selected.get("kind", "ball")
+        self.robot.stop()
+        self.escape_cramped(trigger=0.08, target=0.16)
+        trace_file = output.with_suffix(f".a{attempt}.turn.jsonl")
+        for look in range(2):
+            state = self.healthy()
+            delta = angle(math.atan2(anchor[1] - state["trunk"][1], anchor[0] - state["trunk"][0]) - state["yaw"])
+            if abs(delta) > math.radians(8):
+                with trace_file.open("a") as trace:
+                    self._bounded({"action": "turn", "direction": "left" if delta > 0 else "right",
+                                   "degrees": max(5, min(120, math.degrees(abs(delta))))}, trace)
+            time.sleep(0.3)  # the 5 Hz camera must deliver a frame taken after the body settled
+            found = rebind_near(propose_targets(capture(self.info["port"])), action["color"], kind, anchor)
+            if found is not None:
+                return found
+            if look == 0:  # still out of view: a wider sight line from a step back
+                try:
+                    with trace_file.open("a") as trace:
+                        self._bounded({"action": "move", "direction": "backward", "distance_m": 0.25}, trace)
+                except (NeedsUserInput, TimeoutError, RuntimeError) as error:
+                    if "cancelled" in str(error) or "fallen" in str(error):
+                        raise
+        raise RuntimeError("target lost during approach and not re-acquired")
+
+    def _approach(self, action, selected, output):
+        """Approach the bound target; a clearance stop, a lost target or a timeout triggers up to two recoveries."""
+        recoveries = []
+        for attempt in range(APPROACH_ATTEMPTS):
+            target = selected["world_position"]
+            if not visibility_check(capture(self.info["port"]), target, action["color"])["safe"]:
+                if attempt == 0:
+                    raise NeedsUserInput("target no longer safely visible")
+                raise RuntimeError("target not safely visible after recovery")
+            distance = 0.45 if selected.get("kind") == "pillar" else 0.30
+            plan = {"status": "ok", "goals": [{"target": "point", "x": target[0], "y": target[1], "speed": "slow", "stop_distance_m": distance}]}
+            trace = output.with_suffix(".jsonl" if attempt == 0 else f".a{attempt}.jsonl")
+            try:
+                navigation = execute(plan, self.robot, self.observer, trace, timeout_s=40, scene=self.scene, cancel_file=self.cancel_file,
+                                     guard=VisualGuard(self.info["port"], target, action["color"], self.directory))
+                return navigation, recoveries, selected
+            except (RuntimeError, TimeoutError) as error:
+                text = str(error)
+                if attempt == APPROACH_ATTEMPTS - 1 or not (isinstance(error, TimeoutError) or any(w in text for w in RECOVERABLE_STOPS)):
+                    raise
+                recoveries.append(text)
+                selected = self._reacquire(selected, action, output, attempt + 1)
+
     def _return_to_pose(self, home, output):
         self.escape_cramped()
         plan = {"status": "ok", "goals": [{"target": "point", "x": home["x"], "y": home["y"], "speed": "slow", "stop_distance_m": 0.10}]}
@@ -285,13 +356,9 @@ class SkillExecutor:
                 self.escape_cramped()
                 selected = bind_target(action, candidates, self.healthy()["trunk"][:2])
                 result["bound_target"] = selected
-                target = selected["world_position"]
-                if not visibility_check(capture(self.info["port"]), target, action["color"])["safe"]:
-                    raise NeedsUserInput("target no longer safely visible")
-                distance = 0.45 if selected.get("kind") == "pillar" else 0.30
-                plan = {"status": "ok", "goals": [{"target": "point", "x": target[0], "y": target[1], "speed": "slow", "stop_distance_m": distance}]}
-                result["navigation"] = execute(plan, self.robot, self.observer, output.with_suffix(".jsonl"), timeout_s=40, scene=self.scene, cancel_file=self.cancel_file,
-                    guard=VisualGuard(self.info["port"], target, action["color"], self.directory))
+                result["navigation"], recoveries, final = self._approach(action, selected, output)
+                if recoveries:
+                    result.update(approach_recoveries=recoveries, rebound_target=final)
                 result["success"] = result["navigation"]["success"]
             elif name == "explore":
                 from .explore import run_explore

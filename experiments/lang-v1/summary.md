@@ -20,7 +20,7 @@ Failure analysis of lang-v1 showed most explore failures were the skill itself s
 (18 of 28 failures), not wrong model output. Causes found: frontiers added to the avoid list after one navigation refusal,
 the frontier planner's clearance differing from the navigator's padding (goal "unreachable"), and exploring from a cramped pose.
 Fix: three-tier frontier planning (normal clearance, forget avoid list, 0.25 m clearance), the same clearance passed to the
-navigator, `escape_cramped` before explore. Diagnostic: `diag_explore.py`.
+navigator, `escape_cramped` before explore. Diagnostic: `tools/diag_explore.py`.
 
 | | seed 98000 | seed 98100 | total |
 |---|---|---|---|
@@ -126,3 +126,78 @@ probably optimistic. Explore tasks dropped 41 -> 34: 2 `invalid actor JSON` (for
 3 layout 98101 (tight doorway, unchanged), others physical. Total 66 vs 69 is inside the +/-4 per 40 run-to-run spread, but the explore drop (-7 of 48) is
 larger than that and the new format failures point at the retrain, not the executor. Decision: lang-v3 is not adopted; lang-v2 stays the default.
 Not done: a variant that keeps the explore data share fixed while adding move-only rows, or a lower learning rate / fewer steps.
+
+## Correction: which earlier gains are statistically supported (paired McNemar, same 80 tasks)
+
+Earlier sections compared totals and called 69 vs 63-64 "outside the +/-4 noise". A paired test (`compare_runs`) looks only at the
+tasks that one run solved and the other did not, which is where the information is:
+
+| comparison | A | B | only B solved | only A solved | McNemar p | difference (95% bootstrap) |
+|---|---|---|---|---|---|---|
+| lang-v1 before fixes -> faithful map | 52/80 | 64/80 | 16 | 4 | 0.012 | +15 pts (+4..+26) |
+| lang-v1 before fixes -> current (pad floor, lang-v2) | 52/80 | 69/80 | 22 | 5 | 0.002 | +21 pts (+9..+33) |
+| faithful map -> lang-v2 retrain | 64/80 | 63/80 | 8 | 9 | 1.0 | -1 pt (-11..+9) |
+| faithful map -> + pad floor | 64/80 | 69/80 | 9 | 4 | 0.27 | +6 pts (-3..+15) |
+| lang-v2 same code -> + pad floor | 63/80 | 69/80 | 11 | 5 | 0.21 | +8 pts (-3..+18) |
+| lang-v2 -> lang-v3 | 69/80 | 66/80 | 7 | 10 | 0.63 | -4 pts (-14..+6) |
+
+The overall climb from 52 to 69 is real, and the faithful map (no free space carved through walls) is the step that carries it. The later
+steps (retrain, pad floor) are not separable from luck at 80 tasks; the pad floor may help but this sample cannot show it.
+
+## Recovery for `explore` and `approach` (adapter lang-v2, same 80 tasks, run `recov2`)
+
+Two execution-layer changes taken from the literature (see `docs/related-work.md`):
+* `explore`: when no frontier is reachable at any clearance, walk to the reachable cell nearest the closest frontier and look again
+  (`mapping.vantage_targets`, `Explorer.recover`, at most 2 per call). Idea: SEER keeps a door "to be confirmed" until visited;
+  mode-switching frontier search / AERR-Nav leave a deadlock through a recovery mode.
+* `approach`: on a clearance stop, a lost target or a timeout, back off, face where the target was, look again and re-bind *the same ball*
+  by position (`skills.rebind_near`), then retry; up to 2 recoveries (RePLan, EMAC+: recover instead of ending the episode; MG-Nav and
+  detection-driven goal refinement: re-acquire the target before the last leg).
+
+| | seed 98000 | seed 98100 | total | explore tasks | "往前移动20厘米" |
+|---|---|---|---|---|---|
+| lang-v2 (before) | 37/40 | 32/40 | 69/80 | 41/48 | 12/16 |
+| lang-v2 + recoveries | 39/40 | 30/40 | 69/80 | 40/48 | 13/16 |
+
+Paired against the previous run: 5 tasks only the new run solved, 5 only the old one, p = 1.0. **No measurable change in the total.**
+(The first attempt at this evaluation was killed part-way by the computer going to sleep and was rerun from scratch as `recov2`;
+the partial run was discarded. A keep-awake request is now made before long evaluations.)
+
+What the mechanisms did:
+* `explore` recovery fired in 6 tasks and the ball was found afterwards in 1 (seed 98005, task 201). In the 5 others, including all of layout
+  98101, nothing new was revealed: that doorway is passable only with about 5 mm of margin, so the recovery cannot create a path.
+* `approach` recovery fired in 3 tasks: it saved 1 (seed 98006, a clearance stop at close range) and failed to re-acquire in 2 (seed 98107,
+  ball 3.5-3.8 m away: after backing off and turning, the ball is not confidently detectable at that range). Those two failed the way the
+  old run's single "target lost" failure did, so the recovery is useful at close range and does nothing at long range.
+* Robot footprint check: the collision geoms reach about 0.10 m from the trunk at rest while the navigator assumes 0.14 m (gait sway and
+  tracking error). The tight-doorway failures are therefore a choice of safety margin, not an impossibility; the margin was left unchanged.
+
+Not done (next candidates): gate `_reacquire` by distance and walk toward the ball when it is farther than ~2 m instead of backing off;
+explore with an information-gain / utility score instead of nearest frontier (mean explore time is still ~125 s).
+
+## Regression canary: replaying visited states (adapters lang-v1 / lang-v2 / lang-v3)
+
+The 21-row held-out split cannot see the regressions (it holds early single-room scenes; `move->done` has 2 rows and every adapter passed
+both). `agent_canary --replay` instead re-decides every step recorded by the `eff` rollouts (226 states: the numbered image the model saw,
+its instruction and memory, the teacher's action) with each adapter, counting an action-type match:
+
+| state class | lang-v1 | lang-v2 | lang-v3 |
+|---|---|---|---|
+| `move->done` | 16/16 | **12/16** | 16/16 |
+| `explore->approach` | 44/44 | 44/44 | **41/44** |
+| `approach->stop` | 7/12 | 11/12 | 11/12 |
+| `start->explore` | 46/48 | 48/48 | 48/48 |
+| all 226 | 219 | 221 | 222 |
+
+It flags exactly the two regressions that cost a two-hour rollout each to find: lang-v2's `move->done` (all 4 wrong rows are
+`{"action":"unsupported"}`) and lang-v3's `explore->approach` (3 rows with an invalid approach action). It needs about 10 minutes per adapter
+and no simulator: `bash scripts/canary_chain.sh replay "--replay runs/lang/eff-98000 runs/lang/eff-98100" ADAPTER_0 ADAPTER_1 ...`.
+Limits: states come from lang-v2's own rollouts, so a regression in a state that policy never visits is invisible; type match ignores
+wrong parameters.
+
+## Evaluation tooling added
+
+`compare_runs` (paired McNemar + bootstrap), `agent_canary` (above), `tools/failure_taxonomy.py`, `agent_eval --phrase-variant 1..3` (three
+more held-out wordings per task, checked by a test to be disjoint from every training and test wording), `scripts/eval_world.sh`.
+Two seed groups and one wording of the "move forward" task were the weakest part of the measurement; more groups (98200, 98300) and the
+alternative wordings have not been run yet.

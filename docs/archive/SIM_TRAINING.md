@@ -1,10 +1,10 @@
 # 从 MicroDuck 仿真采集数据并训练 Qwen-VL
 
-> **历史文档（2026-10-19）。** 本文描述的视觉选球链路已移除（`vision_data`、`vision_sft --task vision`、`vision_torch --task actor` 均已不存在），采集与校验helpers 现位于 `sim_data.py`。当前唯一链路见 [AGENT_TRAINING.md](AGENT_TRAINING.md)。
+> **历史文档（2026-10-19）。** 本文描述的视觉选球链路已移除（`vision_data`、`vision_sft --task vision`、`vision_torch --task actor` 均已不存在），采集与校验helpers 现位于 `sim_data.py`。当前唯一链路见 [AGENT_TRAINING.md](../AGENT_TRAINING.md)。
 
 后续 Windows 训练、奖励模型与等 actor 步数回流对照见 [WINDOWS_VISION.md](WINDOWS_VISION.md)；下面保留初轮 Mac 实验记录。
 
-本文保留初轮视觉选球实验。2026-10-15 新增的多技能 agent、两轮专家纠错 SFT 和实际动作评估见 [AGENT_TRAINING.md](AGENT_TRAINING.md)；以下“尚未实现”描述仅指本文当时的视觉分支。
+本文保留初轮视觉选球实验。2026-10-15 新增的多技能 agent、两轮专家纠错 SFT 和实际动作评估见 [AGENT_TRAINING.md](../AGENT_TRAINING.md)；以下“尚未实现”描述仅指本文当时的视觉分支。
 
 本轮实现的是“真实 MuJoCo 图像与专家交互 → 仿真核验标签 → 图文 LoRA → 显式加载回控制器”。不是用文字模板冒充仿真数据，也不是重新训练官方走路策略。多轮模型探索、自改进和学习型 RM 尚未实现。
 

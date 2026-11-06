@@ -103,6 +103,19 @@ def load_splits(directory):
     return manifest, splits
 
 
+# Extra held-out phrasings for the validation split (`agent_eval --phrase-variant K`). A single held-out phrase per
+# task made one evaluation number depend on one wording; these are never used for training (a test asserts that
+# they are disjoint from every training and test phrasing).
+HELDOUT_VARIANTS = [
+    ["往前迈20厘米，接着回到起点", "往后迈20厘米，接着回到起点", "先朝左拧45度，再朝右拧45度",
+     "靠近图中最左边的球，再回到起点", "朝前迈20厘米", "朝后退20厘米", "马上别动", "帮我把红球一脚踢飞", "过去那儿"],
+    ["向前行20厘米后返回起点", "向后行20厘米后返回起点", "左转四十五度后再右转四十五度",
+     "先到最左边那个球旁边，然后返回起点", "向前走20厘米", "向后走20厘米", "停止一切动作", "请帮我踢开那个球", "请去那个地方"],
+    ["前进二十厘米然后回起点", "后退二十厘米然后回起点", "先左后右各转45度",
+     "走到最左面的球那里再回起点", "前进二十厘米", "后退二十厘米", "立刻停下", "把蓝球踢出去", "去那个方向"],
+]
+
+
 def tasks(split, variant=0):
     """Finite teacher tasks, not a runtime natural-language parser. Held-out phrasing."""
     heldout = split != "train"
@@ -141,6 +154,8 @@ def tasks(split, variant=0):
              "接近最左边的球，然后回到起点", "往前挪动20厘米", "往后挪动20厘米", "马上停下", "用脚踢开绿球", "到那边去"],
         ]
         result = [(text, specs) for text, (_, specs) in zip(variants[(variant - 1) % len(variants)], result)]
+    if split == "valid" and variant:
+        result = [(text, specs) for text, (_, specs) in zip(HELDOUT_VARIANTS[(variant - 1) % len(HELDOUT_VARIANTS)], result)]
     if split == "test":
         test_text = ["前行20厘米后返回最初的位置", "先后退20厘米再返回最初的位置", "左转45度后请右转45度",
                      "走近画面最左球后回到最初位置", "前行20厘米", "后退20厘米", "停止行进", "把红球踢开", "去那个位置"]

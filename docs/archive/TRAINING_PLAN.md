@@ -1,8 +1,8 @@
 # MicroDuck × Qwen-VL 训练计划
 
-> **历史文档（2026-10-19）。** 本文早于技能 agent 单链路改造；其中「视觉选球链路」的模块已移除。设备探针数据仍可参考，当前训练入口见 [AGENT_TRAINING.md](AGENT_TRAINING.md)。
+> **历史文档（2026-10-19）。** 本文早于技能 agent 单链路改造；其中「视觉选球链路」的模块已移除。设备探针数据仍可参考，当前训练入口见 [AGENT_TRAINING.md](../AGENT_TRAINING.md)。
 
-后续进展：Mac 多技能 agent 两轮专家纠错 LoRA 见 [AGENT_TRAINING.md](AGENT_TRAINING.md)；Windows CUDA 视觉 QLoRA、学习型奖励模型与多场景对照见 [WINDOWS_VISION.md](WINDOWS_VISION.md)。本文件下方保留历史设备探针和计划，未实现项描述以各实验文档为准；高层在线 RL 仍未实现。
+后续进展：Mac 多技能 agent 两轮专家纠错 LoRA 见 [AGENT_TRAINING.md](../AGENT_TRAINING.md)；Windows CUDA 视觉 QLoRA、学习型奖励模型与多场景对照见 [WINDOWS_VISION.md](WINDOWS_VISION.md)。本文件下方保留历史设备探针和计划，未实现项描述以各实验文档为准；高层在线 RL 仍未实现。
 
 更新：2026-10-14（香港时间）。当前先在 M4 Mac 做小模型图文 LoRA；RTX 3060 台式机作为下一阶段训练设备。本文件区分“已实测”“计划”“尚未实现”，不把模型能加载等同于能训练，也不把内存测试当作能力评测。
 

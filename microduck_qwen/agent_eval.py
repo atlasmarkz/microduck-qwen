@@ -51,6 +51,8 @@ def main():
                         help="independent layouts for --rollout (seed, seed+1, ...); each is a separate simulator scene")
     parser.add_argument("--explore-tasks", type=int, default=0,
                         help="world mix: also run explore-and-approach tasks per colour hidden from the first view")
+    parser.add_argument("--phrase-variant", type=int, default=0, choices=range(4),
+                        help="validation split only: 0 = the original held-out wording, 1..3 = alternative held-out wordings")
     parser.add_argument("--port", type=int, default=7872)
     parser.add_argument("--task-ids", type=int, nargs="+", default=[0, 1, 2, 3])
     parser.add_argument("--scene-mix", choices=("plain", "hard", "yellow", "world"), default="plain",
@@ -63,13 +65,15 @@ def main():
     rollout_seeds = [args.seed + k for k in range(args.rollout_seeds)]
     if args.rollout and set(rollout_seeds) & {row["scene_seed"] for values in splits.values() for row in values}:
         parser.error("rollout seed must be outside all training/development/test scenes")
+    if args.phrase_variant and args.split != "valid":
+        parser.error("--phrase-variant applies to the valid split only")
     if any(i < 0 or i >= len(tasks(args.split)) for i in args.task_ids):
         parser.error("invalid task ID")
     output = args.output.resolve()
     output.mkdir(parents=True, exist_ok=False)
     planner = AgentPlanner(args.adapter)
     report = {"mode": "independent_actor_rollout" if args.rollout else "offline_action_exact_match",
-              "adapter": planner.adapter, "split": args.split, "dataset_manifest_sha256": digest(args.data / "manifest.json"),
+              "adapter": planner.adapter, "split": args.split, "phrase_variant": args.phrase_variant, "dataset_manifest_sha256": digest(args.data / "manifest.json"),
               "results": [], "correct": 0, "total": 0,
               "note": "Development pilot. Rollout teacher is scorer AFTER execution, never a semantic intervention."}
     def save():
@@ -92,7 +96,7 @@ def main():
                 report["startup_failures"].extend(failures)
                 report["scenes"].append({"seed": seed, "occlusion": occlusion, "clutter": clutter})
                 try:
-                    jobs = [(i, *tasks(args.split)[i], None) for i in args.task_ids]
+                    jobs = [(i, *tasks(args.split, args.phrase_variant)[i], None) for i in args.task_ids]
                     if args.explore_tasks:
                         jobs += explore_entries(info, args.split, seed, args.explore_tasks)
                     for i, instruction, specs, meta in jobs:

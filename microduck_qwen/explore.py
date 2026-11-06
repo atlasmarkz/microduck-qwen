@@ -4,6 +4,15 @@ Where to go comes from a depth-built occupancy map (mapping.py), and navigation 
 perceived map only, so unseen walls are never assumed. Pose and extrinsics stay simulator
 oracle, and the executor's own fall / clearance / bounds stops (which read the known scene)
 remain a safety layer; they are not used to choose frontiers or routes.
+
+Ideas taken from the literature (abstract-level reading, adapted to this simulator, not reimplemented):
+  * Frontier-based exploration of an occupancy map with a value per frontier: VLFM (Yokoyama et al., 2023,
+    arXiv:2312.03275); ESC (Zhou et al., 2023, arXiv:2301.13166).
+  * "Suspected targets": partly seen balls of the target colour are revisited (ApexNav, Zhang et al., 2025).
+  * Recovery when no frontier is reachable, by re-observing from the closest reachable vantage point instead of
+    giving up: SEER (Safe Efficient Exploration for Aerial Robots, arXiv:2209.11034) keeps a detected door "to be
+    confirmed" until the robot has been there; mode-switching frontier search (KAIST SGVR, RiTA 2025) and
+    AERR-Nav switch to a recovery mode when the trajectory history shows a deadlock.
 """
 
 import math
@@ -16,6 +25,7 @@ from .navigation import execute
 from .vision import approachable, capture, propose_targets
 
 MAX_ITERATIONS = 12
+MAX_RECOVERIES = 2  # "nothing reachable" re-observations per explore call
 BUDGET_S = 300.0
 CHUNK = 3  # waypoints per navigation call (~1.5 m), then re-look
 SAME_BALL_M = 0.35
@@ -103,6 +113,30 @@ class Explorer:
         self.executor.robot.stop()
         return self.scan(color)
 
+    def _walk(self, path, inflate, index, record, tag=""):
+        """Walk a planned path in chunks, re-looking after each; records the outcome in `record`."""
+        try:
+            for start in range(0, len(path), CHUNK):
+                chunk = path[start:start + CHUNK]
+                plan = {"status": "ok", "goals": [{"target": "point", "x": float(x), "y": float(y), "speed": "slow",
+                                                  "stop_distance_m": 0.10} for x, y in chunk]}
+                execute(plan, self.executor.robot, self.executor.observer, self.output.with_suffix(f".nav{tag}{index}-{start}.jsonl"),
+                        timeout_s=30, scene=self.mapper.as_scene(inflate - NAV_SLACK_M, 0.03 if inflate <= TIGHTEST_INFLATE_M else MIN_PAD_M), cancel_file=self.executor.cancel_file,
+                        cancel_started_ns=self.executor.started_ns,
+                        observation_label="depth-built occupancy map; oracle pose")
+                self.look()  # new sight lines open as the body moves
+            record["reached"] = True
+        except (ValueError, TimeoutError, RuntimeError) as error:
+            # The depth map can under-draw a wall, so the true-scene safety stop may fire mid-route: that
+            # frontier failed, not the whole search. Cancel, a fall and a stalled simulator still end it.
+            if isinstance(error, RuntimeError) and any(w in str(error) for w in ("cancelled", "fallen", "stale")):
+                raise
+            record.update(reached=False, error=f"{type(error).__name__}: {error}", failed_chunk=start,
+                          chunk=[[round(float(x), 2), round(float(y), 2)] for x, y in chunk])
+        self.executor.robot.stop()
+        if not record.get("reached", True):
+            self.executor.escape_cramped()
+
     def step(self, index):
         """Walk to the nearest reachable frontier. Returns the record, or None if none is left."""
         self.executor.escape_cramped()
@@ -118,29 +152,32 @@ class Explorer:
         record = {"from": [round(float(v), 2) for v in position],
                   "frontier": [round(float(goal[0]), 2), round(float(goal[1]), 2)], "waypoints": len(path)}
         self.iterations.append(record)
-        try:
-            for start in range(0, len(path), CHUNK):
-                chunk = path[start:start + CHUNK]
-                plan = {"status": "ok", "goals": [{"target": "point", "x": float(x), "y": float(y), "speed": "slow",
-                                                  "stop_distance_m": 0.10} for x, y in chunk]}
-                execute(plan, self.executor.robot, self.executor.observer, self.output.with_suffix(f".nav{index}-{start}.jsonl"),
-                        timeout_s=30, scene=self.mapper.as_scene(inflate - NAV_SLACK_M, 0.03 if inflate <= TIGHTEST_INFLATE_M else MIN_PAD_M), cancel_file=self.executor.cancel_file,
-                        cancel_started_ns=self.executor.started_ns,
-                        observation_label="depth-built occupancy map; oracle pose")
-                self.look()  # new sight lines open as the body moves
-            record["reached"] = True
-        except (ValueError, TimeoutError, RuntimeError) as error:
-            # The depth map can under-draw a wall, so the true-scene safety stop may fire mid-route: that
-            # frontier failed, not the whole search. Cancel, a fall and a stalled simulator still end it.
-            if isinstance(error, RuntimeError) and any(w in str(error) for w in ("cancelled", "fallen", "stale")):
-                raise
-            record.update(reached=False, error=f"{type(error).__name__}: {error}", failed_chunk=start,
-                          chunk=[[round(float(x), 2), round(float(y), 2)] for x, y in chunk])
+        self._walk(path, inflate, index, record)
         self.avoid.append((float(goal[0]), float(goal[1])))
-        self.executor.robot.stop()
-        if not record.get("reached", True):
-            self.executor.escape_cramped()
         return record
+
+    def recover(self, index):
+        """No frontier is reachable: stand as close to the nearest one as the map allows, then the caller looks again.
+
+        Returns False when there is nowhere better to stand (the failure is then final).
+        """
+        self.executor.escape_cramped()
+        position = self.executor.healthy()["trunk"][:2]
+        for inflate in (INFLATE_M, TIGHT_INFLATE_M):
+            targets = self.mapper.vantage_targets(position, inflate)
+            if targets is None:
+                continue
+            path = self.mapper.plan_to_frontier(position, (), min_distance=0.3, inflate_m=inflate, targets_override=targets)
+            if path:
+                break
+        else:
+            return False
+        goal = path[-1]
+        record = {"recover": True, "from": [round(float(v), 2) for v in position],
+                  "vantage": [round(float(goal[0]), 2), round(float(goal[1]), 2)], "waypoints": len(path)}
+        self.iterations.append(record)
+        self._walk(path, inflate, index, record, tag="v")
+        return True
 
     def finish(self, started):
         self.executor.robot.stop()
@@ -158,6 +195,7 @@ def run_explore(executor, action, output):
     result = {"found": False, "color": color, "map": "depth-built occupancy; oracle pose"}
     try:
         seen = explorer.scan(color)
+        recoveries = 0
         for index in range(MAX_ITERATIONS):
             if seen or time.monotonic() - started > BUDGET_S:
                 break
@@ -165,6 +203,10 @@ def run_explore(executor, action, output):
             if seen:
                 break
             if explorer.step(index) is None:
+                if recoveries < MAX_RECOVERIES and explorer.recover(index):
+                    recoveries += 1
+                    seen = explorer.scan(color)
+                    continue
                 result["stopped"] = "no reachable frontier left"
                 break
             seen = explorer.scan(color)

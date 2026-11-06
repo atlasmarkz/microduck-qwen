@@ -156,11 +156,50 @@ class OccupancyMap:
         keep = [i for i in range(1, count) if stats[i, cv2.CC_STAT_AREA] >= min_cluster]
         return [np.argwhere(labels.T == i) for i in keep]
 
-    def plan_to_frontier(self, position, avoid=(), min_distance=0.4, avoid_radius=0.6, inflate_m=INFLATE_M):
+    def vantage_targets(self, position, inflate_m=INFLATE_M, min_gap_m=0.4):
+        """The reachable cell closest to the nearest frontier cluster, as a one-entry target dict, or None.
+
+        When every frontier is unreachable, the body can still stand as close as the map allows and look
+        again: a doorway or gap behind clutter is often unknown only because it was occluded from where the
+        body has been (cf. SEER, which keeps a detected door "to be confirmed" until the robot has been
+        there; and the mode-switching / recovery-mode frontier searches that leave a deadlock by
+        re-observing instead of giving up).
+        """
+        import cv2
+
+        blocked = self.blocked(inflate_m)
+        start = tuple(int(v) for v in self.index(position[0], position[1]))
+        if not self._inside(*start):
+            return None
+        near = (slice(max(start[0] - 3, 0), start[0] + 4), slice(max(start[1] - 3, 0), start[1] + 4))
+        blocked[near] &= self.grid[near] != FREE
+        if blocked[start]:
+            return None
+        _, labels = cv2.connectedComponents((~blocked).astype(np.uint8).T.copy(), connectivity=8)
+        reach = labels.T == labels.T[start]
+        # Distance (in cells) from every cell to the nearest reachable one; the frontier cell with the
+        # smallest value is the one the body can get closest to.
+        gap = cv2.distanceTransform((~reach).astype(np.uint8), cv2.DIST_L2, 3)
+        best = None
+        for cluster in self.frontier_cells():
+            d = gap[cluster[:, 0], cluster[:, 1]]
+            k = int(d.argmin())
+            if best is None or d[k] < best[0]:
+                best = (float(d[k]), cluster[k])
+        if best is None or best[0] * self.cell < min_gap_m:
+            return None  # a frontier that close is reachable already; the failure is not about the vantage point
+        reachable = np.argwhere(reach)
+        nearest = reachable[int(np.hypot(reachable[:, 0] - best[1][0], reachable[:, 1] - best[1][1]).argmin())]
+        cell = (int(nearest[0]), int(nearest[1]))
+        return {cell: self.center(*cell)}
+
+    def plan_to_frontier(self, position, avoid=(), min_distance=0.4, avoid_radius=0.6, inflate_m=INFLATE_M,
+                         targets_override=None):
         """Waypoints (world x, y) to the cheapest reachable frontier, or None.
 
         Dijkstra over known-free, uninflated-blocked cells; `avoid` lists world points whose
         neighbourhood is excluded so a frontier that failed once is not retried forever.
+        `targets_override` ({cell: (x, y)}) replaces the frontier cells as the goal set.
         """
         import heapq
 
@@ -172,12 +211,14 @@ class OccupancyMap:
         near = (slice(max(start[0] - 3, 0), start[0] + 4), slice(max(start[1] - 3, 0), start[1] + 4))
         blocked[near] &= self.grid[near] != FREE
         targets = {}
-        for cluster in self.frontier_cells():
+        for cluster in ([] if targets_override is not None else self.frontier_cells()):
             for cell in cluster:
                 x, y = self.center(cell[0], cell[1])
                 if any(math.hypot(x - ax, y - ay) < avoid_radius for ax, ay in avoid):
                     continue
                 targets[(int(cell[0]), int(cell[1]))] = (x, y)
+        if targets_override is not None:
+            targets = dict(targets_override)
         if not targets:
             return None
         cost, parent, queue = {start: 0.0}, {}, [(0.0, start)]

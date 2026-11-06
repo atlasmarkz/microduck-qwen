@@ -1,6 +1,6 @@
 # Windows 视觉选目标与闭环导航实验
 
-> **历史文档（2026-10-19）。** 本文的命令基于已移除的独立视觉指代链路（`vision chat`、`vision_data`、`vision_torch --task actor`、`vision_explore`）。Windows 后端仍然有效，但改用技能 agent 入口：`vision_torch train --task agent|reward` + `agent chat`，见 [AGENT_TRAINING.md](AGENT_TRAINING.md) 与 [README.md](README.md)。
+> **历史文档（2026-10-19）。** 本文的命令基于已移除的独立视觉指代链路（`vision chat`、`vision_data`、`vision_torch --task actor`、`vision_explore`）。Windows 后端仍然有效，但改用技能 agent 入口：`vision_torch train --task agent|reward` + `agent chat`，见 [AGENT_TRAINING.md](../AGENT_TRAINING.md) 与 [README.md](../../README.md)。
 
 本轮使用 Qwen3-VL-2B-Instruct 的真实 RGB 输入，输出球的候选编号或停止/拒绝状态；RGB-D 将选中的球定位到世界坐标，已有 A*、闭环控制和官方 ONNX 步态负责移动。视觉模型不生成关节动作。所有命令从仓库根目录执行，路径均相对该目录。
 
@@ -22,7 +22,7 @@
 
 下图为实际采集的第一视角 RGB，候选框和编号由颜色检测产生，图中没有真值坐标或物体名称：
 
-![实际第一视角选球输入](assets/vision-firstperson.png)
+![实际第一视角选球输入](../../assets/vision-firstperson.png)
 
 ## 训练方法与 UI-Genie 的关系
 
@@ -55,7 +55,7 @@ flowchart LR
 
 每个布局使用相同的 7 条指令模板，包括 `停下来` 与 `请画一幅画`。本轮隔离场景种子，未隔离语言模板，因此停止/不支持项的提升不能证明对陌生措辞或新任务的泛化。
 
-采集时关闭 MSAA，防止边缘混色污染 MuJoCo 编码分割 ID；旧 `windows-vision-v1` 数据和 smoke 权重仅保留为诊断，不进入正式实验。正式数据为 `data/windows-vision-v2`，清单哈希和预定预算见 [protocol.json](experiments/windows-vision-v2/protocol.json)。预算在正式训练前固定，回流比例/阈值在探索前固定；测试在全部训练分支完成后运行，不用于调参。
+采集时关闭 MSAA，防止边缘混色污染 MuJoCo 编码分割 ID；旧 `windows-vision-v1` 数据和 smoke 权重仅保留为诊断，不进入正式实验。正式数据为 `data/windows-vision-v2`，清单哈希和预定预算见 [protocol.json](../../experiments/windows-vision-v2/protocol.json)。预算在正式训练前固定，回流比例/阈值在探索前固定；测试在全部训练分支完成后运行，不用于调参。
 
 比较冻结基座、首轮 actor R0（100 步）、静态 SFT 对照（R0 再训练 100 步）与奖励筛选回流 R1（R0 再训练 100 步）。后两者 actor 总步数均为 200，均重建优化器；回流重复采样到约占一半训练行。奖励模型额外训练 50+50 步，探索亦为额外成本，因此不是总算力相等的对照。
 
@@ -63,7 +63,7 @@ QLoRA：NF4 double quant、BF16、最后 8 个语言层 q/v 投影 rank 8、458,
 
 ## 实测结果
 
-固定独立测试的总体正确数为：基座 33/56、R0 41/56、静态 SFT 49/56、回流 R1 49/56；后两者验证集也都为 50/56。全部分支输出合法率为 100%，但颜色/左右选球均为 33/40。因此本轮收益来自停止及不支持指令，尚未观察到视觉选目标本身的提升。交互示例选用静态 SFT，这是在测试前依据验证集平局确定的，见 [选择记录](experiments/windows-vision-v2/deployment-selection.json)。
+固定独立测试的总体正确数为：基座 33/56、R0 41/56、静态 SFT 49/56、回流 R1 49/56；后两者验证集也都为 50/56。全部分支输出合法率为 100%，但颜色/左右选球均为 33/40。因此本轮收益来自停止及不支持指令，尚未观察到视觉选目标本身的提升。交互示例选用静态 SFT，这是在测试前依据验证集平局确定的，见 [选择记录](../../experiments/windows-vision-v2/deployment-selection.json)。
 
 静态 SFT 与回流 R1 对 34 条真正可见目标指令均正确 33 条；对需要拒绝的 4 条部分遮挡、2 条目标不可见指令均为 0 条正确。不能仅凭 87.5% 总体分数认为视觉拒绝能力可靠。
 
@@ -84,7 +84,7 @@ QLoRA：NF4 double quant、BF16、最后 8 个语言层 q/v 投影 rank 8、458,
 
 训练中全部 32 个 LoRA 张量实际变化。actor 的 PyTorch 分配显存峰值约 1.95 GiB，奖励训练约 2.09 GiB；这不包含其他应用、CUDA 上下文或显存保留池，不能当成整机总显存用量。
 
-额外通过正常 MSAA 渲染、关闭采集真值端点的 `vision run` 交互冒烟：约 7.74 秒、路径约 1.16 m，最终距 RGB-D 目标约 0.318 m。这是训练布局上的入口检查，不计入上述独立测试，见 [记录](experiments/windows-vision-v2/deployment-smoke.json)。完整指标、全部测试原始输出、失败记录与五份训练报告见 [实验摘要](experiments/windows-vision-v2/summary.json) 及其同目录文件。
+额外通过正常 MSAA 渲染、关闭采集真值端点的 `vision run` 交互冒烟：约 7.74 秒、路径约 1.16 m，最终距 RGB-D 目标约 0.318 m。这是训练布局上的入口检查，不计入上述独立测试，见 [记录](../../experiments/windows-vision-v2/deployment-smoke.json)。完整指标、全部测试原始输出、失败记录与五份训练报告见 [实验摘要](../../experiments/windows-vision-v2/summary.json) 及其同目录文件。
 
 完整单元测试 59 项通过，包括真实 MuJoCo 分割框回归、图文 completion mask、双图输入、奖励反事实标签与评测器适配器元数据序列化；旧视觉评测入口在 Windows 上另做了单样本运行检查。
 

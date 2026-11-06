@@ -187,7 +187,7 @@ def main():
     args = parser.parse_args()
     args.data = args.data.resolve()
     if os.name == "nt":
-        parser.error("Windows skill-agent training uses microduck_qwen.vision_torch train; see WINDOWS_VISION.md")
+        parser.error("Windows skill-agent training uses microduck_qwen.vision_torch train; see docs/archive/WINDOWS_VISION.md")
     if not (1 <= args.steps <= 1000 and 1 <= args.rank <= 16 and 1 <= args.layers <= 28
             and 1 <= args.accumulation <= 16 and 2 <= args.max_seq_length <= 2048
             and math.isfinite(args.learning_rate) and args.learning_rate > 0):
