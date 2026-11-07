@@ -264,3 +264,28 @@ Two ways to score the same 73 tasks:
 * strict (the exact labelled skill): 61/73 (84%), the number used everywhere above;
 * outcome-equivalent (`done` accepted for `stop` after a verified approach): 64/73 (88%).
 The strict number stays the headline; the second only shows how much of the gap is skill-label strictness rather than robot behaviour.
+
+## Narrowest clearance tier (0.20 m), evaluated on the same new layouts
+
+Motivation: on layout 98101 the knife-edge doorway left no reachable frontier at any clearance down to 0.22 m. Replaying the saved map
+offline found a path at 0.20 m and below. The robot's collision geoms reach only ~0.10 m from the trunk at rest while the navigator assumes
+0.14 m plus a 5 cm map cell, so 0.20 m still leaves a margin over the geometry. New last tier in `explore.clearance_tiers`: inflation 0.20 m
+with a 1 cm navigator pad, tried only when every earlier tier found nothing (`MICRODUCK_NARROW=0` removes it).
+
+Single-layout check (98101, hidden green ball, one run each, a layout this change was designed on): without the tier "no reachable frontier
+left" after 3 steps (3353 cells); with it the robot crossed the doorway and found the ball (5141 cells, 182 s).
+
+Evaluation on seeds 98200 and 98300 (73 valid tasks, recovery on, layouts not used to design the tier), against the recovery-on run above:
+
+| arm | correct | explore | "move forward 20 cm" | left ball + return |
+|---|---|---|---|---|
+| without the tier | 61/73 | 36/45 | 13/16 | 12/12 |
+| with the tier    | 64/73 | 36/45 | 16/16 | 12/12 |
+
+Paired: 5 tasks only with the tier, 2 only without, McNemar p = 0.45. Three of the five gains are "move forward 20 cm" (the model's `move` then
+`unsupported` slip, which depends on sampling, not on exploration). **The explore family is identical, 36/45, and no explore call in either arm
+ended with "no reachable frontier left"**, so these layouts never exercise the tier. The +3 is run-to-run noise; the evaluation shows
+that the tier does no harm to explore (36/45 both), not that it helps. Its only positive evidence is the single 98101 check above.
+Walks that failed mid-route: 4 with the tier, 2 without (small counts, not interpreted).
+
+Next: evaluate on layouts with knife-edge doorways, which means finding such layouts first (the generator does not label them).

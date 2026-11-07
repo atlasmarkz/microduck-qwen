@@ -1,11 +1,16 @@
+import math
+from pathlib import Path
 import random
+import tempfile
 import unittest
+from unittest import mock
 
 import numpy as np
 
 from microduck_qwen.agent import agent_prompt
 from microduck_qwen.agent_data import teacher_action
 from microduck_qwen.agent_language import explore_paraphrases, explore_tasks
+from microduck_qwen.explore import NARROW_INFLATE_M, TIGHTEST_INFLATE_M, Explorer, clearance_tiers, navigator_pad
 from microduck_qwen.mapping import FREE, OCCUPIED, UNKNOWN, OccupancyMap
 from microduck_qwen.skills import validate_action
 from microduck_qwen.vision import Frame, unproject
@@ -134,8 +139,8 @@ if __name__ == "__main__":
 
 
 class RecoveryTests(unittest.TestCase):
-    def gap_map(self):
-        """A closed, known free pocket whose only way on is a 0.2 m gap: too narrow at normal clearance."""
+    def gap_map(self, gap=(0.0, 0.2)):
+        """A closed, known free pocket whose only way on is a gap (0.2 m by default): too narrow at normal clearance."""
         m = OccupancyMap()
 
         def fill(x0, x1, y0, y1, value):
@@ -146,7 +151,7 @@ class RecoveryTests(unittest.TestCase):
         fill(-1.2, 1.55, -1.7, 1.7, OCCUPIED)   # pocket walls (outer ring)
         fill(-1.0, 1.55, -1.5, 1.5, FREE)
         fill(1.55, 1.75, -1.5, 1.5, OCCUPIED)
-        fill(1.55, 1.75, 0.0, 0.2, FREE)        # the gap
+        fill(1.55, 1.75, gap[0], gap[1], FREE)  # the gap
         fill(1.75, 2.2, -0.3, 0.5, FREE)        # known floor beyond it, unknown all around
         return m
 
@@ -166,11 +171,88 @@ class RecoveryTests(unittest.TestCase):
         self.assertIsNotNone(path)
         self.assertAlmostEqual(path[-1][0], x, places=6)
 
+    def test_a_half_metre_gap_opens_only_at_the_narrowest_tier(self):
+        m = self.gap_map((-0.2, 0.3))
+        self.assertIsNone(m.plan_to_frontier((0.0, 0.0), inflate_m=TIGHTEST_INFLATE_M))
+        path = m.plan_to_frontier((0.0, 0.0), inflate_m=NARROW_INFLATE_M)
+        self.assertIsNotNone(path)
+        self.assertGreater(path[-1][0], 1.7)  # it went through the gap
+
+    def test_narrowest_tier_is_last_and_can_be_switched_off(self):
+        tiers = clearance_tiers([(1.0, 1.0)])
+        self.assertEqual(tiers[0], (0.32, [(1.0, 1.0)]))  # normal clearance first, avoiding past failures
+        self.assertEqual([t[0] for t in tiers[1:]], [0.32, 0.26, 0.22, 0.20])
+        self.assertLess(navigator_pad(NARROW_INFLATE_M), navigator_pad(TIGHTEST_INFLATE_M))
+        self.assertEqual(navigator_pad(0.22), 0.03)
+        with mock.patch("microduck_qwen.explore.NARROW", False):
+            self.assertEqual([t[0] for t in clearance_tiers(())], [0.32, 0.32, 0.26, 0.22])
+
     def test_no_vantage_when_the_frontier_is_already_reachable(self):
         m = OccupancyMap()
         m.update_from_points((0.0, 0.0), wall_points(), open_ends=[[3.5, y] for y in np.linspace(-2.5, 2.5, 30)])
         self.assertIsNotNone(m.plan_to_frontier((0.0, 0.0)))
         self.assertIsNone(m.vantage_targets((0.0, 0.0)))
+
+
+class FakeBody:
+    info = {"port": 0}
+
+    def __init__(self):
+        self.state = {"trunk": [0.0, 0.0, 0.0], "yaw": 0.0}
+        self.turns = []
+
+    def healthy(self):
+        return self.state
+
+    def _bounded(self, action, trace):
+        self.turns.append(action)
+        sign = 1 if action["direction"] == "left" else -1
+        self.state = dict(self.state, yaw=self.state["yaw"] + sign * math.radians(action["degrees"]))
+        return {"success": True}
+
+
+class SettleTests(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.body = FakeBody()
+        self.explorer = Explorer(self.body, Path(self.tmp.name) / "out.json")
+        self.explorer.frame_width = 640
+
+    @staticmethod
+    def ball(x, y, x0, x1):
+        return {"color": "blue", "world_position": [x, y, 0.07], "bbox": [x0, 100, x1, 160], "visibility": "visible"}
+
+    def script(self, *frames):
+        frames = iter(frames)
+        self.explorer.look = lambda color=None: next(frames)
+
+    def test_a_ball_clear_of_the_edge_is_kept_without_turning(self):
+        seen = [self.ball(2.0, 0.0, 280, 340)]
+        self.script()
+        self.assertEqual(self.explorer.settle("blue", seen), seen)
+        self.assertEqual(self.body.turns, [])
+
+    def test_a_ball_at_the_right_edge_is_faced_and_confirmed_in_a_fresh_frame(self):
+        edge = [self.ball(2.0, -1.0, 600, 640)]
+        centred = [self.ball(2.0, -1.0, 290, 350)]
+        self.script(centred)
+        self.assertEqual(self.explorer.settle("blue", edge), centred)
+        (turn,) = self.body.turns
+        self.assertEqual(turn["direction"], "right")
+        self.assertAlmostEqual(turn["degrees"], 27.0)
+
+    def test_a_ball_that_vanishes_after_the_turn_is_kept_as_a_suspect(self):
+        self.script([])
+        self.assertEqual(self.explorer.settle("blue", [self.ball(2.0, 1.0, 5, 60)]), [])
+        self.assertEqual(self.explorer.suspects, [(2.0, 1.0)])
+        self.assertEqual(self.body.turns[0]["direction"], "left")
+
+    def test_still_at_the_edge_after_the_attempts_is_not_confirmed(self):
+        edge = [self.ball(2.0, 0.5, 610, 640)]
+        self.script(edge, edge)
+        self.assertEqual(self.explorer.settle("blue", edge), [])
+        self.assertEqual(len(self.explorer.suspects), 1)
 
 
 class ReacquireTests(unittest.TestCase):

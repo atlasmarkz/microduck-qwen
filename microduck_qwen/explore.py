@@ -13,6 +13,9 @@ Ideas taken from the literature (abstract-level reading, adapted to this simulat
     giving up: SEER (Safe Efficient Exploration for Aerial Robots, arXiv:2209.11034) keeps a detected door "to be
     confirmed" until the robot has been there; mode-switching frontier search (KAIST SGVR, RiTA 2025) and
     AERR-Nav switch to a recovery mode when the trajectory history shows a deadlock.
+  * Settling on the target before the last leg: face the detected ball and confirm it in a fresh frame, in the spirit of
+    detection-driven goal refinement with visual servoing for quadrupeds (CVPR Workshops 2026) and of MG-Nav's
+    re-localisation before the final approach (arXiv:2511.22609).
 """
 
 import math
@@ -34,6 +37,36 @@ SAME_BALL_M = 0.35
 NAV_SLACK_M = 0.05  # the navigator's 5 cm lattice sits half a cell off the map's, which costs it up to this much width
 TIGHT_INFLATE_M = 0.26
 TIGHTEST_INFLATE_M = 0.22  # only when nothing else is reachable; the navigator then keeps just 3 cm of pad  # last resort when no frontier is reachable at the normal clearance (balls beside a doorway need it)
+# Narrowest tier, tried only when every tier above found no reachable frontier. The robot's collision geoms reach about
+# 0.10 m from the trunk at rest while the navigator assumes 0.14 m plus a 5 cm map cell, so 0.20 m still leaves a margin
+# over the geometry; the navigator keeps only 1 cm of pad here. A clearance stop on such a route is a failed frontier
+# (caught in _walk), not a failed search. MICRODUCK_NARROW=0 removes the tier (ablation).
+NARROW = os.environ.get("MICRODUCK_NARROW", "1") != "0"
+NARROW_INFLATE_M = 0.20
+NARROW_PAD_M = 0.01
+
+
+def clearance_tiers(avoid):
+    """(inflation, frontiers to avoid) pairs in the order they are tried: normal, forget failures, tighter, tightest, narrowest."""
+    tiers = [(INFLATE_M, avoid), (INFLATE_M, ()), (TIGHT_INFLATE_M, ()), (TIGHTEST_INFLATE_M, ())]
+    return tiers + [(NARROW_INFLATE_M, ())] if NARROW else tiers
+
+
+# A ball found at the edge of the view is only partly in the frame, and the next frame may not show it as fully
+# visible (two evaluated tasks ended exactly so: explore reported the colour found, then no fully visible ball
+# was left to approach). Before returning success, explore turns to face the ball and requires a fresh frame in
+# which it is still fully visible and clear of the image border. MICRODUCK_SETTLE=0 removes the step (ablation).
+SETTLE = os.environ.get("MICRODUCK_SETTLE", "0") != "0"
+SETTLE_ATTEMPTS = 2
+SETTLE_MIN_TURN_DEG = 8.0
+EDGE_MARGIN_PX = 50
+
+
+def navigator_pad(inflate):
+    """Least path margin the navigator keeps around perceived obstacles for a route planned at this clearance."""
+    if inflate <= NARROW_INFLATE_M:
+        return NARROW_PAD_M
+    return 0.03 if inflate <= TIGHTEST_INFLATE_M else MIN_PAD_M
 
 
 def visible_targets(frame, color):
@@ -67,6 +100,7 @@ class Explorer:
     def look(self, color=None):
         time.sleep(0.3)  # let the 5 Hz camera deliver a frame taken after the body settled
         frame = capture(self.port)
+        self.frame_width = int(frame.rgb.shape[1])
         self.mapper.update_from_frame(frame)
         candidates = propose_targets(frame)
         remember(self.inventory, candidates)
@@ -85,6 +119,8 @@ class Explorer:
         """
         for k in range(4):
             seen = self.look(color)
+            if seen and SETTLE:
+                seen = self.settle(color, seen)  # [] when the ball cannot be confirmed: keep turning and exploring
             if seen:
                 return seen
             if k < 3:
@@ -92,6 +128,49 @@ class Explorer:
                     turned = self.executor._bounded({"action": "turn", "direction": "left", "degrees": 90}, trace)
                 if not turned["success"]:
                     raise RuntimeError("explore scan turn failed")
+        return []
+
+    def settle(self, color, seen):
+        """Face the nearest fully visible ball of `color` and confirm it in a fresh frame, clear of the image edge.
+
+        Returns the fresh targets, or [] when the ball could not be confirmed; its position is then kept as a
+        suspect so the search walks closer later instead of giving up on it.
+        """
+        for _ in range(SETTLE_ATTEMPTS):
+            state = self.executor.healthy()
+            x, y = state["trunk"][:2]
+            target = self._nearest(seen, x, y)
+            if self._clear_of_edge(target):
+                return seen
+            bearing = math.degrees(math.atan2(target["world_position"][1] - y, target["world_position"][0] - x) - state["yaw"])
+            bearing = (bearing + 180.0) % 360.0 - 180.0
+            if abs(bearing) >= SETTLE_MIN_TURN_DEG:
+                turn = {"action": "turn", "direction": "left" if bearing > 0 else "right",
+                        "degrees": float(min(120.0, max(5.0, round(abs(bearing)))))}
+                try:
+                    with self.turn_trace.open("a") as trace:
+                        self.executor._bounded(turn, trace)
+                except (TimeoutError, RuntimeError):
+                    return seen  # could not turn: keep what was found rather than lose it
+            previous, seen = seen, self.look(color)
+            if not seen:
+                return self._unconfirmed(color, previous)  # it left the view: remember where it was
+        x, y = self.executor.healthy()["trunk"][:2]
+        return seen if self._clear_of_edge(self._nearest(seen, x, y)) else self._unconfirmed(color, seen)
+
+    @staticmethod
+    def _nearest(seen, x, y):
+        return min(seen, key=lambda c: math.hypot(c["world_position"][0] - x, c["world_position"][1] - y))
+
+    def _clear_of_edge(self, candidate):
+        x0, _, x1, _ = candidate["bbox"]
+        return x0 >= EDGE_MARGIN_PX and x1 <= getattr(self, "frame_width", 640) - EDGE_MARGIN_PX
+
+    def _unconfirmed(self, color, seen):
+        for c in seen:
+            x, y = c["world_position"][:2]
+            if not any(math.hypot(x - sx, y - sy) < SAME_BALL_M for sx, sy in self.suspects + self.checked):
+                self.suspects.append((float(x), float(y)))
         return []
 
     def check_suspect(self, color):
@@ -123,7 +202,7 @@ class Explorer:
                 plan = {"status": "ok", "goals": [{"target": "point", "x": float(x), "y": float(y), "speed": "slow",
                                                   "stop_distance_m": 0.10} for x, y in chunk]}
                 execute(plan, self.executor.robot, self.executor.observer, self.output.with_suffix(f".nav{tag}{index}-{start}.jsonl"),
-                        timeout_s=30, scene=self.mapper.as_scene(inflate - NAV_SLACK_M, 0.03 if inflate <= TIGHTEST_INFLATE_M else MIN_PAD_M), cancel_file=self.executor.cancel_file,
+                        timeout_s=30, scene=self.mapper.as_scene(inflate - NAV_SLACK_M, navigator_pad(inflate)), cancel_file=self.executor.cancel_file,
                         cancel_started_ns=self.executor.started_ns,
                         observation_label="depth-built occupancy map; oracle pose")
                 self.look()  # new sight lines open as the body moves
@@ -144,7 +223,7 @@ class Explorer:
         self.executor.escape_cramped()
         position = self.executor.healthy()["trunk"][:2]
         # Normal clearance first; then forget past failures; then accept tighter clearance.
-        for inflate, avoid in ((INFLATE_M, self.avoid), (INFLATE_M, ()), (TIGHT_INFLATE_M, ()), (TIGHTEST_INFLATE_M, ())):
+        for inflate, avoid in clearance_tiers(self.avoid):
             path = self.mapper.plan_to_frontier(position, avoid, inflate_m=inflate)
             if path is not None:
                 break
