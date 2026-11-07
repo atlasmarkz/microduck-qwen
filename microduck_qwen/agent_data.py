@@ -103,6 +103,11 @@ def load_splits(directory):
     return manifest, splits
 
 
+# The harness cannot label "the leftmost ball" when the layout shows several yellow balls: that task is invalid
+# (not a model failure) and is reported separately by agent_eval, compare_runs and tools/failure_taxonomy.py.
+AMBIGUOUS_TEACHER_TARGET = "teacher leftmost target is ambiguous"
+
+
 # Extra held-out phrasings for the validation split (`agent_eval --phrase-variant K`). A single held-out phrase per
 # task made one evaluation number depend on one wording; these are never used for training (a test asserts that
 # they are disjoint from every training and test phrasing).
@@ -215,7 +220,7 @@ def teacher_action(spec, verified):
     if obj["color"] == "yellow":
         # Yellow targets are bound by selector, never a guessed id; refuse when it is ambiguous.
         if sum(1 for o in visible if o["color"] == "yellow" and o["candidate"]) != 1:
-            raise ValueError("several yellow balls in view; teacher leftmost target is ambiguous")
+            raise ValueError("several yellow balls in view; " + AMBIGUOUS_TEACHER_TARGET)
         return validate_action({"action": "approach", "color": "yellow", "kind": "ball", "selector": "only"})
     return {"action": "approach", "color": obj["color"], "id": obj["candidate"]["id"]}
 

@@ -9,6 +9,8 @@ from pathlib import Path
 import re
 import sys
 
+from microduck_qwen.compare_runs import is_invalid
+
 
 def kind(result):
     error = str(result.get("error"))
@@ -40,10 +42,13 @@ def last_stage(result):
 
 
 def main(directories):
-    total = failed = 0
+    total = failed = invalid = 0
     kinds, stages, families, seeds = (collections.Counter() for _ in range(4))
     for directory in directories:
         for result in json.loads((Path(directory) / "report.json").read_text(encoding="utf-8"))["results"]:
+            if is_invalid(result):  # the harness could not label this task: not a model outcome
+                invalid += 1
+                continue
             total += 1
             if result["correct"]:
                 continue
@@ -53,7 +58,7 @@ def main(directories):
             seeds[result["seed"]] += 1
             if result["task_id"] >= 100:
                 stages[last_stage(result)] += 1
-    print(f"{total - failed}/{total} correct; failures by task family {dict(families)}")
+    print(f"{total - failed}/{total} correct ({invalid} invalid tasks excluded); failures by task family {dict(families)}")
     print("by category:")
     for key, count in kinds.most_common():
         print(f"  {count:3d}  {key}")

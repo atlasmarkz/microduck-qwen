@@ -18,10 +18,17 @@ from pathlib import Path
 import random
 
 
+def is_invalid(result):
+    """A task the harness could not label (the teacher's "leftmost" target was ambiguous or not confidently
+    visible): not a model outcome."""
+    error = str(result.get("error"))
+    return bool(result.get("invalid_task")) or ("teacher" in error and ("ambiguous" in error or "not confidently visible" in error))
+
+
 def load(run_dir):
-    """{(seed, task_id): correct} from one run directory's report.json."""
+    """{(seed, task_id): correct} from one run directory's report.json, without invalid tasks."""
     report = json.loads((Path(run_dir) / "report.json").read_text(encoding="utf-8"))
-    return {(r["seed"], r["task_id"]): bool(r["correct"]) for r in report["results"]}
+    return {(r["seed"], r["task_id"]): bool(r["correct"]) for r in report["results"] if not is_invalid(r)}
 
 
 def family(task_id):

@@ -201,3 +201,43 @@ wrong parameters.
 more held-out wordings per task, checked by a test to be disjoint from every training and test wording), `scripts/eval_world.sh`.
 Two seed groups and one wording of the "move forward" task were the weakest part of the measurement; more groups (98200, 98300) and the
 alternative wordings have not been run yet.
+
+## Expanded evaluation: new layouts and a clean recovery ablation (adapter lang-v2)
+
+New layouts never used for any earlier decision: seeds 98200 and 98300, 8 layouts each, same 5 task types per layout. The harness
+produced 40 tasks for group 98200 and 37 for group 98300 (77 per arm; I did not investigate why 98300 has 3 fewer).
+The only difference between the two arms is the environment variable `MICRODUCK_RECOVERY` (0 = explore and approach recoveries off,
+1 = on), so this is a clean switch, unlike the earlier before/after comparison.
+
+**Tasks the harness cannot label are excluded.** The "leftmost ball" teacher cannot label a task when the layout shows several yellow
+balls or cannot see the leftmost one confidently (`teacher leftmost target is ambiguous` / `not confidently visible`). Those are not model
+outcomes: 4 of the 77 tasks per arm (layouts 98200, 98205, 98302 and 98307, task 3 in each), identical in both arms, are excluded,
+leaving 73. Raw report totals (off 32/40 and 28/37, on 33/38 and 28/37) were written by runs that did not all apply this rule and are
+not used below.
+
+| arm | valid tasks | correct | explore | "move forward 20 cm" | left ball + return |
+|---|---|---|---|---|---|
+| recovery off | 73 | 60 (82%) | 36/45 | 12/16 | 12/12 |
+| recovery on  | 73 | 61 (84%) | 36/45 | 13/16 | 12/12 |
+
+Paired test on the same 73 tasks: 7 solved only with recovery, 6 only without, McNemar p = 1.0, difference +1 point
+(95% bootstrap -8 to +11). **No measurable effect of the recoveries on the total.**
+
+What actually happened:
+* Recovery fired in 4 tasks (approach) and 1 (explore). Approach recovery fired in seed 98201 tasks 200, 201, 202 and in 98303 task 200;
+  the approach then succeeded in all four. In 98201 the recovery-off arm failed all three of those tasks, so these are real saves, but
+  all three are one layout (one geometry, not three independent samples).
+* The other 10 tasks that differ between the arms (98204 x3, 98207, 98203, 98205, 98303, 98306, 98307 x2) had no recovery firing
+  in either arm. They are run-to-run noise from identical code: about 10 of 73 tasks flip between two runs, which matches the earlier
+  +/-4 per 40 estimate and explains why a +1 difference cannot be separated from zero.
+* Failures with recovery on are still mostly `explore` ending without a confirmed ball (outcome check failed) and "target lost during
+  approach and not re-acquired" (2). The long-range target-loss case is not helped by the current recovery (see the previous section).
+
+**Held-out wording, same seed (98200, non-explore tasks, invalid tasks excluded):** the original wording 12/14 (both arms); three alternative
+held-out phrasings 13/14, 13/14, 14/14. The model is not brittle to these three rewordings (n = 14 each, so this cannot detect a gap
+smaller than about 20 points).
+
+**Conclusions.** (1) 82-84% on new layouts is close to the earlier 86% (69/80), so there is no sign of a large drop on layouts the fixes
+were not designed against (the intervals overlap widely; this does not prove there was no tuning to the old layouts). (2) The recoveries are cheap safety nets but their effect on the total is below what 73 tasks can resolve;
+the only evidence for them is the 3 same-layout saves. (3) The remaining explore failures are not addressed by retrying;
+the next candidates are still the safety-margin tier for knife-edge doorways and distance-gated re-acquisition.

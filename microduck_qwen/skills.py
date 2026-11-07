@@ -2,6 +2,7 @@
 
 import json
 import math
+import os
 from pathlib import Path
 import time
 
@@ -9,7 +10,7 @@ from .navigation import Robot, Observer, execute, clearance, inside, nearest_obs
 from .vision import capture, propose_targets, visibility_check, approachable, VisualGuard
 
 
-APPROACH_ATTEMPTS = 3          # first try plus two recoveries
+APPROACH_ATTEMPTS = 3 if os.environ.get("MICRODUCK_RECOVERY", "1") != "0" else 1  # first try plus two recoveries (1 = ablation)
 REBIND_RADIUS_M = 0.5          # the same physical ball must reappear this close to where it was bound
 RECOVERABLE_STOPS = ("净空", "视觉保护停止")  # clearance stop / target lost; not cancel, fall or a stalled simulator
 

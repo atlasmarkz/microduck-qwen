@@ -3,12 +3,13 @@
 import argparse
 from datetime import datetime
 import json
+import os
 import shutil
 from pathlib import Path
 
 from . import ROOT
 from .agent import AgentPlanner
-from .agent_data import episode, explore_entries, load_splits, scene_profile, tasks, world_arguments
+from .agent_data import AMBIGUOUS_TEACHER_TARGET, episode, explore_entries, load_splits, scene_profile, tasks, world_arguments
 from .sim_data import digest
 from .sim_runner import start_scene, stop_process
 from .skills import parse_action
@@ -73,7 +74,7 @@ def main():
     output.mkdir(parents=True, exist_ok=False)
     planner = AgentPlanner(args.adapter)
     report = {"mode": "independent_actor_rollout" if args.rollout else "offline_action_exact_match",
-              "adapter": planner.adapter, "split": args.split, "phrase_variant": args.phrase_variant, "dataset_manifest_sha256": digest(args.data / "manifest.json"),
+              "adapter": planner.adapter, "split": args.split, "phrase_variant": args.phrase_variant, "recovery": os.environ.get("MICRODUCK_RECOVERY", "1") != "0", "dataset_manifest_sha256": digest(args.data / "manifest.json"),
               "results": [], "correct": 0, "total": 0,
               "note": "Development pilot. Rollout teacher is scorer AFTER execution, never a semantic intervention."}
     def save():
@@ -110,15 +111,18 @@ def main():
                             if "cannot restore task start" not in str(entry.get("error")):
                                 break
                         infra = "cannot restore task start" in str(entry.get("error"))
+                        invalid = AMBIGUOUS_TEACHER_TARGET in str(entry.get("error"))  # harness could not label it: not a model failure
                         result = {"seed": seed, "task_id": i, "instruction": instruction, "correct": entry["verified"], "error": entry.get("error"),
                                   "layers": entry.get("layers"), "episode": str(directory / "episode.json"),
-                                  "infra_retries": retry, "infra_failure": infra}
+                                  "infra_retries": retry, "infra_failure": infra, "invalid_task": invalid}
                         report["infra_failures"] = report.get("infra_failures", 0) + infra
                         report["results"].append(result)
-                        report["correct"] += result["correct"]
-                        report["total"] += 1
-                        for name, ok in (result["layers"] or {}).items():
-                            report["layers"][name] += bool(ok)
+                        report["invalid_tasks"] = report.get("invalid_tasks", 0) + invalid
+                        if not invalid:  # invalid tasks stay in `results` but never count towards the score
+                            report["correct"] += result["correct"]
+                            report["total"] += 1
+                            for name, ok in (result["layers"] or {}).items():
+                                report["layers"][name] += bool(ok)
                         low, high = wilson_interval(report["correct"], report["total"])
                         report["wilson95"] = [round(low, 4), round(high, 4)]
                         save()

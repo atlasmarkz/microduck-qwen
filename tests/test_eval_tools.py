@@ -4,7 +4,7 @@ import unittest
 from pathlib import Path
 
 from microduck_qwen.agent_canary import decision_correct, regressions, replay_rows, state_class, summarize
-from microduck_qwen.compare_runs import compare, family, load, mcnemar_exact
+from microduck_qwen.compare_runs import compare, family, is_invalid, load, mcnemar_exact
 
 
 class CanaryTests(unittest.TestCase):
@@ -71,6 +71,18 @@ class PairedComparisonTests(unittest.TestCase):
     def test_runs_without_shared_tasks_are_rejected(self):
         with self.assertRaises(ValueError):
             compare({(1, 3): True}, {(2, 3): True})
+
+    def test_tasks_the_harness_could_not_label_are_not_model_outcomes(self):
+        invalid = {"seed": 7, "task_id": 3, "correct": False,
+                   "error": "ValueError: several yellow balls in view; teacher leftmost target is ambiguous"}
+        self.assertTrue(is_invalid(invalid))
+        self.assertTrue(is_invalid({"seed": 7, "task_id": 3, "correct": False,
+                                    "error": "ValueError: teacher leftmost target not confidently visible"}))
+        self.assertTrue(is_invalid({"seed": 7, "task_id": 3, "correct": False, "invalid_task": True}))
+        self.assertFalse(is_invalid({"seed": 7, "task_id": 3, "correct": False, "error": "failed physical skill"}))
+        with tempfile.TemporaryDirectory() as tmp:
+            (Path(tmp) / "report.json").write_text(json.dumps({"results": [invalid, {"seed": 7, "task_id": 4, "correct": True}]}))
+            self.assertEqual(load(tmp), {(7, 4): True})
 
     def test_load_reads_seed_and_task_from_a_report(self):
         with tempfile.TemporaryDirectory() as tmp:

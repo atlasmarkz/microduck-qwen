@@ -16,6 +16,7 @@ Ideas taken from the literature (abstract-level reading, adapted to this simulat
 """
 
 import math
+import os
 import time
 
 import numpy as np
@@ -25,7 +26,8 @@ from .navigation import execute
 from .vision import approachable, capture, propose_targets
 
 MAX_ITERATIONS = 12
-MAX_RECOVERIES = 2  # "nothing reachable" re-observations per explore call
+RECOVERY = os.environ.get("MICRODUCK_RECOVERY", "1") != "0"  # MICRODUCK_RECOVERY=0 switches the recoveries off (ablation)
+MAX_RECOVERIES = 2 if RECOVERY else 0  # "nothing reachable" re-observations per explore call
 BUDGET_S = 300.0
 CHUNK = 3  # waypoints per navigation call (~1.5 m), then re-look
 SAME_BALL_M = 0.35
