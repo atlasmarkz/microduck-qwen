@@ -31,6 +31,10 @@ try:
               "iters", len(r.get("iterations", [])), "inv", [(i["color"], round(i["x"], 1), round(i["y"], 1)) for i in r.get("inventory", [])], flush=True)
         for it in r.get("iterations", []):
             print("   ", it, flush=True)
+        # The frame the next skill (approach) will see: is the target in it, fully visible and clear of the border?
+        after = capture(info["port"])
+        print("AFTER", color, [(c["visibility"], [int(v) for v in c["bbox"]]) for c in propose_targets(after)
+                               if c["color"] == color and c.get("kind", "ball") == "ball"], "width", after.rgb.shape[1], flush=True)
     (out / "scene.json").write_text(json.dumps(scene))
 finally:
     stop_process(process)

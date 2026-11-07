@@ -289,3 +289,20 @@ that the tier does no harm to explore (36/45 both), not that it helps. Its only 
 Walks that failed mid-route: 4 with the tier, 2 without (small counts, not interpreted).
 
 Next: evaluate on layouts with knife-edge doorways, which means finding such layouts first (the generator does not label them).
+
+## Settle on the target before explore returns (diagnostic, layouts 98205 and 98307)
+
+Two evaluated tasks ended with "explore found the colour, then no fully visible ball to approach". The post-explore frames showed why: the
+ball sat on the image border (x 619/640 in one, not detected at all in the other), so the next frame did not show it fully visible.
+New step in `explore` (`MICRODUCK_SETTLE`, now default on): face the nearest ball, take a fresh frame, and require it fully visible with at
+least 50 px to both sides; if it cannot be confirmed the position becomes a suspect and the search continues.
+
+Same layout, same hidden colour (blue), the frame the next skill would see right after explore (one run each; the tasks were chosen
+because they failed, so this shows the mechanism, not a rate):
+
+| layout | without the step | with the step |
+|---|---|---|
+| 98205 | ball box x 578..640 (cut by the right edge) | x 502..581 (clear, fully visible) |
+| 98307 | ball box x 0..15 (on the left edge) | x 368..395 (near the centre, fully visible) |
+
+Not yet measured: effect on the full evaluation (regressions, time added by the turns). That run is next.

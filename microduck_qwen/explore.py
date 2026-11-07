@@ -56,7 +56,7 @@ def clearance_tiers(avoid):
 # visible (two evaluated tasks ended exactly so: explore reported the colour found, then no fully visible ball
 # was left to approach). Before returning success, explore turns to face the ball and requires a fresh frame in
 # which it is still fully visible and clear of the image border. MICRODUCK_SETTLE=0 removes the step (ablation).
-SETTLE = os.environ.get("MICRODUCK_SETTLE", "0") != "0"
+SETTLE = os.environ.get("MICRODUCK_SETTLE", "1") != "0"
 SETTLE_ATTEMPTS = 2
 SETTLE_MIN_TURN_DEG = 8.0
 EDGE_MARGIN_PX = 50
