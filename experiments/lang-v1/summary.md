@@ -241,3 +241,26 @@ smaller than about 20 points).
 were not designed against (the intervals overlap widely; this does not prove there was no tuning to the old layouts). (2) The recoveries are cheap safety nets but their effect on the total is below what 73 tasks can resolve;
 the only evidence for them is the 3 same-layout saves. (3) The remaining explore failures are not addressed by retrying;
 the next candidates are still the safety-margin tier for knife-edge doorways and distance-gated re-acquisition.
+
+## Anatomy of the 12 failures on the new layouts (recovery on, 73 valid tasks)
+
+Classified from each episode's step log (`tools/failure_taxonomy.py`, which now has a `done` for `stop` category):
+
+| category | tasks | what happened |
+|---|---|---|
+| `move` then `unsupported` | 3 | "move forward 20 cm": the move succeeds, then the model emits `unsupported` instead of `done` |
+| `done` where the teacher expects `stop` | 3 | "approach, then stop": explore and approach both succeed, then the model says `done`; the strict score expects `stop` |
+| approach failed | 3 | target lost during approach and not re-acquired (2), target no longer safely visible (1) |
+| explore ended, ball not confidently visible | 2 | explore reports the colour found, but no fully visible ball is available for approach |
+| `clarify` on an English instruction | 1 | |
+
+The second row was filed under "physical outcome wrong" before: the evaluator's error string ("failed physical skill or wrong task action")
+does not distinguish the two, and the motion was fine in all three. `stop` and `done` both end the episode with the robot already standing
+still after a successful approach, so the physical outcome is identical; only the labelled skill differs. The model emits `done` for `stop`
+in 3 of 11 such tasks with recovery on, 1 of 12 with recovery off and 0 of 12 in the earlier `recov2` run, so this is mostly sampling
+noise around a weak preference, not a systematic fault.
+
+Two ways to score the same 73 tasks:
+* strict (the exact labelled skill): 61/73 (84%), the number used everywhere above;
+* outcome-equivalent (`done` accepted for `stop` after a verified approach): 64/73 (88%).
+The strict number stays the headline; the second only shows how much of the gap is skill-label strictness rather than robot behaviour.

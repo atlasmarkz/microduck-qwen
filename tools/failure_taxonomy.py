@@ -12,9 +12,27 @@ import sys
 from microduck_qwen.compare_runs import is_invalid
 
 
+def done_for_stop(result):
+    """True when the only miss is `done` where the teacher expected `stop`, after every motion skill succeeded.
+
+    Both end the episode with the robot already standing still, so the physical outcome is the same; the strict
+    action-type score still counts it as a miss.
+    """
+    try:
+        steps = json.loads(Path(result["episode"]).read_text(encoding="utf-8"))["steps"]
+    except (OSError, KeyError, ValueError):
+        return False
+    last = steps[-1]
+    predicted = (last.get("prediction") or {}).get("action") or {}
+    return ((last.get("expected") or {}).get("action") == "stop" and predicted.get("action") == "done"
+            and all(s.get("physical_ok", False) for s in steps[:-1]) and all(s.get("target_ok", True) for s in steps))
+
+
 def kind(result):
     error = str(result.get("error"))
     layers = result.get("layers") or {}
+    if done_for_stop(result):
+        return "terminal: `done` where the teacher expects `stop` (motion ok)"
     if "invalid actor JSON" in error:
         return "model: invalid JSON"
     if layers and not layers.get("action_type_ok", True):
