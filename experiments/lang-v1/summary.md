@@ -361,3 +361,10 @@ slips behind a wall edge, and 98204), explore tasks only, two repeats per arm, f
 4/12 -> 8/12 correct; 4 tasks only with it, 0 only without, exact McNemar p = 0.125 (too few pairs to be significant). The walk started in 3 of the
 12 runs with it on, and the approach succeeded after it every time (one of the three is still scored wrong by the `stop`/`done` label slip).
 Read as: the mechanism works when it fires, the layouts are noisy, and the size of the effect on a full evaluation is still unmeasured.
+
+## Candidate evaluation on fresh seeds 99000 / 99100 (lang-v2 vs lang-v4, all execution fixes)
+
+- lang-v2: 61/74 valid (82.4%); lang-v4: 60/74 (81.1%). Paired: only-v2 5, only-v4 4, McNemar p = 1.0, difference -1.4 points (95% CI -9.5..+6.8). No evidence that v4 helps; keep lang-v2.
+- Fresh seeds are lower than the dev layouts (84-88%), so the dev numbers were optimistic.
+- Failure anatomy (v2): 4 `done` where `stop` expected, 4 explore budget used, 2 clarify misfires, 1 approach target not safely visible.
+- Merged dev-explore into main (retry cap per frontier, hardened ball relief, start-of-approach re-acquire); 172 tests pass. Not yet re-evaluated.
