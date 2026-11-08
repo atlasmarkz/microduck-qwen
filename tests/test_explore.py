@@ -180,12 +180,37 @@ class RecoveryTests(unittest.TestCase):
 
     def test_narrowest_tier_is_last_and_can_be_switched_off(self):
         tiers = clearance_tiers([(1.0, 1.0)])
-        self.assertEqual(tiers[0], (0.32, [(1.0, 1.0)]))  # normal clearance first, avoiding past failures
+        self.assertEqual(tiers[0], (0.32, ((1.0, 1.0),)))  # normal clearance first, avoiding past failures
         self.assertEqual([t[0] for t in tiers[1:]], [0.32, 0.26, 0.22, 0.20])
         self.assertLess(navigator_pad(NARROW_INFLATE_M), navigator_pad(TIGHTEST_INFLATE_M))
         self.assertEqual(navigator_pad(0.22), 0.03)
         with mock.patch("microduck_qwen.explore.NARROW", False):
             self.assertEqual([t[0] for t in clearance_tiers(())], [0.32, 0.32, 0.26, 0.22])
+
+    def test_a_frontier_that_failed_twice_stays_excluded_in_every_tier(self):
+        tiers = clearance_tiers([(1.0, 1.0)], exhausted=[(2.2, -0.6)])
+        self.assertEqual(len(tiers), 5)
+        for inflate, avoid in tiers:
+            self.assertIn((2.2, -0.6), avoid)  # forgetting soft failures never forgets an exhausted frontier
+        self.assertNotIn((1.0, 1.0), tiers[1][1])
+
+    def soft_gap_map(self):
+        """A pocket whose only exit is 0.7 m wide between two 'ball' flanks: passable with the ball relief, not without."""
+        m = self.gap_map((-0.35, 0.35))
+        lo, hi = m.index(1.55, -0.95), m.index(1.75, 0.95)
+        for a in range(int(lo[0]), int(hi[0])):
+            for b in range(int(lo[1]), int(hi[1])):
+                if m.grid[a, b] == OCCUPIED:
+                    m.soft[a, b] = True
+        return m
+
+    def test_hardening_the_balls_closes_a_route_that_only_existed_through_their_relief(self):
+        m = self.soft_gap_map()
+        self.assertIsNotNone(m.plan_to_frontier((0.0, 0.0), inflate_m=0.32))
+        m.harden_balls()
+        self.assertIsNone(m.plan_to_frontier((0.0, 0.0), inflate_m=0.32))
+        m.mark_balls([(1.65, 0.5)])
+        self.assertFalse(m.soft.any())  # new sightings are no longer given the relief either
 
     def test_no_vantage_when_the_frontier_is_already_reachable(self):
         m = OccupancyMap()
@@ -302,6 +327,37 @@ class ReacquireTests(unittest.TestCase):
             except RuntimeError as error:
                 result = str(error)
         return result, walks
+
+    def approach_with(self, reacquire):
+        """SkillExecutor._approach on a stub whose first visibility check fails; `reacquire` is what _reacquire does."""
+        import types
+        from microduck_qwen import skills
+
+        body = types.SimpleNamespace(robot=None, observer=None, scene={}, cancel_file=None, directory=Path(tempfile.gettempdir()),
+                                     info={"port": 0}, _reacquire=reacquire)
+        checks = iter([{"safe": False}, {"safe": True}, {"safe": True}])
+        ball = self.ball(2.0, 0.0)
+        with mock.patch.object(skills, "visibility_check", lambda *a: next(checks)), \
+                mock.patch.object(skills, "capture", lambda port: None), \
+                mock.patch.object(skills, "VisualGuard", lambda *a, **k: None), \
+                mock.patch.object(skills, "execute", lambda *a, **k: {"success": True}):
+            return skills.SkillExecutor._approach(body, {"action": "approach", "color": "blue"}, ball, Path(tempfile.gettempdir()) / "a.json")
+
+    def test_a_ball_not_matched_at_the_start_of_approach_is_reacquired_instead_of_asking_the_user(self):
+        found = self.ball(2.05, 0.02)
+        navigation, recoveries, selected = self.approach_with(lambda *a: found)
+        self.assertTrue(navigation["success"])
+        self.assertIs(selected, found)
+        self.assertEqual(recoveries, ["target not safely visible at the start"])
+
+    def test_if_reacquiring_fails_the_user_is_asked_as_before(self):
+        from microduck_qwen.skills import NeedsUserInput
+
+        def lost(*args):
+            raise RuntimeError("target lost during approach and not re-acquired")
+
+        with self.assertRaises(NeedsUserInput):
+            self.approach_with(lost)
 
     def test_a_ball_lost_far_away_is_approached_along_the_route_before_looking_again(self):
         _, walks = self.reacquire_with(3.0)

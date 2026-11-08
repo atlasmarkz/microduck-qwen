@@ -34,6 +34,12 @@ class OccupancyMap:
         self.origin = -size_m / 2
         self.grid = np.zeros((self.n, self.n), dtype=np.uint8)
         self.soft = np.zeros((self.n, self.n), dtype=bool)   # occupied cells that belong to a perceived ball
+        self.balls_relieved = True   # False once a route squeezed between balls was stopped by the clearance guard
+
+    def harden_balls(self):
+        """Treat balls like walls from now on: the relief that lets a route pass close to a ball was refused by the guard."""
+        self.balls_relieved = False
+        self.soft[:] = False
 
     def index(self, x, y):
         return (np.floor((np.asarray(x) - self.origin) / self.cell).astype(int),
@@ -118,6 +124,8 @@ class OccupancyMap:
 
     def mark_balls(self, centers):
         """Flag occupied cells within BALL_MARK_M of a perceived ball centre as ball cells (less inflation)."""
+        if not self.balls_relieved:
+            return
         reach = int(math.ceil(BALL_MARK_M / self.cell))
         for x, y in centers:
             ix, iy = (int(v) for v in self.index(x, y))

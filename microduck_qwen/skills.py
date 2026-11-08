@@ -297,9 +297,22 @@ class SkillExecutor:
         for attempt in range(APPROACH_ATTEMPTS):
             target = selected["world_position"]
             if not visibility_check(capture(self.info["port"]), target, action["color"])["safe"]:
-                if attempt == 0:
+                if attempt == 0 and APPROACH_ATTEMPTS > 1:
+                    # The ball explore just found is not matched in this frame (a small far ball's estimated position can
+                    # jitter, or the body swayed): re-acquire it by position before giving up and asking the user.
+                    recoveries.append("target not safely visible at the start")
+                    try:
+                        selected = self._reacquire(selected, action, output, 1)
+                    except RuntimeError as error:
+                        if any(w in str(error) for w in ("cancelled", "fallen", "stale")):
+                            raise
+                        raise NeedsUserInput("target no longer safely visible") from None
+                    recoveries.extend(vars(self).pop("reacquire_notes", []))
+                    target = selected["world_position"]
+                elif attempt == 0:
                     raise NeedsUserInput("target no longer safely visible")
-                raise RuntimeError("target not safely visible after recovery")
+                else:
+                    raise RuntimeError("target not safely visible after recovery")
             distance = 0.45 if selected.get("kind") == "pillar" else 0.30
             plan = {"status": "ok", "goals": [{"target": "point", "x": target[0], "y": target[1], "speed": "slow", "stop_distance_m": distance}]}
             trace = output.with_suffix(".jsonl" if attempt == 0 else f".a{attempt}.jsonl")

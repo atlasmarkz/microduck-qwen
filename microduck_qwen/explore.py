@@ -18,6 +18,7 @@ Ideas taken from the literature (abstract-level reading, adapted to this simulat
     re-localisation before the final approach (arXiv:2511.22609).
 """
 
+import collections
 import math
 import os
 import time
@@ -47,10 +48,19 @@ NARROW_INFLATE_M = 0.20
 NARROW_PAD_M = 0.01
 
 
-def clearance_tiers(avoid):
-    """(inflation, frontiers to avoid) pairs in the order they are tried: normal, forget failures, tighter, tightest, narrowest."""
-    tiers = [(INFLATE_M, avoid), (INFLATE_M, ()), (TIGHT_INFLATE_M, ()), (TIGHTEST_INFLATE_M, ())]
-    return tiers + [(NARROW_INFLATE_M, ())] if NARROW else tiers
+FRONTIER_TRIES = 2  # a frontier that failed this many walks is never chosen again, however far the tiers are relaxed
+
+
+def clearance_tiers(avoid, exhausted=()):
+    """(inflation, frontiers to avoid) pairs in the order they are tried: normal, forget failures, tighter, tightest, narrowest.
+
+    "Forget failures" forgets the soft avoid list, not the `exhausted` frontiers: one evaluated layout retried the same
+    frontier twelve times (the clearance guard stopped every walk at its first step) and used up the whole budget on it.
+    """
+    exhausted = tuple(exhausted)
+    tiers = [(INFLATE_M, tuple(avoid) + exhausted), (INFLATE_M, exhausted), (TIGHT_INFLATE_M, exhausted),
+             (TIGHTEST_INFLATE_M, exhausted)]
+    return tiers + [(NARROW_INFLATE_M, exhausted)] if NARROW else tiers
 
 
 # A ball found at the edge of the view is only partly in the frame, and the next frame may not show it as fully
@@ -92,6 +102,7 @@ class Explorer:
         self.mapper = OccupancyMap()
         self.inventory = []
         self.avoid = []
+        self.failed_walks = collections.Counter()   # rounded frontier -> walks to it that failed
         self.suspects = []   # target-coloured balls seen only partly: where to look again (ApexNav's "suspected targets")
         self.checked = []
         self.iterations = []
@@ -223,6 +234,10 @@ class Explorer:
             # frontier failed, not the whole search. Cancel, a fall and a stalled simulator still end it.
             if isinstance(error, RuntimeError) and any(w in str(error) for w in ("cancelled", "fallen", "stale")):
                 raise
+            if isinstance(error, RuntimeError) and "净空" in str(error):
+                # The route went closer to something than the guard allows: stop giving balls the relief that made such
+                # routes look possible, so the next plan goes around them.
+                self.mapper.harden_balls()
             record.update(reached=False, error=f"{type(error).__name__}: {error}", failed_chunk=start,
                           chunk=[[round(float(x), 2), round(float(y), 2)] for x, y in chunk])
         self.executor.robot.stop()
@@ -234,7 +249,8 @@ class Explorer:
         self.executor.escape_cramped()
         position = self.executor.healthy()["trunk"][:2]
         # Normal clearance first; then forget past failures; then accept tighter clearance.
-        for inflate, avoid in clearance_tiers(self.avoid):
+        exhausted = [key for key, count in self.failed_walks.items() if count >= FRONTIER_TRIES]
+        for inflate, avoid in clearance_tiers(self.avoid, exhausted):
             path = self.mapper.plan_to_frontier(position, avoid, inflate_m=inflate)
             if path is not None:
                 break
@@ -246,6 +262,8 @@ class Explorer:
         self.iterations.append(record)
         self._walk(path, inflate, index, record)
         self.avoid.append((float(goal[0]), float(goal[1])))
+        if not record.get("reached", True):
+            self.failed_walks[(round(float(goal[0]), 1), round(float(goal[1]), 1))] += 1
         return record
 
     def recover(self, index):
