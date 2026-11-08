@@ -306,3 +306,24 @@ because they failed, so this shows the mechanism, not a rate):
 | 98307 | ball box x 0..15 (on the left edge) | x 368..395 (near the centre, fully visible) |
 
 Not yet measured: effect on the full evaluation (regressions, time added by the turns). That run is next.
+
+## Settle step, full evaluation (seeds 98200 and 98300, recovery and the narrow tier on)
+
+| arm | correct | explore | "move forward 20 cm" | left ball + return |
+|---|---|---|---|---|
+| narrow tier, no settle | 64/73 | 36/45 | 16/16 | 12/12 |
+| + settle (run `ext-settle`) | 64/73 | 38/45 | 14/16 | 12/12 |
+
+Paired: 5 tasks only with settle, 5 only without, McNemar p = 1.0. The total did not move; the pieces did:
+* Gains in explore: the two tasks the step was built for (98205 and 98307, task 201) plus three more (98201/202, 98302/201, 98305/202), which
+  may be the same edge-of-view effect or noise.
+* Explore losses, three: 98200/200 (the model wrote `stop` where `done` was expected, label noise), and 98206/201 and 98300/201, which were a
+  real bug in the step: its pre-turn `healthy()` check raised the body's "clearance too small" safety stop and that ended the whole explore
+  although the ball was already found.
+* "Move forward 20 cm" lost two tasks to the model's `move` then `unsupported` slip (sampling noise, unrelated to explore).
+
+Fix: `Explorer.settle` now returns the unsettled sighting on a body safety stop and re-raises only cancel, fall and stale-physics.
+Re-running just the two affected layouts with the fix (`scripts/eval_layouts.sh`, runs `fixchk-98206` and `fixchk-98300`, one run each):
+98206 task 201 and 98300 task 201 both pass now; 98206 task 200 fails for an unrelated reason (the model emitted `stop` where `return_home`
+was expected). These are single runs of tasks chosen because they failed: they show the bug is gone, not a rate. The corrected code has
+not had a full 73-task evaluation.

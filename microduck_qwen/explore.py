@@ -134,8 +134,18 @@ class Explorer:
         """Face the nearest fully visible ball of `color` and confirm it in a fresh frame, clear of the image edge.
 
         Returns the fresh targets, or [] when the ball could not be confirmed; its position is then kept as a
-        suspect so the search walks closer later instead of giving up on it.
+        suspect so the search walks closer later instead of giving up on it. A safety stop of the body (clearance
+        too small next to a wall, say) is not a reason to lose a ball already found: the unsettled sighting is returned.
+        Cancel, a fall and a stalled simulator still end the search.
         """
+        try:
+            return self._settle(color, seen)
+        except RuntimeError as error:
+            if any(w in str(error) for w in ("cancelled", "fallen", "stale")):
+                raise
+            return seen
+
+    def _settle(self, color, seen):
         for _ in range(SETTLE_ATTEMPTS):
             state = self.executor.healthy()
             x, y = state["trunk"][:2]

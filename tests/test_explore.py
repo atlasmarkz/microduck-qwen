@@ -248,6 +248,22 @@ class SettleTests(unittest.TestCase):
         self.assertEqual(self.explorer.suspects, [(2.0, 1.0)])
         self.assertEqual(self.body.turns[0]["direction"], "left")
 
+    def test_a_clearance_stop_keeps_the_sighting_but_a_cancel_still_ends_the_search(self):
+        edge = [self.ball(2.0, -1.0, 600, 640)]
+
+        def too_close():
+            raise RuntimeError("outside map or scene clearance too small; stopped")
+
+        self.body.healthy = too_close
+        self.assertEqual(self.explorer.settle("blue", edge), edge)
+
+        def cancelled():
+            raise RuntimeError("cancelled by stop command")
+
+        self.body.healthy = cancelled
+        with self.assertRaises(RuntimeError):
+            self.explorer.settle("blue", edge)
+
     def test_still_at_the_edge_after_the_attempts_is_not_confirmed(self):
         edge = [self.ball(2.0, 0.5, 610, 640)]
         self.script(edge, edge)
