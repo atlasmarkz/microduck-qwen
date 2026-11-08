@@ -72,6 +72,20 @@ class AgentTests(unittest.TestCase):
         memory["completed"] = [{"action": "return_home"}]
         self.assertIn('"completed":[{"action":"return_home"}]', agent_prompt("回到起点", memory))
 
+    def test_every_finished_skill_tells_the_model_what_the_executor_verified(self):
+        for skill in ({"action": "move", "direction": "forward", "distance_m": 0.2},
+                      {"action": "turn", "direction": "left", "degrees": 90},
+                      {"action": "approach", "color": "red", "selector": "nearest"},
+                      {"action": "explore", "color": "red"},
+                      {"action": "return_home"}):
+            memory = self.memory()
+            memory["completed"] = [skill]
+            self.assertIn("执行器反馈", agent_prompt("往前移动20厘米", memory), skill["action"])
+        move = self.memory()
+        move["completed"] = [{"action": "move", "direction": "forward", "distance_m": 0.2}]
+        self.assertIn("输出done", agent_prompt("往前移动20厘米", move))  # a satisfied instruction must end with done
+        self.assertNotIn("执行器反馈", agent_prompt("往前移动20厘米", self.memory()))  # nothing finished yet: no feedback
+
     def test_reward_false_accept_is_overridden_and_returned_as_negative_feedback(self):
         from microduck_qwen import agent_data
         executed = []

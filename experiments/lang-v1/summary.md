@@ -327,3 +327,20 @@ Re-running just the two affected layouts with the fix (`scripts/eval_layouts.sh`
 98206 task 201 and 98300 task 201 both pass now; 98206 task 200 fails for an unrelated reason (the model emitted `stop` where `return_home`
 was expected). These are single runs of tasks chosen because they failed: they show the bug is gone, not a rate. The corrected code has
 not had a full 73-task evaluation.
+
+## Executor feedback after move/turn (the `move` then `unsupported` slip)
+
+Cause found in `agent_prompt`: approach, explore, return_home and bypass_return each end with an "executor feedback" line telling the model
+what was verified and what to do next; move and turn did not, so after a completed "move forward 20 cm" the model saw nothing saying the
+instruction was satisfied and sometimes wrote `unsupported`. Added a line for move/turn (output `done` when nothing else is left; use
+`unsupported` only if an unimplemented skill such as kicking remains). No retraining; the same adapter (lang-v2).
+
+* Replay canary (638 recorded states): `move->done` 41/48 -> 48/48; every other state class identical.
+* Simulator, task "move forward 20 cm" only, 32 layouts never used before (98400..98731), same adapter, flag off vs on:
+  26/32 -> 32/32, 6 tasks only with the feedback, 0 only without, McNemar p = 0.031, +19 points (95% bootstrap +6..+34).
+  All 6 failures without it were `move` then `unsupported`; none remain with it.
+
+Tried and rejected, same offline canary: a longer feedback after approach that spells out when to write `stop`, `return_home` or `done`.
+It fixed `approach->stop` (28 -> 34 of 34) but pushed 20 states that should go home to `stop` (`approach->return_home` 74 -> 54), net
+626 -> 608. A frozen LoRA adapter is not robust to a reworded prompt it never saw; the `stop`/`done` confusion needs training data, not
+prompt text. Code removed.

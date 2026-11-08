@@ -14,6 +14,8 @@ from .vision import MODEL, REVISION, capture, propose_targets, save_frame
 from .sim_data import digest
 
 
+MOVE_FEEDBACK = os.environ.get("MICRODUCK_MOVE_FEEDBACK", "1") != "0"  # executor feedback after move/turn (see agent_prompt)
+
 def checked_memory(memory):
     if set(memory) != {"home_recorded", "odometry_relative_home", "completed"} or type(memory["home_recorded"]) is not bool:
         raise ValueError("invalid observable memory")
@@ -39,6 +41,10 @@ def agent_prompt(instruction, memory):
         feedback = "\n执行器反馈：探索已成功找到目标颜色并停稳，目标在当前图像中。现在用approach的selector=nearest靠近，不要重复explore。"
     if memory["completed"] and memory["completed"][-1]["action"] in ("bypass_return", "return_home"):
         feedback = "\n执行器反馈：绕行与回家等已完成动作已经成功验收，机器人已停稳。仅处理指令剩余要求；没有剩余要求则done，禁止重复已完成的绕行或回家。"
+    if MOVE_FEEDBACK and memory["completed"] and memory["completed"][-1]["action"] in ("move", "turn"):
+        # Every other finished skill already tells the model what the executor verified; after move/turn the model saw
+        # nothing and sometimes wrote `unsupported` for a fully satisfied "move forward" instruction.
+        feedback = "\n执行器反馈：移动或转向已成功完成，机器人已停稳。指令的其余要求都已满足则输出done；只有指令里还有未实现的技能（如踢球）才用unsupported。"
     return ("MicroDuck仿真。根据图像、指令和本条指令已完成动作，输出下一步的单个JSON，不要解释。"
             '技能：{"action":"move","direction":"forward或backward","distance_m":0.2}；'
             '{"action":"turn","direction":"left或right","degrees":90}；'
