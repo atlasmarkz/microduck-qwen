@@ -281,6 +281,52 @@ class ReacquireTests(unittest.TestCase):
         self.assertIs(rebind_near([far, near], "blue", "ball", (2.0, 0.0)), near)
         self.assertIsNone(rebind_near([far], "blue", "ball", (2.0, 0.0)))  # the only blue ball is elsewhere
 
+    def reacquire_with(self, distance, found=True):
+        """Run SkillExecutor._reacquire on a stub body `distance` metres from the ball; returns (result, executed plans)."""
+        import types
+        from microduck_qwen import skills
+
+        walks, body = [], types.SimpleNamespace()
+        body.robot = types.SimpleNamespace(stop=lambda: None)
+        body.healthy = lambda: {"trunk": [0.0, 0.0, 0.0], "yaw": 0.0}
+        body.escape_cramped = lambda **kwargs: False
+        body._bounded = lambda action, trace: {"success": True}
+        body.observer, body.scene, body.cancel_file, body.info = None, {}, None, {"port": 0}
+        ball = self.ball(distance, 0.0)
+        with mock.patch.object(skills, "execute", lambda plan, *a, **k: walks.append(plan)), \
+                mock.patch.object(skills, "capture", lambda port: None), \
+                mock.patch.object(skills, "propose_targets", lambda frame: [ball] if found else []), \
+                mock.patch.object(skills.time, "sleep", lambda s: None):
+            try:
+                result = skills.SkillExecutor._reacquire(body, ball, {"color": "blue"}, Path(tempfile.gettempdir()) / "x.json", 1)
+            except RuntimeError as error:
+                result = str(error)
+        return result, walks
+
+    def test_a_ball_lost_far_away_is_approached_along_the_route_before_looking_again(self):
+        _, walks = self.reacquire_with(3.0)
+        (plan,) = walks
+        goal = plan["goals"][0]
+        self.assertEqual((goal["x"], goal["y"], goal["stop_distance_m"]), (3.0, 0.0, 0.6))
+
+    def test_internal_walking_plans_satisfy_the_navigation_contract(self):
+        """Two plans were once built with a stop distance the contract rejects (0.9, 1.4); the error was swallowed
+        and the walk silently never happened. Every plan the explorer and the re-acquisition build must validate."""
+        from microduck_qwen.contract import arena, validate
+        from microduck_qwen.explore import SUSPECT_STOP_M
+        from microduck_qwen.skills import FAR_REACQUIRE_STOP_M
+        for stop in (SUSPECT_STOP_M, FAR_REACQUIRE_STOP_M):
+            validate({"status": "ok", "goals": [{"target": "point", "x": 1.0, "y": 0.0, "speed": "slow", "stop_distance_m": stop}]}, arena())
+
+    def test_a_ball_lost_close_by_is_only_looked_for_again(self):
+        result, walks = self.reacquire_with(1.0)
+        self.assertEqual(walks, [])
+        self.assertEqual(result["world_position"][:2], [1.0, 0.0])
+
+    def test_a_ball_that_is_still_not_found_ends_the_approach(self):
+        result, _ = self.reacquire_with(3.0, found=False)
+        self.assertIn("not re-acquired", result)
+
     def test_rebinding_ignores_other_colours_unseen_balls_and_other_kinds(self):
         from microduck_qwen.skills import rebind_near
         candidates = [self.ball(2.0, 0.0, color="red"), self.ball(2.0, 0.1, visibility="hidden"),

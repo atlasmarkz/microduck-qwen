@@ -12,7 +12,10 @@ from .vision import capture, propose_targets, visibility_check, approachable, Vi
 
 APPROACH_ATTEMPTS = 3 if os.environ.get("MICRODUCK_RECOVERY", "1") != "0" else 1  # first try plus two recoveries (1 = ablation)
 REBIND_RADIUS_M = 0.5          # the same physical ball must reappear this close to where it was bound
-RECOVERABLE_STOPS = ("净空", "视觉保护停止")  # clearance stop / target lost; not cancel, fall or a stalled simulator
+FAR_REACQUIRE = os.environ.get("MICRODUCK_FAR_REACQUIRE", "1") != "0"  # 0 = always back off first (ablation)
+FAR_REACQUIRE_M = 1.8          # farther than this from where the ball was, walk toward it before looking again
+FAR_REACQUIRE_STOP_M = 0.6     # ... and stop this far from it (0.6 m is the contract's largest stop distance for a point goal)
+RECOVERABLE_STOPS =("净空", "视觉保护停止")  # clearance stop / target lost; not cancel, fall or a stalled simulator
 
 
 class NeedsUserInput(RuntimeError):
@@ -252,6 +255,20 @@ class SkillExecutor:
         """
         anchor, kind = selected["world_position"][:2], selected.get("kind", "ball")
         self.robot.stop()
+        if FAR_REACQUIRE and math.dist(self.healthy()["trunk"][:2], anchor) > FAR_REACQUIRE_M:
+            # A ball several metres away is lost behind a wall edge or a doorway frame, and from a step back it is still
+            # too small to detect. We know where it was, so close the distance on the planned route first and look from there.
+            plan = {"status": "ok", "goals": [{"target": "point", "x": anchor[0], "y": anchor[1], "speed": "slow",
+                                              "stop_distance_m": FAR_REACQUIRE_STOP_M}]}
+            try:
+                execute(plan, self.robot, self.observer, output.with_suffix(f".a{attempt}.far.jsonl"), timeout_s=30,
+                        scene=self.scene, cancel_file=self.cancel_file)
+            except (ValueError, RuntimeError, TimeoutError) as error:
+                if any(w in str(error) for w in ("cancelled", "fallen", "stale")):
+                    raise
+                # Not fatal (look from here), but never silent: a rejected plan once made this whole step a no-op unnoticed.
+                self.reacquire_notes = getattr(self, "reacquire_notes", []) + [f"far walk: {type(error).__name__}: {error}"]
+            self.robot.stop()
         self.escape_cramped(trigger=0.08, target=0.16)
         trace_file = output.with_suffix(f".a{attempt}.turn.jsonl")
         for look in range(2):
@@ -296,6 +313,7 @@ class SkillExecutor:
                     raise
                 recoveries.append(text)
                 selected = self._reacquire(selected, action, output, attempt + 1)
+                recoveries.extend(vars(self).pop("reacquire_notes", []))
 
     def _return_to_pose(self, home, output):
         self.escape_cramped()

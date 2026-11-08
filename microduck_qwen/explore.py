@@ -34,6 +34,7 @@ MAX_RECOVERIES = 2 if RECOVERY else 0  # "nothing reachable" re-observations per
 BUDGET_S = 300.0
 CHUNK = 3  # waypoints per navigation call (~1.5 m), then re-look
 SAME_BALL_M = 0.35
+SUSPECT_STOP_M = 0.6  # the contract caps a point goal's stop distance at 0.6 m; 0.9 here was rejected, so no suspect was ever walked to
 NAV_SLACK_M = 0.05  # the navigator's 5 cm lattice sits half a cell off the map's, which costs it up to this much width
 TIGHT_INFLATE_M = 0.26
 TIGHTEST_INFLATE_M = 0.22  # only when nothing else is reachable; the navigator then keeps just 3 cm of pad  # last resort when no frontier is reachable at the normal clearance (balls beside a doorway need it)
@@ -194,7 +195,7 @@ class Explorer:
         record = {"suspect": [round(x, 2), round(y, 2)]}
         self.iterations.append(record)
         try:
-            plan = {"status": "ok", "goals": [{"target": "point", "x": x, "y": y, "speed": "slow", "stop_distance_m": 0.9}]}
+            plan = {"status": "ok", "goals": [{"target": "point", "x": x, "y": y, "speed": "slow", "stop_distance_m": SUSPECT_STOP_M}]}
             execute(plan, self.executor.robot, self.executor.observer, self.output.with_suffix(f".suspect{len(self.checked)}.jsonl"),
                     timeout_s=40, scene=self.mapper.as_scene(), cancel_file=self.executor.cancel_file,
                     cancel_started_ns=self.executor.started_ns, observation_label="depth-built occupancy map; oracle pose")

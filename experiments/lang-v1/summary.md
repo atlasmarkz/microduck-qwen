@@ -344,3 +344,20 @@ Tried and rejected, same offline canary: a longer feedback after approach that s
 It fixed `approach->stop` (28 -> 34 of 34) but pushed 20 states that should go home to `stop` (`approach->return_home` 74 -> 54), net
 626 -> 608. A frozen LoRA adapter is not robust to a reworded prompt it never saw; the `stop`/`done` confusion needs training data, not
 prompt text. Code removed.
+
+## Correction: suspect walks never happened; and the far re-acquisition that depends on the same bound
+
+Found while checking why a new re-acquisition step did nothing: the navigation contract caps a point goal's stop distance at 0.6 m
+(`contract._number(..., 0.1, 0.6)`), but `Explorer.check_suspect` asked for 0.9 m and the new re-acquisition for 1.4 m. The plan was rejected,
+the `ValueError` was caught as "not reached", and nothing moved. Over every recorded run, **25 of 25 suspect walks failed on this bound**, so the
+"revisit partly seen balls of the target colour (ApexNav)" claimed earlier for `explore` was never actually executed; it only looked at the
+view it already had. Both distances are now 0.6 m (`SUSPECT_STOP_M`, `FAR_REACQUIRE_STOP_M`), a test builds every internal walking plan against the
+contract, and a failed far walk is recorded in the recovery list instead of being swallowed. Every number measured before this fix was produced
+without working suspect walks, including the settle step's fallback (an unconfirmed ball becomes a suspect, which was then not visited).
+
+Far re-acquisition (when the target is lost while farther than 1.8 m from where it was, walk along the planned route to 0.6 m of that
+spot before looking again, instead of backing off blind): A/B on the two layouts with the hardest approaches (98302, where a ball 3 m away
+slips behind a wall edge, and 98204), explore tasks only, two repeats per arm, flag off vs on, 12 task pairs:
+4/12 -> 8/12 correct; 4 tasks only with it, 0 only without, exact McNemar p = 0.125 (too few pairs to be significant). The walk started in 3 of the
+12 runs with it on, and the approach succeeded after it every time (one of the three is still scored wrong by the `stop`/`done` label slip).
+Read as: the mechanism works when it fires, the layouts are noisy, and the size of the effect on a full evaluation is still unmeasured.
