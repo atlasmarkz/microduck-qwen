@@ -368,3 +368,11 @@ Read as: the mechanism works when it fires, the layouts are noisy, and the size 
 - Fresh seeds are lower than the dev layouts (84-88%), so the dev numbers were optimistic.
 - Failure anatomy (v2): 4 `done` where `stop` expected, 4 explore budget used, 2 clarify misfires, 1 approach target not safely visible.
 - Merged dev-explore into main (retry cap per frontier, hardened ball relief, start-of-approach re-acquire); 172 tests pass. Not yet re-evaluated.
+
+## Merged execution fixes on the same fresh layouts (lang-v2, seeds 99000 / 99100, run `merged-v2`)
+
+Harden balls after a clearance stop, cap retries per frontier, re-acquire at the start of approach (commit ad26f71), against `cand-v2` on the same 74 valid tasks.
+
+* 61/74 vs 61/74; 4 tasks only with the fixes, 4 only without; McNemar p = 1.0; difference 0.0 (95% bootstrap -8.1..+8.1). **No measurable effect on the total.**
+* Failure mix is nearly unchanged: 4 `done` for `stop`, 4 explore budget used, 1 explore clearance stop, 1 wrong action type. One failing episode recorded no steps at all (`infra: reset`, a harness failure that is scored as a miss); `tools/failure_taxonomy.py` crashed on it and now reports it.
+* The fixes were built for specific failures (the 99005 explore loop, approach not safely visible at the start). Whether those particular tasks changed was not inspected here; the paired total says only that gains and losses cancel.

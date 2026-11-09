@@ -22,6 +22,8 @@ def done_for_stop(result):
         steps = json.loads(Path(result["episode"]).read_text(encoding="utf-8"))["steps"]
     except (OSError, KeyError, ValueError):
         return False
+    if not steps:
+        return False
     last = steps[-1]
     predicted = (last.get("prediction") or {}).get("action") or {}
     return ((last.get("expected") or {}).get("action") == "stop" and predicted.get("action") == "done"
@@ -52,6 +54,8 @@ def kind(result):
 
 def last_stage(result):
     steps = json.loads(Path(result["episode"]).read_text(encoding="utf-8"))["steps"]
+    if not steps:
+        return "?", "episode recorded no steps"
     last = steps[-1]
     execution = last.get("execution", {})
     action = (last["prediction"].get("action") or {}).get("action", "?")
