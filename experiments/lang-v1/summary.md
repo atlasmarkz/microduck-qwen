@@ -376,3 +376,40 @@ Harden balls after a clearance stop, cap retries per frontier, re-acquire at the
 * 61/74 vs 61/74; 4 tasks only with the fixes, 4 only without; McNemar p = 1.0; difference 0.0 (95% bootstrap -8.1..+8.1). **No measurable effect on the total.**
 * Failure mix is nearly unchanged: 4 `done` for `stop`, 4 explore budget used, 1 explore clearance stop, 1 wrong action type. One failing episode recorded no steps at all (`infra: reset`, a harness failure that is scored as a miss); `tools/failure_taxonomy.py` crashed on it and now reports it.
 * The fixes were built for specific failures (the 99005 explore loop, approach not safely visible at the start). Whether those particular tasks changed was not inspected here; the paired total says only that gains and losses cancel.
+
+## Action legality check (harness, no retraining; `MICRODUCK_LEGALITY=1`, default off)
+
+`microduck_qwen/legality.py` rejects a decoded skill that contradicts the skill contract in the current state, then lets the
+model choose again among legal types: every type is scored by the model's log-probability of the prefix `{"action":"<type>`,
+and the output is regenerated greedily with the best legal prefix forced. Rules come from `agent_prompt` and the state classes
+of the training data, not from task labels: no `done` before a verified skill; no `return_home` without a home; with a home,
+no `clarify` after a verified skill, and none at the start when the instruction names a target colour (every `clarify` row in
+the training data is a target-less instruction such as "去那边"); no repeat of the verified explore/approach of the same colour
+or of a return. Not rules: `stop` vs `done` (both legal terminals) and `unsupported` after move/turn (legitimate when an
+unimplemented skill remains).
+
+Rule check before any model run: 0 of the teacher labels in every dataset under `data/` and 0 of the 3908 recorded teacher
+labels in `runs/lang` are flagged. Of the 3908 recorded model decisions (all adapters), exactly 24 are flagged: 22 `clarify` at
+the start of an explore task and 2 unparseable outputs; the other recorded errors (63 `stop`/`done` swaps after approach,
+24 `unsupported` after move) are not contract violations and are untouched.
+
+Offline replay, `lang-v2`, all 3908 recorded states of `runs/lang` (one run with the check on; a legal decision passes through
+unchanged and every intervention keeps the original output, so the same run gives both arms; `tools/legality_report.py`):
+
+| replay set | off | on | only on | only off | interventions |
+|---|---|---|---|---|---|
+| canary dev set (6 runs, 638 states) | 626 | 629 | 3 | 0 | 3, all fixed |
+| fresh seeds 99000/99100 (cand-v2, cand-v4, merged-v2; 597 states) | 581 | 583 | 2 | 0 | 2, all fixed |
+| all of `runs/lang` | 3857 | 3863 | 6 | 0 | 8: 6 fixed, 2 still wrong |
+
+* The off arm reproduces the earlier canary exactly (626/638), so the replay is deterministic.
+* Every intervention is `start->explore` where `lang-v2` wrote `clarify`; the class goes 828/836 -> 834/836. No other class changes; nothing correct is broken.
+* The 2 still wrong are the same task (layout 98302, task 202, "please the blue ball is in another room, go next to it, then return to your initial position") replayed from two runs: the best legal type was `return_home` (-3.5 and -4.4) just ahead of `explore` (-4.4 and -4.8). The same task from a third run was fixed.
+* The prefix score ranks the model's own illegal choice first in 8/8 interventions, so the scoring is consistent with what greedy decoding produced.
+* Cost: 0 on legal decisions; an intervention takes 8-13 s (11 scoring passes plus one generation).
+* The 8 interventions come from 5 distinct layout/task pairs (98302/202 appears four times), so this is not 8 independent cases.
+
+Reading: a guard with no false positives on everything recorded, fixing the clarify misfire class offline. It addresses at most
+the 2 clarify misfires seen in the fresh-seed failures (of 13), so the expected end-to-end effect is about 1-3 tasks out of 74, inside run-to-run
+noise; not measured in the simulator. Not done: the obvious next rule ("`return_home` at the start, while the robot is still at home, is
+pointless") would fix the remaining 2, but it was found on these same states, so it needs states never used for the decision.

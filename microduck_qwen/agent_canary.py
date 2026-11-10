@@ -30,6 +30,7 @@ from collections import defaultdict
 import json
 from pathlib import Path
 
+from . import legality
 from .agent import AgentPlanner
 from .agent_data import load_splits
 from .sim_data import digest
@@ -107,9 +108,11 @@ def main():
     for row in rows:
         prediction = planner.predict(row["instruction"], row["image"], row["memory"])
         results.append({"id": row["id"], "state": state_class(row), "expected": row["expected"], "raw": prediction["raw"],
-                        "correct": decision_correct(prediction, row["expected"], bool(args.replay))})
+                        "correct": decision_correct(prediction, row["expected"], bool(args.replay)),
+                        **({"legality": prediction["legality"]} if "legality" in prediction else {})})
     classes = summarize(results)
     report = {"adapter": planner.adapter, **source, "correct": sum(r["correct"] for r in results), "total": len(results),
+              "legality_enabled": legality.ENABLED, "legality_interventions": sum("legality" in r for r in results),
               "classes": classes, "results": results}
     if args.baseline:
         base = json.loads(args.baseline.read_text(encoding="utf-8"))
@@ -117,7 +120,8 @@ def main():
         report["regressions"] = regressions(classes, base["classes"], args.min_drop)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    print(f"CANARY {args.adapter}: {report['correct']}/{report['total']}")
+    print(f"CANARY {args.adapter}: {report['correct']}/{report['total']}"
+          + (f" (legality on, {report['legality_interventions']} interventions)" if legality.ENABLED else ""))
     for key, (correct, total) in classes.items():
         print(f"  {key:28s} {correct}/{total}")
     for item in report.get("regressions", []):

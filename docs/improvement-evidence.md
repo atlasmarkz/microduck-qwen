@@ -30,6 +30,7 @@ Evidence levels used here:
 | 14 | lang-v4 data (English clarify) | weights | teacher | not adopted | canary plus fresh seeds 99000/99100 | canary English clarify 138/138; end-to-end 61/74 vs 60/74, p = 1.0 | none |
 | 15 | far re-acquisition | executor code | failure analysis | code | 12 task pairs on 2 layouts | 4/12 -> 8/12, p = 0.125 | none (too few pairs; mechanism works when it fires) |
 | 16 | harden balls, retry cap, start-of-approach re-acquire | executor code | failures on seeds 99000/99100 | code (merged, 172 tests pass) | paired re-run `merged-v2` running | not available yet | pending |
+| 17 | action legality check plus model-scored legal fallback | harness (decision filter) | prompt contract and training-data state classes | code, flag off by default | offline replay of 3908 recorded states, both arms from one run | `start->explore` 828/836 -> 834/836; 6 decisions only with it, 0 only without; 0 teacher labels flagged | none yet (offline only, 5 distinct layout/task pairs; simulator effect not measured) |
 
 Gaps this table exposes:
 * Only row 12 is a retained gain, and it covers one task type ("move forward 20 cm").

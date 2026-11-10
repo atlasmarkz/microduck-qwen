@@ -155,6 +155,46 @@ def generate_text(model, processor, image, prompt, max_new_tokens=110, temperatu
     return raw, time.perf_counter() - started
 
 
+def with_prefix(inputs, processor, text):
+    """Prompt inputs with `text` appended after the generation prompt, as if the model had already written it."""
+    import torch
+
+    tail = torch.tensor([processor.tokenizer.encode(text, add_special_tokens=False)])
+    out = dict(inputs)
+    out["input_ids"] = torch.cat((inputs["input_ids"], tail), dim=1)
+    out["attention_mask"] = torch.cat((inputs["attention_mask"], torch.ones_like(tail)), dim=1)
+    if "mm_token_type_ids" in inputs:
+        out["mm_token_type_ids"] = torch.cat((inputs["mm_token_type_ids"], torch.zeros_like(tail)), dim=1)
+    return out, tail.shape[1]
+
+
+def prefix_logprobs(model, processor, image, prompt, prefixes):
+    """{prefix: summed log-probability the model assigns to writing that prefix first}; one forward pass per prefix."""
+    import torch
+
+    base = encoded(processor, image, prompt)
+    scores = {}
+    for text in prefixes:
+        inputs, length = with_prefix(base, processor, text)
+        inputs = {key: value.to(model.device) for key, value in inputs.items()}
+        with torch.inference_mode():
+            logits = model(**inputs, use_cache=False, logits_to_keep=length + 1).logits[0, :-1]
+        targets = inputs["input_ids"][0, -length:]
+        scores[text] = torch.log_softmax(logits.float(), dim=-1).gather(1, targets[:, None]).sum().item()
+    return scores
+
+
+def generate_with_prefix(model, processor, image, prompt, text, max_new_tokens=110):
+    """Greedy continuation after a forced output prefix; returns the full raw output including the prefix."""
+    import torch
+
+    inputs, _ = with_prefix(encoded(processor, image, prompt), processor, text)
+    inputs = {key: value.to(model.device) for key, value in inputs.items()}
+    with torch.inference_mode():
+        output = model.generate(**inputs, max_new_tokens=max_new_tokens, do_sample=False, use_cache=True)
+    return text + processor.tokenizer.decode(output[0, inputs["input_ids"].shape[1]:], skip_special_tokens=True)
+
+
 class TorchAgentPlanner:
     """Windows counterpart of agent.AgentPlanner: one bounded skill JSON per observation."""
 
@@ -179,6 +219,19 @@ class TorchAgentPlanner:
             result["action"] = parse_action(raw)
         except (ValueError, TypeError, KeyError) as error:
             result["error"] = str(error)
+        from . import legality
+        if legality.ENABLED and not temperature:
+            def score(names):
+                values = prefix_logprobs(self.model, self.processor, image, prompt, [legality.prefix(n) for n in names])
+                return {name: values[legality.prefix(name)] for name in names}
+
+            def regenerate(name):
+                return generate_with_prefix(self.model, self.processor, image, prompt, legality.prefix(name))
+
+            started = time.perf_counter()
+            result = legality.enforce(result, instruction, memory, score, regenerate)
+            if "legality" in result:
+                result["legality"]["latency_s"] = time.perf_counter() - started
         return result
 
 
