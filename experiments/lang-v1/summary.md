@@ -431,3 +431,43 @@ in both run reports; `scripts/pipelines/eval-legality.sh`).
 Reading: the legality check is a zero-cost guard on these layouts (it adds latency only when it fires, and it did not), with an offline
 gain on recorded misfires and no measurable end-to-end effect. Keep it available behind the flag; whether to turn it on by default
 is a policy choice, not a result.
+
+## Simulator-truth outcome scorer (`python -m microduck_qwen.truth_score RUN ... [--b RUN ...] [--details]`)
+
+Scores each task by what physically happened, without the teacher's per-step labels: the robot's oracle pose before every decision,
+the true ball positions, the first frame's segmentation (for "leftmost"), and scene contacts. The task definition (`teacher_specs`) says
+only what is required (colour or leftmost ball, move, return). Success: the model ended the task itself with `done` or `stop`; the
+required ball was reached within the teacher's own resting bound (0.375 m); a required return ended within 0.175 m of home (return_home's
+0.10 m goal + 0.025 arrival + 0.05 coast) after the reach; a required move is within the executor's 0.05 m / 0.08 m lateral tolerance;
+no scene contact. Episodes the strict evaluation cut before the outcome was visible are reported separately: `cut_teacher` (the teacher
+could not label a later step), `cut_deviation` (a different non-terminal skill, after which the strict run stops) and `cut_infra`; the
+headline counts them as failures and an upper bound counts them as successes. Same valid-task filter as `compare_runs`.
+
+Validation on every run with a report in `runs/lang` (1588 valid tasks, 25 run groups):
+* **0 of the 1263 strict passes fail the truth check**, so the scorer agrees with the existing physical verification wherever the
+  teacher agreed.
+* 69 strict failures are truth successes, every one a terminal label swap with the robot where it should be (49 ended with `done`,
+  20 with `stop`). The rescored totals are 1332 vs 1263.
+* No paired conclusion changes:
+
+| comparison | strict | truth |
+|---|---|---|
+| cand-v2 vs cand-v4 (fresh seeds) | 61 vs 60, p = 1.0 | 66 vs 65, p = 1.0 |
+| cand-v2 vs merged-v2 | 61 vs 61, p = 1.0 | 66 vs 66, p = 1.0 |
+| merged-v2 vs legal-v2 | 61 vs 62, p = 1.0 | 66 vs 68, p = 0.73 (5 vs 3 discordant; the check never fired) |
+| move feedback off vs on (32 layouts) | 26 vs 32, p = 0.031 | 26 vs 32, p = 0.031 |
+| new vs fix | 52 vs 52, p = 1.0 | 54 vs 56, p = 0.79 |
+| base vs eff | 42 vs 69, p < 0.001, +34 points | 52 vs 70, p = 0.001, +22.5 points |
+
+Readings:
+* The largest historical gain survives but is a third smaller: part of base -> eff was the model learning the teacher's `stop`/`done`
+  convention, not better physical outcomes.
+* On the fresh seeds the model's remaining failures are execution, not decisions. In merged-v2 all 7 truth failures had the expected
+  skill chosen (5 explore budget or clearance stops, 1 approach target not bound, 1 safety stop after explore); legal-v2's 4 are
+  explore budget. Layout 99104 fails all three explore tasks in both runs.
+* `merged-v2` and `legal-v2` ran the same decision path, so their 8 truth flips are an A/A noise estimate (8 of 74 = 11%).
+* Two `legal-v2` tasks are `cut_teacher`: explore found the ball, then the teacher could not label the approach ("no confidently visible
+  blue ball"), and the strict score counted the labeller's refusal as a model failure.
+* Not covered: what a deviating model would have done after the strict run stopped it (`cut_deviation`; none in these runs, the
+  clarify misfires end in `clarify`, which is a truth failure). Measuring that needs a free-running evaluation mode that keeps executing
+  the model's own actions after a deviation.

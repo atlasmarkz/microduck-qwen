@@ -63,5 +63,7 @@ simulator-only and single robot. Not yet checked: prior work on skill-level outc
    | merged-v2 | 61/74 (82.4%) | 65/74 (87.8%) |
 
    The gaps between runs are unchanged by the rescoring. The equivalence is still defined by the same rule teacher's expectation,
-   so it does not remove the teacher dependence; the independent simulator-truth success scorer is still to be built.
+   so it does not remove the teacher dependence. The independent simulator-truth scorer is now built
+   (`microduck_qwen/truth_score.py`): 0 of 1263 strict passes fail it; merged-v2 66/74, cand-v2 66/74, cand-v4 65/74; no paired
+   conclusion changes (details in `experiments/lang-v1/summary.md`). It still stops where the strict run stops a deviating episode.
 3. Still open in P0: layout-seed registry and three-way split, noise-floor repeats, HITCH row in `docs/related-work.md`, lang-v4 canary table.
