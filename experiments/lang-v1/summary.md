@@ -471,3 +471,39 @@ Readings:
 * Not covered: what a deviating model would have done after the strict run stopped it (`cut_deviation`; none in these runs, the
   clarify misfires end in `clarify`, which is a truth failure). Measuring that needs a free-running evaluation mode that keeps executing
   the model's own actions after a deviation.
+
+## Perceived-map escape for the explore stuck loop (`MICRODUCK_MAP_ESCAPE=1`, run `mapesc-v2`)
+
+Cause: the navigator's guard checks clearance against the perceived map (5 cm cells, so a door jamb is drawn about 10 cm too close)
+and stops below 0.015 m, while `escape_cramped` measured the true scene and only acted below 0.05 m. At the recorded stuck points the
+true clearance was 0.09-0.11 m and the perceived one 0.015-0.016 m, so the robot never backed away and every later walk failed at
+the guard from the same spot. Fix (flag, off by default): after a failed walk and before each explore step or recovery, also run
+`escape_cramped` against the perceived map; it stops early if backing away would bring the true clearance under the guard threshold.
+Two new unit tests cover the perceived-only obstacle and the real obstacle behind the robot.
+
+Paired evaluation, fresh seeds 99000/99100, same code, adapter and seeds as `merged-v2` / `legal-v2`; only the flag differs.
+
+| comparison (74 tasks) | strict | truth |
+|---|---|---|
+| merged-v2 vs mapesc-v2 | 61 vs 67, 3 vs 9 discordant, p = 0.15 | 66 vs 71, 3 vs 8 discordant, p = 0.23 (95% -0.01..+0.16) |
+| legal-v2 vs mapesc-v2 | 62 vs 67, 2 vs 7, p = 0.18 | 68 vs 71, 2 vs 5, p = 0.45 |
+
+Mechanism, over the 44 explore calls of each run:
+
+| run | explore found the ball | stuck (>= 3 failed walks in a row from one spot) | map escape fired |
+|---|---|---|---|
+| merged-v2 | 39/44 | 4 (0 found) | - |
+| legal-v2 | 41/45 | 5 (1 found) | - |
+| mapesc-v2 | 43/44 | 0 | 4 calls, all 4 found the ball |
+
+Attribution of the flips:
+* The escape fired in 99005 tasks 201/202 and 99104 tasks 200/202, and all four are truth successes. 99104 failed all three explore
+  tasks in both earlier runs (0/6) and now passes all three (task 201 without the escape firing, so a different route). 99005 tasks
+  201/202 had already passed in `legal-v2` without the escape, so those two flips are not attributable to it.
+* None of the three losses touched the escape: 99005/200 and 99006/202 are true-scene clearance safety stops in explore (the error
+  that also hit 99103/201 in `merged-v2`), 99007/201 is a model `clarify`.
+
+Reading: the stuck pattern is gone (4-5 calls -> 0) and the one layout that failed every explore task in both earlier runs now passes,
+but the overall gain is not significant, it is the size of the A/A noise (8 truth flips between `merged-v2` and `legal-v2`), and the
+fix was diagnosed from failures on these same seeds (layouts 99104 and 99005). It is a dev-task mechanism result, not a retained gain.
+Confirming it needs layouts never used for any decision. Remaining truth failures: 2 explore safety stops (true clearance), 1 clarify.

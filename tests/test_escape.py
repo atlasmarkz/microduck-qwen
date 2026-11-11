@@ -49,5 +49,23 @@ class EscapeTests(unittest.TestCase):
         self.assertEqual((body.x, body.y), (1.0, 0.0))
 
 
+    def test_escapes_an_obstacle_that_exists_only_in_the_perceived_map(self):
+        # True scene: the nearest real obstacle is far. Perceived map: a cell 0.18 m away (clearance ~0.015).
+        body = FakeBody(0.0, 0.0, 0.0)
+        e = executor(body, {"x": 2.0, "y": 0.0, "radius": 0.1})
+        perceived = {"bounds": [-3, 3, -3, 3], "obstacles": [{"x": 0.18, "y": 0.0, "radius": 0.025}], "objects": {}}
+        self.assertFalse(e.escape_cramped())  # the true scene alone sees no reason to move
+        self.assertTrue(e.escape_cramped(scene=perceived))
+        self.assertGreaterEqual(math.hypot(body.x - 0.18, body.y) - 0.025 - 0.14, 0.10 - 0.02)
+
+    def test_a_perceived_escape_never_backs_into_a_real_obstacle(self):
+        # Perceived cell just ahead, real pillar just behind: backing away from the cell must stop at the guard.
+        body = FakeBody(0.0, 0.0, 0.0)
+        e = executor(body, {"x": -0.30, "y": 0.0, "radius": 0.1})
+        perceived = {"bounds": [-3, 3, -3, 3], "obstacles": [{"x": 0.18, "y": 0.0, "radius": 0.025}], "objects": {}}
+        e.escape_cramped(scene=perceived, timeout_s=3.0)
+        self.assertGreater(math.hypot(body.x + 0.30, body.y) - 0.1 - 0.14, 0.0)
+
+
 if __name__ == "__main__":
     unittest.main()

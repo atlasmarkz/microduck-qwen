@@ -48,6 +48,12 @@ NARROW_INFLATE_M = 0.20
 NARROW_PAD_M = 0.01
 
 
+# The navigator's guard measures clearance on the perceived map, the default escape on the true scene. When a map cell
+# sits within the guard of the robot while the true clearance is fine, every walk stops on its first in-place turn and
+# the escape never moves: one evaluated layout spent 8 of its 12 iterations so (99104). MICRODUCK_MAP_ESCAPE=1 also
+# backs away from the perceived map before each plan and after each failed walk.
+MAP_ESCAPE = os.environ.get("MICRODUCK_MAP_ESCAPE", "0") != "0"
+
 FRONTIER_TRIES = 2  # a frontier that failed this many walks is never chosen again, however far the tiers are relaxed
 
 
@@ -216,6 +222,16 @@ class Explorer:
         self.executor.robot.stop()
         return self.scan(color)
 
+    def unpin(self, record=None):
+        """Back away from the true scene and, with MAP_ESCAPE, from the perceived map the navigator guards against."""
+        self.executor.escape_cramped()
+        if MAP_ESCAPE:
+            moved = self.executor.escape_cramped(scene=self.mapper.as_scene())
+            if moved and record is not None:
+                record["map_escape"] = True
+            return moved
+        return False
+
     def _walk(self, path, inflate, index, record, tag=""):
         """Walk a planned path in chunks, re-looking after each; records the outcome in `record`."""
         try:
@@ -242,11 +258,11 @@ class Explorer:
                           chunk=[[round(float(x), 2), round(float(y), 2)] for x, y in chunk])
         self.executor.robot.stop()
         if not record.get("reached", True):
-            self.executor.escape_cramped()
+            self.unpin(record)
 
     def step(self, index):
         """Walk to the nearest reachable frontier. Returns the record, or None if none is left."""
-        self.executor.escape_cramped()
+        self.unpin()
         position = self.executor.healthy()["trunk"][:2]
         # Normal clearance first; then forget past failures; then accept tighter clearance.
         exhausted = [key for key, count in self.failed_walks.items() if count >= FRONTIER_TRIES]
@@ -271,7 +287,7 @@ class Explorer:
 
         Returns False when there is nowhere better to stand (the failure is then final).
         """
-        self.executor.escape_cramped()
+        self.unpin()
         position = self.executor.healthy()["trunk"][:2]
         for inflate in (INFLATE_M, TIGHT_INFLATE_M):
             targets = self.mapper.vantage_targets(position, inflate)

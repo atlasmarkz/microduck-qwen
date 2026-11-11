@@ -74,7 +74,7 @@ def main():
     output.mkdir(parents=True, exist_ok=False)
     planner = AgentPlanner(args.adapter)
     report = {"mode": "independent_actor_rollout" if args.rollout else "offline_action_exact_match",
-              "adapter": planner.adapter, "split": args.split, "phrase_variant": args.phrase_variant, "recovery": os.environ.get("MICRODUCK_RECOVERY", "1") != "0", "legality": os.environ.get("MICRODUCK_LEGALITY", "0") != "0", "dataset_manifest_sha256": digest(args.data / "manifest.json"),
+              "adapter": planner.adapter, "split": args.split, "phrase_variant": args.phrase_variant, "recovery": os.environ.get("MICRODUCK_RECOVERY", "1") != "0", "legality": os.environ.get("MICRODUCK_LEGALITY", "0") != "0", "map_escape": os.environ.get("MICRODUCK_MAP_ESCAPE", "0") != "0", "dataset_manifest_sha256": digest(args.data / "manifest.json"),
               "results": [], "correct": 0, "total": 0,
               "note": "Development pilot. Rollout teacher is scorer AFTER execution, never a semantic intervention."}
     def save():

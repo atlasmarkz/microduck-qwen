@@ -11,6 +11,7 @@ from .vision import capture, propose_targets, visibility_check, approachable, Vi
 
 
 APPROACH_ATTEMPTS = 3 if os.environ.get("MICRODUCK_RECOVERY", "1") != "0" else 1  # first try plus two recoveries (1 = ablation)
+GUARD_CLEARANCE_M = 0.015      # navigation.execute stops below this clearance
 REBIND_RADIUS_M = 0.5          # the same physical ball must reappear this close to where it was bound
 FAR_REACQUIRE = os.environ.get("MICRODUCK_FAR_REACQUIRE", "1") != "0"  # 0 = always back off first (ablation)
 FAR_REACQUIRE_M = 1.8          # farther than this from where the ball was, walk toward it before looking again
@@ -214,11 +215,16 @@ class SkillExecutor:
                 self.robot.move(0.30 if signed > 0 else -self.backward_command, correction)
             time.sleep(0.08)
 
-    def escape_cramped(self, trigger=0.05, target=0.10, timeout_s=10.0):
+    def escape_cramped(self, trigger=0.05, target=0.10, timeout_s=10.0, scene=None):
         """Back away from an obstacle the body is pressed against, so navigation can start again.
 
         Turn to face away from the nearest obstacle, then walk until the clearance recovers.
         Uses the known safety map like the other safety checks; returns whether it moved.
+
+        `scene` escapes from a different obstacle set, e.g. the explore skill's perceived depth map, whose 5 cm cells
+        can draw a door jamb ~10 cm closer than it is: the navigator's guard then stops every walk on its first turn
+        while the true clearance is fine and the default escape sees nothing to back away from. Escaping a perceived
+        obstacle never brings the body closer to a real one than the navigator's guard allows.
         """
         if self.cancel_file is not None and self.cancel_file.exists() and int(self.cancel_file.read_text()) > self.started_ns:
             raise RuntimeError("cancelled by stop command")
@@ -228,9 +234,11 @@ class SkillExecutor:
             if state["trunk_z"] < 0.085 or state["imu"]["gravity"][2] > -0.65:
                 raise RuntimeError("fallen or unstable; stopped")
             position = state["trunk"][:2]
-            near = nearest_obstacle(position, self.scene)
+            near = nearest_obstacle(position, self.scene if scene is None else scene)
             margin = near[2] if near else 100.0
             if margin >= (target if moved else trigger):
+                break
+            if scene is not None and moved and clearance(position, self.scene) < GUARD_CLEARANCE_M:
                 break
             moved = True
             away = math.atan2(position[1] - near[1], position[0] - near[0])
