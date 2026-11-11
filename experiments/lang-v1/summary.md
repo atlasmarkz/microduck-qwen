@@ -413,3 +413,21 @@ Reading: a guard with no false positives on everything recorded, fixing the clar
 the 2 clarify misfires seen in the fresh-seed failures (of 13), so the expected end-to-end effect is about 1-3 tasks out of 74, inside run-to-run
 noise; not measured in the simulator. Not done: the obvious next rule ("`return_home` at the start, while the robot is still at home, is
 pointless") would fix the remaining 2, but it was found on these same states, so it needs states never used for the decision.
+
+### Legality check in the simulator (fresh seeds 99000 / 99100, run `legal-v2`, paired with `merged-v2`)
+
+Same adapter (lang-v2), executor code and layouts as `merged-v2`; only `MICRODUCK_LEGALITY=1` differs (recorded as `"legality": true`
+in both run reports; `scripts/pipelines/eval-legality.sh`).
+
+* 61/74 vs 62/74; 3 tasks only without, 4 only with; McNemar p = 1.0; difference +1.4 points (95% -5.4..+8.1).
+* **The check never fired**: 0 interventions in all 74 episodes. lang-v2 made no illegal decision on these layouts, so both arms
+  ran the same decision path and the 7 flips are run-to-run noise (physical execution: 2 "no confidently visible ball to approach",
+  4 failed physical skill or wrong action after execution, 1 task-start restore failure). The +1 says nothing about the check.
+* Useful by-product: an A/A repeat on the same 74 tasks, 7 flips (9.5%), consistent with the ~10 of 73 seen earlier. One identical
+  repeat cannot separate a 1-3 task effect.
+* The offline replay had found the check's 2 fresh-seed interventions in `cand-v2-99000`, made by the same adapter on the same
+  layouts; in this run those states did not recur (the explore start frames differ between runs).
+
+Reading: the legality check is a zero-cost guard on these layouts (it adds latency only when it fires, and it did not), with an offline
+gain on recorded misfires and no measurable end-to-end effect. Keep it available behind the flag; whether to turn it on by default
+is a policy choice, not a result.
