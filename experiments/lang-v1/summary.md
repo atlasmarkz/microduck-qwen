@@ -507,3 +507,22 @@ Reading: the stuck pattern is gone (4-5 calls -> 0) and the one layout that fail
 but the overall gain is not significant, it is the size of the A/A noise (8 truth flips between `merged-v2` and `legal-v2`), and the
 fix was diagnosed from failures on these same seeds (layouts 99104 and 99005). It is a dev-task mechanism result, not a retained gain.
 Confirming it needs layouts never used for any decision. Remaining truth failures: 2 explore safety stops (true clearance), 1 clarify.
+
+### Confirmation on never-used layouts (seeds 99200/99300, runs `mapoff-v2` / `mapesc-v2`)
+
+Both arms run in one pipeline (`scripts/pipelines/eval-map-escape-new.sh`), interleaved per seed group; the flag is the only
+difference. lang-v2 training data stops at seed 97202 and no earlier evaluation used these seeds. 80 valid tasks.
+
+| | strict | truth | explore found | stuck explore calls | map escape fired |
+|---|---|---|---|---|---|
+| off (`mapoff-v2`) | 72/80 | 74/80 (cuts 3) | 45/46 | 0 | - |
+| on (`mapesc-v2`) | 72/80 | 74/80 (cuts 2) | 45/45 | 0 | 0 |
+| paired | 3 vs 3 discordant, p = 1.0 | 2 vs 2, p = 1.0 (95% -0.05..+0.05) | | | |
+
+Reading: **not confirmed, and not testable on these layouts**. The stuck loop never occurred in either arm (0 of 91 explore calls),
+so the escape never fired and the two arms ran the same path; the 4 truth flips are noise (e.g. 99206/201 and 99207/202 swap a
+true-clearance safety stop between arms, neither near an escape). The condition it fixes is layout-specific: 4-5 of 44 explore calls
+on 99000/99100, concentrated on two layouts, and 0 of 91 on 16 new layouts. It also cost nothing here (74 vs 74). Keeping it behind
+the flag; a retained-gain claim needs layouts where the stuck point exists, e.g. a larger sample of new seeds.
+Remaining truth failures on the new seeds, both arms: English "please the green ball is in another room" ends with `clarify` (2 per
+arm), true-clearance safety stops (1 per arm), and the teacher refuses to label approach after explore found a green ball (2-3 cuts).
