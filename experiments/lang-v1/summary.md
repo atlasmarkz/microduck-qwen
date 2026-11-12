@@ -526,3 +526,41 @@ on 99000/99100, concentrated on two layouts, and 0 of 91 on 16 new layouts. It a
 the flag; a retained-gain claim needs layouts where the stuck point exists, e.g. a larger sample of new seeds.
 Remaining truth failures on the new seeds, both arms: English "please the green ball is in another room" ends with `clarify` (2 per
 arm), true-clearance safety stops (1 per arm), and the teacher refuses to label approach after explore found a green ball (2-3 cuts).
+
+## Frozen base with the same harness (run `frozen`, seeds 99200/99300)
+
+Question: how much of the success comes from the LoRA adapter, with the harness held fixed? `agent_eval` without `--adapter`
+(frozen Qwen3-VL-4B-Instruct), same arguments, prompt, validator and executor as `mapoff-v2`; map escape and legality off in both.
+Pipeline `scripts/pipelines/eval-frozen-base.sh`. Same 80 tasks on the same 16 never-used layouts. This measures the adapter, not
+the harness: a harness ablation would need a primitive-only action set (no `explore`/`approach` executor).
+
+| | strict | truth | truth outcomes |
+|---|---|---|---|
+| frozen base | 19/80 | 27/80 | 27 success, 49 cut at a deviation, 4 fail |
+| lang-v2 LoRA (`mapoff-v2`) | 72/80 | 74/80 | 74 success, 3 teacher cut, 3 fail |
+| paired | 3 vs 56 discordant, p < 1e-12, +66 pp (95% +54..+78) | 3 vs 50, p < 1e-12, +59 pp (95% +46..+71) | |
+
+By family (strict): explore 18/48 vs 40/48, task 3 1/16 vs 16/16, task 4 0/16 vs 16/16. Output format is never the problem
+(`format_ok` holds in all 80 frozen tasks; the JSON contract in the prompt is enough).
+
+Where the frozen base fails (first wrong step, 61 failures):
+
+| previous skill | expected | frozen output | tasks |
+|---|---|---|---|
+| `return_home` | `done` | `explore` again | 17 |
+| `move`/`turn` | `done` | the same `move` again | 16 |
+| `return_home` | `done` | `approach` again | 14 |
+| `approach` | `done` | `stop` | 6 |
+| (first step) | `explore` | `approach` a ball not in view | 2 |
+| other (`stop` vs `done`, target, physical) | | | 6 |
+
+53 of the 61 failures are the same thing: every earlier skill was the right one and executed successfully, and the model does not
+end the task. It ignores the explicit executor feedback line ("移动或转向已成功完成……其余要求都已满足则输出done", row 12 of
+`docs/improvement-evidence.md`) and repeats the last part of the plan. LoRA has 0 such failures.
+
+Reading: with the harness fixed, the adapter adds +59 pp truth on never-used layouts. Almost all of it is one learned behaviour,
+recognising that the instruction is finished and emitting `done`; skill choice and target binding are already right in the frozen
+model in all but about 8 tasks. If termination were handled (counting the 53 as passes) the frozen base would be about 72/80, the
+same as LoRA, but that is a counterfactual: the truth scorer cannot see what the repeated skill would have done to the outcome, so it
+is not a measured number. The cheap test is a frozen-base re-run with a stronger termination cue or a rule-based stop, which would
+say whether this gap needs training at all.
