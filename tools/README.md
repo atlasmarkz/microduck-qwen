@@ -8,4 +8,5 @@ Diagnostics, not part of the package. Run from the repository root (`pip install
 | `render_eval_map.py TASK_DIR SCENE_JSON OUT.png` | draws the depth-built map, frontiers and the true walls/balls of one evaluated task |
 | `diag_explore.py SEED OUTDIR` | reproduces `explore` per hidden colour in one layout and dumps the map and true scene |
 | `legality_report.py CANARY.json [--subset RUN ...]` | off/on comparison of the action-legality check from one replay canary run made with `MICRODUCK_LEGALITY=1` |
+| `render_figure.sh [HTML] [PNG] [HEIGHT]` | renders an HTML figure (default `assets/paper/architecture_overview.html`) to a 2x PNG with headless Edge |
 | `diag_pos.py`, `diag_stop.py`, `render_map.py` | earlier one-off diagnostics for stop positions and `diag_explore` output |

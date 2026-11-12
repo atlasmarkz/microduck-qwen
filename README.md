@@ -29,8 +29,10 @@
 ## 架构
 
 <p align="center">
-  <img src="assets/architecture.png" alt="系统架构" width="100%">
+  <img src="assets/architecture-overview.png" alt="系统架构：在线闭环（观察→构造提示→VLM 决策→规则守卫→几何执行→仿真执行）与离线改进和发布门槛" width="100%">
 </p>
+
+上半部分是在线闭环：每执行完一个技能，就把新的画面、位姿和技能状态写回记忆与执行器反馈，再让模型选下一个技能，每条指令最多 5 步，由模型自己用 `done` 或 `stop` 结束。下半部分是离线改进：改动可以是 LoRA 权重，也可以是 harness 代码，都要先过回放金丝雀、仿真真值评分和留出布局上的成对检验，才会被采用。虚线框是默认关闭的可选模块。图的源文件是 [assets/paper/architecture_overview.html](assets/paper/architecture_overview.html)，用 `bash tools/render_figure.sh` 重新生成；论文用的矢量版（TikZ）在 [assets/paper/architecture_acl.tex](assets/paper/architecture_acl.tex)。
 
 - 模型：`Qwen/Qwen3-VL-4B-Instruct` + LoRA，每步只输出一个技能：`move` · `turn` · `approach` · `search` · `explore` · `return_home` · `stop` · `done` · `clarify` · `unsupported` · `bypass_return`。
 - 执行：深度图建图 + 前沿探索 + A* 路径，净空过小时护栏停车；官方 ONNX 步态跑在 MuJoCo 里。

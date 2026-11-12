@@ -1,0 +1,292 @@
+<!doctype html>
+<!-- Overview figure (infographic style) for the README and slides.
+     Render: bash tools/render_figure.sh   ->   assets/architecture-overview.png (3200 px wide)
+     Facts shown here are the ones recorded in docs/improvement-evidence.md and experiments/lang-v1/summary.md. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>MicroDuck Agent overview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&family=JetBrains+Mono:wght@500;700&display=block" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1f2933; --muted: #52606d;
+    --o1: #e8603c; --o2: #f59e5b; --oBg: #fff4ee; --oLine: #f3b49c;
+    --b1: #2f6fd1; --b2: #5ba3f2; --bBg: #eef5ff; --bLine: #9cc0ef;
+    --learn: #3b6fc4; --rule: #6b7280; --geo: #2f8a4c; --sim: #c27613; --eval: #7b55b5;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: #ffffff; }
+  body { width: 1600px; font-family: "Nunito", "Segoe UI", sans-serif; color: var(--ink); }
+  .fig { padding: 18px 20px 16px; display: flex; flex-direction: column; gap: 0; }
+  .emoji { font-family: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif; font-weight: 400; }
+
+  /* ---------- band ---------- */
+  .band { border-radius: 22px; padding: 14px 16px 14px; position: relative; }
+  .band.online { background: var(--oBg); border: 2.5px solid var(--oLine); }
+  .band.offline { background: var(--bBg); border: 2.5px solid var(--bLine); }
+  .ribbon { display: flex; align-items: center; gap: 14px; margin-bottom: 12px; }
+  .ribbon .title { border-radius: 14px; padding: 7px 20px 7px 12px; color: #fff; display: flex; align-items: center; gap: 12px;
+                   box-shadow: 0 3px 0 rgba(0,0,0,.12); }
+  .online .ribbon .title { background: linear-gradient(90deg, var(--o1), var(--o2)); }
+  .offline .ribbon .title { background: linear-gradient(90deg, var(--b1), var(--b2)); }
+  .ribbon .logo { width: 44px; height: 44px; border-radius: 12px; background: rgba(255,255,255,.95); display: grid; place-items: center; font-size: 28px; }
+  .ribbon h1 { font-size: 27px; font-weight: 900; letter-spacing: .2px; line-height: 1.05; }
+  .ribbon h1 small { display: block; font-size: 14.5px; font-weight: 700; opacity: .95; letter-spacing: 0; margin-top: 2px; }
+  .goal { margin-left: auto; display: flex; align-items: center; gap: 10px; background: #fff; border-radius: 14px; padding: 8px 14px;
+          font-size: 14.5px; font-weight: 700; max-width: 430px; line-height: 1.25; }
+  .online .goal { border: 2px solid var(--oLine); }
+  .offline .goal { border: 2px solid var(--bLine); }
+  .goal .emoji { font-size: 26px; }
+  .goal b { color: var(--o1); } .offline .goal b { color: var(--b1); }
+
+  /* ---------- stage cards ---------- */
+  .row { display: flex; align-items: stretch; gap: 0; }
+  .card { background: #fff; border-radius: 16px; border: 2.2px solid var(--c); display: flex; flex-direction: column; overflow: hidden;
+          box-shadow: 0 2px 0 rgba(0,0,0,.06); }
+  .card .head { background: var(--c); color: #fff; padding: 6px 10px; white-space: nowrap; display: flex; align-items: center; gap: 8px; font-weight: 900; font-size: 16.5px; }
+  .card .head .num { width: 24px; height: 24px; border-radius: 50%; background: #fff; color: var(--c); display: grid; place-items: center; font-size: 14px; flex: none; }
+  .card .head .kind { margin-left: auto; font-size: 11.5px; font-weight: 800; background: rgba(255,255,255,.25); border-radius: 8px; padding: 2px 7px; }
+  .card .body { padding: 9px 10px 10px; display: flex; flex-direction: column; gap: 7px; flex: 1; }
+  .item { display: flex; gap: 8px; align-items: flex-start; font-size: 13.4px; line-height: 1.25; font-weight: 600; color: var(--muted); }
+  .item .emoji { font-size: 20px; line-height: 1; flex: none; width: 24px; text-align: center; }
+  .item b { color: var(--ink); font-weight: 800; display: block; font-size: 13.8px; }
+  .item.opt { border: 1.8px dashed #9aa5b1; border-radius: 10px; padding: 5px 6px; }
+  .tag { display: inline-block; font-size: 10.5px; font-weight: 800; border-radius: 6px; padding: 0 5px; margin-left: 3px; vertical-align: 1px;
+         background: #eef0f3; color: #52606d; }
+  .arrow { width: 30px; flex: none; display: grid; place-items: center; }
+  .arrow svg { width: 26px; height: 26px; }
+  .pill-set { display: flex; flex-wrap: wrap; gap: 4px; }
+  .pill { font-family: "JetBrains Mono", monospace; font-size: 11px; font-weight: 700; padding: 1px 6px; border-radius: 7px; background: #e5eefb; color: #2b4f8f; }
+  .code { font-family: "JetBrains Mono", monospace; font-size: 12px; font-weight: 500; background: #1f2937; color: #e5e7eb; border-radius: 10px;
+          padding: 7px 9px; line-height: 1.35; }
+  .code .k { color: #93c5fd; } .code .s { color: #fcd34d; }
+  .mini { display: flex; justify-content: center; }
+  .split { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+
+  /* ---------- loop bars and connectors ---------- */
+  .loopbar { margin-top: 11px; border: 2.2px dashed var(--o1); border-radius: 14px; background: #fff; padding: 7px 14px; display: flex;
+             align-items: center; gap: 12px; font-size: 14.5px; font-weight: 700; }
+  .offline .loopbar { border-color: var(--b1); }
+  .loopbar .emoji { font-size: 22px; }
+  .loopbar b { color: var(--o1); } .offline .loopbar b { color: var(--b1); }
+  .connect { display: flex; justify-content: center; gap: 70px; padding: 6px 0; font-size: 14.5px; font-weight: 800; }
+  .connect span { display: flex; align-items: center; gap: 6px; background: #fff; border: 2px solid #cbd2d9; border-radius: 12px; padding: 3px 12px; }
+  .connect .up { color: var(--learn); border-color: #a9c3ea; }
+  .connect .down { color: var(--o1); border-color: var(--oLine); }
+
+  .verdicts { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .verdict { border-radius: 10px; padding: 5px 7px; font-size: 12px; font-weight: 700; line-height: 1.25; color: var(--muted); }
+  .verdict b { display: block; font-size: 13px; font-weight: 900; }
+  .verdict.keep { background: #e7f6ec; border: 1.8px solid #8fd1a5; } .verdict.keep b { color: #1f7a3e; }
+  .verdict.drop { background: #fdeceb; border: 1.8px solid #f1a9a3; } .verdict.drop b { color: #b4352b; }
+
+  .legend { display: flex; gap: 18px; justify-content: center; margin-top: 10px; font-size: 13px; font-weight: 700; color: var(--muted); }
+  .legend span { display: flex; align-items: center; gap: 6px; }
+  .legend i { width: 16px; height: 16px; border-radius: 5px; display: inline-block; }
+</style>
+</head>
+<body>
+<div class="fig">
+
+<!-- =================================================================== ONLINE -->
+<section class="band online">
+  <div class="ribbon">
+    <div class="title"><div class="logo emoji">🦆</div>
+      <h1>MicroDuck Agent: Online Closed Loop<small>A small VLM picks one skill per step; a geometric harness executes and reports back</small></h1></div>
+    <div class="goal"><span class="emoji">🎯</span><div><b>Goal:</b> follow a free-form instruction in an unseen multi-room world, on one 8&nbsp;GB GPU</div></div>
+  </div>
+
+  <div class="row">
+    <!-- 1 observe -->
+    <div class="card" style="--c:#8a6bd1; width:210px">
+      <div class="head"><span class="num">1</span>Observe<span class="kind">input</span></div>
+      <div class="body">
+        <div class="item"><span class="emoji">💬</span><div><b>Instruction</b>“Find the blue ball in another room, walk to it, then come back.”</div></div>
+        <div class="item"><span class="emoji">📷</span><div><b>RGB-D frame</b>onboard camera, 640×360</div></div>
+        <div class="item"><span class="emoji">🧠</span><div><b>Memory</b>home set · odometry to home · completed skills</div></div>
+      </div>
+    </div>
+    <div class="arrow"><svg viewBox="0 0 24 24"><path d="M3 12h14M12 5l7 7-7 7" fill="none" stroke="#e8603c" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+
+    <!-- 2 prompt -->
+    <div class="card" style="--c:var(--rule); width:252px">
+      <div class="head"><span class="num">2</span>Build prompt<span class="kind">rule-based</span></div>
+      <div class="body">
+        <div class="item"><span class="emoji">🔍</span><div><b>Candidate proposer</b>colour + depth segmentation numbers every ball</div></div>
+        <div class="mini">
+          <svg width="196" height="74" viewBox="0 0 196 74">
+            <defs><linearGradient id="wall" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#dfe6ee"/><stop offset="1" stop-color="#c7d2de"/></linearGradient></defs>
+            <rect x="1" y="1" width="194" height="72" rx="8" fill="url(#wall)" stroke="#9aa5b1" stroke-width="1.5"/>
+            <rect x="1" y="50" width="194" height="23" fill="#b9a58a" opacity=".55"/>
+            <rect x="70" y="10" width="34" height="44" fill="#f8fafc" stroke="#9aa5b1"/>
+            <circle cx="42" cy="56" r="10" fill="#3b82f6"/><circle cx="148" cy="58" r="8" fill="#ef4444"/>
+            <rect x="29" y="43" width="26" height="26" fill="none" stroke="#111" stroke-width="1.6"/>
+            <rect x="137" y="47" width="22" height="22" fill="none" stroke="#111" stroke-width="1.6"/>
+            <rect x="29" y="31" width="13" height="13" fill="#111"/><text x="35.5" y="41.5" font-size="11" font-weight="800" fill="#fff" text-anchor="middle" font-family="Nunito">1</text>
+            <rect x="137" y="35" width="13" height="13" fill="#111"/><text x="143.5" y="45.5" font-size="11" font-weight="800" fill="#fff" text-anchor="middle" font-family="Nunito">2</text>
+          </svg>
+        </div>
+        <div class="item"><span class="emoji">💡</span><div><b>Executor feedback</b>one line on what the last skill achieved</div></div>
+      </div>
+    </div>
+    <div class="arrow"><svg viewBox="0 0 24 24"><path d="M3 12h14M12 5l7 7-7 7" fill="none" stroke="#e8603c" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+
+    <!-- 3 decide -->
+    <div class="card" style="--c:var(--learn); width:262px; border-width:3px; box-shadow:0 0 0 4px #dbe7fb">
+      <div class="head"><span class="num">3</span>Decide<span class="kind">learned</span></div>
+      <div class="body">
+        <div class="split" style="grid-template-columns:1.25fr 1fr">
+          <div class="item"><span class="emoji">❄️</span><div><b style="white-space:nowrap">Qwen3-VL-4B</b>frozen, 4-bit</div></div>
+          <div class="item"><span class="emoji">🔥</span><div><b>LoRA</b>trained adapter</div></div>
+        </div>
+        <div class="item" style="margin-top:-2px"><span class="emoji">🧩</span><div><b>Exactly one skill per step</b>from a closed set of 11</div></div>
+        <div class="pill-set">
+          <span class="pill">move</span><span class="pill">turn</span><span class="pill">search</span><span class="pill">explore</span><span class="pill">approach</span>
+          <span class="pill">return_home</span><span class="pill">bypass_return</span><span class="pill">stop</span><span class="pill">done</span><span class="pill">clarify</span><span class="pill">unsupported</span>
+        </div>
+        <div class="code">{<span class="k">"action"</span>: <span class="s">"explore"</span>,<br>&nbsp;<span class="k">"color"</span>: <span class="s">"blue"</span>}</div>
+      </div>
+    </div>
+    <div class="arrow"><svg viewBox="0 0 24 24"><path d="M3 12h14M12 5l7 7-7 7" fill="none" stroke="#e8603c" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+
+    <!-- 4 guard -->
+    <div class="card" style="--c:#4b5563; width:232px">
+      <div class="head"><span class="num">4</span>Guard<span class="kind">rule-based</span></div>
+      <div class="body">
+        <div class="item"><span class="emoji">✅</span><div><b>Contract check</b>strict JSON schema, bounded parameters</div></div>
+        <div class="item"><span class="emoji">🔗</span><div><b>Target binding</b>colour / number / selector → a visible candidate</div></div>
+        <div class="item opt"><span class="emoji">🛡️</span><div><b>Legality filter<span class="tag">optional</span></b>illegal type → best legal one by prefix log-prob</div></div>
+        <div class="item"><span class="emoji">✋</span><div><b>Cannot resolve?</b>stop and ask the user</div></div>
+      </div>
+    </div>
+    <div class="arrow"><svg viewBox="0 0 24 24"><path d="M3 12h14M12 5l7 7-7 7" fill="none" stroke="#e8603c" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+
+    <!-- 5 execute -->
+    <div class="card" style="--c:var(--geo); width:254px">
+      <div class="head"><span class="num">5</span>Execute<span class="kind">geometric</span></div>
+      <div class="body">
+        <div class="item"><span class="emoji">🗺️</span><div><b>explore</b>depth-built occupancy map → nearest reachable frontier → A*</div></div>
+        <div class="mini">
+          <svg width="214" height="62" viewBox="0 0 214 62">
+            <rect x="1" y="1" width="212" height="60" rx="7" fill="#f4faf5" stroke="#9fcfae" stroke-width="1.5"/>
+            <g fill="#334155">
+              <rect x="70" y="1" width="7" height="22"/><rect x="70" y="40" width="7" height="21"/>
+              <rect x="140" y="1" width="7" height="60"/>
+            </g>
+            <g fill="#cbd5e1" opacity=".9"><rect x="150" y="1" width="62" height="60" rx="5"/></g>
+            <g fill="#d6ecdb"><rect x="5" y="5" width="62" height="52" rx="4"/><rect x="80" y="5" width="57" height="52" rx="4"/></g>
+            <path d="M24 40 C 45 40, 60 31, 74 31 S 110 30, 120 18" fill="none" stroke="#2f8a4c" stroke-width="3" stroke-dasharray="5 3" stroke-linecap="round"/>
+            <circle cx="24" cy="40" r="6" fill="#f59e0b" stroke="#fff" stroke-width="1.5"/>
+            <g fill="#2563eb"><circle cx="125" cy="14" r="3.2"/><circle cx="132" cy="22" r="3.2"/><circle cx="132" cy="34" r="3.2"/></g>
+            <text x="179" y="35" font-size="11" font-weight="800" fill="#64748b" text-anchor="middle" font-family="Nunito">unknown</text>
+            <text x="104" y="52" font-size="10" font-weight="800" fill="#2563eb" text-anchor="middle" font-family="Nunito">frontier</text>
+          </svg>
+        </div>
+        <div class="item"><span class="emoji">🎯</span><div><b>approach</b>guarded walk to the bound ball; re-acquire if lost</div></div>
+        <div class="item"><span class="emoji">🧭</span><div><b>move · turn · return_home</b>closed on odometry</div></div>
+        <div class="item"><span class="emoji">🚧</span><div><b>Safety</b>clearance guard stops a walk; back-off escape</div></div>
+      </div>
+    </div>
+    <div class="arrow"><svg viewBox="0 0 24 24"><path d="M3 12h14M12 5l7 7-7 7" fill="none" stroke="#e8603c" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+
+    <!-- 6 robot -->
+    <div class="card" style="--c:var(--sim); flex:1">
+      <div class="head"><span class="num">6</span>Act<span class="kind">simulation</span></div>
+      <div class="body">
+        <div class="mini">
+          <svg width="150" height="92" viewBox="0 0 150 92">
+            <rect x="2" y="2" width="146" height="88" rx="6" fill="#fff8ec" stroke="#8b6b3f" stroke-width="3"/>
+            <path d="M75 2 V33 M75 53 V90 M2 46 H30 M48 46 H102 M120 46 H148" stroke="#8b6b3f" stroke-width="3" fill="none"/>
+            <circle cx="124" cy="22" r="6" fill="#3b82f6"/><circle cx="30" cy="72" r="6" fill="#ef4444"/><circle cx="118" cy="72" r="6" fill="#facc15"/>
+            <rect x="96" y="60" width="7" height="7" fill="#64748b"/>
+            <text x="28" y="30" font-size="22" text-anchor="middle" font-family="Segoe UI Emoji">🦆</text>
+          </svg>
+        </div>
+        <div class="item"><span class="emoji">🌐</span><div><b>MuJoCo world</b>2×2 rooms, doorways, balls, pillars</div></div>
+        <div class="item"><span class="emoji">❄️</span><div><b>Official gait</b>frozen ONNX policy, 50&nbsp;Hz</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="loopbar"><span class="emoji">🔁</span>
+    <div><b>After every skill</b> the new frame, pose and skill status flow back into memory and the feedback line (step 1); at most 5 skills per instruction, and the model ends the task itself with <span class="pill" style="background:#ffe7dc;color:#b4441f">done</span> or <span class="pill" style="background:#ffe7dc;color:#b4441f">stop</span>.</div>
+  </div>
+</section>
+
+<div class="connect">
+  <span class="up"><span class="emoji">⬆️</span> adapter weights · harness code</span>
+  <span class="down"><span class="emoji">⬇️</span> logged episodes</span>
+</div>
+
+<!-- =================================================================== OFFLINE -->
+<section class="band offline">
+  <div class="ribbon">
+    <div class="title"><div class="logo emoji">🔬</div>
+      <h1>Offline Improvement and Release Gate<small>Failure-driven updates to weights or harness, adopted only if a paired test on unseen layouts agrees</small></h1></div>
+    <div class="goal"><span class="emoji">⚖️</span><div><b>Goal:</b> keep only changes that beat run-to-run noise, judged by what physically happened</div></div>
+  </div>
+
+  <div class="row">
+    <div class="card" style="--c:#8a6bd1; width:232px">
+      <div class="head"><span class="num">1</span>Roll out<span class="kind">simulation</span></div>
+      <div class="body">
+        <div class="item"><span class="emoji">🎮</span><div><b>Current agent acts</b>the online loop on training layouts</div></div>
+        <div class="item"><span class="emoji">🗂️</span><div><b>Every step logged</b>frame, memory, decision, oracle pose, contacts</div></div>
+      </div>
+    </div>
+    <div class="arrow"><svg viewBox="0 0 24 24"><path d="M3 12h14M12 5l7 7-7 7" fill="none" stroke="#2f6fd1" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+
+    <div class="card" style="--c:var(--rule); width:290px">
+      <div class="head"><span class="num">2</span>Correct &amp; diagnose<span class="kind">rule-based</span></div>
+      <div class="body">
+        <div class="item"><span class="emoji">🧑‍🏫</span><div><b>Expert correction</b>rule teacher takes over wrong steps; only physics-verified trajectories kept</div></div>
+        <div class="item"><span class="emoji">🩺</span><div><b>Failure taxonomy</b>last skill, error, stuck spot</div></div>
+      </div>
+    </div>
+    <div class="arrow"><svg viewBox="0 0 24 24"><path d="M3 12h14M12 5l7 7-7 7" fill="none" stroke="#2f6fd1" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+
+    <div class="card" style="--c:var(--learn); width:262px">
+      <div class="head"><span class="num">3</span>Update<span class="kind">two targets</span></div>
+      <div class="body">
+        <div class="item"><span class="emoji">🔥</span><div><b>Weights</b>LoRA SFT on aggregated data (DAgger-style) plus older data</div></div>
+        <div class="item"><span class="emoji">🛠️</span><div><b>Harness</b>executor, feedback text, guard; most behind an on/off switch</div></div>
+      </div>
+    </div>
+    <div class="arrow"><svg viewBox="0 0 24 24"><path d="M3 12h14M12 5l7 7-7 7" fill="none" stroke="#2f6fd1" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+
+    <div class="card" style="--c:var(--eval); flex:1">
+      <div class="head"><span class="num">4</span>Release gate<span class="kind">evaluation</span></div>
+      <div class="body">
+        <div class="split" style="grid-template-columns:1fr 1fr 1fr">
+          <div class="item"><span class="emoji">🐤</span><div><b>Replay canary</b>re-decide recorded states offline</div></div>
+          <div class="item"><span class="emoji">⚖️</span><div><b>Truth scorer</b>simulator outcome, not teacher labels</div></div>
+          <div class="item"><span class="emoji">📊</span><div><b>Paired McNemar</b>same tasks, unseen layouts</div></div>
+        </div>
+        <div class="verdicts">
+          <div class="verdict keep"><b>✓ adopted</b>move/turn feedback line: 26 → 32 of 32, p = 0.031</div>
+          <div class="verdict drop"><b>✗ rejected</b>lang-v3 retrain: replay canary caught a regression</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="loopbar"><span class="emoji">🔁</span>
+    <div><b>Next round</b> starts from the adopted agent. Changes that cannot be told from noise (about 8 of 74 tasks flip between identical runs) stay behind their switch.</div>
+  </div>
+</section>
+
+<div class="legend">
+  <span><i style="background:var(--learn)"></i>learned</span>
+  <span><i style="background:var(--rule)"></i>rule-based</span>
+  <span><i style="background:var(--geo)"></i>geometric</span>
+  <span><i style="background:var(--sim)"></i>simulation</span>
+  <span><i style="background:var(--eval)"></i>evaluation</span>
+  <span><span class="emoji">❄️</span>frozen</span>
+  <span><span class="emoji">🔥</span>trained</span>
+  <span><i style="border:2px dashed #9aa5b1;background:#fff"></i>optional, off by default</span>
+</div>
+
+</div>
+</body>
+</html>
