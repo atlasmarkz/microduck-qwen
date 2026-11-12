@@ -104,3 +104,39 @@ class EnforceTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TerminationTests(unittest.TestCase):
+    MOVE = {"action": "move", "direction": "forward", "distance_m": 0.2}
+
+    def test_after_a_verified_return_only_done_or_unsupported(self):
+        from microduck_qwen.legality import termination_violation
+        after = memory(APPROACH_BLUE, {"action": "return_home"})
+        for action in (EXPLORE_BLUE, APPROACH_BLUE, {"action": "stop"}, {"action": "return_home"}):
+            self.assertIsNotNone(termination_violation(action, "走到蓝球再回来", after))
+        for action in ({"action": "done"}, {"action": "unsupported"}):
+            self.assertIsNone(termination_violation(action, "走到蓝球再回来", after))
+
+    def test_identical_move_or_turn_repeat_is_illegal_but_a_new_one_is_not(self):
+        from microduck_qwen.legality import termination_violation
+        self.assertIsNotNone(termination_violation(dict(self.MOVE), "往前移动20厘米", memory(self.MOVE)))
+        self.assertIsNone(termination_violation({"action": "return_home"}, "前进再回来", memory(self.MOVE)))
+        left = {"action": "turn", "direction": "left", "degrees": 90}
+        self.assertIsNone(termination_violation({"action": "turn", "direction": "right", "degrees": 90}, "左转再右转",
+                                                memory(left)))
+
+    def test_no_rule_before_any_skill_or_after_approach(self):
+        from microduck_qwen.legality import termination_violation
+        self.assertIsNone(termination_violation(EXPLORE_BLUE, "找蓝球", memory()))
+        self.assertIsNone(termination_violation({"action": "stop"}, "走到蓝球", memory(APPROACH_BLUE)))
+
+    def test_enforce_with_termination_check_regenerates_done(self):
+        from microduck_qwen.legality import termination_violation
+        after = memory({"action": "return_home"})
+        result = {"raw": '{"action":"explore","color":"red"}', "action": {"action": "explore", "color": "red"}}
+        scores = {name: -1.0 for name in ACTIONS}
+        scores.update(explore=-0.1, done=-2.0, unsupported=-3.0)
+        fixed = enforce(result, "找红球再回来", after, lambda names: {n: scores[n] for n in names},
+                        lambda name: prefix(name) + '"}', check=termination_violation)
+        self.assertEqual(fixed["action"], {"action": "done"})
+        self.assertEqual(fixed["legality"]["chosen"], "done")

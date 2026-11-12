@@ -220,7 +220,7 @@ class TorchAgentPlanner:
         except (ValueError, TypeError, KeyError) as error:
             result["error"] = str(error)
         from . import legality
-        if legality.ENABLED and not temperature:
+        if legality.ACTIVE and not temperature:
             def score(names):
                 values = prefix_logprobs(self.model, self.processor, image, prompt, [legality.prefix(n) for n in names])
                 return {name: values[legality.prefix(name)] for name in names}
@@ -229,7 +229,7 @@ class TorchAgentPlanner:
                 return generate_with_prefix(self.model, self.processor, image, prompt, legality.prefix(name))
 
             started = time.perf_counter()
-            result = legality.enforce(result, instruction, memory, score, regenerate)
+            result = legality.enforce(result, instruction, memory, score, regenerate, legality.active_check)
             if "legality" in result:
                 result["legality"]["latency_s"] = time.perf_counter() - started
         return result

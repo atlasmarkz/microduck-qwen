@@ -15,6 +15,12 @@ Deliberately not rules: `stop` vs `done` after an approach (both are legal termi
 is a semantic question, not a contract violation) and `unsupported` after move/turn (legitimate when the instruction
 still contains an unimplemented skill; the executor feedback line addresses that slip).
 
+Termination rules (`MICRODUCK_TERMINATION=1`, separate flag, checked alone or together with the rules above): in the
+lang-v2 training data a verified return_home/bypass_return is followed by `done` in 455 of 455 states, and a verified move/turn
+is never followed by the identical move/turn (turn -> a different turn occurs 102 times). So after a verified return only
+`done` or `unsupported` (an unimplemented remainder) is legal, and repeating the identical verified move/turn is illegal.
+The frozen base model breaks exactly these in 47 of its 61 failures on seeds 99200/99300 (run `frozen`).
+
 When a decision is illegal or unparseable, every action type is scored by the model's own log-probability of the prefix
 `{"action":"<type>` and the output is regenerated with the best-scoring legal prefix forced. The choice is the model's,
 restricted to the legal set; no rule picks the replacement directly.
@@ -26,6 +32,8 @@ import re
 from .skills import parse_action
 
 ENABLED = os.environ.get("MICRODUCK_LEGALITY", "0") != "0"
+TERMINATION = os.environ.get("MICRODUCK_TERMINATION", "0") != "0"
+ACTIVE = ENABLED or TERMINATION
 ACTIONS = ("move", "turn", "approach", "search", "explore", "return_home", "stop", "done", "clarify", "unsupported",
            "bypass_return")
 COLOUR = re.compile(r"红|绿|蓝|黄|red|green|blue|yellow", re.IGNORECASE)
@@ -63,22 +71,44 @@ def violation(action, instruction, memory):
     return None
 
 
-def type_legal(name, instruction, memory):
+def termination_violation(action, instruction, memory):
+    """Why `action` fails to end a finished task (termination rules), or None."""
+    completed = memory.get("completed") or []
+    if not completed:
+        return None
+    last, name = completed[-1], action["action"]
+    if last["action"] in ("return_home", "bypass_return") and name not in ("done", "unsupported"):
+        return "only done after a verified return"
+    if last["action"] in ("move", "turn") and action == last:
+        return "repeat the identical verified move/turn"
+    return None
+
+
+def active_check(action, instruction, memory):
+    """The rule sets switched on by the environment flags, in order."""
+    for on, check in ((ENABLED, violation), (TERMINATION, termination_violation)):
+        reason = check(action, instruction, memory) if on else None
+        if reason is not None:
+            return reason
+    return None
+
+
+def type_legal(name, instruction, memory, check=violation):
     """Whether some action of this type can be legal here (colour-specific rules are checked on the regenerated action)."""
     probe = {"action": name}
     if name in ("approach", "search", "explore"):
         probe["color"] = None
-    return violation(probe, instruction, memory) is None
+    return check(probe, instruction, memory) is None
 
 
-def enforce(result, instruction, memory, score, regenerate):
+def enforce(result, instruction, memory, score, regenerate, check=violation):
     """Return `result` unchanged when its action is legal; otherwise the best legal regeneration with a `legality` record.
 
     `score(names) -> {name: log-probability of prefix(name)}` and `regenerate(name) -> raw text starting with prefix(name)`
     are supplied by the planner, so this function stays model-free and testable.
     """
     action = result.get("action")
-    reason = ("unparseable: " + str(result.get("error"))) if action is None else violation(action, instruction, memory)
+    reason = ("unparseable: " + str(result.get("error"))) if action is None else check(action, instruction, memory)
     if reason is None:
         return result
     scores = score(ACTIONS)
@@ -87,7 +117,7 @@ def enforce(result, instruction, memory, score, regenerate):
               "top_scored": max(scores, key=scores.get), "attempts": []}
     if original is not None:
         record["top_scored_is_original"] = record["top_scored"] == original
-    legal = sorted((name for name in ACTIONS if type_legal(name, instruction, memory)), key=scores.get, reverse=True)
+    legal = sorted((name for name in ACTIONS if type_legal(name, instruction, memory, check)), key=scores.get, reverse=True)
     fixed = {key: value for key, value in result.items() if key not in ("action", "error", "raw")}
     fixed["raw"], fixed["error"] = result.get("raw"), "no legal regeneration: " + reason
     for name in legal[:MAX_ATTEMPTS]:
@@ -99,7 +129,7 @@ def enforce(result, instruction, memory, score, regenerate):
         except (ValueError, TypeError, KeyError) as error:
             attempt["error"] = str(error)
             continue
-        problem = violation(candidate, instruction, memory) if candidate["action"] == name else "forced prefix not kept"
+        problem = check(candidate, instruction, memory) if candidate["action"] == name else "forced prefix not kept"
         if problem is not None:
             attempt["error"] = problem
             continue

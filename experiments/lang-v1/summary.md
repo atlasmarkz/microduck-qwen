@@ -564,3 +564,38 @@ model in all but about 8 tasks. If termination were handled (counting the 53 as 
 same as LoRA, but that is a counterfactual: the truth scorer cannot see what the repeated skill would have done to the outcome, so it
 is not a measured number. The cheap test is a frozen-base re-run with a stronger termination cue or a rule-based stop, which would
 say whether this gap needs training at all.
+
+### Frozen base plus a termination rule (run `frozterm`, seeds 99200/99300)
+
+The rule (`MICRODUCK_TERMINATION=1`, `microduck_qwen/legality.py`, off by default) comes from the lang-v2 training data, not from
+the evaluation labels: after a verified `return_home`/`bypass_return` only `done` or `unsupported` is legal (455 of 455 training
+states end with `done`), and repeating the identical verified move/turn is illegal (never in the training data). A violating
+decision is replaced by the model's own best-scoring legal action, as in the legality filter (row 17); no rule picks the action.
+Offline, before the run: it flags 47 of the frozen model's 59 first wrong steps and none of the LoRA decisions or teacher labels on
+these seeds. Pipeline `scripts/pipelines/eval-frozen-termination.sh`; same arguments as `frozen`.
+
+| | strict | truth | truth outcomes |
+|---|---|---|---|
+| frozen base (`frozen`) | 19/80 | 27/80 | 27 success, 49 cut at a deviation, 4 fail |
+| frozen base + termination rule (`frozterm`) | 60/80 | 68/80 | 68 success, 6 deviation cuts, 5 teacher cuts, 1 fail |
+| lang-v2 LoRA (`mapoff-v2`) | 72/80 | 74/80 | 74 success, 3 teacher cuts, 3 fail |
+| rule vs frozen, paired | 43 vs 2, p < 1e-10 | 44 vs 3, p < 1e-10 | |
+| LoRA vs rule, paired | 17 vs 5, p = 0.017, +15 pp (95% +4..+25) | 10 vs 4, p = 0.18, +7.5 pp (95% -1..+16) | |
+
+The rule fired 47 times in 220 steps: 43 regenerations chose `done` (27 after a return, 16 after a repeated move/turn), 4 were
+unparseable outputs (the filter also handles those; regenerated as `search`/`explore`). About 10 s extra per firing (two extra
+forward passes).
+
+Remaining frozen-base errors (first wrong step, 14 tasks): `stop` instead of `done` after an approach (7; the truth scorer counts
+these as successes when the robot did stop at the ball, which is why strict and truth differ), "靠近照片里最左侧的球，之后返回起点"
+(task 3, 4 layouts) answered with `search`/`explore` instead of `approach` with `selector=leftmost`, `approach` for a ball not in
+view where the teacher explores (2), and 1 `done` vs `stop`. Plus 5 teacher cuts (no confidently visible green ball after explore)
+and 2 English `clarify`.
+
+Reading: a two-line contract rule closes 41 of the 47 truth points between the frozen base and the adapter (27 -> 68 vs 74); the
+remaining truth gap (+7.5 pp) is not significant on 80 tasks. On strict scoring the adapter is still significantly better
+(+15 pp), mostly because it learned the teacher's `stop`/`done` wording after an approach and the leftmost-selector task. So most of
+the measured adapter gain is a termination behaviour that does not need training. Caveat: the rule was chosen after looking at the
+frozen-base failures on these same seeds. It is a behaviour class taken from training data, not tuned to these layouts, but by this
+project's own standard it is a dev-seed result; confirming it needs never-used seeds (and a LoRA + rule arm, expected to change
+nothing since the rule flagged none of its decisions offline).
