@@ -599,3 +599,42 @@ the measured adapter gain is a termination behaviour that does not need training
 frozen-base failures on these same seeds. It is a behaviour class taken from training data, not tuned to these layouts, but by this
 project's own standard it is a dev-seed result; confirming it needs never-used seeds (and a LoRA + rule arm, expected to change
 nothing since the rule flagged none of its decisions offline).
+
+## No-harness baseline: frozen Qwen3-VL-4B drives the robot directly (run `raw`, seeds 99200/99300)
+
+Question: what does the harness itself add, against the plain VLM controlling the robot? `agent_eval --primitive-only`
+(`microduck_qwen/raw_baseline.py`, pipeline `scripts/pipelines/eval-no-harness.sh`). Same 80 tasks on the same 16 never-used
+layouts as `frozen`, `frozterm` and `mapoff-v2`.
+
+The model sees the plain RGB frame (no numbered candidates), the instruction, its odometry relative to the start, and its last 6
+actions with their outcome; it may output only `move` (0.05-0.35 m), `turn` (5-120 deg), `stop` or `done`, up to 40 decisions per
+task. Removed: the skill vocabulary (`explore`, `approach`, `search`, `return_home`, `bypass_return`), depth map, frontier
+exploration, A*, target binding, validator, executor feedback, the 5-skill plan. Kept: the official gait (through the same
+bounded move/turn executor) and the executor's known-map refusal of an unsafe translation, reported to the model as refused.
+Odometry and the refusal favour the baseline. One prompt, written once, not tuned.
+
+| | truth success | explore (48) | leftmost + home (16) | move 20 cm (16) |
+|---|---|---|---|---|
+| no harness, frozen (`raw`) | **0/80** | 0 | 0 | 0 |
+| harness, frozen (`frozen`) | 27/80 | | | |
+| harness + termination rule, frozen (`frozterm`) | 68/80 | | | |
+| harness + LoRA (`mapoff-v2`) | 74/80 | | | |
+
+Paired, truth: harness vs no harness with the same frozen model 27 vs 0 (p < 1e-7, +34 pp, 95% +24..+44); harness + termination
+rule 68 vs 0 (+85 pp); full system with LoRA 74 vs 0 (+92.5 pp, 95% +86..+98). No task succeeds without the harness.
+
+What the no-harness model did (2661 decisions, mean 33 per task): `move` 1910, `turn` 740, 11 invalid outputs (mostly
+`move` with direction `left`), and not a single `done` or `stop`. 856 of 1910 moves were refused as unsafe: it keeps walking into
+the same wall. 38 explore tasks and all 16 move tasks ran out the 40-step budget, 9 explore tasks ended with the robot wedged
+against an obstacle, 10 leftmost tasks ended on an invalid output.
+
+Termination is not the only problem. Counting a task as solved if the model had stopped at the best moment (oracle stop over every
+prefix of the episode): no harness 16/80 (only the 20 cm moves; explore 0/48, leftmost + home 0/16), frozen with harness 74/80.
+Distances: in explore tasks the target starts a median 4.1 m away in another room and the closest the robot ever came is a median
+3.4 m (1 of 48 within 1 m); in the leftmost task it reached the ball 6 times in 16 but never got back home afterwards.
+
+Reading: on this task set the harness is the whole difference between 0 and any success. Without it the frozen 4B model can make
+a bounded move but cannot find a ball in another room, cannot navigate back to the start from odometry, and never ends a task.
+With the harness the same frozen weights reach 27/80 (74/80 if stopped at the right time), a two-line termination rule gives
+68/80, and the LoRA adapter 74/80. Limits: one prompt and one 4B model; a stronger VLM, a tuned prompt or a longer budget could
+do better on the move and leftmost tasks, but not plausibly close the explore gap (0/48 even with an oracle stop).
