@@ -10,6 +10,7 @@ import io
 import json
 import math
 import os
+import socket
 import subprocess
 import sys
 import tempfile
@@ -21,6 +22,19 @@ DEMO_INSTRUCTION = "去别的房间找蓝色的球，走到它旁边，然后回
 DEMO_SEED = 98107
 
 
+def free_port():
+    with socket.socket() as probe:
+        probe.bind(("127.0.0.1", 0))
+        return probe.getsockname()[1]
+
+
+def display_frame(port):
+    """Latest camera frame for the audience view; never fails on render latency."""
+    from .vision import capture
+
+    return capture(port, max_age=math.inf)
+
+
 @contextmanager
 def simulation(seed):
     """Start the headless simulator, then stop it on success, failure or interruption."""
@@ -30,9 +44,11 @@ def simulation(seed):
         directory = Path(directory)
         manifest = directory / "simulator.json"
         log_path = directory / "simulator.log"
+        # Fresh ports: a simulator orphaned by a crashed kernel must not block the next run.
+        # Physics runs on its own thread so software rendering cannot freeze simulated time.
         command = [sys.executable, "-u", "-m", "microduck_qwen.sim_native", "--vision",
                    "--world", "2", "2", "--seed", str(seed), "--manifest", str(manifest),
-                   "--port", "17821", "--control-port", "17831"]
+                   "--port", str(free_port()), "--control-port", str(free_port()), "--async-physics"]
         with log_path.open("wb") as log:
             process = subprocess.Popen(command, cwd=ROOT, stdout=log, stderr=subprocess.STDOUT,
                                        env={**os.environ, "MUJOCO_GL": os.environ.get("MUJOCO_GL", "egl")})
@@ -50,6 +66,7 @@ def simulation(seed):
             else:
                 log = log_path.read_text(encoding="utf-8", errors="replace")[-4000:]
                 raise RuntimeError(f"仿真未能启动。\n{log}")
+            info["log_file"] = str(log_path)
             yield info
         finally:
             if process.poll() is None:
@@ -122,7 +139,6 @@ def live_demo(planner, instruction=DEMO_INSTRUCTION, seed=DEMO_SEED):
 
     from .agent import run_instruction
     from .navigation import Observer
-    from .vision import capture
 
     instruction = instruction.strip()
     if not instruction:
@@ -145,7 +161,7 @@ def live_demo(planner, instruction=DEMO_INSTRUCTION, seed=DEMO_SEED):
         trail, actions = [], []
         started = time.monotonic()
         try:
-            frame, state = capture(info["port"], wait_for_fresh=1.5), observer.read()
+            frame, state = display_frame(info["port"]), observer.read()
             task = worker.submit(run_instruction, ReportingPlanner(), instruction, info)
             while True:
                 pose = tuple(state["trunk"][:2])
@@ -167,7 +183,7 @@ def live_demo(planner, instruction=DEMO_INSTRUCTION, seed=DEMO_SEED):
                 if report is not None:
                     return report
                 time.sleep(0.5)
-                frame, state = capture(info["port"], wait_for_fresh=1.5), observer.read()
+                frame, state = display_frame(info["port"]), observer.read()
         finally:
             observer.close()
 
@@ -178,7 +194,6 @@ def live_baseline(motion="forward", seed=DEMO_SEED):
 
     from .navigation import Observer
     from .skills import SkillExecutor
-    from .vision import capture
 
     motions = {
         "forward": ("手动前进 0.20 m", {"action": "move", "direction": "forward", "distance_m": 0.2}),
@@ -204,7 +219,7 @@ def live_baseline(motion="forward", seed=DEMO_SEED):
             task = worker.submit(execute, info, Path(directory))
             while True:
                 state = observer.read()
-                frame = capture(info["port"], wait_for_fresh=1.5)
+                frame = display_frame(info["port"])
                 trail.append(tuple(state["trunk"][:2]))
                 overview = draw_overview(scene, info["home_pose"], trail, state["yaw"])
                 result = task.result() if task.done() else None

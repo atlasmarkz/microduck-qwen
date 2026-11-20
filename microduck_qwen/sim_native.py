@@ -122,6 +122,8 @@ def main():
     parser.add_argument("--density", type=float, default=1.0, help="world clutter density 0..4")
     parser.add_argument("--manifest", type=Path, default=ROOT / "runs/simulator.json")
     parser.add_argument("--seconds", type=float, default=0, help="bounded smoke run; 0 keeps running")
+    parser.add_argument("--async-physics", action="store_true",
+                        help="step gait and physics on a real-time worker so slow (software) rendering cannot pause them")
     args = parser.parse_args()
     if args.yellow_course and (not args.vision or args.clutter or args.occlusion != "none"):
         parser.error("--yellow-course requires --vision and no ball occlusion/clutter flags")
@@ -191,14 +193,51 @@ def main():
         started = time.monotonic()
         tick = started
         next_image = 0.0
+        stopped, errors, physics = threading.Event(), [], None
+        camera_stats = {"frames": 0, "max_render_s": 0.0, "total_render_s": 0.0}
+        next_report = started + 10
+        if args.async_physics:
+            def step_physics():
+                # Same 50 Hz control tick as the synchronous loop; OpenGL stays on the main thread.
+                deadline = time.monotonic()
+                try:
+                    while not stopped.is_set():
+                        gait.update()
+                        world.step(4)
+                        deadline += 0.02
+                        slack = deadline - time.monotonic()
+                        if slack > 0:
+                            stopped.wait(slack)
+                        elif slack < -0.25:
+                            deadline = time.monotonic()  # behind real time: do not burst-catch-up
+                except BaseException as error:
+                    errors.append(error)
+                    stopped.set()
+
+            physics = threading.Thread(target=step_physics, name="physics", daemon=True)
+            physics.start()
         while args.seconds == 0 or time.monotonic() - started < args.seconds:
             if viewer is not None and not viewer.is_running():
                 break
-            gait.update()
-            world.step(4)
+            if physics is None:
+                gait.update()
+                world.step(4)
+            elif errors:
+                raise errors[0]
             if body.camera is not None and time.monotonic() >= next_image:
+                render_started = time.monotonic()
                 body.camera.render(world)
                 next_image = time.monotonic() + 0.2
+                if physics is not None:
+                    render_s = time.monotonic() - render_started
+                    camera_stats["frames"] += 1
+                    camera_stats["max_render_s"] = max(camera_stats["max_render_s"], render_s)
+                    camera_stats["total_render_s"] += render_s
+                    if time.monotonic() >= next_report:
+                        # Host diagnostics for slow (e.g. Colab software-GL) runs; physics should track wall time.
+                        print(json.dumps({"wall_s": round(time.monotonic() - started, 1),
+                                          "sim_time": round(float(world.data.time), 1), **camera_stats}), flush=True)
+                        next_report = time.monotonic() + 10
             if viewer is not None:
                 viewer.sync()
             if not ready and world.data.time >= 4.0:
@@ -222,12 +261,18 @@ def main():
                     "note": "Simulation-only TCP controller; official ONNX gait and BAM motors; no robotd."}, indent=2) + "\n", encoding="utf-8")
                 ready = True
                 print("READY: native MuJoCo simulation; run CLI commands in a second terminal.", flush=True)
-            tick += 0.02
-            time.sleep(max(0.0, tick - time.monotonic()))
+            if physics is None:
+                tick += 0.02
+                time.sleep(max(0.0, tick - time.monotonic()))
+            elif stopped.wait(0.02):
+                raise errors[0] if errors else RuntimeError("physics worker stopped")
         print(json.dumps({"ready": ready, "sim_time": world.data.time, "trunk": body.sensors()["trunk"]}), flush=True)
     except KeyboardInterrupt:
         pass
     finally:
+        stopped.set()
+        if physics is not None:
+            physics.join(timeout=2)
         commands.set({})
         if viewer is not None:
             viewer.close()

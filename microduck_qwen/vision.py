@@ -53,8 +53,14 @@ def decode_array(encoded, dtype, shape):
     return np.frombuffer(raw, dtype=dtype).reshape(shape).copy()
 
 
-def capture(port, max_age=1.0, *, wait_for_fresh=0.0):
-    """Read a fresh frame; callers at rest may briefly wait for a replacement."""
+def capture(port, max_age=None, *, wait_for_fresh=0.0):
+    """Read a fresh frame; callers at rest may briefly wait for a replacement.
+
+    Age counts from the scene snapshot, so it includes render time. Slow software-GL
+    hosts (Colab CPU) may raise the 1 s default with MICRODUCK_CAMERA_MAX_AGE.
+    """
+    if max_age is None:
+        max_age = float(os.environ.get("MICRODUCK_CAMERA_MAX_AGE", "1.0"))
     deadline = time.monotonic() + wait_for_fresh
     while True:
         connection = JsonConnection(("127.0.0.1", port))
