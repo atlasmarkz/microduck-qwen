@@ -117,7 +117,7 @@ class Explorer:
 
     def look(self, color=None):
         time.sleep(0.3)  # let the 5 Hz camera deliver a frame taken after the body settled
-        frame = capture(self.port)
+        frame = capture(self.port, wait_for_fresh=1.5)
         self.frame_width = int(frame.rgb.shape[1])
         self.mapper.update_from_frame(frame)
         candidates = propose_targets(frame)

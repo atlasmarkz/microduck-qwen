@@ -17,6 +17,7 @@ from microduck_qwen.navigation import face_target_heading, pathfind, segment_cle
 from microduck_qwen.vision import (
     apply_grace,
     approachable,
+    capture,
     decode_array,
     project,
     unproject,
@@ -30,6 +31,22 @@ from microduck_qwen.vision_scene import make_scene
 
 
 class VisionTests(unittest.TestCase):
+    def test_stationary_capture_can_wait_for_a_fresh_replacement(self):
+        def encoded(size):
+            return base64.b64encode(zlib.compress(bytes(size))).decode()
+
+        stale = {"wall_ns": 1_000_000_000}
+        fresh = {"wall_ns": 2_500_000_000, "width": 16, "height": 16,
+                 "rgb_zlib": encoded(16 * 16 * 3), "depth_zlib": encoded(16 * 16 * 4)}
+        with patch("microduck_qwen.vision.JsonConnection") as connection, \
+                patch("microduck_qwen.vision.time.time_ns", return_value=3_000_000_000), \
+                patch("microduck_qwen.vision.time.sleep"):
+            connection.return_value.receive.side_effect = [stale, fresh]
+            self.assertEqual(capture(1234, wait_for_fresh=1).metadata["wall_ns"], 2_500_000_000)
+            connection.return_value.receive.side_effect = [stale]
+            with self.assertRaisesRegex(RuntimeError, "camera stale"):
+                capture(1234)
+
     def test_yellow_pillar_gets_a_numbered_localized_target_not_a_ball(self):
         metadata = self.metadata()
         metadata.update(camera_position=[0, 0, 0.15], camera_rotation=[[0, 0, -1], [-1, 0, 0], [0, 1, 0]])

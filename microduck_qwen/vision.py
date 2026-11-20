@@ -53,16 +53,23 @@ def decode_array(encoded, dtype, shape):
     return np.frombuffer(raw, dtype=dtype).reshape(shape).copy()
 
 
-def capture(port, max_age=1.0):
-    connection = JsonConnection(("127.0.0.1", port))
-    try:
-        connection.send({"op": "vision"})
-        packet = connection.receive()
-    finally:
-        connection.close()
-    age = (time.time_ns() - packet["wall_ns"]) / 1e9
-    if not 0 <= age <= max_age:
-        raise RuntimeError(f"camera stale ({age:.2f}s)")
+def capture(port, max_age=1.0, *, wait_for_fresh=0.0):
+    """Read a fresh frame; callers at rest may briefly wait for a replacement."""
+    deadline = time.monotonic() + wait_for_fresh
+    while True:
+        connection = JsonConnection(("127.0.0.1", port))
+        try:
+            connection.send({"op": "vision"})
+            packet = connection.receive()
+        finally:
+            connection.close()
+        age = (time.time_ns() - packet["wall_ns"]) / 1e9
+        if 0 <= age <= max_age:
+            break
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            raise RuntimeError(f"camera stale ({age:.2f}s)")
+        time.sleep(min(0.1, remaining))
     width, height = packet["width"], packet["height"]
     if not (16 <= width <= 1920 and 16 <= height <= 1080):
         raise ValueError("unsupported camera size")

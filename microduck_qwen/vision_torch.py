@@ -1,4 +1,4 @@
-"""Windows CUDA Qwen3-VL skill-agent SFT and binary action rewards with 4-bit LoRA."""
+"""CUDA Qwen3-VL skill-agent SFT and binary action rewards with 4-bit LoRA."""
 
 import argparse
 from contextlib import ExitStack
@@ -105,10 +105,11 @@ def load_model():
         raise FileNotFoundError("Download the fixed Qwen3-VL model first; see Windows vision instructions")
     if not torch.cuda.is_available():
         raise RuntimeError("This bounded QLoRA experiment requires CUDA")
+    dtype = torch.bfloat16 if torch.cuda.is_bf16_supported(including_emulation=False) else torch.float16
     config = BitsAndBytesConfig(load_in_4bit=True, bnb_4bit_quant_type="nf4",
-        bnb_4bit_use_double_quant=True, bnb_4bit_compute_dtype=torch.bfloat16)
+        bnb_4bit_use_double_quant=True, bnb_4bit_compute_dtype=dtype)
     model = Qwen3VLForConditionalGeneration.from_pretrained(str(MODEL_PATH),
-        quantization_config=config, device_map={"": 0}, dtype=torch.bfloat16, attn_implementation="sdpa")
+        quantization_config=config, device_map={"": 0}, dtype=dtype, attn_implementation="sdpa")
     processor = AutoProcessor.from_pretrained(str(MODEL_PATH), size={"shortest_edge": 65536, "longest_edge": 131072})
     return model.eval(), processor
 
