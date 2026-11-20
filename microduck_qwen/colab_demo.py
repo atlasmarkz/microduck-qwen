@@ -22,6 +22,37 @@ DEMO_INSTRUCTION = "去别的房间找蓝色的球，走到它旁边，然后回
 DEMO_SEED = 98107
 
 
+NVIDIA_EGL = Path("/usr/lib64-nvidia/libEGL_nvidia.so.0")  # Colab GPU runtimes ship it here
+EGL_VENDORS = Path("/usr/share/glvnd/egl_vendor.d")
+
+
+def prepare_rendering(backend):
+    """Make MuJoCo render on the GPU when one exists, and report the OpenGL renderer.
+
+    Colab GPU runtimes register only Mesa's EGL vendor, so EGL silently falls back to
+    llvmpipe: about 0.6-1.0 s per camera frame on a T4 instead of about 0.04 s.
+    """
+    os.environ["MUJOCO_GL"] = os.environ["PYOPENGL_PLATFORM"] = backend
+    if backend == "egl" and NVIDIA_EGL.is_file() and not list(EGL_VENDORS.glob("*nvidia*.json")):
+        EGL_VENDORS.mkdir(parents=True, exist_ok=True)
+        (EGL_VENDORS / "10_nvidia.json").write_text(json.dumps(
+            {"file_format_version": "1.0.0", "ICD": {"library_path": str(NVIDIA_EGL)}}))
+    probe = ("import mujoco\n"
+             "from OpenGL import GL\n"
+             "context = mujoco.GLContext(64, 64)\n"
+             "context.make_current()\n"
+             "print(GL.glGetString(GL.GL_RENDERER).decode())\n"
+             "context.free()\n")
+    result = subprocess.run([sys.executable, "-c", probe], capture_output=True, text=True, timeout=60)
+    if result.returncode:
+        raise RuntimeError(f"MuJoCo {backend} 渲染初始化失败：\n{result.stderr[-2000:]}")
+    renderer = result.stdout.strip().splitlines()[-1]
+    if "llvmpipe" in renderer or backend == "osmesa":
+        # Software GL needs 0.4-1 s per frame; let the agent accept frames that old.
+        os.environ.setdefault("MICRODUCK_CAMERA_MAX_AGE", "2.0")
+    return renderer
+
+
 def free_port():
     with socket.socket() as probe:
         probe.bind(("127.0.0.1", 0))
