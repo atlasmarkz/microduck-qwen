@@ -1,4 +1,6 @@
-<h1 align="center">MicroDuck × Qwen-VL</h1>
+<h1 align="center">
+  <img src="assets/microduck-logo.svg" width="40" height="40" align="absmiddle" alt="">&nbsp; MicroDuck × Qwen-VL
+</h1>
 
 <p align="center"><b>用中文指挥仿真机器人找球、走近并返回起点</b><br>
 Qwen3-VL 看图选择下一步技能，MuJoCo 中的规划器和官方步态负责移动。</p>
