@@ -23,8 +23,8 @@ Qwen3-VL 看图选择下一步技能，MuJoCo 中的规划器和官方步态负�
 
 | 演示 | 你可以做什么 | 环境 |
 | --- | --- | --- |
-| [原始 MicroDuck](https://colab.research.google.com/github/atlasmarkz/microduck-qwen/blob/main/notebooks/microduck-baseline.ipynb) | 手动选择前进、左转、右转或停止，观察官方步态 | Colab CPU，无需模型权重 |
-| [MicroDuck × Qwen-VL](https://colab.research.google.com/github/atlasmarkz/microduck-qwen/blob/main/notebooks/microduck-live-demo.ipynb) | 输入中文，观察实时相机、轨迹和逐步决策 | Colab GPU，首次下载约 9 GB |
+| [原始 MicroDuck](https://colab.research.google.com/github/atlasmarkz/microduck-qwen/blob/main/notebooks/microduck-baseline.ipynb) | 手动选择前进、左转、右转或停止，从跟随小鸭子的第三视角观察官方步态 | Colab CPU，无需模型权重 |
+| [MicroDuck × Qwen-VL](https://colab.research.google.com/github/atlasmarkz/microduck-qwen/blob/main/notebooks/microduck-live-demo.ipynb) | 输入中文，观察跟随小鸭子的第三视角、模型看到的相机画面、轨迹和逐步决策 | Colab GPU，首次下载约 9 GB |
 
 两份 Notebook 使用同一个 2×2 场景。2026-11-20 在全新的 Colab T4 运行时上从头运行：默认任务连续两轮完成 `explore → approach → return_home → done`，每步模型决策约 1.3–2.1 秒，安装与下载共约 5 分钟。基线版在 Colab CPU 上手动动作 10/10 完成。第 1 格会打印 OpenGL 渲染器，GPU 运行时应显示 `Tesla T4` 等显卡名，显示 `llvmpipe` 说明退回了软件渲染。会议演示前，先跑完预热，再执行一轮默认任务。
 
