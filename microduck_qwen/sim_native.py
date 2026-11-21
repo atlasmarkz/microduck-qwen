@@ -104,6 +104,55 @@ class Gait:
             world.bam.q_target[:] = self.home + action
 
 
+class Spectator:
+    """Audience-only chase camera behind and above the duck; its frames never reach the agent."""
+
+    def __init__(self, world, body, width=640, height=360):
+        import mujoco
+
+        self.world, self.body = world, body
+        self.renderer = mujoco.Renderer(world.model, height=height, width=width)
+        self.camera = mujoco.MjvCamera()
+        self.camera.type = mujoco.mjtCamera.mjCAMERA_FREE
+        # 48 degrees down from 1.1 m keeps the 0.40 m walls from hiding the duck when it backs onto one.
+        self.camera.distance, self.camera.elevation = 1.1, -48
+        self.azimuth = None
+        self.lock = threading.Lock()
+        self.latest = None
+
+    def render(self):
+        import base64
+        import io
+
+        from PIL import Image
+
+        with self.world.lock:
+            data, trunk = self.world.data, self.body.trunk
+            x, y = float(data.qpos[trunk]), float(data.qpos[trunk + 1])
+            w, qx, qy, qz = data.qpos[trunk + 3:trunk + 7]
+            yaw = math.degrees(math.atan2(2 * (w * qz + qx * qy), 1 - 2 * (qy * qy + qz * qz)))
+            # Ease toward the heading so turning in place does not whip the view around.
+            self.azimuth = yaw if self.azimuth is None else self.azimuth + 0.35 * ((yaw - self.azimuth + 180) % 360 - 180)
+            self.camera.lookat[:] = [x, y, 0.08]
+            self.camera.azimuth = self.azimuth
+            self.renderer.update_scene(data, camera=self.camera)
+            stamp = time.time_ns()
+        buffer = io.BytesIO()
+        Image.fromarray(self.renderer.render()).save(buffer, format="JPEG", quality=80)
+        packet = {"wall_ns": stamp, "jpeg_b64": base64.b64encode(buffer.getvalue()).decode()}
+        with self.lock:
+            self.latest = packet
+
+    def packet(self):
+        with self.lock:
+            if self.latest is None:
+                raise RuntimeError("spectator frame not ready")
+            return dict(self.latest)
+
+    def close(self):
+        self.renderer.close()
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--viewer", action="store_true")
@@ -124,6 +173,8 @@ def main():
     parser.add_argument("--seconds", type=float, default=0, help="bounded smoke run; 0 keeps running")
     parser.add_argument("--async-physics", action="store_true",
                         help="step gait and physics on a real-time worker so slow (software) rendering cannot pause them")
+    parser.add_argument("--spectator", action="store_true",
+                        help="also render an audience-only third-person chase view, served as op 'spectator'")
     args = parser.parse_args()
     if args.yellow_course and (not args.vision or args.clutter or args.occlusion != "none"):
         parser.error("--yellow-course requires --vision and no ball occlusion/clutter flags")
@@ -166,6 +217,17 @@ def main():
     gait = Gait(world, body, args.policy, commands, server)
     if args.vision:
         body.camera = server.Camera(world.model, "vision_camera")
+    spectator = Spectator(world, body) if args.spectator else None
+    if spectator is not None:
+        inner_dispatch = server.Handler.dispatch
+
+        def dispatch(handler, robot, request):
+            if request.get("op") == "spectator":
+                return spectator.packet()
+            return inner_dispatch(handler, robot, request)
+
+        server.Handler.dispatch = dispatch
+    next_spectator = 0.0
     servers, viewer = [], None
     manifest = args.manifest
     ready = False
@@ -238,6 +300,11 @@ def main():
                         print(json.dumps({"wall_s": round(time.monotonic() - started, 1),
                                           "sim_time": round(float(world.data.time), 1), **camera_stats}), flush=True)
                         next_report = time.monotonic() + 10
+            if spectator is not None and time.monotonic() >= next_spectator:
+                spectator_started = time.monotonic()
+                spectator.render()
+                # About 5 Hz on a GPU; on software GL back off so the agent's camera keeps its cadence.
+                next_spectator = time.monotonic() + max(0.2, 2 * (time.monotonic() - spectator_started))
             if viewer is not None:
                 viewer.sync()
             if not ready and world.data.time >= 4.0:
@@ -278,6 +345,8 @@ def main():
             viewer.close()
         if body.camera is not None:
             body.camera.renderer.close()
+        if spectator is not None:
+            spectator.close()
         for listener in servers:
             listener.server_close()
         if ready:

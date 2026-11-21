@@ -66,12 +66,29 @@ def display_frame(port):
     return capture(port, max_age=math.inf)
 
 
+def spectator_frame(port):
+    """JPEG bytes of the audience-only third-person view, or None until the first one exists."""
+    from .navigation import JsonConnection
+
+    try:
+        connection = JsonConnection(("127.0.0.1", port))
+    except OSError:
+        return None  # cosmetic view: never stop the demo over it
+    try:
+        connection.send({"op": "spectator"})
+        return base64.b64decode(connection.receive()["jpeg_b64"])
+    except (RuntimeError, OSError):
+        return None  # not rendered yet, or a transient socket hiccup
+    finally:
+        connection.close()
+
+
 @contextmanager
 def simulation(seed):
     """Start the headless simulator, then stop it on success, failure or interruption."""
     runs = ROOT / "runs"
     runs.mkdir(exist_ok=True)
-    with tempfile.TemporaryDirectory(prefix="colab-", dir=runs) as directory:
+    with tempfile.TemporaryDirectory(prefix="colab-", dir=runs, ignore_cleanup_errors=True) as directory:
         directory = Path(directory)
         manifest = directory / "simulator.json"
         log_path = directory / "simulator.log"
@@ -79,7 +96,7 @@ def simulation(seed):
         # Physics runs on its own thread so software rendering cannot freeze simulated time.
         command = [sys.executable, "-u", "-m", "microduck_qwen.sim_native", "--vision",
                    "--world", "2", "2", "--seed", str(seed), "--manifest", str(manifest),
-                   "--port", str(free_port()), "--control-port", str(free_port()), "--async-physics"]
+                   "--port", str(free_port()), "--control-port", str(free_port()), "--async-physics", "--spectator"]
         with log_path.open("wb") as log:
             process = subprocess.Popen(command, cwd=ROOT, stdout=log, stderr=subprocess.STDOUT,
                                        env={**os.environ, "MUJOCO_GL": os.environ.get("MUJOCO_GL", "egl")})
@@ -142,22 +159,29 @@ def draw_overview(scene, home, trail, yaw):
     return image
 
 
-def dashboard(frame, overview, instruction, decisions, elapsed, summary="", *,
+def dashboard(frame, overview, instruction, decisions, elapsed, summary="", *, spectator=None,
               title="MicroDuck × Qwen-VL", decision_label="模型决策"):
     from IPython.display import HTML
     from PIL import Image
 
     def img(image):
-        buffer = io.BytesIO()
-        image.save(buffer, format="JPEG", quality=78)
-        return 'data:image/jpeg;base64,' + base64.b64encode(buffer.getvalue()).decode()
+        if isinstance(image, bytes):
+            data = image  # already JPEG from the simulator
+        else:
+            buffer = io.BytesIO()
+            image.save(buffer, format="JPEG", quality=78)
+            data = buffer.getvalue()
+        return 'data:image/jpeg;base64,' + base64.b64encode(data).decode()
 
     actions = " → ".join(decisions) or "等待第一步…"
+    third = (f'<div>第三视角 · 跟随小鸭子（仅供观众）<br><img width="480" src="{img(spectator)}"></div>'
+             if spectator else "")
     return HTML(f"""<div style="font:16px system-ui;max-width:1000px">
       <p><b>{html.escape(title)}</b>　{html.escape(instruction)}</p>
       <div style="display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap">
-        <div>仿真俯视图 · 白点为起点<br><img width="380" src="{img(overview)}"></div>
-        <div>机器人实时第一视角<br><img width="480" src="{img(Image.fromarray(frame.rgb))}"></div>
+        {third}
+        <div>机器人实时第一视角 · 模型看到的画面<br><img width="480" src="{img(Image.fromarray(frame.rgb))}"></div>
+        <div>仿真俯视图 · 白点为起点<br><img width="300" src="{img(overview)}"></div>
       </div>
       <p><b>{html.escape(decision_label)}</b>　{html.escape(actions)}　·　{elapsed:.0f} 秒</p>
       <p>{html.escape(summary)}</p>
@@ -210,7 +234,8 @@ def live_demo(planner, instruction=DEMO_INSTRUCTION, seed=DEMO_SEED):
                                   if step.get("execution", {}).get("error")), None)
                     if error:
                         summary += f" · {error}"
-                output.update(dashboard(frame, overview, instruction, actions, elapsed, summary))
+                output.update(dashboard(frame, overview, instruction, actions, elapsed, summary,
+                                        spectator=spectator_frame(info["port"])))
                 if report is not None:
                     return report
                 time.sleep(0.5)
@@ -259,7 +284,7 @@ def live_baseline(motion="forward", seed=DEMO_SEED):
                     distance = math.dist((info["home_pose"]["x"], info["home_pose"]["y"]), trail[-1])
                     summary = f"执行结束 · 位移 {distance:.2f} m" if result["success"] else result.get("error", "已停车")
                 output.update(dashboard(frame, overview, label, [action["action"]],
-                                        time.monotonic() - started, summary,
+                                        time.monotonic() - started, summary, spectator=spectator_frame(info["port"]),
                                         title="MicroDuck · 官方步态", decision_label="手动命令"))
                 if result is not None:
                     return result
