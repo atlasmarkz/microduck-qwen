@@ -304,7 +304,10 @@ def main():
             if body.camera is not None and time.monotonic() >= next_image:
                 render_started = time.monotonic()
                 body.camera.render(world)
-                next_image = time.monotonic() + 0.2
+                # 0.2 s gap (5 Hz) as in the experiments; demo mode (--spectator) on a fast GPU
+                # renders the robot camera at 10 Hz. Software GL keeps the 0.2 s gap.
+                fast = spectator is not None and time.monotonic() - render_started < 0.05
+                next_image = time.monotonic() + (0.1 if fast else 0.2)
                 if physics is not None:
                     render_s = time.monotonic() - render_started
                     camera_stats["frames"] += 1

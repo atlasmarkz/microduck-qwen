@@ -59,27 +59,40 @@ def free_port():
         return probe.getsockname()[1]
 
 
-def audience_frames(port):
+class AudienceFeed:
     """(chase view, robot camera) as JPEG bytes for the audience; (None, None) until rendered.
 
-    One small request: the simulator pre-encodes both, so the dashboard never pulls the
-    agent's full RGB-D packet (about 1 MB with depth) just to show a picture.
+    One small request per refresh over one kept-open connection: the simulator pre-encodes
+    both pictures, so the dashboard never pulls the agent's full RGB-D packet (about 1 MB
+    with depth), and the simulator log is not flooded with connect/disconnect lines.
     """
-    from .navigation import JsonConnection
 
-    try:
-        connection = JsonConnection(("127.0.0.1", port))
-    except OSError:
-        return None, None  # cosmetic view: never stop the demo over it
-    try:
-        connection.send({"op": "spectator"})
-        packet = connection.receive()
+    def __init__(self, port):
+        self.port, self.connection = port, None
+
+    def frames(self):
+        from .navigation import JsonConnection
+
+        try:
+            if self.connection is None:
+                self.connection = JsonConnection(("127.0.0.1", self.port))
+            self.connection.send({"op": "spectator"})
+            packet = self.connection.receive()
+        except RuntimeError:
+            return None, None  # not rendered yet
+        except OSError:
+            self.close()  # cosmetic view: reconnect next time, never stop the demo over it
+            return None, None
         camera = packet.get("camera_jpeg_b64")
         return base64.b64decode(packet["jpeg_b64"]), base64.b64decode(camera) if camera else None
-    except (RuntimeError, OSError):
-        return None, None  # not rendered yet, or a transient socket hiccup
-    finally:
-        connection.close()
+
+    def close(self):
+        if self.connection is not None:
+            try:
+                self.connection.close()
+            except OSError:
+                pass
+            self.connection = None
 
 
 @contextmanager
@@ -223,7 +236,7 @@ class Board:
         self.status_text = status
 
 
-REFRESH_S = 0.1  # dashboard cadence; the simulator renders the chase view at up to 15 Hz on a GPU
+REFRESH_S = 1 / 15  # dashboard cadence; on a GPU the simulator renders the chase view at 15 Hz, the robot camera at 10 Hz
 
 
 def live_demo(planner, instruction=DEMO_INSTRUCTION, seed=DEMO_SEED):
@@ -248,7 +261,7 @@ def live_demo(planner, instruction=DEMO_INSTRUCTION, seed=DEMO_SEED):
     with ThreadPoolExecutor(max_workers=1) as worker, simulation(seed) as info:
         scene = json.loads(Path(info["scene_file"]).read_text(encoding="utf-8"))
         home = info["home_pose"]
-        observer = Observer(info["port"])
+        observer, feed = Observer(info["port"]), AudienceFeed(info["port"])
         trail, actions = [], []
         started = next_map = time.monotonic()
         try:
@@ -271,12 +284,13 @@ def live_demo(planner, instruction=DEMO_INSTRUCTION, seed=DEMO_SEED):
                                   if step.get("execution", {}).get("error")), None)
                     if error:
                         summary += f" · {error}"
-                spectator, camera = audience_frames(info["port"])
+                spectator, camera = feed.frames()
                 board.update(actions, tick - started, summary, spectator=spectator, camera=camera, overview=overview)
                 if report is not None:
                     return report
                 time.sleep(max(0.0, REFRESH_S - (time.monotonic() - tick)))
         finally:
+            feed.close()
             observer.close()
 
 
@@ -302,7 +316,7 @@ def live_baseline(motion="forward", seed=DEMO_SEED):
 
     board = Board("MicroDuck · 官方步态", label, "手动命令")
     with tempfile.TemporaryDirectory() as directory, ThreadPoolExecutor(max_workers=1) as worker, simulation(seed) as info:
-        observer = Observer(info["port"])
+        observer, feed = Observer(info["port"]), AudienceFeed(info["port"])
         try:
             scene = json.loads(Path(info["scene_file"]).read_text(encoding="utf-8"))
             trail, started = [], time.monotonic()
@@ -321,11 +335,12 @@ def live_baseline(motion="forward", seed=DEMO_SEED):
                 if result is not None:
                     distance = math.dist((info["home_pose"]["x"], info["home_pose"]["y"]), trail[-1])
                     summary = f"执行结束 · 位移 {distance:.2f} m" if result["success"] else result.get("error", "已停车")
-                spectator, camera = audience_frames(info["port"])
+                spectator, camera = feed.frames()
                 board.update([action["action"]], tick - started, summary,
                              spectator=spectator, camera=camera, overview=overview)
                 if result is not None:
                     return result
                 time.sleep(max(0.0, REFRESH_S - (time.monotonic() - tick)))
         finally:
+            feed.close()
             observer.close()
