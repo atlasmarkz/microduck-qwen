@@ -59,26 +59,25 @@ def free_port():
         return probe.getsockname()[1]
 
 
-def display_frame(port):
-    """Latest camera frame for the audience view; never fails on render latency."""
-    from .vision import capture
+def audience_frames(port):
+    """(chase view, robot camera) as JPEG bytes for the audience; (None, None) until rendered.
 
-    return capture(port, max_age=math.inf)
-
-
-def spectator_frame(port):
-    """JPEG bytes of the audience-only third-person view, or None until the first one exists."""
+    One small request: the simulator pre-encodes both, so the dashboard never pulls the
+    agent's full RGB-D packet (about 1 MB with depth) just to show a picture.
+    """
     from .navigation import JsonConnection
 
     try:
         connection = JsonConnection(("127.0.0.1", port))
     except OSError:
-        return None  # cosmetic view: never stop the demo over it
+        return None, None  # cosmetic view: never stop the demo over it
     try:
         connection.send({"op": "spectator"})
-        return base64.b64decode(connection.receive()["jpeg_b64"])
+        packet = connection.receive()
+        camera = packet.get("camera_jpeg_b64")
+        return base64.b64decode(packet["jpeg_b64"]), base64.b64decode(camera) if camera else None
     except (RuntimeError, OSError):
-        return None  # not rendered yet, or a transient socket hiccup
+        return None, None  # not rendered yet, or a transient socket hiccup
     finally:
         connection.close()
 
@@ -159,39 +158,76 @@ def draw_overview(scene, home, trail, yaw):
     return image
 
 
-def dashboard(frame, overview, instruction, decisions, elapsed, summary="", *, spectator=None,
-              title="MicroDuck × Qwen-VL", decision_label="模型决策"):
-    from IPython.display import HTML
-    from PIL import Image
+def jpeg(image, quality=78):
+    buffer = io.BytesIO()
+    image.save(buffer, format="JPEG", quality=quality)
+    return buffer.getvalue()
 
-    def img(image):
-        if isinstance(image, bytes):
-            data = image  # already JPEG from the simulator
-        else:
-            buffer = io.BytesIO()
-            image.save(buffer, format="JPEG", quality=78)
-            data = buffer.getvalue()
-        return 'data:image/jpeg;base64,' + base64.b64encode(data).decode()
 
-    actions = " → ".join(decisions) or "等待第一步…"
-    third = (f'<div>第三视角 · 跟随小鸭子（仅供观众）<br><img width="480" src="{img(spectator)}"></div>'
-             if spectator else "")
-    return HTML(f"""<div style="font:16px system-ui;max-width:1000px">
-      <p><b>{html.escape(title)}</b>　{html.escape(instruction)}</p>
-      <div style="display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap">
-        {third}
-        <div>机器人实时第一视角 · 模型看到的画面<br><img width="480" src="{img(Image.fromarray(frame.rgb))}"></div>
-        <div>仿真俯视图 · 白点为起点<br><img width="300" src="{img(overview)}"></div>
-      </div>
-      <p><b>{html.escape(decision_label)}</b>　{html.escape(actions)}　·　{elapsed:.0f} 秒</p>
-      <p>{html.escape(summary)}</p>
-    </div>""")
+class Board:
+    """Dashboard whose pictures update in place, so motion reads as video, not page reloads.
+
+    Uses ipywidgets (preinstalled on Colab); without it, falls back to re-rendering HTML.
+    Only changed pictures are sent, which keeps a 10 Hz refresh light.
+    """
+
+    PANELS = (("spectator", "第三视角 · 跟随小鸭子（仅供观众）", 480),
+              ("camera", "机器人实时第一视角 · 模型看到的画面", 480),
+              ("overview", "仿真俯视图 · 白点为起点", 300))
+
+    def __init__(self, title, subtitle, decision_label):
+        from IPython.display import HTML, display
+
+        self.header = f"<b>{html.escape(title)}</b>　{html.escape(subtitle)}"
+        self.decision_label, self.latest, self.status_text = decision_label, {}, None
+        try:
+            import ipywidgets as widgets
+        except ImportError:
+            widgets = None
+        self.widgets = widgets
+        if widgets is None:
+            self.handle = display(HTML(self.header), display_id=True)
+            return
+        self.images, boxes = {}, []
+        for name, caption, width in self.PANELS:
+            self.images[name] = widgets.Image(format="jpeg", layout=widgets.Layout(width=f"{width}px"))
+            boxes.append(widgets.VBox([widgets.HTML(html.escape(caption)), self.images[name]]))
+        self.status = widgets.HTML()
+        display(widgets.VBox([widgets.HTML(f'<div style="font-size:16px">{self.header}</div>'),
+                              widgets.HBox(boxes, layout=widgets.Layout(flex_flow="row wrap", grid_gap="16px")),
+                              self.status]))
+
+    def update(self, decisions, elapsed, summary="", **pictures):
+        """pictures: spectator / camera / overview as JPEG bytes; None keeps the previous one."""
+        from IPython.display import HTML
+
+        changed = {name: data for name, data in pictures.items()
+                   if data is not None and data != self.latest.get(name)}
+        self.latest.update(changed)
+        actions = " → ".join(decisions) or "等待第一步…"
+        status = (f"<p><b>{html.escape(self.decision_label)}</b>　{html.escape(actions)}　·　{elapsed:.0f} 秒</p>"
+                  f"<p>{html.escape(summary)}</p>")
+        if self.widgets is not None:
+            for name, data in changed.items():
+                self.images[name].value = data
+            if status != self.status_text:
+                self.status.value = status
+        elif changed or status != self.status_text:
+            pictures_html = "".join(
+                f'<div>{html.escape(caption)}<br><img width="{width}" '
+                f'src="data:image/jpeg;base64,{base64.b64encode(self.latest[name]).decode()}"></div>'
+                for name, caption, width in self.PANELS if name in self.latest)
+            self.handle.update(HTML(f"""<div style="font:16px system-ui;max-width:1000px"><p>{self.header}</p>
+              <div style="display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap">{pictures_html}</div>
+              {status}</div>"""))
+        self.status_text = status
+
+
+REFRESH_S = 0.1  # dashboard cadence; the simulator renders the chase view at up to 15 Hz on a GPU
 
 
 def live_demo(planner, instruction=DEMO_INSTRUCTION, seed=DEMO_SEED):
     """Execute fresh model decisions while streaming simulated RGB and odometry."""
-    from IPython.display import display
-
     from .agent import run_instruction
     from .navigation import Observer
 
@@ -207,26 +243,27 @@ def live_demo(planner, instruction=DEMO_INSTRUCTION, seed=DEMO_SEED):
             decisions.put(action.get("action", "无法解析动作"))
             return prediction
 
-    output = display("正在启动 MuJoCo…", display_id=True)
+    board = Board("MicroDuck × Qwen-VL", instruction, "模型决策")
     # On interrupt, close the simulation before waiting for the in-flight inference.
     with ThreadPoolExecutor(max_workers=1) as worker, simulation(seed) as info:
         scene = json.loads(Path(info["scene_file"]).read_text(encoding="utf-8"))
         home = info["home_pose"]
         observer = Observer(info["port"])
         trail, actions = [], []
-        started = time.monotonic()
+        started = next_map = time.monotonic()
         try:
-            frame, state = display_frame(info["port"]), observer.read()
             task = worker.submit(run_instruction, ReportingPlanner(), instruction, info)
             while True:
+                tick = time.monotonic()
+                state = observer.read()
                 pose = tuple(state["trunk"][:2])
                 trail.append(pose)
                 while not decisions.empty():
                     actions.append(decisions.get_nowait())
-                overview = draw_overview(scene, home, trail, state["yaw"])
-                elapsed = time.monotonic() - started
                 report = task.result() if task.done() else None
-                summary = ""
+                summary, overview = "", None
+                if report is not None or tick >= next_map:
+                    overview, next_map = jpeg(draw_overview(scene, home, trail, state["yaw"])), tick + 0.3
                 if report is not None:
                     distance = math.dist(pose, (home["x"], home["y"]))
                     summary = f"结束状态 {report['status']} · 距起点 {distance:.2f} m · done 是模型声明"
@@ -234,20 +271,17 @@ def live_demo(planner, instruction=DEMO_INSTRUCTION, seed=DEMO_SEED):
                                   if step.get("execution", {}).get("error")), None)
                     if error:
                         summary += f" · {error}"
-                output.update(dashboard(frame, overview, instruction, actions, elapsed, summary,
-                                        spectator=spectator_frame(info["port"])))
+                spectator, camera = audience_frames(info["port"])
+                board.update(actions, tick - started, summary, spectator=spectator, camera=camera, overview=overview)
                 if report is not None:
                     return report
-                time.sleep(0.5)
-                frame, state = display_frame(info["port"]), observer.read()
+                time.sleep(max(0.0, REFRESH_S - (time.monotonic() - tick)))
         finally:
             observer.close()
 
 
 def live_baseline(motion="forward", seed=DEMO_SEED):
     """Run an explicit manual motion with the official gait, with no model inference."""
-    from IPython.display import display
-
     from .navigation import Observer
     from .skills import SkillExecutor
 
@@ -266,28 +300,32 @@ def live_baseline(motion="forward", seed=DEMO_SEED):
         finally:
             executor.close()
 
-    output = display("正在启动 MicroDuck…", display_id=True)
+    board = Board("MicroDuck · 官方步态", label, "手动命令")
     with tempfile.TemporaryDirectory() as directory, ThreadPoolExecutor(max_workers=1) as worker, simulation(seed) as info:
         observer = Observer(info["port"])
         try:
             scene = json.loads(Path(info["scene_file"]).read_text(encoding="utf-8"))
             trail, started = [], time.monotonic()
+            next_map = started
             task = worker.submit(execute, info, Path(directory))
             while True:
+                tick = time.monotonic()
                 state = observer.read()
-                frame = display_frame(info["port"])
                 trail.append(tuple(state["trunk"][:2]))
-                overview = draw_overview(scene, info["home_pose"], trail, state["yaw"])
                 result = task.result() if task.done() else None
+                overview = None
+                if result is not None or tick >= next_map:
+                    overview = jpeg(draw_overview(scene, info["home_pose"], trail, state["yaw"]))
+                    next_map = tick + 0.3
                 summary = ""
                 if result is not None:
                     distance = math.dist((info["home_pose"]["x"], info["home_pose"]["y"]), trail[-1])
                     summary = f"执行结束 · 位移 {distance:.2f} m" if result["success"] else result.get("error", "已停车")
-                output.update(dashboard(frame, overview, label, [action["action"]],
-                                        time.monotonic() - started, summary, spectator=spectator_frame(info["port"]),
-                                        title="MicroDuck · 官方步态", decision_label="手动命令"))
+                spectator, camera = audience_frames(info["port"])
+                board.update([action["action"]], tick - started, summary,
+                             spectator=spectator, camera=camera, overview=overview)
                 if result is not None:
                     return result
-                time.sleep(0.3)
+                time.sleep(max(0.0, REFRESH_S - (time.monotonic() - tick)))
         finally:
             observer.close()

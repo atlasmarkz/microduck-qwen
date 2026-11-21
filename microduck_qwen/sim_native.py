@@ -119,6 +119,7 @@ class Spectator:
         self.azimuth = None
         self.lock = threading.Lock()
         self.latest = None
+        self.camera_jpeg, self.camera_stamp = None, None
 
     def render(self):
         import base64
@@ -140,6 +141,20 @@ class Spectator:
         buffer = io.BytesIO()
         Image.fromarray(self.renderer.render()).save(buffer, format="JPEG", quality=80)
         packet = {"wall_ns": stamp, "jpeg_b64": base64.b64encode(buffer.getvalue()).decode()}
+        robot = self.body.camera.packet() if self.body.camera is not None and self.body.camera.latest else None
+        if robot is not None and robot["wall_ns"] != self.camera_stamp:
+            # Re-encode the agent's latest RGB once per new frame, so the audience view does not
+            # have to fetch the full RGB-D packet (about 1 MB with depth) to show it.
+            import zlib
+
+            import numpy as np
+
+            rgb = np.frombuffer(zlib.decompress(base64.b64decode(robot["rgb_zlib"])), dtype=np.uint8)
+            frame = io.BytesIO()
+            Image.fromarray(rgb.reshape(robot["height"], robot["width"], 3)).save(frame, format="JPEG", quality=80)
+            self.camera_jpeg, self.camera_stamp = base64.b64encode(frame.getvalue()).decode(), robot["wall_ns"]
+        if self.camera_jpeg is not None:
+            packet.update(camera_jpeg_b64=self.camera_jpeg, camera_wall_ns=self.camera_stamp)
         with self.lock:
             self.latest = packet
 
@@ -303,8 +318,9 @@ def main():
             if spectator is not None and time.monotonic() >= next_spectator:
                 spectator_started = time.monotonic()
                 spectator.render()
-                # About 5 Hz on a GPU; on software GL back off so the agent's camera keeps its cadence.
-                next_spectator = time.monotonic() + max(0.2, 2 * (time.monotonic() - spectator_started))
+                # Up to 15 Hz on a GPU so the chase view reads as motion; on software GL back off
+                # to half duty so the agent's own camera keeps its cadence.
+                next_spectator = time.monotonic() + max(1 / 15, 2 * (time.monotonic() - spectator_started))
             if viewer is not None:
                 viewer.sync()
             if not ready and world.data.time >= 4.0:
