@@ -1,0 +1,63 @@
+{
+ "new": {
+  "alpha_walking_success": 0.002,
+  "velstand_v8_success": 1.0,
+  "alpha_walking_falls": 0,
+  "velstand_v8_falls": 0
+ },
+ "old": {
+  "alpha_walking_success": 1.0
+ },
+ "old_thresholds": {
+  "walk_vx_min": 0.054271887680602544,
+  "spin_yaw_min": 0.41358422357275443,
+  "stand_yaw_max": 0.05,
+  "stand_v_max": 0.02,
+  "base_stats": {
+   "walk_vx_p5_p50": [
+    0.10854377536120509,
+    0.1306388377789824
+   ],
+   "spin_yaw_p5_p50": [
+    0.8271684471455089,
+    0.9701184590583554
+   ],
+   "stand_yaw_p99": 0.0005702472001033031,
+   "stand_v_p99": 0.0001717528104455354,
+   "n": {
+    "stand": 150,
+    "walk": 190,
+    "spin": 160
+   },
+   "falls": 0
+  }
+ },
+ "noise_floor_1e-3": {
+  "new": {
+   "fixed": 2,
+   "broken": 1
+  },
+  "old": {
+   "fixed": 0,
+   "broken": 0
+  }
+ },
+ "new_by_bin": {
+  "0.3-0.5": {
+   "alpha_walking": 0.007042253521126761,
+   "velstand_v8": 1.0
+  },
+  "0.5-0.7": {
+   "alpha_walking": 0.0,
+   "velstand_v8": 1.0
+  },
+  "0.7-0.85": {
+   "alpha_walking": 0.0,
+   "velstand_v8": 1.0
+  },
+  "0.85-1.0": {
+   "alpha_walking": 0.0,
+   "velstand_v8": 1.0
+  }
+ }
+}

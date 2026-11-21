@@ -1,0 +1,138 @@
+{
+ "seeds": [
+  10000,
+  10005
+ ],
+ "policies": {
+  "alpha_walking": [
+   {
+    "case": "vx0.2 from standstill",
+    "falls": 0,
+    "n": 5,
+    "yaw_rate_mean": 0.0022989146268653175,
+    "vx_mean": 0.0002385280578557017
+   },
+   {
+    "case": "vx0.2 after 1.5 s of vx0.4",
+    "falls": 0,
+    "n": 5,
+    "yaw_rate_mean": -0.018213540602447023,
+    "vx_mean": 0.06435466144923244
+   },
+   {
+    "case": "vx0.2 no obs noise",
+    "falls": 0,
+    "n": 5,
+    "yaw_rate_mean": 0.0006240974047115395,
+    "vx_mean": 0.0001078944082508367
+   },
+   {
+    "case": "wz+0.6 from standstill",
+    "falls": 0,
+    "n": 5,
+    "yaw_rate_mean": 0.0059601860931784295,
+    "vx_mean": 0.00014389212006097278
+   },
+   {
+    "case": "wz+0.6 after 1.5 s of wz+1.5",
+    "falls": 0,
+    "n": 5,
+    "yaw_rate_mean": 0.24775902777864428,
+    "vx_mean": 0.01584292745961554
+   },
+   {
+    "case": "wz-0.6 after 1.5 s of wz-1.5",
+    "falls": 0,
+    "n": 5,
+    "yaw_rate_mean": -0.37390841328869906,
+    "vx_mean": 0.013712900580275914
+   },
+   {
+    "case": "wz+0.3 after 1.5 s of wz+1.5",
+    "falls": 0,
+    "n": 5,
+    "yaw_rate_mean": 0.00117228322222791,
+    "vx_mean": -5.884255270338602e-05
+   },
+   {
+    "case": "wz+1.0 after 1.5 s of wz+1.5",
+    "falls": 0,
+    "n": 5,
+    "yaw_rate_mean": 0.43347304117292207,
+    "vx_mean": 0.016911893899236023
+   },
+   {
+    "case": "wz+0.6 no obs noise",
+    "falls": 0,
+    "n": 5,
+    "yaw_rate_mean": 0.004797571214726708,
+    "vx_mean": 0.00014175320913290573
+   }
+  ],
+  "velstand": [
+   {
+    "case": "vx0.2 from standstill",
+    "falls": 0,
+    "n": 5,
+    "yaw_rate_mean": 0.0027221030464272492,
+    "vx_mean": 0.0001619429569415531
+   },
+   {
+    "case": "vx0.2 after 1.5 s of vx0.4",
+    "falls": 0,
+    "n": 5,
+    "yaw_rate_mean": -0.08009140787964718,
+    "vx_mean": 0.053186516334316
+   },
+   {
+    "case": "vx0.2 no obs noise",
+    "falls": 0,
+    "n": 5,
+    "yaw_rate_mean": -0.0009396084118678358,
+    "vx_mean": 0.0001162282499249291
+   },
+   {
+    "case": "wz+0.6 from standstill",
+    "falls": 0,
+    "n": 5,
+    "yaw_rate_mean": 0.06704211142850179,
+    "vx_mean": 0.0011322506933143846
+   },
+   {
+    "case": "wz+0.6 after 1.5 s of wz+1.5",
+    "falls": 0,
+    "n": 5,
+    "yaw_rate_mean": 0.606085936152302,
+    "vx_mean": 0.011823422155711378
+   },
+   {
+    "case": "wz-0.6 after 1.5 s of wz-1.5",
+    "falls": 0,
+    "n": 5,
+    "yaw_rate_mean": -0.704738133923163,
+    "vx_mean": 0.015963863989387598
+   },
+   {
+    "case": "wz+0.3 after 1.5 s of wz+1.5",
+    "falls": 0,
+    "n": 5,
+    "yaw_rate_mean": 0.31930609129105764,
+    "vx_mean": 0.00930629475639034
+   },
+   {
+    "case": "wz+1.0 after 1.5 s of wz+1.5",
+    "falls": 0,
+    "n": 5,
+    "yaw_rate_mean": 1.185389469594419,
+    "vx_mean": -0.0017971927644145527
+   },
+   {
+    "case": "wz+0.6 no obs noise",
+    "falls": 0,
+    "n": 5,
+    "yaw_rate_mean": 0.0028709702329060586,
+    "vx_mean": -7.393748598154982e-05
+   }
+  ]
+ }
+}

@@ -1,0 +1,20 @@
+== alpha_walking
+  vx0.2 from standstill            falls 0/5  yaw +0.002  vx +0.000
+  vx0.2 after 1.5 s of vx0.4       falls 0/5  yaw -0.018  vx +0.064
+  vx0.2 no obs noise               falls 0/5  yaw +0.001  vx +0.000
+  wz+0.6 from standstill           falls 0/5  yaw +0.006  vx +0.000
+  wz+0.6 after 1.5 s of wz+1.5     falls 0/5  yaw +0.248  vx +0.016
+  wz-0.6 after 1.5 s of wz-1.5     falls 0/5  yaw -0.374  vx +0.014
+  wz+0.3 after 1.5 s of wz+1.5     falls 0/5  yaw +0.001  vx -0.000
+  wz+1.0 after 1.5 s of wz+1.5     falls 0/5  yaw +0.433  vx +0.017
+  wz+0.6 no obs noise              falls 0/5  yaw +0.005  vx +0.000
+== velstand
+  vx0.2 from standstill            falls 0/5  yaw +0.003  vx +0.000
+  vx0.2 after 1.5 s of vx0.4       falls 0/5  yaw -0.080  vx +0.053
+  vx0.2 no obs noise               falls 0/5  yaw -0.001  vx +0.000
+  wz+0.6 from standstill           falls 0/5  yaw +0.067  vx +0.001
+  wz+0.6 after 1.5 s of wz+1.5     falls 0/5  yaw +0.606  vx +0.012
+  wz-0.6 after 1.5 s of wz-1.5     falls 0/5  yaw -0.705  vx +0.016
+  wz+0.3 after 1.5 s of wz+1.5     falls 0/5  yaw +0.319  vx +0.009
+  wz+1.0 after 1.5 s of wz+1.5     falls 0/5  yaw +1.185  vx -0.002
+  wz+0.6 no obs noise              falls 0/5  yaw +0.003  vx -0.000
