@@ -10,7 +10,9 @@ import threading
 import time
 
 from . import ROOT
-from .sim_native import Commands, ControlHandler, DEFAULT_POLICY, DEFAULT_RL, Gait
+from .colab_demo import draw_overview
+from .demo_gif import compose_demo_frame, quantize_demo_frame
+from .sim_native import Commands, ControlHandler, DEFAULT_POLICY, DEFAULT_RL, Gait, Spectator
 from .sim_body import configure_body
 from .sim_data import digest
 
@@ -72,7 +74,7 @@ def main():
         camera.distance, camera.azimuth, camera.elevation = 9.6, 90, -86
     font = ImageFont.truetype("msyh.ttc", 17)
     small = ImageFont.truetype("msyh.ttc", 14)
-    wrenderer = mujoco.Renderer(world.model, height=338, width=600) if args.world else None
+    wrenderer = Spectator(world, body) if args.world else None
     try:
         bold = ImageFont.truetype("msyhbd.ttc", 26)
         label_font = ImageFont.truetype("msyhbd.ttc", 17)
@@ -104,83 +106,29 @@ def main():
             finished.set()
 
     def world_frame(elapsed, distance, pose, port):
-        """Large 16:10 layout for the multi-room demo: top-down world with trail, model input, live view, decisions."""
+        """Capture 3rd-person chase view of the duck + 1st-person camera + 2D trail for the README GIF."""
+        import base64
+        import io
+
         body.camera.render(world)
-        wrenderer.update_scene(world.data, camera=camera)
+        wrenderer.render()
+        spec_img = Image.open(io.BytesIO(base64.b64decode(wrenderer.packet()["jpeg_b64"]))).convert("RGB")
         trail.append((pose[0], pose[1]))
-        import numpy as np
-        cam = wrenderer.scene.camera[0]
-        eye, forward, up = np.array(cam.pos), np.array(cam.forward), np.array(cam.up)
-        right = np.cross(forward, up)
-        tan = math.tan(math.radians(world.model.vis.global_.fovy) / 2)
-
-        def project(x, y, z=0.3):  # world metres -> pixels of the 600x338 top-down render
-            v = np.array([x, y, z]) - eye
-            depth = v @ forward
-            return 300 + (v @ right) / depth / tan * 169, 169 - (v @ up) / depth / tan * 169
-
-        pixels = [project(px, py) for px, py in trail]
-        # Only the GL render and the camera grab happen while the simulation runs; drawing is deferred.
-        jobs.append((Image.fromarray(wrenderer.render()), pixels, capture(port), elapsed, distance, list(decisions), finished.is_set()))
+        sensor = body.sensors()
+        w, qx, qy, qz = sensor["imu"]["quat"]
+        yaw = math.atan2(2 * (w * qz + qx * qy), 1 - 2 * (qy * qy + qz * qz))
+        minimap = draw_overview(scene_data, home, list(trail), yaw)
+        jobs.append((spec_img, minimap, capture(port), elapsed, distance, list(decisions), finished.is_set()))
         times.append(time.monotonic())
 
-    def compose(top, pixels, live_frame, elapsed, distance, decisions, done):
-        overlay = ImageDraw.Draw(top)
-        for i, (px, py) in enumerate(pixels[:-1]):
-            r = 2.5 + 2.0 * i / max(1, len(pixels))
-            overlay.ellipse((px - r, py - r, px + r, py + r), fill=(39, 211, 255))
-        rx, ry = pixels[-1]
-        overlay.ellipse((rx - 11, ry - 11, rx + 11, ry + 11), fill=(255, 154, 47), outline=(255, 255, 255), width=3)
-        canvas = Image.new("RGB", (1000, 620), "#0b1220")
-        draw = ImageDraw.Draw(canvas)
-        draw.text((24, 14), "MICRODUCK × QWEN-VL", font=bold, fill="white")
-        chip = f"实机仿真 · {args.speed}× 倍速 · {elapsed:.0f} s"
-        width = draw.textlength(chip, font=note_font) + 28
-        draw.rounded_rectangle((976 - width, 20, 976, 52), 16, fill="#2a1f0b", outline="#ffc778")
-        draw.text((990 - width, 25), chip, font=note_font, fill="#ffc778")
-        draw.rounded_rectangle((20, 70, 980, 118), 12, fill="#14203a", outline="#2b4170")
-        draw.text((36, 79), "指令", font=label_font, fill="#61c9ff")
-        draw.text((100, 76), instruction, font=text_font, fill="white")
-        canvas.paste(top, (20, 134))
-        draw.rounded_rectangle((20, 134, 620, 472), 6, outline="#2b4170", width=2)
-        draw.rounded_rectangle((26, 138, 372, 166), 8, fill="#0b1220")
-        draw.text((36, 141), "俯视全景 · 橙点为机器人，蓝点为走过的路", font=note_font, fill="#c9d6ee")
-        live = annotate(live_frame, propose_targets(live_frame)).resize((340, 191))
-        model_image = live
-        if decisions:
-            with Image.open(decisions[-1]["image"]) as image:
-                model_image = image.convert("RGB").resize((340, 191))
-        draw.text((640, 134), "本步模型输入（带编号）", font=label_font, fill="#9aabc7")
-        canvas.paste(model_image, (640, 160))
-        draw.text((640, 360), "机器人第一视角", font=label_font, fill="#9aabc7")
-        canvas.paste(live, (640, 386))
-        for box in ((640, 160, 980, 351), (640, 386, 980, 577)):
-            draw.rounded_rectangle(box, 4, outline="#2b4170", width=2)
-        draw.text((20, 486), "模型决策（每步重新看图）", font=label_font, fill="#9aabc7")
-        x = 20
-        for i, decision in enumerate(decisions):
-            action = decision.get("prediction", {}).get("action", {})
-            label = " · ".join(str(v) for v in action.values()) if action else "看图推理中…"
-            text = f"{i + 1}  {label}"
-            chip_w = draw.textlength(text, font=chip_font) + 26
-            current = i == len(decisions) - 1 and not done
-            draw.rounded_rectangle((x, 516, x + chip_w, 556), 20, fill="#10304a" if current else "#14203a",
-                                   outline="#61c9ff" if current else "#2b4170", width=2)
-            draw.text((x + 13, 522), text, font=chip_font, fill="white")
-            x += chip_w + 10
-        status = "已完成" if done else "执行中"
-        draw.text((20, 572), f"距起点 {distance:.2f} m   状态：{status}", font=text_font, fill="#90edc2")
-        draw.text((20, 598), f"{MODEL.split('/')[-1]} + LoRA · 官方步态 · done 仅为模型声明，非成功认证", font=note_font, fill="#7d8aa6")
-        # Small saturated marks (the orange robot dot) vanish in a 96-colour palette unless their colours are
-        # forced in: quantize with a swatch strip appended, then crop it away.
-        swatches = Image.new("RGB", (1000, 40), "#0b1220")
-        keep = ("#ff9a2f", "#27d3ff", "#90edc2", "#ffc778", "#e5322d", "#2a5cff", "#2fd14f", "#ffffff")
-        for k, colour in enumerate(keep):  # the ball colours (red/blue/green) must survive next to the orange robot
-            swatches.paste(Image.new("RGB", (125, 40), colour), (k * 125, 0))
-        extended = Image.new("RGB", (1000, 660))
-        extended.paste(canvas, (0, 0))
-        extended.paste(swatches, (0, 620))
-        frames.append(extended.quantize(colors=96, dither=Image.Dither.NONE).crop((0, 0, 1000, 620)))
+    def compose(spec_img, minimap, live_frame, elapsed, distance, decisions, done):
+        live = annotate(live_frame, propose_targets(live_frame))
+        action_dicts = [d["prediction"]["action"] for d in decisions if d.get("prediction", {}).get("action")]
+        canvas = compose_demo_frame(
+            spec_img, live, minimap, instruction, action_dicts, elapsed, distance,
+            speed=args.speed, done=done,
+        )
+        frames.append(quantize_demo_frame(canvas, colors=128))
 
     jobs = []  # raw snapshots; all PIL work happens after the run so it cannot slow the simulation down
     worker = None
@@ -282,6 +230,9 @@ def main():
         output = ROOT / "assets" / ("explore-rooms-4b-v1.gif" if args.world else
                                     "yellow-obstacles-4b-v1.gif" if args.yellow_course else "agent-demo.gif")
         frames[0].save(output, save_all=True, append_images=frames[1:], duration=durations, loop=0, optimize=True)
+        if args.world:
+            import shutil
+            shutil.copyfile(output, ROOT / "assets/microduck-navigation-demo.gif")
         with Image.open(output) as gif:
             assert gif.is_animated and gif.n_frames > 30 and gif.size == frames[0].size
             encoded_ms = 0

@@ -144,8 +144,9 @@ class Explorer:
             if k < 3:
                 with self.turn_trace.open("a") as trace:
                     turned = self.executor._bounded({"action": "turn", "direction": "left", "degrees": 90}, trace)
-                if not turned["success"]:
-                    raise RuntimeError("explore scan turn failed")
+                achieved = turned.get("achieved", 0.0)
+                if not turned["success"] and not (math.radians(45) <= achieved <= math.radians(145)):
+                    raise RuntimeError(f"explore scan turn failed (achieved={math.degrees(achieved):.1f} deg)")
         return []
 
     def settle(self, color, seen):
