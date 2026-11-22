@@ -1,0 +1,51 @@
+{
+ "instruction": "去别的房间找蓝色的球，走到它旁边，然后回起点",
+ "seed": 98107,
+ "adapter": "adapters/lang-v2",
+ "home": {
+  "x": 0.002077834787867965,
+  "y": 0.00012904772218025234,
+  "yaw": -0.00423368449221793
+ },
+ "status": "model_done",
+ "error": null,
+ "final_home_distance_m": 0.08148472927254112,
+ "events": [
+  {
+   "t": 0.8589999999999236,
+   "kind": "thinking"
+  },
+  {
+   "t": 6.780999999999949,
+   "kind": "decided",
+   "action": "explore"
+  },
+  {
+   "t": 50.983999999999924,
+   "kind": "thinking"
+  },
+  {
+   "t": 53.26499999999987,
+   "kind": "decided",
+   "action": "approach"
+  },
+  {
+   "t": 68.65599999999995,
+   "kind": "thinking"
+  },
+  {
+   "t": 70.29700000000003,
+   "kind": "decided",
+   "action": "return_home"
+  },
+  {
+   "t": 113.0,
+   "kind": "thinking"
+  },
+  {
+   "t": 114.51499999999987,
+   "kind": "decided",
+   "action": "done"
+  }
+ ]
+}

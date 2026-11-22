@@ -14,10 +14,10 @@ Qwen3-VL 看图选择下一步技能，MuJoCo 中的规划器和官方步态负�
 </p>
 
 <p align="center">
-  <img src="assets/microduck-navigation-demo.gif" width="100%" alt="MicroDuck 仿真实录：俯视轨迹、模型第一视角与找蓝球后返回起点的四步决策">
+  <img src="assets/microduck-navigation-demo.gif" width="100%" alt="MicroDuck 仿真实录：跟随小鸭子的第三视角、模型第一视角、俯视轨迹与找蓝球后返回起点的四步决策">
 </p>
 
-一次 MuJoCo 仿真实录，**5× 播放**。机器人跨房间找到蓝球，走近后返回起点，最终相距约 **8 cm**。左侧是供观众查看的俯视轨迹，右侧是模型读取的相机图像和当前动作。[原始录像](assets/explore-rooms-4b-v1.gif) · [逐步记录](assets/explore-rooms-4b-v1.json)
+一次 MuJoCo 仿真实录，**5× 播放**，实际用时约 115 秒。机器人跨房间找到蓝球，走近后返回起点，最终相距约 **8 cm**。左侧是跟随小鸭子的第三视角，只给观众看；右侧是模型读取的相机图像、俯视轨迹和当前决策。由 `python -m microduck_qwen.record_readme_demo record` 和 `compose` 生成。[逐步记录](assets/microduck-navigation-demo.json) · [早期录像](assets/explore-rooms-4b-v1.gif)
 
 ## 在浏览器里试
 
