@@ -125,11 +125,13 @@ ROBOT_ZH = {"robot_walk.xml": "行走模型（躯干和头部碰撞已简化）"
 COMMAND_ZH = {"VelocityCommandCommandOnlyCfg": "速度指令", "RelativeHeadingVelocityCommandCfg": "速度 + 相对朝向指令",
               "GroundPickPhaseCommandCfg": "相位时钟 [cos, sin, 0]", "SitStandCommandCfg": "姿势标志（0 站，1 坐）",
               "UniformPoseCommandCfg": "姿态偏移", "StandingGatedPoseCommandCfg": "姿态偏移（仅站立时）"}
+# These commands write their own values; the velocity ranges they inherit are never sampled.
+GENERATED_COMMANDS = {"GroundPickPhaseCommandCfg": "由相位时钟生成，不采样", "SitStandCommandCfg": "随机切换 0 / 1，不采样速度"}
 
 STYLE = ("<style>.duck{font:14px/1.6 system-ui,sans-serif;max-width:1080px}"
          ".duck table{border-collapse:collapse;margin:8px 0}.duck th,.duck td{border:1px solid rgba(128,128,128,.4);"
          "padding:4px 10px;text-align:left;vertical-align:top}.duck .num{text-align:right;font-variant-numeric:tabular-nums}"
-         ".duck small{opacity:.75}</style>")
+         ".duck small{opacity:.75}.duck th,.duck .key{white-space:nowrap}.duck .wide{min-width:200px}</style>")
 
 
 def load():
@@ -143,9 +145,13 @@ def variants(snapshot, flat_id):
     return base, [task["id"] for task in snapshot["tasks"] if task.get("base") in base]
 
 
-def table(head, rows, numeric=()):
+def table(head, rows, numeric=(), key=(0,), wide=()):
+    """Colab outputs are narrow: key columns never wrap, wide columns keep a readable width."""
+    def style(i):
+        return " ".join(name for name, columns in (("num", numeric), ("key", key), ("wide", wide)) if i in columns)
+
     def cells(row):
-        return "".join(f'<td class="num">{c}</td>' if i in numeric else f"<td>{c}</td>" for i, c in enumerate(row))
+        return "".join(f'<td class="{style(i)}">{c}</td>' for i, c in enumerate(row))
 
     return ("<table><tr>" + "".join(f"<th>{h}</th>" for h in head) + "</tr>"
             + "".join(f"<tr>{cells(row)}</tr>" for row in rows) + "</table>")
@@ -153,6 +159,15 @@ def table(head, rows, numeric=()):
 
 def code(names, separator="、"):
     return separator.join(f"<code>{html.escape(name)}</code>" for name in names)
+
+
+def ranges_text(ranges):
+    """{"lin_vel_x": [-0.4, 0.4]} or {"range": [[lo, hi], ...]} as readable intervals."""
+    parts = []
+    for name, value in ranges.items():
+        pairs = [f"[{low:.3g}, {high:.3g}]" for low, high in (value if isinstance(value[0], list) else [value])]
+        parts.append(" ".join(pairs) if name == "range" else f"{name} {pairs[0]}")
+    return html.escape("；".join(parts))
 
 
 def value_text(value):
@@ -170,15 +185,15 @@ def task_table_html():
     for key, (title, goal, _how, flat_id, policies, bundle) in FAMILIES.items():
         base, backlash = variants(snapshot, flat_id)
         task = by_id[flat_id]
-        terrain = "斜坡" if task["terrain"] == "slope" else "平地 + 崎岖" if len(base) > 1 else "平地"
-        rows.append((f"<b>{title}</b><br><small>{key}</small>", goal, terrain, code([task["robot_xml"]]),
+        terrain = "斜坡" if task["terrain"] == "slope" else "平地、崎岖" if len(base) > 1 else "平地"
+        rows.append((f"<b>{title}</b><br><small>{key}</small>", goal, terrain, task["robot_xml"].removeprefix("robot_").removesuffix(".xml"),
                      len(task["rewards"]), len(backlash) or "无", "<br>".join(policies) or "未发布",
                      "可续训" if bundle else "无"))
     total, twins = len(by_id), sum("base" in task for task in by_id.values())
     return (STYLE + f'<div class="duck"><p>microduck_rl 在提交 <code>{snapshot["revision"][:7]}</code> 注册了 <b>{total}</b> 个任务：'
             f"{total - twins} 个基础任务（{len(FAMILIES)} 个任务族）和 {twins} 个齿隙（Backlash）变体。"
             "齿隙变体给 14 个舵机各加 ±1° 间隙，奖励和观测项不变。</p>"
-            + table(("任务族", "学什么", "地形", "机器人模型", "奖励项", "齿隙变体", "官方 ONNX", "训练检查点"), rows, numeric=(4, 5))
+            + table(("任务族", "学什么", "地形", "机器人模型", "奖励项", "齿隙变体", "官方 ONNX", "检查点"), rows, numeric=(4, 5), key=(0, 2, 7), wide=(1,))
             + f"<p><small>“可续训”指 Hugging Face <code>{TRAINING_REPO}</code> 里有完整 rsl_rl 检查点（演员、评论家、归一化、优化器、课程进度）。"
             "ONNX 只能运行，不能继续训练。</small></p></div>")
 
@@ -194,7 +209,7 @@ def family_html(key):
         rewards.append((code([term["name"]]), REWARD_ZH[term["func"]], weight,
                         f'<small>{html.escape(snapshot["reward_docs"][term["func"]])}</small>'))
     commands = [(code([name]), COMMAND_ZH[cfg["type"]],
-                 f'<small>{html.escape(json.dumps(cfg["ranges"]))}</small>' if cfg["ranges"] else "无")
+                 f'<small>{GENERATED_COMMANDS.get(cfg["type"]) or ranges_text(cfg["ranges"])}</small>')
                 for name, cfg in task["commands"].items()]
     ppo = task["ppo"]
     bundle_text = f"{TRAINING_REPO}/bundles/{bundle}" if bundle else "未公开"
@@ -221,10 +236,10 @@ def family_html(key):
     ]
     return (STYLE + f'<div class="duck"><h3>{title} · {key}</h3><p>{goal}<br>{how}</p>' + table(("项目", "内容"), facts)
             + f"<h4>奖励（{len(rewards)} 项，{flat_id}）</h4>"
-            + table(("奖励项", "含义", "权重", "上游说明原文"), rewards, numeric=(2,))
+            + table(("奖励项", "含义", "权重", "上游说明原文"), rewards, numeric=(2,), key=(0, 2))
             + "<p><small>箭头表示课程把权重从初值调到终值。部分惩罚函数自己返回负数，所以权重写成正数。"
             "权重 0 的项用来保留观测槽位或作挂钩。</small></p>"
-            + "<h4>指令</h4>" + table(("槽位", "含义", "初始采样范围"), commands)
+            + "<h4>指令</h4>" + table(("槽位", "含义", "初始采样范围"), commands, key=(0, 1))
             + "<p>训练命令（需要 CUDA GPU，本 Notebook 不执行）：<br>"
             + code([f"uv run train {flat_id} --env.scene.num-envs 4096"]) + "</p></div>")
 
