@@ -3,6 +3,7 @@ import json
 import math
 from pathlib import Path
 import tempfile
+import threading
 import unittest
 from unittest.mock import MagicMock
 
@@ -33,6 +34,34 @@ class ColabDemoTests(unittest.TestCase):
         self.assertNotEqual(port, control_port)
         self.assertGreater(port, 0)
         self.assertGreater(control_port, 0)
+
+    def test_ui_bridge_queues_worker_updates_until_the_page_polls(self):
+        bridge = colab_demo.UiBridge()
+        bridge.colab, shown = MagicMock(), []
+
+        def worker():
+            for value in range(3):
+                bridge.post("status", lambda value=value: shown.append(("status", value)))
+            bridge.post("log", lambda: shown.append(("log", 0)))
+
+        thread = threading.Thread(target=worker)
+        thread.start()
+        thread.join()
+        self.assertEqual(shown, [])  # nothing reaches widgets outside a poll
+        bridge.flush()
+        self.assertEqual(shown, [("status", 2), ("log", 0)])  # newest per key, once
+        bridge.flush()
+        self.assertEqual(len(shown), 2)
+
+    def test_ui_bridge_main_thread_update_is_immediate_and_outdates_queued_ones(self):
+        bridge = colab_demo.UiBridge()
+        bridge.colab, shown = MagicMock(), []
+        thread = threading.Thread(target=lambda: bridge.post("log", lambda: shown.append("old")))
+        thread.start()
+        thread.join()
+        bridge.post("log", lambda: shown.append("new"))
+        bridge.flush()
+        self.assertEqual(shown, ["new"])
 
     def test_format_action_includes_parameters(self):
         self.assertEqual(colab_demo._format_action({"action": "explore", "color": "blue"}), "explore(color=blue)")

@@ -403,6 +403,93 @@ class Board:
 REFRESH_S = 1 / 15  # dashboard cadence; on a GPU the simulator renders the chase view at 15 Hz, the robot camera at 10 Hz
 
 
+class UiBridge:
+    """Delivers widget updates made by worker threads while no cell is running.
+
+    Colab drops widget messages the kernel sends on its own between cells (2026-11: an update from
+    a thread or an event-loop callback never reaches the page), but delivers those sent while it
+    answers the page. So on Colab the page polls, and each poll applies the newest pending updates.
+    Elsewhere the kernel's event loop applies them.
+    """
+
+    LANES = 3  # polls in flight at once, so the refresh rate is not capped by one round trip
+
+    def __init__(self):
+        self.main_thread = threading.get_ident()
+        self.lock = threading.Lock()
+        self.pending = {}
+        self.closed = False
+        self.polls = 0
+        self.ioloop = None
+        try:
+            from google.colab import output
+
+            self.colab = output
+        except ImportError:
+            self.colab = None
+            try:
+                from tornado.ioloop import IOLoop
+
+                self.ioloop = IOLoop.current(instance=False)
+            except Exception:
+                pass
+
+    def post(self, key, fn):
+        """Run fn on the main thread; a newer update with the same key replaces an undelivered one."""
+        if threading.get_ident() == self.main_thread:
+            with self.lock:
+                self.pending.pop(key, None)
+            fn()
+            return
+        with self.lock:
+            self.pending[key] = fn
+        if self.colab is None:
+            if self.ioloop is not None:
+                self.ioloop.add_callback(self.flush)
+            else:
+                self.flush()
+
+    def flush(self):
+        with self.lock:
+            updates, self.pending = list(self.pending.values()), {}
+        for update in updates:
+            update()
+
+    def start_polling(self):
+        """Call right after displaying the widgets: the polling script lives in the same output."""
+        if self.colab is None:
+            return
+        from IPython.display import JSON, Javascript, display
+
+        def poll():
+            self.polls += 1
+            self.flush()
+            return JSON({"stop": self.closed})
+
+        name = f"microduck.poll.{id(self)}"
+        self.colab.register_callback(name, poll)
+        display(Javascript("""
+            (() => {
+              const wait = ms => new Promise(done => setTimeout(done, ms));
+              const lane = async offset => {
+                await wait(offset);
+                for (let failures = 0; failures < 20;) {
+                  try {
+                    const reply = await google.colab.kernel.invokeFunction(%s, [], {});
+                    if (reply.data["application/json"].stop) return;
+                    failures = 0;
+                  } catch (error) {  // kernel restarting, or gone
+                    failures += 1;
+                    await wait(1000);
+                  }
+                  await wait(30);
+                }
+              };
+              for (let i = 0; i < %d; i++) lane(i * 60);
+            })();
+        """ % (json.dumps(name), self.LANES)))
+
+
 class InteractiveConsole:
     """Native ipywidgets interactive console built on 15 Hz Spectator + async physics."""
 
@@ -411,13 +498,7 @@ class InteractiveConsole:
 
         self.planner = planner
         self.session = SimSession(seed=seed)
-        self._main_thread_id = threading.get_ident()
-        try:
-            from tornado.ioloop import IOLoop
-            self._ioloop = IOLoop.current(instance=False)
-        except Exception:
-            self._ioloop = None
-        self._ui_lock = threading.Lock()
+        self.ui = UiBridge()
         self._stop_refresh = threading.Event()
         self._wake_refresh = threading.Event()
         self._busy_lock = threading.Lock()
@@ -558,16 +639,6 @@ class InteractiveConsole:
         self._refresh_thread = threading.Thread(target=self._refresh_loop, daemon=True)
         self._refresh_thread.start()
 
-    def _ui(self, fn):
-        """Marshal ipywidgets updates onto the kernel main thread to avoid ZMQ IOPub races."""
-        if threading.get_ident() == self._main_thread_id:
-            fn()
-        elif self._ioloop is not None:
-            self._ioloop.add_callback(fn)
-        else:
-            with self._ui_lock:
-                fn()
-
     def _status_markup(self, text, color="#16a34a"):
         return (
             f"<span style='display:inline-block;padding:3px 10px;border-radius:12px;"
@@ -578,7 +649,7 @@ class InteractiveConsole:
         self._task_label = text
         self._task_color = color
         markup = self._status_markup(text, color)
-        self._ui(lambda: setattr(self.status_html, "value", markup))
+        self.ui.post("status", lambda: setattr(self.status_html, "value", markup))
 
     def _append_log(self, message, level="info"):
         colors = {"info": "#334155", "action": "#0369a1", "ok": "#15803d", "warn": "#b45309", "error": "#b91c1c"}
@@ -593,7 +664,7 @@ class InteractiveConsole:
                 + "".join(reversed(self._logs))
                 + "</div>"
             )
-        self._ui(lambda: setattr(self.log_html, "value", html_value))
+            self.ui.post("log", lambda: setattr(self.log_html, "value", html_value))
 
     def _refresh_once(self, *, force_map=False):
         if self._resetting:
@@ -614,22 +685,13 @@ class InteractiveConsole:
             else:
                 status_markup = self._status_markup(f"待命 · 朝向 {yaw_deg}° · 距起点 {dist:.2f} m", "#16a34a")
 
-            changed = {}
-            for key, data in (("spectator", spectator_jpg), ("camera", camera_jpg), ("overview", overview_jpg)):
+            for key, data, image in (("spectator", spectator_jpg, self.spectator_img),
+                                     ("camera", camera_jpg, self.camera_img),
+                                     ("overview", overview_jpg, self.overview_img)):
                 if data is not None and data != self._latest_bytes.get(key):
                     self._latest_bytes[key] = data
-                    changed[key] = data
-
-            def apply():
-                if "spectator" in changed:
-                    self.spectator_img.value = changed["spectator"]
-                if "camera" in changed:
-                    self.camera_img.value = changed["camera"]
-                if "overview" in changed:
-                    self.overview_img.value = changed["overview"]
-                self.status_html.value = status_markup
-
-            self._ui(apply)
+                    self.ui.post(key, lambda image=image, data=data: setattr(image, "value", data))
+            self.ui.post("status", lambda: setattr(self.status_html, "value", status_markup))
         except Exception as error:
             if self._resetting:
                 return
@@ -687,7 +749,7 @@ class InteractiveConsole:
 
     def _hide_ask_box(self):
         if self.planner is not None:
-            self._ui(lambda: setattr(self.ask_box.layout, "display", "none"))
+            self.ui.post("ask", lambda: setattr(self.ask_box.layout, "display", "none"))
 
     def _submit_ask(self, answer):
         self._ask_answer = answer
@@ -705,7 +767,7 @@ class InteractiveConsole:
             self.ask_input.value = ""
             self.ask_box.layout.display = "flex"
 
-        self._ui(show_ask)
+        self.ui.post("ask", show_ask)
         self._set_status("等待你的回复…", color="#d97706")
         self._append_log(f"机器人询问：{prompt_text.splitlines()[0]}", level="warn")
         self._ask_event.wait()
@@ -846,9 +908,11 @@ class InteractiveConsole:
     def display(self):
         from IPython.display import display
         display(self.root)
+        self.ui.start_polling()
         return self
 
     def close(self):
+        self.ui.closed = True
         self._stop_refresh.set()
         self._wake_refresh.set()
         self._handle_stop()
