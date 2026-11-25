@@ -43,12 +43,24 @@ def wilson_interval(correct, total, z=1.96):
 def primitive_entry(directory, scene_dir, info, instruction, specs, planner, max_steps, meta):
     """Run one no-harness episode and score it by simulator truth; returns the fields the report loop reads."""
     from .raw_baseline import raw_episode
-    from .truth_score import score_episode
     from .vision_torch import generate_text
 
     report = raw_episode(directory, info, instruction, specs,
                          lambda image, prompt: generate_text(planner.model, planner.processor, image, prompt),
                          max_steps, meta)
+    return truth_entry(directory, info, report)
+
+
+def free_entry(directory, info, instruction, specs, planner, meta):
+    """Run one uncut episode of the deployed loop and score it by simulator truth."""
+    from .free_run import free_episode
+
+    return truth_entry(directory, info, free_episode(directory, info, instruction, specs, planner, meta=meta))
+
+
+def truth_entry(directory, info, report):
+    from .truth_score import score_episode
+
     scene = json.loads(Path(info["scene_file"]).read_text(encoding="utf-8"))
     truth_path = directory / "step-000-truth.json"
     first = json.loads(truth_path.read_text())["ground_truth"] if truth_path.exists() else None
@@ -81,6 +93,8 @@ def main():
     parser.add_argument("--primitive-only", action="store_true",
                         help="no-harness baseline (raw_baseline.py): frozen model, plain RGB, move/turn/stop/done only; "
                              "scored by simulator truth")
+    parser.add_argument("--free-run", action="store_true",
+                        help="run the deployed loop to its natural end instead of cutting at the first deviation from the teacher (free_run.py)")
     parser.add_argument("--max-steps", type=int, default=40, help="--primitive-only: decisions per task")
     args = parser.parse_args()
     manifest, splits = load_splits(args.data)
@@ -93,13 +107,15 @@ def main():
         parser.error("--phrase-variant applies to the valid split only")
     if any(i < 0 or i >= len(tasks(args.split)) for i in args.task_ids):
         parser.error("invalid task ID")
+    if args.free_run and (args.primitive_only or not args.rollout):
+        parser.error("--free-run needs --rollout and excludes --primitive-only")
     if args.primitive_only and (args.adapter or not args.rollout):
         parser.error("--primitive-only is a frozen-model rollout: needs --rollout and no --adapter")
     output = args.output.resolve()
     output.mkdir(parents=True, exist_ok=False)
     planner = AgentPlanner(args.adapter)
     report = {"mode": "independent_actor_rollout" if args.rollout else "offline_action_exact_match",
-              "adapter": planner.adapter, "split": args.split, "phrase_variant": args.phrase_variant, "recovery": os.environ.get("MICRODUCK_RECOVERY", "1") != "0", "legality": os.environ.get("MICRODUCK_LEGALITY", "0") != "0", "termination": os.environ.get("MICRODUCK_TERMINATION", "0") != "0", "map_escape": os.environ.get("MICRODUCK_MAP_ESCAPE", "0") != "0", "primitive_only": args.primitive_only, "max_steps": args.max_steps if args.primitive_only else None, "dataset_manifest_sha256": digest(args.data / "manifest.json"),
+              "adapter": planner.adapter, "split": args.split, "phrase_variant": args.phrase_variant, "recovery": os.environ.get("MICRODUCK_RECOVERY", "1") != "0", "legality": os.environ.get("MICRODUCK_LEGALITY", "0") != "0", "termination": os.environ.get("MICRODUCK_TERMINATION", "0") != "0", "map_escape": os.environ.get("MICRODUCK_MAP_ESCAPE", "0") != "0", "primitive_only": args.primitive_only, "free_run": args.free_run, "max_steps": args.max_steps if args.primitive_only else None, "dataset_manifest_sha256": digest(args.data / "manifest.json"),
               "results": [], "correct": 0, "total": 0,
               "note": "Development pilot. Rollout teacher is scorer AFTER execution, never a semantic intervention."}
     def save():
@@ -134,6 +150,8 @@ def main():
                                 shutil.rmtree(directory)  # a retry starts from a clean episode directory
                             if args.primitive_only:
                                 entry = primitive_entry(directory, scene_dir, info, instruction, specs, planner, args.max_steps, meta)
+                            elif args.free_run:
+                                entry = free_entry(directory, info, instruction, specs, planner, meta)
                             else:
                                 _, entry = episode(output, directory, info, args.split, seed, instruction, specs, planner, False, meta)
                             if "cannot restore task start" not in str(entry.get("error")):

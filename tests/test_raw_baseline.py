@@ -47,6 +47,12 @@ class TruthOnPrimitiveEpisodes(unittest.TestCase):
         episode = {"teacher_specs": self.specs, "steps": [step(0, 0, {"action": "done"})], "scene_contact_steps_delta": 0}
         self.assertEqual(score_episode(episode, SCENE, HOME)["verdict"], "fail")
 
+    def test_uncut_run_without_a_terminal_decision_is_a_fail_not_a_cut(self):
+        approach = {"action": "approach", "color": "red", "id": 1}
+        episode = {"teacher_specs": self.specs, "steps": [step(0, 0, approach), step(1.7, 0, approach)],
+                   "error": "step limit of 5 reached without a terminal decision", "scene_contact_steps_delta": 0}
+        self.assertEqual(score_episode(episode, SCENE, HOME)["verdict"], "fail")
+
     def test_touching_the_scene_fails(self):
         episode = {"teacher_specs": self.specs, "steps": [step(1.7, 0, {"action": "done"})], "scene_contact_steps_delta": 3}
         self.assertEqual(score_episode(episode, SCENE, HOME)["verdict"], "fail")
