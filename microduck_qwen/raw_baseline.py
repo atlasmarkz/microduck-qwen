@@ -20,7 +20,8 @@ import json
 
 from .sim_data import collection_frame, request
 from .skills import SkillExecutor, memory_state, parse_action
-from .vision import MODEL, REVISION, save_frame
+from .vision import save_frame
+from .vision_torch import MODEL, REVISION  # agent_eval always passes the torch planner's generate here
 
 ACTIONS = ("move", "turn", "stop", "done")
 TERMINAL = ("stop", "done")
