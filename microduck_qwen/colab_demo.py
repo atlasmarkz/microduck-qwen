@@ -412,7 +412,7 @@ class UiBridge:
     Elsewhere the kernel's event loop applies them.
     """
 
-    LANES = 3  # polls in flight at once, so the refresh rate is not capped by one round trip
+    LANES = 5  # polls in flight at once, so the refresh rate is not capped by one round trip
 
     def __init__(self):
         self.main_thread = threading.get_ident()

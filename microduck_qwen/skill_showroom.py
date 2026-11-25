@@ -98,7 +98,7 @@ SKILLS = {
         Segment("alpha_walking.onnx", 3.0, "前进 vx=0.4 m/s", twist(0.4), main=True),
         Segment("alpha_walking.onnx", 2.5, "原地左转 1.5 rad/s", twist(wz=1.5), main=True),
         Segment("alpha_walking.onnx", 1.0, "停下")),
-        note="本仓库遥控台和 Qwen 导航用的就是这个步态。实测速度明显低于指令，小指令（如 vx=0.15）下几乎不动。", checks=("travel", "turn")),
+        note="遥控台用的就是这个步态。实测速度明显低于指令，小指令（如 vx=0.15）下几乎不动。", checks=("travel", "turn")),
     "velstand": Skill("走站一体（含倒地起身）", "Mjlab-VelStand-Rough-Backlash-MicroDuck", (
         Segment("", 1.2, "仰面躺倒，无策略，电机保持默认姿势"),
         Segment(STAND, 2.0, "从仰面倒地起身", main=True),
