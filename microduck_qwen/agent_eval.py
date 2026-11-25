@@ -43,19 +43,24 @@ def wilson_interval(correct, total, z=1.96):
 def primitive_entry(directory, scene_dir, info, instruction, specs, planner, max_steps, meta):
     """Run one no-harness episode and score it by simulator truth; returns the fields the report loop reads."""
     from .raw_baseline import raw_episode
+    from .state_log import StateLog
     from .vision_torch import generate_text
 
-    report = raw_episode(directory, info, instruction, specs,
-                         lambda image, prompt: generate_text(planner.model, planner.processor, image, prompt),
-                         max_steps, meta)
+    with StateLog(info["port"], directory.with_name(directory.name + "-states.jsonl")):
+        report = raw_episode(directory, info, instruction, specs,
+                             lambda image, prompt: generate_text(planner.model, planner.processor, image, prompt),
+                             max_steps, meta)
     return truth_entry(directory, info, report)
 
 
 def free_entry(directory, info, instruction, specs, planner, meta):
     """Run one uncut episode of the deployed loop and score it by simulator truth."""
     from .free_run import free_episode
+    from .state_log import StateLog
 
-    return truth_entry(directory, info, free_episode(directory, info, instruction, specs, planner, meta=meta))
+    with StateLog(info["port"], directory.with_name(directory.name + "-states.jsonl")):
+        report = free_episode(directory, info, instruction, specs, planner, meta=meta)
+    return truth_entry(directory, info, report)
 
 
 def truth_entry(directory, info, report):

@@ -39,9 +39,11 @@ def free_episode(directory, info, instruction, specs, planner, max_steps=MAX_STE
             image = save_frame(directory, frame, candidates, f"step-{index:03d}")
             if index == 0:  # the truth scorer resolves "the leftmost ball in the photo" from the first frame
                 (directory / "step-000-truth.json").write_text(json.dumps({"ground_truth": gt}, indent=2) + "\n")
-            memory = memory_state(info, executor.healthy(), completed)
+            state = executor.healthy()
+            memory = memory_state(info, state, completed)
             prediction = planner.predict(instruction, image, memory)
-            step = {"memory": memory, "prediction": prediction}
+            step = {"memory": memory, "prediction": prediction, "sim_time": state["sim_time"],
+                    "decided_sim_time": executor.observer.read()["sim_time"]}
             report["steps"].append(step)
             action = prediction.get("action")
             if action is None:

@@ -78,12 +78,14 @@ def raw_episode(directory, info, instruction, specs, generate, max_steps=40, met
             image = directory / f"step-{index:03d}-rgb.png"
             if index == 0:  # the truth scorer resolves "the leftmost ball in the photo" from the first frame
                 (directory / "step-000-truth.json").write_text(json.dumps({"ground_truth": gt}, indent=2) + "\n")
-            memory = memory_state(info, executor.healthy(), [])
+            state = executor.healthy()
+            memory = memory_state(info, state, [])
             prompt = raw_prompt(instruction, memory["odometry_relative_home"], history, index, max_steps)
             raw, latency = generate(image, prompt)
             prediction = {"instruction": instruction, "raw": raw, "latency_s": latency, "model": MODEL,
                           "revision": REVISION, "adapter": None}
-            step = {"memory": memory, "prediction": prediction}
+            step = {"memory": memory, "prediction": prediction, "sim_time": state["sim_time"],
+                    "decided_sim_time": executor.observer.read()["sim_time"]}
             report["steps"].append(step)
             try:
                 action = parse_action(raw)
