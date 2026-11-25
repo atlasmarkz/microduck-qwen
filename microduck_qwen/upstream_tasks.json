@@ -1,0 +1,4456 @@
+{
+ "source": "pollen-robotics/microduck_rl",
+ "revision": "0daab160d3fb1c2cbaba16a4a19052f36709dd9e",
+ "bam_revision": "62bd8ce12154340be97e06f7f41a0ca8f116d967",
+ "mjlab": "1.3.0",
+ "reward_docs": {
+  "action_over_limit_penalty": "Penalise commanding a joint target beyond its hard limit (+ overshoot).",
+  "action_rate_l2": "Penalize the rate of change of the actions using L2 squared kernel.",
+  "action_rate_l2_fallen_scaled": "mjlab action_rate_l2, multiplied by ``fallen_scale`` while tilt > gate.",
+  "angular_momentum_penalty": "Penalize whole-body angular momentum to encourage natural arm swing.",
+  "apply_mouth_payload_force": "Hook par-step (utilisé comme reward de poids 0) : applique le POIDS de l'objet tenu dans la bouche comme force externe verticale au mouth_tip, gaté sur la remontée (phase >= hold_end, rampe rapide au moment du 'grab').",
+  "ball_forward_velocity": "Ball XY velocity along the per-env kick direction, clamped to [0, max].",
+  "ball_speed_overshoot_penalty": "Ball forward speed in excess of ``target_speed`` (linear, ≥ 0).",
+  "body_ang_vel_at_height": "Trunk ``sum(ω_xy²)`` penalty gated by trunk z (and optionally tilt).",
+  "body_angular_velocity_penalty": "Penalize excessive body angular velocities.",
+  "body_impact_cost": "Penalize terrain contact forces above a threshold on protected body parts.",
+  "body_pose_tracking_6d": "Mean of 6 per-axis Gaussian rewards for tracking commanded body pose.",
+  "body_pose_tracking_locomotion": "Locomotion-aware 6D body pose tracking.",
+  "body_upright_gaussian": "Gaussian reward on tilt magnitude — sharp pull toward fully vertical.",
+  "body_upright_linear": "Linear reward for body uprightness — provides gradient at every tilt angle.",
+  "braking_reward": "Reward coming to a stop when cmd_x < 0 (brake commanded).",
+  "com_height_target": "Reward for keeping the center of mass within a target height range. Returns positive reward when in range, negative penalty when outside.",
+  "com_upward_velocity": "Reward upward CoM velocity to incentivize dynamic standup motion.",
+  "crouch_forward_lean": "Léger penché AVANT du tronc pendant l'accroupi (gaté par le blend crouch).",
+  "crouch_glide_pose_by_phase": "Gaussian match to a phase-interpolated joint pose (stand <-> crouch).",
+  "crouch_glide_pose_l1": "L1 bootstrap toward the phase-interpolated crouch pose (negative penalty).",
+  "fallen_state_penalty": "1.0 while FALLEN (weight it negative): a flat per-step tax on staying down. Without it, lying still is ~0/step while attempting recovery costs action-rate/torque penalties — waiting for the fallen_too_long recycle was the rational policy. (",
+  "feet_air_time": "Reward feet air time.",
+  "feet_air_time_upright": "velocity template feet_air_time, zeroed while FALLEN (tilt > gate).",
+  "feet_clearance": "Penalize deviation from target clearance height, weighted by foot velocity.",
+  "feet_flat_penalty": "Penalize foot sites not being parallel to the ground.",
+  "feet_grounded_reward": "Positive reward for feet contacting the ground (0, +0.5, or +1.0).",
+  "feet_slip": "Penalize foot sliding (xy velocity while in contact).",
+  "feet_swing_height": "Penalize deviation from target swing height, evaluated at landing.",
+  "forward_lean_reward": "Reward leaning slightly forward when pushing, to counteract the backward torque from skating strokes.",
+  "forward_speed_reward": "Récompense la vitesse avant du tronc (conserver l'élan / ne pas freiner).",
+  "gait_symmetry_penalty": "Penalize lopsided left/right foot usage (one blade doing most of the work).",
+  "glide_reward": "Reward the GLIDE phase of a stride: coast on ONE blade with quiet legs.",
+  "ground_pick_return_pose_phased": "ground_pick_return_pose gaté par la up-gate segmentée (remontée+repos).",
+  "ground_pick_return_upright_phased": "ground_pick_return_upright gaté par la up-gate segmentée.",
+  "grounded_reward": "Reward BOTH blades in contact — a classic swizzle stays grounded (no lifting).",
+  "head_pose_bias_penalty": "Penalize the time-averaged (DC) neck/head tracking error: -mean(|EMA(err)|).",
+  "head_pose_tracking": "Per-joint Gaussian reward for matching commanded neck/head deltas.",
+  "heading_hold_reward": "Reward holding the SPAWN heading (go straight) — corrective, angle-based.",
+  "heading_tracking_reward": "Reward for reducing heading error when cmd[2] encodes heading error.",
+  "height_l1_penalty": "L1 companion to ``height_target_gaussian``.",
+  "height_progress": "Potential-based height shaping: Δ min(trunk z, ceiling) per step.",
+  "height_target_gaussian": "Gaussian on trunk z against a single fixed target.",
+  "is_alive": "Reward for staying alive (not terminated)",
+  "joint_deviation_l1": "L1 penalty for joint positions deviating from their default (HOME).",
+  "joint_pos_limits": "Penalize joint positions if they cross the soft limits.",
+  "joint_torque_rate_l2": "Penalize rate of change in actuator torques (proxy for gearbox shock).",
+  "joint_torque_rate_l2_fallen_scaled": "joint_torque_rate_l2 × ``fallen_scale`` while fallen (see action_rate_l2_fallen_scaled).",
+  "joint_torques_l2": "Penalize actuator forces (torques) to encourage energy-efficient motion.",
+  "leg_antisymmetry": "Amorce le CISEAU des jambes (une avant / une arrière) pendant le spin.",
+  "leg_symmetry_reward": "Reward left/right legs mirroring — the swizzle's defining symmetry.",
+  "mouth_ground_proximity_phased": "mouth_ground_proximity gaté par la down-gate segmentée (descente+palier).",
+  "mouth_perpendicular_phased": "mouth_perpendicular_to_ground gaté par la down-gate segmentée.",
+  "neck_action_rate_l2": "Penalize the rate of change of neck actions (action_t - action_{t-1}). Neck joints are indices 5-8 (4 joints total).",
+  "neck_joint_pos_l2": "Penalize neck/head joint position deviation from default (L2 squared).",
+  "neck_torque_when_tilted": "Cost (≥ 0 → NEGATIVE weight): mean (|τ_neck| / torque_scale)² × gate.",
+  "neck_vel_descent_penalty": "Pénalise la vitesse des joints du cou pendant la DESCENTE+palier (freine le piqué de la tête).",
+  "pose_l1_penalty": "L1 companion to ``pose_target_match`` (constant gradient toward target).",
+  "pose_target_match": "Gaussian pose-match against a single fixed target.",
+  "posture_composite": "Multiplicative goal score vs the commanded posture (height·upright·pose [·head]).",
+  "posture_height_gaussian": "Gaussian on trunk z against the commanded posture's target height.",
+  "posture_height_l1": "L1 companion to ``posture_height_gaussian`` — the transition driver.",
+  "posture_pose_l1": "L1 companion to ``posture_pose_match`` (constant gradient to target).",
+  "posture_pose_match": "Gaussian pose-match against the commanded posture's target pose.",
+  "posture_rise_bootstrap": "Upward-vz reward, active only when STAND is commanded and z < max_height.",
+  "posture_stillness": "Reward trunk stillness while AT the commanded posture, upright.",
+  "recovery_success": "One-shot bounty on a COMPLETED recovery: fires on the frame where an env that has been fallen (tilt > fallen_tilt for ≥ min_fallen_s) becomes genuinely upright (tilt < up_tilt AND trunk z > up_z). Hysteresis: re-arms only by being fallen ag",
+  "roulade_flatness_penalty": "(lateral-axis world-z)² — dense gradient toward a sagittal roll.",
+  "roulade_head_pivot": "Reward head-ground contact while rotating forward mid-roll.",
+  "roulade_height_after_roll": "Broad height Gaussian × completion gate — pull up to standing height.",
+  "roulade_landing_composite": "standing_composite_score × completion gate.",
+  "roulade_landing_sharp": "Tight-std upright × height Gaussians × completion gate — the last mile.",
+  "roulade_lateral_velocity_penalty": "Body-frame lateral (y) linear velocity² — keeps the roll straight.",
+  "roulade_overspeed_penalty": "max(0, |ω_y| − omega_max)² — quadratic tax on whip-speed rotation.",
+  "roulade_progress": "Pay increments of the progress frontier, up to one full roll.",
+  "roulade_rise_velocity": "com_upward_velocity × late-roll gate — bootstrap the exit rise.",
+  "roulade_sagittal_penalty": "Rotation out of the sagittal plane: body-frame ω_x² + ω_z² (positive; use a negative weight). ω_y is the roll axis and stays free.",
+  "roulade_stand_tax": "SELF-NEGATING height L1 below target, active only after roll completion.",
+  "roulade_upright_after_roll": "Linear cos(tilt) × completion gate — bootstrap pull toward vertical.",
+  "self_collision_cost": "Penalize self-collisions.",
+  "servo_acc_spike_penalty": "Sum over servos of ReLU(|joint accel| - acc_thresh), accel by finite difference of joint velocity at the control rate.",
+  "servo_stall_penalty": "Number of servos pushing hard against something that does not move.",
+  "single_foot_grounded_reward": "Binary reward: 1 while the sensed foot touches the terrain.",
+  "single_support_reward": "Reward single-support (a skating stride), mildly discourage the swizzle.",
+  "skating_air_time_reward": "Reward feet air time only when pushing (cmd_x > 0).",
+  "soft_landing": "Penalize high impact forces at landing to encourage soft footfalls.",
+  "spin_grounded": "Les deux lames au sol pendant le spin — empêche « je saute et je vrille ».",
+  "spin_rate_l1": "Bootstrap L1 : gradient constant vers la cible même quand la gaussienne de `spin_rate_track` sature loin de la cible. À utiliser avec un poids POSITIF (la valeur retournée est déjà négative).",
+  "spin_rate_track": "Objectif principal du spin : suivre la vitesse de lacet cible ω*(φ).",
+  "spin_stay_in_place": "Coût ‖v_xy‖² du tronc : tourner SUR PLACE, et tuer l'élan d'entrée.",
+  "spin_wheel_differential": "Récompense la rotation EN ROULEMENT (et non en patinage).",
+  "standing_composite_score": "Smooth multiplicative goal-state score (product of three Gaussians).",
+  "track_angular_velocity": "Reward heading error for heading-controlled envs, angular velocity for others.",
+  "track_linear_velocity": "Reward for tracking the commanded base linear velocity.",
+  "track_yaw_rate_fine": "Yaw-rate-only Gaussian, exp(-(wz_cmd - wz)²/std²), ADDED next to the stock track_angular_velocity (which stays as is).",
+  "trunk_downward_velocity_penalty": "Penalty on downward trunk velocity beyond ``max_down_vel``.",
+  "trunk_upward_velocity_penalty": "Penalty on upward trunk velocity beyond ``max_up_vel``.",
+  "trunk_vertical_accel_penalty": "Penalty proportional to ``|a_z|`` of the trunk (finite-diff of v_z).",
+  "upright": "Reward for keeping the base upright.",
+  "upright_body_cmd_relative": "mjlab's flat-ground ``upright`` (exp(-|g_b,xy|²/std²)), measured against the COMMANDED roll/pitch instead of level: target g_b = (sin θ, -sin φ·cos θ) for body command roll φ = cmd[3], pitch θ = cmd[4] (ZYX, same convention as body_pose_tra",
+  "upright_gaussian_at_height": "``body_upright_gaussian`` weighted by smoothstep on trunk z.",
+  "upright_progress": "Potential-based upright shaping: Δcos(tilt) per step.",
+  "upright_while_tall": "Linear upright reward weighted by a smoothstep on trunk z.",
+  "variable_posture": "Penalize deviation from default pose with speed-dependent tolerance.",
+  "variable_posture_body_relaxed": "mjlab ``variable_posture`` + a 4th regime: standing envs with an ACTIVE body command (any of ``body_active_axes`` non-zero) use ``std_body``.",
+  "wheel_glide_reward": "Récompense le ROULEMENT des roues vers l'avant (glisse), plafonné.",
+  "wheel_speed_reward": "Reward wheel spin proportional to commanded push."
+ },
+ "tasks": [
+  {
+   "id": "Mjlab-BallKick-Flat-Backlash-MicroDuck",
+   "base": "Mjlab-BallKick-Flat-MicroDuck",
+   "robot_xml": "robot_groundcontact_backlash.xml"
+  },
+  {
+   "id": "Mjlab-BallKick-Flat-MicroDuck",
+   "terrain": "flat",
+   "robot_xml": "robot_groundcontact.xml",
+   "other_entities": [
+    "ball"
+   ],
+   "episode_s": 5.0,
+   "control_hz": 50,
+   "rewards": [
+    {
+     "name": "upright",
+     "func": "upright",
+     "weight": 2.0,
+     "final": 2.0
+    },
+    {
+     "name": "body_ang_vel",
+     "func": "body_angular_velocity_penalty",
+     "weight": -0.05,
+     "final": -0.05
+    },
+    {
+     "name": "angular_momentum",
+     "func": "angular_momentum_penalty",
+     "weight": -0.02,
+     "final": -0.02
+    },
+    {
+     "name": "dof_pos_limits",
+     "func": "joint_pos_limits",
+     "weight": -1.0,
+     "final": -1.0
+    },
+    {
+     "name": "action_rate_l2",
+     "func": "action_rate_l2",
+     "weight": -0.1,
+     "final": -1.0
+    },
+    {
+     "name": "ball_forward_velocity",
+     "func": "ball_forward_velocity",
+     "weight": 12.0,
+     "final": 12.0
+    },
+    {
+     "name": "ball_speed_overshoot",
+     "func": "ball_speed_overshoot_penalty",
+     "weight": -4.0,
+     "final": -4.0
+    },
+    {
+     "name": "support_foot_grounded",
+     "func": "single_foot_grounded_reward",
+     "weight": 2.0,
+     "final": 2.0
+    },
+    {
+     "name": "pose_stand_legs",
+     "func": "pose_target_match",
+     "weight": 2.0,
+     "final": 2.0
+    },
+    {
+     "name": "pose_stand_neck",
+     "func": "pose_target_match",
+     "weight": 1.0,
+     "final": 1.0
+    },
+    {
+     "name": "height_stand",
+     "func": "height_target_gaussian",
+     "weight": 1.0,
+     "final": 1.0
+    },
+    {
+     "name": "self_collisions",
+     "func": "self_collision_cost",
+     "weight": -1.0,
+     "final": -1.0
+    }
+   ],
+   "commands": {
+    "twist": {
+     "type": "VelocityCommandCommandOnlyCfg",
+     "ranges": {
+      "lin_vel_x": [
+       -0.01,
+       0.01
+      ],
+      "lin_vel_y": [
+       -0.01,
+       0.01
+      ],
+      "ang_vel_z": [
+       -0.05,
+       0.05
+      ]
+     }
+    }
+   },
+   "actor_obs": [
+    "base_ang_vel",
+    "projected_gravity",
+    "joint_pos",
+    "joint_vel",
+    "actions",
+    "command",
+    "head_command",
+    "body_command"
+   ],
+   "critic_obs": [
+    "base_lin_vel",
+    "base_ang_vel",
+    "projected_gravity",
+    "joint_pos",
+    "joint_vel",
+    "actions",
+    "command",
+    "foot_air_time",
+    "foot_contact",
+    "foot_contact_forces",
+    "head_command",
+    "body_command",
+    "ball_position",
+    "ball_velocity"
+   ],
+   "terminations": [
+    "time_out",
+    "fell_over",
+    "out_of_terrain_bounds",
+    "nan_state"
+   ],
+   "events": [
+    "reset_base",
+    "reset_robot_joints",
+    "push_robot",
+    "foot_friction",
+    "encoder_bias",
+    "base_com",
+    "expand_bam_friction_fields",
+    "reset_action_history",
+    "set_ground_state",
+    "reset_ball",
+    "randomize_com",
+    "randomize_head_com",
+    "randomize_armature",
+    "randomize_mass_inertia",
+    "randomize_joint_friction"
+   ],
+   "curriculum": [
+    "action_rate_weight",
+    "com_range",
+    "head_com_range",
+    "push_magnitude"
+   ],
+   "ppo": {
+    "experiment": "ball_kick_right",
+    "max_iterations": 10000,
+    "steps_per_env": 24,
+    "hidden": [
+     512,
+     256,
+     128
+    ],
+    "learning_rate": 0.001,
+    "gamma": 0.99,
+    "lam": 0.95,
+    "entropy": 0.01,
+    "clip": 0.2,
+    "symmetry": false
+   }
+  },
+  {
+   "id": "Mjlab-GroundPick-Flat-Backlash-MicroDuck",
+   "base": "Mjlab-GroundPick-Flat-MicroDuck",
+   "robot_xml": "robot_groundcontact_backlash.xml"
+  },
+  {
+   "id": "Mjlab-GroundPick-Flat-MicroDuck",
+   "terrain": "flat",
+   "robot_xml": "robot_groundcontact.xml",
+   "other_entities": [],
+   "episode_s": 20.0,
+   "control_hz": 50,
+   "rewards": [
+    {
+     "name": "upright",
+     "func": "upright",
+     "weight": 0.2,
+     "final": 0.2
+    },
+    {
+     "name": "body_ang_vel",
+     "func": "body_angular_velocity_penalty",
+     "weight": -0.05,
+     "final": -0.05
+    },
+    {
+     "name": "angular_momentum",
+     "func": "angular_momentum_penalty",
+     "weight": -0.02,
+     "final": -0.02
+    },
+    {
+     "name": "dof_pos_limits",
+     "func": "joint_pos_limits",
+     "weight": -1.0,
+     "final": -1.0
+    },
+    {
+     "name": "action_rate_l2",
+     "func": "action_rate_l2",
+     "weight": -2.0,
+     "final": -2.0
+    },
+    {
+     "name": "soft_landing",
+     "func": "soft_landing",
+     "weight": -1e-05,
+     "final": -1e-05
+    },
+    {
+     "name": "mouth_ground_proximity",
+     "func": "mouth_ground_proximity_phased",
+     "weight": 3.0,
+     "final": 3.0
+    },
+    {
+     "name": "mouth_perpendicular_to_ground",
+     "func": "mouth_perpendicular_phased",
+     "weight": 2.0,
+     "final": 2.0
+    },
+    {
+     "name": "ground_pick_return_pose_legs",
+     "func": "ground_pick_return_pose_phased",
+     "weight": 6.0,
+     "final": 6.0
+    },
+    {
+     "name": "ground_pick_return_pose_neck",
+     "func": "ground_pick_return_pose_phased",
+     "weight": 6.0,
+     "final": 6.0
+    },
+    {
+     "name": "return_upright",
+     "func": "ground_pick_return_upright_phased",
+     "weight": 4.0,
+     "final": 4.0
+    },
+    {
+     "name": "neck_vel_descent",
+     "func": "neck_vel_descent_penalty",
+     "weight": -0.1,
+     "final": -0.1
+    },
+    {
+     "name": "mouth_payload_force",
+     "func": "apply_mouth_payload_force",
+     "weight": 0.0,
+     "final": 0.0
+    },
+    {
+     "name": "feet_grounded",
+     "func": "feet_grounded_reward",
+     "weight": 3.0,
+     "final": 3.0
+    },
+    {
+     "name": "feet_flat",
+     "func": "feet_flat_penalty",
+     "weight": -2.0,
+     "final": -2.0
+    },
+    {
+     "name": "neck_action_rate_l2",
+     "func": "neck_action_rate_l2",
+     "weight": -1.0,
+     "final": -1.0
+    },
+    {
+     "name": "joint_torques_l2",
+     "func": "joint_torques_l2",
+     "weight": -0.005,
+     "final": -0.005
+    },
+    {
+     "name": "self_collisions",
+     "func": "self_collision_cost",
+     "weight": -1.0,
+     "final": -1.0
+    },
+    {
+     "name": "head_impact_penalty",
+     "func": "body_impact_cost",
+     "weight": -2.0,
+     "final": -2.0
+    }
+   ],
+   "commands": {
+    "twist": {
+     "type": "GroundPickPhaseCommandCfg",
+     "ranges": {
+      "lin_vel_x": [
+       -1.0,
+       1.0
+      ],
+      "lin_vel_y": [
+       -1.0,
+       1.0
+      ],
+      "ang_vel_z": [
+       -0.5,
+       0.5
+      ],
+      "heading": [
+       -3.141592653589793,
+       3.141592653589793
+      ]
+     }
+    }
+   },
+   "actor_obs": [
+    "base_ang_vel",
+    "projected_gravity",
+    "joint_pos",
+    "joint_vel",
+    "actions",
+    "command",
+    "head_command",
+    "body_command"
+   ],
+   "critic_obs": [
+    "base_lin_vel",
+    "base_ang_vel",
+    "projected_gravity",
+    "joint_pos",
+    "joint_vel",
+    "actions",
+    "command",
+    "foot_air_time",
+    "foot_contact",
+    "foot_contact_forces",
+    "head_command",
+    "body_command"
+   ],
+   "terminations": [
+    "time_out",
+    "fell_over",
+    "out_of_terrain_bounds",
+    "nan_state"
+   ],
+   "events": [
+    "reset_base",
+    "reset_robot_joints",
+    "push_robot",
+    "foot_friction",
+    "encoder_bias",
+    "base_com",
+    "expand_bam_friction_fields",
+    "reset_action_history",
+    "sample_mouth_payload",
+    "randomize_com",
+    "randomize_head_com",
+    "randomize_mass_inertia",
+    "randomize_joint_friction",
+    "randomize_armature"
+   ],
+   "curriculum": [
+    "action_rate_weight",
+    "com_range",
+    "head_com_range"
+   ],
+   "ppo": {
+    "experiment": "ground_pick",
+    "max_iterations": 20000,
+    "steps_per_env": 24,
+    "hidden": [
+     512,
+     256,
+     128
+    ],
+    "learning_rate": 0.001,
+    "gamma": 0.99,
+    "lam": 0.95,
+    "entropy": 0.01,
+    "clip": 0.2,
+    "symmetry": false
+   }
+  },
+  {
+   "id": "Mjlab-GroundPick-Rough-Backlash-MicroDuck",
+   "base": "Mjlab-GroundPick-Rough-MicroDuck",
+   "robot_xml": "robot_groundcontact_backlash.xml"
+  },
+  {
+   "id": "Mjlab-GroundPick-Rough-MicroDuck",
+   "terrain": "rough",
+   "robot_xml": "robot_groundcontact.xml",
+   "other_entities": [],
+   "episode_s": 20.0,
+   "control_hz": 50,
+   "rewards": [
+    {
+     "name": "upright",
+     "func": "upright",
+     "weight": 0.2,
+     "final": 0.2
+    },
+    {
+     "name": "body_ang_vel",
+     "func": "body_angular_velocity_penalty",
+     "weight": -0.05,
+     "final": -0.05
+    },
+    {
+     "name": "angular_momentum",
+     "func": "angular_momentum_penalty",
+     "weight": -0.02,
+     "final": -0.02
+    },
+    {
+     "name": "dof_pos_limits",
+     "func": "joint_pos_limits",
+     "weight": -1.0,
+     "final": -1.0
+    },
+    {
+     "name": "action_rate_l2",
+     "func": "action_rate_l2",
+     "weight": -2.0,
+     "final": -2.0
+    },
+    {
+     "name": "soft_landing",
+     "func": "soft_landing",
+     "weight": -1e-05,
+     "final": -1e-05
+    },
+    {
+     "name": "mouth_ground_proximity",
+     "func": "mouth_ground_proximity_phased",
+     "weight": 3.0,
+     "final": 3.0
+    },
+    {
+     "name": "mouth_perpendicular_to_ground",
+     "func": "mouth_perpendicular_phased",
+     "weight": 2.0,
+     "final": 2.0
+    },
+    {
+     "name": "ground_pick_return_pose_legs",
+     "func": "ground_pick_return_pose_phased",
+     "weight": 6.0,
+     "final": 6.0
+    },
+    {
+     "name": "ground_pick_return_pose_neck",
+     "func": "ground_pick_return_pose_phased",
+     "weight": 6.0,
+     "final": 6.0
+    },
+    {
+     "name": "return_upright",
+     "func": "ground_pick_return_upright_phased",
+     "weight": 4.0,
+     "final": 4.0
+    },
+    {
+     "name": "neck_vel_descent",
+     "func": "neck_vel_descent_penalty",
+     "weight": -0.1,
+     "final": -0.1
+    },
+    {
+     "name": "mouth_payload_force",
+     "func": "apply_mouth_payload_force",
+     "weight": 0.0,
+     "final": 0.0
+    },
+    {
+     "name": "feet_grounded",
+     "func": "feet_grounded_reward",
+     "weight": 3.0,
+     "final": 3.0
+    },
+    {
+     "name": "feet_flat",
+     "func": "feet_flat_penalty",
+     "weight": -2.0,
+     "final": -2.0
+    },
+    {
+     "name": "neck_action_rate_l2",
+     "func": "neck_action_rate_l2",
+     "weight": -1.0,
+     "final": -1.0
+    },
+    {
+     "name": "joint_torques_l2",
+     "func": "joint_torques_l2",
+     "weight": -0.005,
+     "final": -0.005
+    },
+    {
+     "name": "self_collisions",
+     "func": "self_collision_cost",
+     "weight": -1.0,
+     "final": -1.0
+    },
+    {
+     "name": "head_impact_penalty",
+     "func": "body_impact_cost",
+     "weight": -2.0,
+     "final": -2.0
+    }
+   ],
+   "commands": {
+    "twist": {
+     "type": "GroundPickPhaseCommandCfg",
+     "ranges": {
+      "lin_vel_x": [
+       -1.0,
+       1.0
+      ],
+      "lin_vel_y": [
+       -1.0,
+       1.0
+      ],
+      "ang_vel_z": [
+       -0.5,
+       0.5
+      ],
+      "heading": [
+       -3.141592653589793,
+       3.141592653589793
+      ]
+     }
+    }
+   },
+   "actor_obs": [
+    "base_ang_vel",
+    "projected_gravity",
+    "joint_pos",
+    "joint_vel",
+    "actions",
+    "command",
+    "head_command",
+    "body_command"
+   ],
+   "critic_obs": [
+    "base_lin_vel",
+    "base_ang_vel",
+    "projected_gravity",
+    "joint_pos",
+    "joint_vel",
+    "actions",
+    "command",
+    "foot_air_time",
+    "foot_contact",
+    "foot_contact_forces",
+    "head_command",
+    "body_command"
+   ],
+   "terminations": [
+    "time_out",
+    "fell_over",
+    "out_of_terrain_bounds",
+    "nan_state"
+   ],
+   "events": [
+    "reset_base",
+    "reset_robot_joints",
+    "push_robot",
+    "foot_friction",
+    "encoder_bias",
+    "base_com",
+    "expand_bam_friction_fields",
+    "reset_action_history",
+    "sample_mouth_payload",
+    "randomize_com",
+    "randomize_head_com",
+    "randomize_mass_inertia",
+    "randomize_joint_friction",
+    "randomize_armature"
+   ],
+   "curriculum": [
+    "terrain_levels",
+    "action_rate_weight",
+    "com_range",
+    "head_com_range"
+   ],
+   "ppo": {
+    "experiment": "ground_pick",
+    "max_iterations": 20000,
+    "steps_per_env": 24,
+    "hidden": [
+     512,
+     256,
+     128
+    ],
+    "learning_rate": 0.001,
+    "gamma": 0.99,
+    "lam": 0.95,
+    "entropy": 0.01,
+    "clip": 0.2,
+    "symmetry": false
+   }
+  },
+  {
+   "id": "Mjlab-RollerCrouch-Flat-Backlash-MicroDuck",
+   "base": "Mjlab-RollerCrouch-Flat-MicroDuck",
+   "robot_xml": "robot_groundcontact_rollers_backlash.xml"
+  },
+  {
+   "id": "Mjlab-RollerCrouch-Flat-MicroDuck",
+   "terrain": "flat",
+   "robot_xml": "robot_groundcontact_rollers.xml",
+   "other_entities": [],
+   "episode_s": 20.0,
+   "control_hz": 50,
+   "rewards": [
+    {
+     "name": "upright",
+     "func": "upright",
+     "weight": 2.0,
+     "final": 2.0
+    },
+    {
+     "name": "body_ang_vel",
+     "func": "body_angular_velocity_penalty",
+     "weight": -0.05,
+     "final": -0.05
+    },
+    {
+     "name": "angular_momentum",
+     "func": "angular_momentum_penalty",
+     "weight": -0.02,
+     "final": -0.02
+    },
+    {
+     "name": "action_rate_l2",
+     "func": "action_rate_l2",
+     "weight": -1.0,
+     "final": -1.0
+    },
+    {
+     "name": "crouch_glide_pose",
+     "func": "crouch_glide_pose_by_phase",
+     "weight": 6.0,
+     "final": 6.0
+    },
+    {
+     "name": "crouch_glide_pose_l1",
+     "func": "crouch_glide_pose_l1",
+     "weight": 2.0,
+     "final": 2.0
+    },
+    {
+     "name": "forward_speed",
+     "func": "forward_speed_reward",
+     "weight": 1.0,
+     "final": 1.0
+    },
+    {
+     "name": "crouch_forward_lean",
+     "func": "crouch_forward_lean",
+     "weight": 1.0,
+     "final": 1.0
+    },
+    {
+     "name": "feet_flat",
+     "func": "feet_flat_penalty",
+     "weight": -2.0,
+     "final": -2.0
+    },
+    {
+     "name": "self_collisions",
+     "func": "self_collision_cost",
+     "weight": -1.0,
+     "final": -1.0
+    },
+    {
+     "name": "neck_action_rate_l2",
+     "func": "neck_action_rate_l2",
+     "weight": -0.5,
+     "final": -0.5
+    },
+    {
+     "name": "joint_torques_l2",
+     "func": "joint_torques_l2",
+     "weight": -0.001,
+     "final": -0.001
+    }
+   ],
+   "commands": {
+    "twist": {
+     "type": "GroundPickPhaseCommandCfg",
+     "ranges": {
+      "lin_vel_x": [
+       -1.0,
+       1.0
+      ],
+      "lin_vel_y": [
+       -1.0,
+       1.0
+      ],
+      "ang_vel_z": [
+       -0.5,
+       0.5
+      ],
+      "heading": [
+       -3.141592653589793,
+       3.141592653589793
+      ]
+     }
+    }
+   },
+   "actor_obs": [
+    "base_ang_vel",
+    "projected_gravity",
+    "joint_pos",
+    "joint_vel",
+    "actions",
+    "command",
+    "head_command",
+    "body_command"
+   ],
+   "critic_obs": [
+    "base_lin_vel",
+    "base_ang_vel",
+    "projected_gravity",
+    "joint_pos",
+    "joint_vel",
+    "actions",
+    "command",
+    "foot_air_time",
+    "foot_contact",
+    "foot_contact_forces",
+    "wheel_vel",
+    "head_command",
+    "body_command"
+   ],
+   "terminations": [
+    "time_out",
+    "fell_over",
+    "out_of_terrain_bounds",
+    "nan_state"
+   ],
+   "events": [
+    "reset_base",
+    "reset_robot_joints",
+    "push_robot",
+    "encoder_bias",
+    "base_com",
+    "reset_action_history",
+    "randomize_wheel_friction",
+    "randomize_com",
+    "randomize_head_com",
+    "randomize_mass_inertia",
+    "randomize_joint_friction",
+    "randomize_armature"
+   ],
+   "curriculum": [
+    "action_rate_weight",
+    "com_range",
+    "head_com_range"
+   ],
+   "ppo": {
+    "experiment": "roller_crouch",
+    "max_iterations": 8000,
+    "steps_per_env": 24,
+    "hidden": [
+     512,
+     256,
+     128
+    ],
+    "learning_rate": 0.001,
+    "gamma": 0.99,
+    "lam": 0.95,
+    "entropy": 0.01,
+    "clip": 0.2,
+    "symmetry": false
+   }
+  },
+  {
+   "id": "Mjlab-RollerSlope-Flat-Backlash-MicroDuck",
+   "base": "Mjlab-RollerSlope-Flat-MicroDuck",
+   "robot_xml": "robot_groundcontact_rollers_backlash.xml"
+  },
+  {
+   "id": "Mjlab-RollerSlope-Flat-MicroDuck",
+   "terrain": "slope",
+   "robot_xml": "robot_groundcontact_rollers.xml",
+   "other_entities": [],
+   "episode_s": 20.0,
+   "control_hz": 50,
+   "rewards": [
+    {
+     "name": "action_rate_l2",
+     "func": "action_rate_l2",
+     "weight": -1.0,
+     "final": -1.0
+    },
+    {
+     "name": "upright",
+     "func": "body_upright_gaussian",
+     "weight": 3.0,
+     "final": 3.0
+    },
+    {
+     "name": "alive",
+     "func": "is_alive",
+     "weight": 1.0,
+     "final": 1.0
+    },
+    {
+     "name": "wheel_glide",
+     "func": "wheel_glide_reward",
+     "weight": 2.0,
+     "final": 2.0
+    },
+    {
+     "name": "heading_hold",
+     "func": "heading_hold_reward",
+     "weight": 1.5,
+     "final": 1.5
+    },
+    {
+     "name": "feet_flat",
+     "func": "feet_flat_penalty",
+     "weight": -2.0,
+     "final": -2.0
+    },
+    {
+     "name": "neck_action_rate_l2",
+     "func": "neck_action_rate_l2",
+     "weight": -0.5,
+     "final": -0.5
+    },
+    {
+     "name": "neck_joint_pos_l2",
+     "func": "neck_joint_pos_l2",
+     "weight": -0.75,
+     "final": -0.75
+    },
+    {
+     "name": "joint_torques_l2",
+     "func": "joint_torques_l2",
+     "weight": -0.001,
+     "final": -0.001
+    }
+   ],
+   "commands": {
+    "twist": {
+     "type": "RelativeHeadingVelocityCommandCfg",
+     "ranges": {
+      "lin_vel_x": [
+       0.0,
+       0.0
+      ],
+      "lin_vel_y": [
+       0.0,
+       0.0
+      ],
+      "ang_vel_z": [
+       0.0,
+       0.0
+      ]
+     }
+    }
+   },
+   "actor_obs": [
+    "base_ang_vel",
+    "projected_gravity",
+    "joint_pos",
+    "joint_vel",
+    "actions",
+    "command",
+    "head_command",
+    "body_command"
+   ],
+   "critic_obs": [
+    "base_lin_vel",
+    "base_ang_vel",
+    "projected_gravity",
+    "joint_pos",
+    "joint_vel",
+    "actions",
+    "command",
+    "foot_air_time",
+    "foot_contact",
+    "foot_contact_forces",
+    "wheel_vel",
+    "head_command",
+    "body_command"
+   ],
+   "terminations": [
+    "time_out",
+    "fell_over",
+    "nan_state",
+    "fell_into_void"
+   ],
+   "events": [
+    "reset_base",
+    "reset_robot_joints",
+    "push_robot",
+    "encoder_bias",
+    "base_com",
+    "expand_bam_friction_fields",
+    "reset_action_history",
+    "randomize_wheel_friction",
+    "randomize_com",
+    "randomize_head_com",
+    "randomize_mass_inertia",
+    "randomize_joint_friction",
+    "randomize_armature",
+    "reset_rolling_entry"
+   ],
+   "curriculum": [
+    "terrain_levels"
+   ],
+   "ppo": {
+    "experiment": "roller_slope",
+    "max_iterations": 8000,
+    "steps_per_env": 24,
+    "hidden": [
+     512,
+     256,
+     128
+    ],
+    "learning_rate": 0.001,
+    "gamma": 0.99,
+    "lam": 0.95,
+    "entropy": 0.01,
+    "clip": 0.2,
+    "symmetry": false
+   }
+  },
+  {
+   "id": "Mjlab-RollerStandUp-Flat-MicroDuck",
+   "terrain": "flat",
+   "robot_xml": "robot_groundcontact_rollers.xml",
+   "other_entities": [],
+   "episode_s": 6.0,
+   "control_hz": 50,
+   "rewards": [
+    {
+     "name": "body_ang_vel",
+     "func": "body_angular_velocity_penalty",
+     "weight": -0.05,
+     "final": -0.05
+    },
+    {
+     "name": "angular_momentum",
+     "func": "angular_momentum_penalty",
+     "weight": -0.02,
+     "final": -0.02
+    },
+    {
+     "name": "action_rate_l2",
+     "func": "action_rate_l2",
+     "weight": -0.6,
+     "final": -1.0
+    },
+    {
+     "name": "self_collisions",
+     "func": "self_collision_cost",
+     "weight": -1.0,
+     "final": -1.0
+    },
+    {
+     "name": "neck_action_rate_l2",
+     "func": "neck_action_rate_l2",
+     "weight": -0.5,
+     "final": -0.5
+    },
+    {
+     "name": "neck_joint_pos_l2",
+     "func": "neck_joint_pos_l2",
+     "weight": -0.5,
+     "final": -0.5
+    },
+    {
+     "name": "joint_torques_l2",
+     "func": "joint_torques_l2",
+     "weight": -0.001,
+     "final": -0.001
+    },
+    {
+     "name": "action_over_limit",
+     "func": "action_over_limit_penalty",
+     "weight": -0.5,
+     "final": -0.5
+    },
+    {
+     "name": "pose_stand_legs",
+     "func": "pose_target_match",
+     "weight": 8.0,
+     "final": 8.0
+    },
+    {
+     "name": "pose_stand_l1",
+     "func": "pose_l1_penalty",
+     "weight": 5.0,
+     "final": 5.0
+    },
+    {
+     "name": "height_stand",
+     "func": "height_target_gaussian",
+     "weight": 4.0,
+     "final": 4.0
+    },
+    {
+     "name": "height_stand_sharp",
+     "func": "height_target_gaussian",
+     "weight": 4.0,
+     "final": 4.0
+    },
+    {
+     "name": "height_stand_l1",
+     "func": "height_l1_penalty",
+     "weight": 30.0,
+     "final": 30.0
+    },
+    {
+     "name": "com_upward_velocity",
+     "func": "com_upward_velocity",
+     "weight": 3.0,
+     "final": 3.0
+    },
+    {
+     "name": "gentle_rise",
+     "func": "trunk_vertical_accel_penalty",
+     "weight": 0.02,
+     "final": 0.02
+    },
+    {
+     "name": "upright_linear",
+     "func": "body_upright_linear",
+     "weight": 6.0,
+     "final": 6.0
+    },
+    {
+     "name": "upright_sharp",
+     "func": "upright_gaussian_at_height",
+     "weight": 6.0,
+     "final": 6.0
+    },
+    {
+     "name": "standing_composite",
+     "func": "standing_composite_score",
+     "weight": 15.0,
+     "final": 15.0
+    },
+    {
+     "name": "joint_torque_rate_l2",
+     "func": "joint_torque_rate_l2",
+     "weight": -0.2,
+     "final": -0.2
+    }
+   ],
+   "commands": {
+    "twist": {
+     "type": "VelocityCommandCommandOnlyCfg",
+     "ranges": {
+      "lin_vel_x": [
+       -0.01,
+       0.01
+      ],
+      "lin_vel_y": [
+       -0.01,
+       0.01
+      ],
+      "ang_vel_z": [
+       -0.05,
+       0.05
+      ]
+     }
+    }
+   },
+   "actor_obs": [
+    "base_ang_vel",
+    "projected_gravity",
+    "joint_pos",
+    "joint_vel",
+    "actions",
+    "command",
+    "head_command",
+    "body_command"
+   ],
+   "critic_obs": [
+    "base_lin_vel",
+    "base_ang_vel",
+    "projected_gravity",
+    "joint_pos",
+    "joint_vel",
+    "actions",
+    "command",
+    "foot_air_time",
+    "foot_contact",
+    "foot_contact_forces",
+    "wheel_vel",
+    "head_command",
+    "body_command"
+   ],
+   "terminations": [
+    "time_out",
+    "out_of_terrain_bounds",
+    "nan_state"
+   ],
+   "events": [
+    "reset_base",
+    "reset_robot_joints",
+    "push_robot",
+    "encoder_bias",
+    "base_com",
+    "expand_bam_friction_fields",
+    "reset_action_history",
+    "randomize_wheel_friction",
+    "randomize_com",
+    "randomize_head_com",
+    "randomize_mass_inertia",
+    "randomize_joint_friction",
+    "randomize_armature",
+    "set_ground_state"
+   ],
+   "curriculum": [
+    "action_rate_weight",
+    "wheel_friction",
+    "com_range",
+    "head_com_range",
+    "ground_state_mix",
+    "push_magnitude"
+   ],
+   "ppo": {
+    "experiment": "roller_standup",
+    "max_iterations": 15000,
+    "steps_per_env": 24,
+    "hidden": [
+     512,
+     256,
+     128
+    ],
+    "learning_rate": 0.001,
+    "gamma": 0.99,
+    "lam": 0.95,
+    "entropy": 0.01,
+    "clip": 0.2,
+    "symmetry": false
+   }
+  },
+  {
+   "id": "Mjlab-Roulade-Flat-MicroDuck",
+   "terrain": "flat",
+   "robot_xml": "robot_groundcontact.xml",
+   "other_entities": [],
+   "episode_s": 5.0,
+   "control_hz": 50,
+   "rewards": [
+    {
+     "name": "body_ang_vel",
+     "func": "body_angular_velocity_penalty",
+     "weight": -0.002,
+     "final": -0.002
+    },
+    {
+     "name": "angular_momentum",
+     "func": "angular_momentum_penalty",
+     "weight": -0.001,
+     "final": -0.001
+    },
+    {
+     "name": "dof_pos_limits",
+     "func": "joint_pos_limits",
+     "weight": -1.0,
+     "final": -1.0
+    },
+    {
+     "name": "action_rate_l2",
+     "func": "action_rate_l2",
+     "weight": -0.1,
+     "final": -0.4
+    },
+    {
+     "name": "roulade_progress",
+     "func": "roulade_progress",
+     "weight": 8.0,
+     "final": 8.0
+    },
+    {
+     "name": "roulade_overspeed",
+     "func": "roulade_overspeed_penalty",
+     "weight": -0.1,
+     "final": -0.1
+    },
+    {
+     "name": "roulade_head_pivot",
+     "func": "roulade_head_pivot",
+     "weight": 0.5,
+     "final": 0.5
+    },
+    {
+     "name": "roulade_landing_composite",
+     "func": "roulade_landing_composite",
+     "weight": 4.0,
+     "final": 4.0
+    },
+    {
+     "name": "roulade_upright_after_roll",
+     "func": "roulade_upright_after_roll",
+     "weight": 1.5,
+     "final": 1.5
+    },
+    {
+     "name": "roulade_height_after_roll",
+     "func": "roulade_height_after_roll",
+     "weight": 1.0,
+     "final": 1.0
+    },
+    {
+     "name": "roulade_landing_sharp",
+     "func": "roulade_landing_sharp",
+     "weight": 2.0,
+     "final": 2.0
+    },
+    {
+     "name": "roulade_stand_tax",
+     "func": "roulade_stand_tax",
+     "weight": 5.0,
+     "final": 5.0
+    },
+    {
+     "name": "roulade_rise_velocity",
+     "func": "roulade_rise_velocity",
+     "weight": 0.75,
+     "final": 0.75
+    },
+    {
+     "name": "roulade_sagittal",
+     "func": "roulade_sagittal_penalty",
+     "weight": -0.1,
+     "final": -0.1
+    },
+    {
+     "name": "roulade_lateral_vel",
+     "func": "roulade_lateral_velocity_penalty",
+     "weight": -0.5,
+     "final": -0.5
+    },
+    {
+     "name": "roulade_flatness",
+     "func": "roulade_flatness_penalty",
+     "weight": -0.5,
+     "final": -0.5
+    },
+    {
+     "name": "joint_torque_rate_l2",
+     "func": "joint_torque_rate_l2",
+     "weight": 0.0,
+     "final": -0.001
+    },
+    {
+     "name": "arrival_damping",
+     "func": "body_ang_vel_at_height",
+     "weight": 0.0,
+     "final": -0.05
+    },
+    {
+     "name": "gentle_landing",
+     "func": "trunk_vertical_accel_penalty",
+     "weight": 0.002,
+     "final": 0.005
+    },
+    {
+     "name": "self_collisions",
+     "func": "self_collision_cost",
+     "weight": -0.1,
+     "final": -0.1
+    }
+   ],
+   "commands": {
+    "twist": {
+     "type": "VelocityCommandCommandOnlyCfg",
+     "ranges": {
+      "lin_vel_x": [
+       -0.01,
+       0.01
+      ],
+      "lin_vel_y": [
+       -0.01,
+       0.01
+      ],
+      "ang_vel_z": [
+       -0.05,
+       0.05
+      ]
+     }
+    }
+   },
+   "actor_obs": [
+    "base_ang_vel",
+    "projected_gravity",
+    "joint_pos",
+    "joint_vel",
+    "actions",
+    "command",
+    "head_command",
+    "body_command"
+   ],
+   "critic_obs": [
+    "base_lin_vel",
+    "base_ang_vel",
+    "projected_gravity",
+    "joint_pos",
+    "joint_vel",
+    "actions",
+    "command",
+    "foot_air_time",
+    "foot_contact",
+    "foot_contact_forces",
+    "head_command",
+    "body_command"
+   ],
+   "terminations": [
+    "time_out",
+    "out_of_terrain_bounds",
+    "nan_state"
+   ],
+   "events": [
+    "reset_base",
+    "reset_robot_joints",
+    "foot_friction",
+    "encoder_bias",
+    "base_com",
+    "expand_bam_friction_fields",
+    "reset_action_history",
+    "set_roulade_state",
+    "randomize_com",
+    "randomize_head_com",
+    "randomize_armature",
+    "randomize_mass_inertia",
+    "randomize_joint_friction"
+   ],
+   "curriculum": [
+    "roulade_spawn_mix",
+    "com_range",
+    "head_com_range",
+    "action_rate_weight",
+    "arrival_damping_weight",
+    "torque_rate_weight",
+    "gentle_landing_weight"
+   ],
+   "ppo": {
+    "experiment": "microduck_roulade",
+    "max_iterations": 10000,
+    "steps_per_env": 24,
+    "hidden": [
+     512,
+     256,
+     128
+    ],
+    "learning_rate": 0.001,
+    "gamma": 0.99,
+    "lam": 0.95,
+    "entropy": 0.01,
+    "clip": 0.2,
+    "symmetry": true
+   }
+  },
+  {
+   "id": "Mjlab-SitStand-Flat-Backlash-MicroDuck",
+   "base": "Mjlab-SitStand-Flat-MicroDuck",
+   "robot_xml": "robot_groundcontact_backlash.xml"
+  },
+  {
+   "id": "Mjlab-SitStand-Flat-MicroDuck",
+   "terrain": "flat",
+   "robot_xml": "robot_groundcontact.xml",
+   "other_entities": [],
+   "episode_s": 12.0,
+   "control_hz": 50,
+   "rewards": [
+    {
+     "name": "body_ang_vel",
+     "func": "body_angular_velocity_penalty",
+     "weight": -0.05,
+     "final": -0.05
+    },
+    {
+     "name": "angular_momentum",
+     "func": "angular_momentum_penalty",
+     "weight": -0.02,
+     "final": -0.02
+    },
+    {
+     "name": "dof_pos_limits",
+     "func": "joint_pos_limits",
+     "weight": -1.0,
+     "final": -1.0
+    },
+    {
+     "name": "action_rate_l2",
+     "func": "action_rate_l2",
+     "weight": -0.1,
+     "final": -1.0
+    },
+    {
+     "name": "posture_pose_legs",
+     "func": "posture_pose_match",
+     "weight": 4.0,
+     "final": 4.0
+    },
+    {
+     "name": "head_pose_tracking",
+     "func": "head_pose_tracking",
+     "weight": 0.75,
+     "final": 0.75
+    },
+    {
+     "name": "posture_pose_l1",
+     "func": "posture_pose_l1",
+     "weight": 1.0,
+     "final": 1.0
+    },
+    {
+     "name": "posture_height",
+     "func": "posture_height_gaussian",
+     "weight": 1.0,
+     "final": 1.0
+    },
+    {
+     "name": "posture_height_sharp",
+     "func": "posture_height_gaussian",
+     "weight": 1.0,
+     "final": 1.0
+    },
+    {
+     "name": "posture_height_l1",
+     "func": "posture_height_l1",
+     "weight": 6.0,
+     "final": 6.0
+    },
+    {
+     "name": "rise_bootstrap",
+     "func": "posture_rise_bootstrap",
+     "weight": 0.75,
+     "final": 0.75
+    },
+    {
+     "name": "descent_speed",
+     "func": "trunk_downward_velocity_penalty",
+     "weight": 10.0,
+     "final": 20.0
+    },
+    {
+     "name": "rise_speed",
+     "func": "trunk_upward_velocity_penalty",
+     "weight": 0.0,
+     "final": 10.0
+    },
+    {
+     "name": "gentle_motion",
+     "func": "trunk_vertical_accel_penalty",
+     "weight": 0.05,
+     "final": 0.05
+    },
+    {
+     "name": "upright_linear",
+     "func": "body_upright_linear",
+     "weight": 2.5,
+     "final": 2.5
+    },
+    {
+     "name": "upright_while_tall",
+     "func": "upright_while_tall",
+     "weight": 1.5,
+     "final": 1.5
+    },
+    {
+     "name": "posture_stillness",
+     "func": "posture_stillness",
+     "weight": 2.0,
+     "final": 2.0
+    },
+    {
+     "name": "posture_composite",
+     "func": "posture_composite",
+     "weight": 3.0,
+     "final": 3.0
+    },
+    {
+     "name": "joint_torque_rate_l2",
+     "func": "joint_torque_rate_l2",
+     "weight": 0.0,
+     "final": -0.001
+    },
+    {
+     "name": "neck_strain_leaned",
+     "func": "neck_torque_when_tilted",
+     "weight": -0.5,
+     "final": -0.5
+    },
+    {
+     "name": "self_collisions",
+     "func": "self_collision_cost",
+     "weight": -1.0,
+     "final": -1.0
+    }
+   ],
+   "commands": {
+    "twist": {
+     "type": "SitStandCommandCfg",
+     "ranges": {
+      "lin_vel_x": [
+       -1.0,
+       1.0
+      ],
+      "lin_vel_y": [
+       -1.0,
+       1.0
+      ],
+      "ang_vel_z": [
+       -0.5,
+       0.5
+      ]
+     }
+    },
+    "head_pose": {
+     "type": "UniformPoseCommandCfg",
+     "ranges": {
+      "range": [
+       [
+        -0.05,
+        0.05
+       ],
+       [
+        -0.05,
+        0.05
+       ],
+       [
+        -0.07,
+        0.07
+       ],
+       [
+        -0.015,
+        0.015
+       ]
+      ]
+     }
+    }
+   },
+   "actor_obs": [
+    "base_ang_vel",
+    "projected_gravity",
+    "joint_pos",
+    "joint_vel",
+    "actions",
+    "command",
+    "head_command",
+    "body_command"
+   ],
+   "critic_obs": [
+    "base_lin_vel",
+    "base_ang_vel",
+    "projected_gravity",
+    "joint_pos",
+    "joint_vel",
+    "actions",
+    "command",
+    "foot_air_time",
+    "foot_contact",
+    "foot_contact_forces",
+    "head_command",
+    "body_command"
+   ],
+   "terminations": [
+    "time_out",
+    "out_of_terrain_bounds",
+    "nan_state"
+   ],
+   "events": [
+    "reset_base",
+    "reset_robot_joints",
+    "push_robot",
+    "foot_friction",
+    "encoder_bias",
+    "base_com",
+    "expand_bam_friction_fields",
+    "reset_action_history",
+    "set_ground_state",
+    "seated_head_jerk",
+    "seated_tip",
+    "randomize_com",
+    "randomize_head_com",
+    "randomize_armature",
+    "randomize_mass_inertia",
+    "randomize_joint_friction"
+   ],
+   "curriculum": [
+    "head_pose_range",
+    "com_range",
+    "head_com_range",
+    "push_magnitude",
+    "action_rate_weight",
+    "descent_speed_weight",
+    "rise_speed_weight",
+    "seated_head_jerk_prob",
+    "seated_tip_range",
+    "torque_rate_weight"
+   ],
+   "ppo": {
+    "experiment": "microduck_sitstand",
+    "max_iterations": 15000,
+    "steps_per_env": 24,
+    "hidden": [
+     512,
+     256,
+     128
+    ],
+    "learning_rate": 0.001,
+    "gamma": 0.99,
+    "lam": 0.95,
+    "entropy": 0.01,
+    "clip": 0.2,
+    "symmetry": false
+   }
+  },
+  {
+   "id": "Mjlab-SitStand-Rough-Backlash-MicroDuck",
+   "base": "Mjlab-SitStand-Rough-MicroDuck",
+   "robot_xml": "robot_groundcontact_backlash.xml"
+  },
+  {
+   "id": "Mjlab-SitStand-Rough-MicroDuck",
+   "terrain": "rough",
+   "robot_xml": "robot_groundcontact.xml",
+   "other_entities": [],
+   "episode_s": 12.0,
+   "control_hz": 50,
+   "rewards": [
+    {
+     "name": "body_ang_vel",
+     "func": "body_angular_velocity_penalty",
+     "weight": -0.05,
+     "final": -0.05
+    },
+    {
+     "name": "angular_momentum",
+     "func": "angular_momentum_penalty",
+     "weight": -0.02,
+     "final": -0.02
+    },
+    {
+     "name": "dof_pos_limits",
+     "func": "joint_pos_limits",
+     "weight": -1.0,
+     "final": -1.0
+    },
+    {
+     "name": "action_rate_l2",
+     "func": "action_rate_l2",
+     "weight": -0.1,
+     "final": -1.0
+    },
+    {
+     "name": "posture_pose_legs",
+     "func": "posture_pose_match",
+     "weight": 4.0,
+     "final": 4.0
+    },
+    {
+     "name": "head_pose_tracking",
+     "func": "head_pose_tracking",
+     "weight": 0.75,
+     "final": 0.75
+    },
+    {
+     "name": "posture_pose_l1",
+     "func": "posture_pose_l1",
+     "weight": 1.0,
+     "final": 1.0
+    },
+    {
+     "name": "posture_height",
+     "func": "posture_height_gaussian",
+     "weight": 1.0,
+     "final": 1.0
+    },
+    {
+     "name": "posture_height_sharp",
+     "func": "posture_height_gaussian",
+     "weight": 1.0,
+     "final": 1.0
+    },
+    {
+     "name": "posture_height_l1",
+     "func": "posture_height_l1",
+     "weight": 6.0,
+     "final": 6.0
+    },
+    {
+     "name": "rise_bootstrap",
+     "func": "posture_rise_bootstrap",
+     "weight": 0.75,
+     "final": 0.75
+    },
+    {
+     "name": "descent_speed",
+     "func": "trunk_downward_velocity_penalty",
+     "weight": 10.0,
+     "final": 20.0
+    },
+    {
+     "name": "rise_speed",
+     "func": "trunk_upward_velocity_penalty",
+     "weight": 0.0,
+     "final": 10.0
+    },
+    {
+     "name": "gentle_motion",
+     "func": "trunk_vertical_accel_penalty",
+     "weight": 0.05,
+     "final": 0.05
+    },
+    {
+     "name": "upright_linear",
+     "func": "body_upright_linear",
+     "weight": 2.5,
+     "final": 2.5
+    },
+    {
+     "name": "upright_while_tall",
+     "func": "upright_while_tall",
+     "weight": 1.5,
+     "final": 1.5
+    },
+    {
+     "name": "posture_stillness",
+     "func": "posture_stillness",
+     "weight": 2.0,
+     "final": 2.0
+    },
+    {
+     "name": "posture_composite",
+     "func": "posture_composite",
+     "weight": 3.0,
+     "final": 3.0
+    },
+    {
+     "name": "joint_torque_rate_l2",
+     "func": "joint_torque_rate_l2",
+     "weight": 0.0,
+     "final": -0.001
+    },
+    {
+     "name": "neck_strain_leaned",
+     "func": "neck_torque_when_tilted",
+     "weight": -0.5,
+     "final": -0.5
+    },
+    {
+     "name": "self_collisions",
+     "func": "self_collision_cost",
+     "weight": -1.0,
+     "final": -1.0
+    }
+   ],
+   "commands": {
+    "twist": {
+     "type": "SitStandCommandCfg",
+     "ranges": {
+      "lin_vel_x": [
+       -1.0,
+       1.0
+      ],
+      "lin_vel_y": [
+       -1.0,
+       1.0
+      ],
+      "ang_vel_z": [
+       -0.5,
+       0.5
+      ]
+     }
+    },
+    "head_pose": {
+     "type": "UniformPoseCommandCfg",
+     "ranges": {
+      "range": [
+       [
+        -0.05,
+        0.05
+       ],
+       [
+        -0.05,
+        0.05
+       ],
+       [
+        -0.07,
+        0.07
+       ],
+       [
+        -0.015,
+        0.015
+       ]
+      ]
+     }
+    }
+   },
+   "actor_obs": [
+    "base_ang_vel",
+    "projected_gravity",
+    "joint_pos",
+    "joint_vel",
+    "actions",
+    "command",
+    "head_command",
+    "body_command"
+   ],
+   "critic_obs": [
+    "base_lin_vel",
+    "base_ang_vel",
+    "projected_gravity",
+    "joint_pos",
+    "joint_vel",
+    "actions",
+    "command",
+    "foot_air_time",
+    "foot_contact",
+    "foot_contact_forces",
+    "head_command",
+    "body_command"
+   ],
+   "terminations": [
+    "time_out",
+    "out_of_terrain_bounds",
+    "nan_state"
+   ],
+   "events": [
+    "reset_base",
+    "reset_robot_joints",
+    "push_robot",
+    "foot_friction",
+    "encoder_bias",
+    "base_com",
+    "expand_bam_friction_fields",
+    "reset_action_history",
+    "set_ground_state",
+    "seated_head_jerk",
+    "seated_tip",
+    "randomize_com",
+    "randomize_head_com",
+    "randomize_armature",
+    "randomize_mass_inertia",
+    "randomize_joint_friction"
+   ],
+   "curriculum": [
+    "terrain_levels",
+    "head_pose_range",
+    "com_range",
+    "head_com_range",
+    "push_magnitude",
+    "action_rate_weight",
+    "descent_speed_weight",
+    "rise_speed_weight",
+    "seated_head_jerk_prob",
+    "seated_tip_range",
+    "torque_rate_weight"
+   ],
+   "ppo": {
+    "experiment": "microduck_sitstand",
+    "max_iterations": 15000,
+    "steps_per_env": 24,
+    "hidden": [
+     512,
+     256,
+     128
+    ],
+    "learning_rate": 0.001,
+    "gamma": 0.99,
+    "lam": 0.95,
+    "entropy": 0.01,
+    "clip": 0.2,
+    "symmetry": false
+   }
+  },
+  {
+   "id": "Mjlab-Spin-Flat-MicroDuck",
+   "terrain": "flat",
+   "robot_xml": "robot_groundcontact_rollers.xml",
+   "other_entities": [],
+   "episode_s": 20.0,
+   "control_hz": 50,
+   "rewards": [
+    {
+     "name": "upright",
+     "func": "upright",
+     "weight": 2.0,
+     "final": 2.0
+    },
+    {
+     "name": "body_ang_vel",
+     "func": "body_angular_velocity_penalty",
+     "weight": -0.05,
+     "final": -0.05
+    },
+    {
+     "name": "action_rate_l2",
+     "func": "action_rate_l2",
+     "weight": -1.0,
+     "final": -1.0
+    },
+    {
+     "name": "spin_rate_track",
+     "func": "spin_rate_track",
+     "weight": 6.0,
+     "final": 6.0
+    },
+    {
+     "name": "spin_rate_l1",
+     "func": "spin_rate_l1",
+     "weight": 0.5,
+     "final": 0.5
+    },
+    {
+     "name": "spin_stay_in_place",
+     "func": "spin_stay_in_place",
+     "weight": -3.0,
+     "final": -3.0
+    },
+    {
+     "name": "spin_wheel_differential",
+     "func": "spin_wheel_differential",
+     "weight": 1.0,
+     "final": 1.0
+    },
+    {
+     "name": "leg_antisymmetry",
+     "func": "leg_antisymmetry",
+     "weight": 1.0,
+     "final": 0.25
+    },
+    {
+     "name": "spin_grounded",
+     "func": "spin_grounded",
+     "weight": 0.5,
+     "final": 0.5
+    },
+    {
+     "name": "feet_flat",
+     "func": "feet_flat_penalty",
+     "weight": -2.0,
+     "final": -2.0
+    },
+    {
+     "name": "self_collisions",
+     "func": "self_collision_cost",
+     "weight": -1.0,
+     "final": -1.0
+    },
+    {
+     "name": "neck_action_rate_l2",
+     "func": "neck_action_rate_l2",
+     "weight": -0.5,
+     "final": -0.5
+    },
+    {
+     "name": "neck_joint_pos_l2",
+     "func": "neck_joint_pos_l2",
+     "weight": -0.2,
+     "final": -0.2
+    },
+    {
+     "name": "joint_torques_l2",
+     "func": "joint_torques_l2",
+     "weight": -0.001,
+     "final": -0.001
+    }
+   ],
+   "commands": {
+    "twist": {
+     "type": "GroundPickPhaseCommandCfg",
+     "ranges": {
+      "lin_vel_x": [
+       -1.0,
+       1.0
+      ],
+      "lin_vel_y": [
+       -1.0,
+       1.0
+      ],
+      "ang_vel_z": [
+       -0.5,
+       0.5
+      ],
+      "heading": [
+       -3.141592653589793,
+       3.141592653589793
+      ]
+     }
+    }
+   },
+   "actor_obs": [
+    "base_ang_vel",
+    "projected_gravity",
+    "joint_pos",
+    "joint_vel",
+    "actions",
+    "command",
+    "head_command",
+    "body_command"
+   ],
+   "critic_obs": [
+    "base_lin_vel",
+    "base_ang_vel",
+    "projected_gravity",
+    "joint_pos",
+    "joint_vel",
+    "actions",
+    "command",
+    "foot_air_time",
+    "foot_contact",
+    "foot_contact_forces",
+    "wheel_vel",
+    "head_command",
+    "body_command"
+   ],
+   "terminations": [
+    "time_out",
+    "fell_over",
+    "out_of_terrain_bounds",
+    "nan_state"
+   ],
+   "events": [
+    "reset_base",
+    "reset_robot_joints",
+    "push_robot",
+    "encoder_bias",
+    "base_com",
+    "reset_action_history",
+    "randomize_wheel_friction",
+    "randomize_com",
+    "randomize_head_com",
+    "randomize_mass_inertia",
+    "randomize_joint_friction",
+    "randomize_armature"
+   ],
+   "curriculum": [
+    "action_rate_weight",
+    "leg_antisym_weight",
+    "com_range",
+    "head_com_range"
+   ],
+   "ppo": {
+    "experiment": "spin",
+    "max_iterations": 8000,
+    "steps_per_env": 24,
+    "hidden": [
+     512,
+     256,
+     128
+    ],
+    "learning_rate": 0.001,
+    "gamma": 0.99,
+    "lam": 0.95,
+    "entropy": 0.01,
+    "clip": 0.2,
+    "symmetry": false
+   }
+  },
+  {
+   "id": "Mjlab-StandUp-Flat-Backlash-MicroDuck",
+   "base": "Mjlab-StandUp-Flat-MicroDuck",
+   "robot_xml": "robot_groundcontact_backlash.xml"
+  },
+  {
+   "id": "Mjlab-StandUp-Flat-MicroDuck",
+   "terrain": "flat",
+   "robot_xml": "robot_groundcontact.xml",
+   "other_entities": [],
+   "episode_s": 6.0,
+   "control_hz": 50,
+   "rewards": [
+    {
+     "name": "body_ang_vel",
+     "func": "body_angular_velocity_penalty",
+     "weight": -0.05,
+     "final": -0.05
+    },
+    {
+     "name": "angular_momentum",
+     "func": "angular_momentum_penalty",
+     "weight": -0.02,
+     "final": -0.02
+    },
+    {
+     "name": "dof_pos_limits",
+     "func": "joint_pos_limits",
+     "weight": -1.0,
+     "final": -1.0
+    },
+    {
+     "name": "action_rate_l2",
+     "func": "action_rate_l2",
+     "weight": -0.1,
+     "final": -1.0
+    },
+    {
+     "name": "pose_stand_legs",
+     "func": "pose_target_match",
+     "weight": 2.0,
+     "final": 2.0
+    },
+    {
+     "name": "head_pose_tracking",
+     "func": "head_pose_tracking",
+     "weight": 0.75,
+     "final": 0.75
+    },
+    {
+     "name": "head_pose_bias",
+     "func": "head_pose_bias_penalty",
+     "weight": 0.0,
+     "final": 1.5
+    },
+    {
+     "name": "pose_stand_l1",
+     "func": "pose_l1_penalty",
+     "weight": 1.25,
+     "final": 1.25
+    },
+    {
+     "name": "height_stand",
+     "func": "height_target_gaussian",
+     "weight": 1.0,
+     "final": 1.0
+    },
+    {
+     "name": "height_stand_sharp",
+     "func": "height_target_gaussian",
+     "weight": 1.0,
+     "final": 0.2
+    },
+    {
+     "name": "height_stand_l1",
+     "func": "height_l1_penalty",
+     "weight": 7.5,
+     "final": 7.5
+    },
+    {
+     "name": "com_upward_velocity",
+     "func": "com_upward_velocity",
+     "weight": 0.75,
+     "final": 0.75
+    },
+    {
+     "name": "gentle_rise",
+     "func": "trunk_vertical_accel_penalty",
+     "weight": 0.005,
+     "final": 0.005
+    },
+    {
+     "name": "arrival_damping",
+     "func": "body_ang_vel_at_height",
+     "weight": 0.0,
+     "final": -0.05
+    },
+    {
+     "name": "upright_linear",
+     "func": "body_upright_linear",
+     "weight": 1.5,
+     "final": 1.5
+    },
+    {
+     "name": "upright_sharp",
+     "func": "upright_gaussian_at_height",
+     "weight": 1.5,
+     "final": 0.5
+    },
+    {
+     "name": "standing_composite",
+     "func": "standing_composite_score",
+     "weight": 3.75,
+     "final": 1.5
+    },
+    {
+     "name": "body_pose_tracking",
+     "func": "body_pose_tracking_locomotion",
+     "weight": 0.0,
+     "final": 4.0
+    },
+    {
+     "name": "joint_torque_rate_l2",
+     "func": "joint_torque_rate_l2",
+     "weight": 0.0,
+     "final": -0.001
+    },
+    {
+     "name": "self_collisions",
+     "func": "self_collision_cost",
+     "weight": -1.0,
+     "final": -1.0
+    }
+   ],
+   "commands": {
+    "twist": {
+     "type": "VelocityCommandCommandOnlyCfg",
+     "ranges": {
+      "lin_vel_x": [
+       -0.01,
+       0.01
+      ],
+      "lin_vel_y": [
+       -0.01,
+       0.01
+      ],
+      "ang_vel_z": [
+       -0.05,
+       0.05
+      ]
+     }
+    },
+    "head_pose": {
+     "type": "UniformPoseCommandCfg",
+     "ranges": {
+      "range": [
+       [
+        -0.05,
+        0.05
+       ],
+       [
+        -0.05,
+        0.05
+       ],
+       [
+        -0.07,
+        0.07
+       ],
+       [
+        -0.015,
+        0.015
+       ]
+      ]
+     }
+    },
+    "body_pose": {
+     "type": "UniformPoseCommandCfg",
+     "ranges": {
+      "range": [
+       [
+        -0.005,
+        0.005
+       ],
+       [
+        -0.005,
+        0.005
+       ],
+       [
+        -0.005,
+        0.005
+       ],
+       [
+        -0.05,
+        0.05
+       ],
+       [
+        -0.05,
+        0.05
+       ],
+       [
+        -0.05,
+        0.05
+       ]
+      ]
+     }
+    }
+   },
+   "actor_obs": [
+    "base_ang_vel",
+    "projected_gravity",
+    "joint_pos",
+    "joint_vel",
+    "actions",
+    "command",
+    "head_command",
+    "body_command"
+   ],
+   "critic_obs": [
+    "base_lin_vel",
+    "base_ang_vel",
+    "projected_gravity",
+    "joint_pos",
+    "joint_vel",
+    "actions",
+    "command",
+    "foot_air_time",
+    "foot_contact",
+    "foot_contact_forces",
+    "head_command",
+    "body_command"
+   ],
+   "terminations": [
+    "time_out",
+    "out_of_terrain_bounds",
+    "nan_state"
+   ],
+   "events": [
+    "reset_base",
+    "reset_robot_joints",
+    "push_robot",
+    "foot_friction",
+    "encoder_bias",
+    "base_com",
+    "expand_bam_friction_fields",
+    "reset_action_history",
+    "set_ground_state",
+    "randomize_com",
+    "randomize_head_com",
+    "randomize_armature",
+    "randomize_mass_inertia",
+    "randomize_joint_friction"
+   ],
+   "curriculum": [
+    "ground_state_mix",
+    "head_pose_range",
+    "com_range",
+    "head_com_range",
+    "push_magnitude",
+    "action_rate_weight",
+    "arrival_damping_weight",
+    "head_pose_bias_weight",
+    "torque_rate_weight",
+    "body_pose_tracking_weight",
+    "body_pose_range",
+    "height_stand_sharp_weight",
+    "upright_sharp_weight",
+    "standing_composite_weight"
+   ],
+   "ppo": {
+    "experiment": "microduck_stand",
+    "max_iterations": 15000,
+    "steps_per_env": 24,
+    "hidden": [
+     512,
+     256,
+     128
+    ],
+    "learning_rate": 0.001,
+    "gamma": 0.99,
+    "lam": 0.95,
+    "entropy": 0.01,
+    "clip": 0.2,
+    "symmetry": false
+   }
+  },
+  {
+   "id": "Mjlab-StandUp-Rough-Backlash-MicroDuck",
+   "base": "Mjlab-StandUp-Rough-MicroDuck",
+   "robot_xml": "robot_groundcontact_backlash.xml"
+  },
+  {
+   "id": "Mjlab-StandUp-Rough-MicroDuck",
+   "terrain": "rough",
+   "robot_xml": "robot_groundcontact.xml",
+   "other_entities": [],
+   "episode_s": 6.0,
+   "control_hz": 50,
+   "rewards": [
+    {
+     "name": "body_ang_vel",
+     "func": "body_angular_velocity_penalty",
+     "weight": -0.05,
+     "final": -0.05
+    },
+    {
+     "name": "angular_momentum",
+     "func": "angular_momentum_penalty",
+     "weight": -0.02,
+     "final": -0.02
+    },
+    {
+     "name": "dof_pos_limits",
+     "func": "joint_pos_limits",
+     "weight": -1.0,
+     "final": -1.0
+    },
+    {
+     "name": "action_rate_l2",
+     "func": "action_rate_l2",
+     "weight": -0.1,
+     "final": -1.0
+    },
+    {
+     "name": "pose_stand_legs",
+     "func": "pose_target_match",
+     "weight": 2.0,
+     "final": 2.0
+    },
+    {
+     "name": "head_pose_tracking",
+     "func": "head_pose_tracking",
+     "weight": 0.75,
+     "final": 0.75
+    },
+    {
+     "name": "head_pose_bias",
+     "func": "head_pose_bias_penalty",
+     "weight": 0.0,
+     "final": 1.5
+    },
+    {
+     "name": "pose_stand_l1",
+     "func": "pose_l1_penalty",
+     "weight": 1.25,
+     "final": 1.25
+    },
+    {
+     "name": "height_stand",
+     "func": "height_target_gaussian",
+     "weight": 1.0,
+     "final": 1.0
+    },
+    {
+     "name": "height_stand_sharp",
+     "func": "height_target_gaussian",
+     "weight": 1.0,
+     "final": 0.2
+    },
+    {
+     "name": "height_stand_l1",
+     "func": "height_l1_penalty",
+     "weight": 7.5,
+     "final": 7.5
+    },
+    {
+     "name": "com_upward_velocity",
+     "func": "com_upward_velocity",
+     "weight": 0.75,
+     "final": 0.75
+    },
+    {
+     "name": "gentle_rise",
+     "func": "trunk_vertical_accel_penalty",
+     "weight": 0.005,
+     "final": 0.005
+    },
+    {
+     "name": "arrival_damping",
+     "func": "body_ang_vel_at_height",
+     "weight": 0.0,
+     "final": -0.05
+    },
+    {
+     "name": "upright_linear",
+     "func": "body_upright_linear",
+     "weight": 1.5,
+     "final": 1.5
+    },
+    {
+     "name": "upright_sharp",
+     "func": "upright_gaussian_at_height",
+     "weight": 1.5,
+     "final": 0.5
+    },
+    {
+     "name": "standing_composite",
+     "func": "standing_composite_score",
+     "weight": 3.75,
+     "final": 1.5
+    },
+    {
+     "name": "body_pose_tracking",
+     "func": "body_pose_tracking_locomotion",
+     "weight": 0.0,
+     "final": 4.0
+    },
+    {
+     "name": "joint_torque_rate_l2",
+     "func": "joint_torque_rate_l2",
+     "weight": 0.0,
+     "final": -0.001
+    },
+    {
+     "name": "self_collisions",
+     "func": "self_collision_cost",
+     "weight": -1.0,
+     "final": -1.0
+    }
+   ],
+   "commands": {
+    "twist": {
+     "type": "VelocityCommandCommandOnlyCfg",
+     "ranges": {
+      "lin_vel_x": [
+       -0.01,
+       0.01
+      ],
+      "lin_vel_y": [
+       -0.01,
+       0.01
+      ],
+      "ang_vel_z": [
+       -0.05,
+       0.05
+      ]
+     }
+    },
+    "head_pose": {
+     "type": "UniformPoseCommandCfg",
+     "ranges": {
+      "range": [
+       [
+        -0.05,
+        0.05
+       ],
+       [
+        -0.05,
+        0.05
+       ],
+       [
+        -0.07,
+        0.07
+       ],
+       [
+        -0.015,
+        0.015
+       ]
+      ]
+     }
+    },
+    "body_pose": {
+     "type": "UniformPoseCommandCfg",
+     "ranges": {
+      "range": [
+       [
+        -0.005,
+        0.005
+       ],
+       [
+        -0.005,
+        0.005
+       ],
+       [
+        -0.005,
+        0.005
+       ],
+       [
+        -0.05,
+        0.05
+       ],
+       [
+        -0.05,
+        0.05
+       ],
+       [
+        -0.05,
+        0.05
+       ]
+      ]
+     }
+    }
+   },
+   "actor_obs": [
+    "base_ang_vel",
+    "projected_gravity",
+    "joint_pos",
+    "joint_vel",
+    "actions",
+    "command",
+    "head_command",
+    "body_command"
+   ],
+   "critic_obs": [
+    "base_lin_vel",
+    "base_ang_vel",
+    "projected_gravity",
+    "joint_pos",
+    "joint_vel",
+    "actions",
+    "command",
+    "foot_air_time",
+    "foot_contact",
+    "foot_contact_forces",
+    "head_command",
+    "body_command"
+   ],
+   "terminations": [
+    "time_out",
+    "out_of_terrain_bounds",
+    "nan_state"
+   ],
+   "events": [
+    "reset_base",
+    "reset_robot_joints",
+    "push_robot",
+    "foot_friction",
+    "encoder_bias",
+    "base_com",
+    "expand_bam_friction_fields",
+    "reset_action_history",
+    "set_ground_state",
+    "randomize_com",
+    "randomize_head_com",
+    "randomize_armature",
+    "randomize_mass_inertia",
+    "randomize_joint_friction"
+   ],
+   "curriculum": [
+    "terrain_levels",
+    "ground_state_mix",
+    "head_pose_range",
+    "com_range",
+    "head_com_range",
+    "push_magnitude",
+    "action_rate_weight",
+    "arrival_damping_weight",
+    "head_pose_bias_weight",
+    "torque_rate_weight",
+    "body_pose_tracking_weight",
+    "body_pose_range",
+    "height_stand_sharp_weight",
+    "upright_sharp_weight",
+    "standing_composite_weight"
+   ],
+   "ppo": {
+    "experiment": "microduck_stand",
+    "max_iterations": 15000,
+    "steps_per_env": 24,
+    "hidden": [
+     512,
+     256,
+     128
+    ],
+    "learning_rate": 0.001,
+    "gamma": 0.99,
+    "lam": 0.95,
+    "entropy": 0.01,
+    "clip": 0.2,
+    "symmetry": false
+   }
+  },
+  {
+   "id": "Mjlab-VelStand-Flat-Backlash-MicroDuck",
+   "base": "Mjlab-VelStand-Flat-MicroDuck",
+   "robot_xml": "robot_allcollisions_backlash.xml"
+  },
+  {
+   "id": "Mjlab-VelStand-Flat-MicroDuck",
+   "terrain": "flat",
+   "robot_xml": "robot_allcollisions.xml",
+   "other_entities": [],
+   "episode_s": 20.0,
+   "control_hz": 50,
+   "rewards": [
+    {
+     "name": "track_linear_velocity",
+     "func": "track_linear_velocity",
+     "weight": 2.0,
+     "final": 2.0
+    },
+    {
+     "name": "track_angular_velocity",
+     "func": "track_angular_velocity",
+     "weight": 2.0,
+     "final": 2.0
+    },
+    {
+     "name": "upright",
+     "func": "upright_body_cmd_relative",
+     "weight": 2.0,
+     "final": 2.0
+    },
+    {
+     "name": "pose",
+     "func": "variable_posture_body_relaxed",
+     "weight": 1.0,
+     "final": 1.0
+    },
+    {
+     "name": "body_ang_vel",
+     "func": "body_angular_velocity_penalty",
+     "weight": -0.05,
+     "final": -0.05
+    },
+    {
+     "name": "angular_momentum",
+     "func": "angular_momentum_penalty",
+     "weight": -0.02,
+     "final": -0.02
+    },
+    {
+     "name": "dof_pos_limits",
+     "func": "joint_pos_limits",
+     "weight": -1.0,
+     "final": -1.0
+    },
+    {
+     "name": "action_rate_l2",
+     "func": "action_rate_l2_fallen_scaled",
+     "weight": -1.0,
+     "final": -1.0
+    },
+    {
+     "name": "air_time",
+     "func": "feet_air_time_upright",
+     "weight": 3.0,
+     "final": 3.0
+    },
+    {
+     "name": "foot_clearance",
+     "func": "feet_clearance",
+     "weight": -2.0,
+     "final": -2.0
+    },
+    {
+     "name": "foot_swing_height",
+     "func": "feet_swing_height",
+     "weight": -0.25,
+     "final": -0.25
+    },
+    {
+     "name": "foot_slip",
+     "func": "feet_slip",
+     "weight": -0.1,
+     "final": -0.1
+    },
+    {
+     "name": "self_collisions",
+     "func": "self_collision_cost",
+     "weight": -1.0,
+     "final": -1.0
+    },
+    {
+     "name": "head_pose_tracking",
+     "func": "head_pose_tracking",
+     "weight": 2.0,
+     "final": 2.0
+    },
+    {
+     "name": "body_pose_tracking",
+     "func": "body_pose_tracking_locomotion",
+     "weight": 2.0,
+     "final": 2.0
+    },
+    {
+     "name": "head_pose_bias",
+     "func": "head_pose_bias_penalty",
+     "weight": 3.0,
+     "final": 3.0
+    },
+    {
+     "name": "track_yaw_fine",
+     "func": "track_yaw_rate_fine",
+     "weight": 2.0,
+     "final": 2.0
+    },
+    {
+     "name": "upright_progress",
+     "func": "upright_progress",
+     "weight": 5.0,
+     "final": 5.0
+    },
+    {
+     "name": "height_progress",
+     "func": "height_progress",
+     "weight": 30.0,
+     "final": 30.0
+    },
+    {
+     "name": "com_upward_velocity",
+     "func": "com_upward_velocity",
+     "weight": 0.0,
+     "final": 2.0
+    },
+    {
+     "name": "joint_torque_rate_l2",
+     "func": "joint_torque_rate_l2_fallen_scaled",
+     "weight": -0.002,
+     "final": -0.002
+    },
+    {
+     "name": "servo_impact",
+     "func": "body_impact_cost",
+     "weight": -0.005,
+     "final": -0.02
+    },
+    {
+     "name": "head_impact",
+     "func": "body_impact_cost",
+     "weight": -0.0025,
+     "final": -0.01
+    },
+    {
+     "name": "trunk_impact",
+     "func": "body_impact_cost",
+     "weight": -0.0025,
+     "final": -0.01
+    },
+    {
+     "name": "servo_acc_spike",
+     "func": "servo_acc_spike_penalty",
+     "weight": -0.00025,
+     "final": -0.001
+    },
+    {
+     "name": "servo_stall",
+     "func": "servo_stall_penalty",
+     "weight": -0.0125,
+     "final": -0.05
+    },
+    {
+     "name": "gentle_rise",
+     "func": "trunk_vertical_accel_penalty",
+     "weight": 0.00125,
+     "final": 0.005
+    },
+    {
+     "name": "fallen_tax",
+     "func": "fallen_state_penalty",
+     "weight": 0.0,
+     "final": -0.5
+    },
+    {
+     "name": "recovery_success",
+     "func": "recovery_success",
+     "weight": 0.0,
+     "final": 10.0
+    }
+   ],
+   "commands": {
+    "twist": {
+     "type": "VelocityCommandCommandOnlyCfg",
+     "ranges": {
+      "lin_vel_x": [
+       -0.4,
+       0.4
+      ],
+      "lin_vel_y": [
+       -0.3,
+       0.3
+      ],
+      "ang_vel_z": [
+       -1.0,
+       1.0
+      ],
+      "heading": [
+       -3.141592653589793,
+       3.141592653589793
+      ]
+     }
+    },
+    "head_pose": {
+     "type": "UniformPoseCommandCfg",
+     "ranges": {
+      "range": [
+       [
+        -0.05,
+        0.05
+       ],
+       [
+        -0.05,
+        0.05
+       ],
+       [
+        -0.07,
+        0.07
+       ],
+       [
+        -0.015,
+        0.015
+       ]
+      ]
+     }
+    },
+    "body_pose": {
+     "type": "StandingGatedPoseCommandCfg",
+     "ranges": {
+      "range": [
+       [
+        -0.002,
+        0.002
+       ],
+       [
+        -0.002,
+        0.002
+       ],
+       [
+        -0.0125,
+        0.005
+       ],
+       [
+        -0.10471975511965978,
+        0.10471975511965978
+       ],
+       [
+        -0.10471975511965978,
+        0.10471975511965978
+       ],
+       [
+        -0.02,
+        0.02
+       ]
+      ]
+     }
+    }
+   },
+   "actor_obs": [
+    "base_ang_vel",
+    "projected_gravity",
+    "joint_pos",
+    "joint_vel",
+    "actions",
+    "command",
+    "head_command",
+    "body_command"
+   ],
+   "critic_obs": [
+    "base_lin_vel",
+    "base_ang_vel",
+    "projected_gravity",
+    "joint_pos",
+    "joint_vel",
+    "actions",
+    "command",
+    "foot_height",
+    "foot_air_time",
+    "foot_contact",
+    "foot_contact_forces",
+    "head_command",
+    "body_command"
+   ],
+   "terminations": [
+    "time_out",
+    "fell_over",
+    "out_of_terrain_bounds",
+    "nan_state",
+    "fallen_too_long"
+   ],
+   "events": [
+    "reset_base",
+    "reset_robot_joints",
+    "push_robot",
+    "foot_friction",
+    "encoder_bias",
+    "base_com",
+    "expand_bam_friction_fields",
+    "reset_action_history",
+    "randomize_com",
+    "randomize_head_com",
+    "randomize_mass_inertia",
+    "randomize_joint_friction",
+    "randomize_armature",
+    "random_prone_init",
+    "topple_push"
+   ],
+   "curriculum": [
+    "action_rate_weight",
+    "standing_envs",
+    "head_pose_range",
+    "com_range",
+    "head_com_range",
+    "head_pose_bias_weight",
+    "body_pose_range",
+    "fell_over_disable",
+    "prone_init_prob",
+    "fallen_tax_weight",
+    "recovery_success_weight",
+    "topple_push_range",
+    "servo_impact_weight",
+    "head_impact_weight",
+    "trunk_impact_weight",
+    "servo_acc_spike_weight",
+    "servo_stall_weight",
+    "gentle_rise_weight",
+    "com_upward_weight"
+   ],
+   "ppo": {
+    "experiment": "velstand",
+    "max_iterations": 6000,
+    "steps_per_env": 24,
+    "hidden": [
+     512,
+     256,
+     128
+    ],
+    "learning_rate": 0.001,
+    "gamma": 0.99,
+    "lam": 0.95,
+    "entropy": 0.01,
+    "clip": 0.2,
+    "symmetry": false
+   }
+  },
+  {
+   "id": "Mjlab-VelStand-Rough-Backlash-MicroDuck",
+   "base": "Mjlab-VelStand-Rough-MicroDuck",
+   "robot_xml": "robot_allcollisions_backlash.xml"
+  },
+  {
+   "id": "Mjlab-VelStand-Rough-MicroDuck",
+   "terrain": "rough",
+   "robot_xml": "robot_allcollisions.xml",
+   "other_entities": [],
+   "episode_s": 20.0,
+   "control_hz": 50,
+   "rewards": [
+    {
+     "name": "track_linear_velocity",
+     "func": "track_linear_velocity",
+     "weight": 2.0,
+     "final": 2.0
+    },
+    {
+     "name": "track_angular_velocity",
+     "func": "track_angular_velocity",
+     "weight": 2.0,
+     "final": 2.0
+    },
+    {
+     "name": "upright",
+     "func": "upright_body_cmd_relative",
+     "weight": 2.0,
+     "final": 2.0
+    },
+    {
+     "name": "pose",
+     "func": "variable_posture_body_relaxed",
+     "weight": 1.0,
+     "final": 1.0
+    },
+    {
+     "name": "body_ang_vel",
+     "func": "body_angular_velocity_penalty",
+     "weight": -0.05,
+     "final": -0.05
+    },
+    {
+     "name": "angular_momentum",
+     "func": "angular_momentum_penalty",
+     "weight": -0.02,
+     "final": -0.02
+    },
+    {
+     "name": "dof_pos_limits",
+     "func": "joint_pos_limits",
+     "weight": -1.0,
+     "final": -1.0
+    },
+    {
+     "name": "action_rate_l2",
+     "func": "action_rate_l2_fallen_scaled",
+     "weight": -1.0,
+     "final": -1.0
+    },
+    {
+     "name": "air_time",
+     "func": "feet_air_time_upright",
+     "weight": 3.0,
+     "final": 3.0
+    },
+    {
+     "name": "foot_clearance",
+     "func": "feet_clearance",
+     "weight": -2.0,
+     "final": -2.0
+    },
+    {
+     "name": "foot_swing_height",
+     "func": "feet_swing_height",
+     "weight": -0.25,
+     "final": -0.25
+    },
+    {
+     "name": "foot_slip",
+     "func": "feet_slip",
+     "weight": -0.1,
+     "final": -0.1
+    },
+    {
+     "name": "self_collisions",
+     "func": "self_collision_cost",
+     "weight": -1.0,
+     "final": -1.0
+    },
+    {
+     "name": "head_pose_tracking",
+     "func": "head_pose_tracking",
+     "weight": 2.0,
+     "final": 2.0
+    },
+    {
+     "name": "body_pose_tracking",
+     "func": "body_pose_tracking_locomotion",
+     "weight": 2.0,
+     "final": 2.0
+    },
+    {
+     "name": "head_pose_bias",
+     "func": "head_pose_bias_penalty",
+     "weight": 3.0,
+     "final": 3.0
+    },
+    {
+     "name": "track_yaw_fine",
+     "func": "track_yaw_rate_fine",
+     "weight": 2.0,
+     "final": 2.0
+    },
+    {
+     "name": "upright_progress",
+     "func": "upright_progress",
+     "weight": 5.0,
+     "final": 5.0
+    },
+    {
+     "name": "height_progress",
+     "func": "height_progress",
+     "weight": 30.0,
+     "final": 30.0
+    },
+    {
+     "name": "com_upward_velocity",
+     "func": "com_upward_velocity",
+     "weight": 0.0,
+     "final": 2.0
+    },
+    {
+     "name": "joint_torque_rate_l2",
+     "func": "joint_torque_rate_l2_fallen_scaled",
+     "weight": -0.002,
+     "final": -0.002
+    },
+    {
+     "name": "servo_impact",
+     "func": "body_impact_cost",
+     "weight": -0.005,
+     "final": -0.02
+    },
+    {
+     "name": "head_impact",
+     "func": "body_impact_cost",
+     "weight": -0.0025,
+     "final": -0.01
+    },
+    {
+     "name": "trunk_impact",
+     "func": "body_impact_cost",
+     "weight": -0.0025,
+     "final": -0.01
+    },
+    {
+     "name": "servo_acc_spike",
+     "func": "servo_acc_spike_penalty",
+     "weight": -0.00025,
+     "final": -0.001
+    },
+    {
+     "name": "servo_stall",
+     "func": "servo_stall_penalty",
+     "weight": -0.0125,
+     "final": -0.05
+    },
+    {
+     "name": "gentle_rise",
+     "func": "trunk_vertical_accel_penalty",
+     "weight": 0.00125,
+     "final": 0.005
+    },
+    {
+     "name": "fallen_tax",
+     "func": "fallen_state_penalty",
+     "weight": 0.0,
+     "final": -0.5
+    },
+    {
+     "name": "recovery_success",
+     "func": "recovery_success",
+     "weight": 0.0,
+     "final": 10.0
+    }
+   ],
+   "commands": {
+    "twist": {
+     "type": "VelocityCommandCommandOnlyCfg",
+     "ranges": {
+      "lin_vel_x": [
+       -0.4,
+       0.4
+      ],
+      "lin_vel_y": [
+       -0.3,
+       0.3
+      ],
+      "ang_vel_z": [
+       -1.0,
+       1.0
+      ],
+      "heading": [
+       -3.141592653589793,
+       3.141592653589793
+      ]
+     }
+    },
+    "head_pose": {
+     "type": "UniformPoseCommandCfg",
+     "ranges": {
+      "range": [
+       [
+        -0.05,
+        0.05
+       ],
+       [
+        -0.05,
+        0.05
+       ],
+       [
+        -0.07,
+        0.07
+       ],
+       [
+        -0.015,
+        0.015
+       ]
+      ]
+     }
+    },
+    "body_pose": {
+     "type": "StandingGatedPoseCommandCfg",
+     "ranges": {
+      "range": [
+       [
+        -0.002,
+        0.002
+       ],
+       [
+        -0.002,
+        0.002
+       ],
+       [
+        -0.0125,
+        0.005
+       ],
+       [
+        -0.10471975511965978,
+        0.10471975511965978
+       ],
+       [
+        -0.10471975511965978,
+        0.10471975511965978
+       ],
+       [
+        -0.02,
+        0.02
+       ]
+      ]
+     }
+    }
+   },
+   "actor_obs": [
+    "base_ang_vel",
+    "projected_gravity",
+    "joint_pos",
+    "joint_vel",
+    "actions",
+    "command",
+    "head_command",
+    "body_command"
+   ],
+   "critic_obs": [
+    "base_lin_vel",
+    "base_ang_vel",
+    "projected_gravity",
+    "joint_pos",
+    "joint_vel",
+    "actions",
+    "command",
+    "foot_height",
+    "foot_air_time",
+    "foot_contact",
+    "foot_contact_forces",
+    "head_command",
+    "body_command"
+   ],
+   "terminations": [
+    "time_out",
+    "fell_over",
+    "out_of_terrain_bounds",
+    "nan_state",
+    "fallen_too_long"
+   ],
+   "events": [
+    "reset_base",
+    "reset_robot_joints",
+    "push_robot",
+    "foot_friction",
+    "encoder_bias",
+    "base_com",
+    "expand_bam_friction_fields",
+    "reset_action_history",
+    "randomize_com",
+    "randomize_head_com",
+    "randomize_mass_inertia",
+    "randomize_joint_friction",
+    "randomize_armature",
+    "random_prone_init",
+    "topple_push"
+   ],
+   "curriculum": [
+    "terrain_levels",
+    "action_rate_weight",
+    "standing_envs",
+    "head_pose_range",
+    "com_range",
+    "head_com_range",
+    "head_pose_bias_weight",
+    "body_pose_range",
+    "fell_over_disable",
+    "prone_init_prob",
+    "fallen_tax_weight",
+    "recovery_success_weight",
+    "topple_push_range",
+    "servo_impact_weight",
+    "head_impact_weight",
+    "trunk_impact_weight",
+    "servo_acc_spike_weight",
+    "servo_stall_weight",
+    "gentle_rise_weight",
+    "com_upward_weight"
+   ],
+   "ppo": {
+    "experiment": "velstand",
+    "max_iterations": 6000,
+    "steps_per_env": 24,
+    "hidden": [
+     512,
+     256,
+     128
+    ],
+    "learning_rate": 0.001,
+    "gamma": 0.99,
+    "lam": 0.95,
+    "entropy": 0.01,
+    "clip": 0.2,
+    "symmetry": false
+   }
+  },
+  {
+   "id": "Mjlab-Velocity-Flat-Backlash-MicroDuck",
+   "base": "Mjlab-Velocity-Flat-MicroDuck",
+   "robot_xml": "robot_walk_backlash.xml"
+  },
+  {
+   "id": "Mjlab-Velocity-Flat-Backlash-MicroDuck-Rollers",
+   "base": "Mjlab-Velocity-Flat-MicroDuck-Rollers",
+   "robot_xml": "robot_groundcontact_rollers_backlash.xml"
+  },
+  {
+   "id": "Mjlab-Velocity-Flat-MicroDuck",
+   "terrain": "flat",
+   "robot_xml": "robot_walk.xml",
+   "other_entities": [],
+   "episode_s": 20.0,
+   "control_hz": 50,
+   "rewards": [
+    {
+     "name": "track_linear_velocity",
+     "func": "track_linear_velocity",
+     "weight": 2.0,
+     "final": 2.0
+    },
+    {
+     "name": "track_angular_velocity",
+     "func": "track_angular_velocity",
+     "weight": 2.0,
+     "final": 2.0
+    },
+    {
+     "name": "upright",
+     "func": "upright",
+     "weight": 2.0,
+     "final": 2.0
+    },
+    {
+     "name": "pose",
+     "func": "variable_posture",
+     "weight": 1.0,
+     "final": 1.0
+    },
+    {
+     "name": "body_ang_vel",
+     "func": "body_angular_velocity_penalty",
+     "weight": -0.05,
+     "final": -0.05
+    },
+    {
+     "name": "angular_momentum",
+     "func": "angular_momentum_penalty",
+     "weight": -0.02,
+     "final": -0.02
+    },
+    {
+     "name": "dof_pos_limits",
+     "func": "joint_pos_limits",
+     "weight": -1.0,
+     "final": -1.0
+    },
+    {
+     "name": "action_rate_l2",
+     "func": "action_rate_l2",
+     "weight": -0.1,
+     "final": -1.0
+    },
+    {
+     "name": "air_time",
+     "func": "feet_air_time",
+     "weight": 3.0,
+     "final": 3.0
+    },
+    {
+     "name": "foot_clearance",
+     "func": "feet_clearance",
+     "weight": -2.0,
+     "final": -2.0
+    },
+    {
+     "name": "foot_swing_height",
+     "func": "feet_swing_height",
+     "weight": -0.25,
+     "final": -0.25
+    },
+    {
+     "name": "foot_slip",
+     "func": "feet_slip",
+     "weight": -0.1,
+     "final": -0.1
+    },
+    {
+     "name": "self_collisions",
+     "func": "self_collision_cost",
+     "weight": -1.0,
+     "final": -1.0
+    },
+    {
+     "name": "head_pose_tracking",
+     "func": "head_pose_tracking",
+     "weight": 2.0,
+     "final": 2.0
+    },
+    {
+     "name": "body_pose_tracking",
+     "func": "body_pose_tracking_6d",
+     "weight": 0.0,
+     "final": 0.0
+    },
+    {
+     "name": "head_pose_bias",
+     "func": "head_pose_bias_penalty",
+     "weight": 0.0,
+     "final": 3.0
+    }
+   ],
+   "commands": {
+    "twist": {
+     "type": "VelocityCommandCommandOnlyCfg",
+     "ranges": {
+      "lin_vel_x": [
+       -0.4,
+       0.4
+      ],
+      "lin_vel_y": [
+       -0.3,
+       0.3
+      ],
+      "ang_vel_z": [
+       -1.0,
+       1.0
+      ],
+      "heading": [
+       -3.141592653589793,
+       3.141592653589793
+      ]
+     }
+    },
+    "head_pose": {
+     "type": "UniformPoseCommandCfg",
+     "ranges": {
+      "range": [
+       [
+        -0.05,
+        0.05
+       ],
+       [
+        -0.05,
+        0.05
+       ],
+       [
+        -0.07,
+        0.07
+       ],
+       [
+        -0.015,
+        0.015
+       ]
+      ]
+     }
+    },
+    "body_pose": {
+     "type": "UniformPoseCommandCfg",
+     "ranges": {
+      "range": [
+       [
+        -0.005,
+        0.005
+       ],
+       [
+        -0.005,
+        0.005
+       ],
+       [
+        -0.005,
+        0.005
+       ],
+       [
+        -0.05,
+        0.05
+       ],
+       [
+        -0.05,
+        0.05
+       ],
+       [
+        -0.05,
+        0.05
+       ]
+      ]
+     }
+    }
+   },
+   "actor_obs": [
+    "base_ang_vel",
+    "projected_gravity",
+    "joint_pos",
+    "joint_vel",
+    "actions",
+    "command",
+    "head_command",
+    "body_command"
+   ],
+   "critic_obs": [
+    "base_lin_vel",
+    "base_ang_vel",
+    "projected_gravity",
+    "joint_pos",
+    "joint_vel",
+    "actions",
+    "command",
+    "foot_height",
+    "foot_air_time",
+    "foot_contact",
+    "foot_contact_forces",
+    "head_command",
+    "body_command"
+   ],
+   "terminations": [
+    "time_out",
+    "fell_over",
+    "out_of_terrain_bounds",
+    "nan_state"
+   ],
+   "events": [
+    "reset_base",
+    "reset_robot_joints",
+    "push_robot",
+    "foot_friction",
+    "encoder_bias",
+    "base_com",
+    "expand_bam_friction_fields",
+    "reset_action_history",
+    "randomize_com",
+    "randomize_head_com",
+    "randomize_mass_inertia",
+    "randomize_joint_friction",
+    "randomize_armature"
+   ],
+   "curriculum": [
+    "action_rate_weight",
+    "standing_envs",
+    "head_pose_range",
+    "body_pose_range",
+    "com_range",
+    "head_com_range",
+    "head_pose_bias_weight"
+   ],
+   "ppo": {
+    "experiment": "velocity",
+    "max_iterations": 50000,
+    "steps_per_env": 24,
+    "hidden": [
+     512,
+     256,
+     128
+    ],
+    "learning_rate": 0.001,
+    "gamma": 0.99,
+    "lam": 0.95,
+    "entropy": 0.01,
+    "clip": 0.2,
+    "symmetry": false
+   }
+  },
+  {
+   "id": "Mjlab-Velocity-Flat-MicroDuck-Rollers",
+   "terrain": "flat",
+   "robot_xml": "robot_groundcontact_rollers.xml",
+   "other_entities": [],
+   "episode_s": 20.0,
+   "control_hz": 50,
+   "rewards": [
+    {
+     "name": "upright",
+     "func": "upright",
+     "weight": 2.0,
+     "final": 2.0
+    },
+    {
+     "name": "pose",
+     "func": "variable_posture",
+     "weight": 2.0,
+     "final": 2.0
+    },
+    {
+     "name": "body_ang_vel",
+     "func": "body_angular_velocity_penalty",
+     "weight": -0.05,
+     "final": -0.05
+    },
+    {
+     "name": "angular_momentum",
+     "func": "angular_momentum_penalty",
+     "weight": -0.02,
+     "final": -0.02
+    },
+    {
+     "name": "action_rate_l2",
+     "func": "action_rate_l2",
+     "weight": -1.0,
+     "final": -2.0
+    },
+    {
+     "name": "com_height_target",
+     "func": "com_height_target",
+     "weight": 2.0,
+     "final": 2.0
+    },
+    {
+     "name": "self_collisions",
+     "func": "self_collision_cost",
+     "weight": -1.0,
+     "final": -1.0
+    },
+    {
+     "name": "feet_flat",
+     "func": "feet_flat_penalty",
+     "weight": -2.0,
+     "final": -2.0
+    },
+    {
+     "name": "neck_action_rate_l2",
+     "func": "neck_action_rate_l2",
+     "weight": -0.5,
+     "final": -0.5
+    },
+    {
+     "name": "neck_joint_pos_l2",
+     "func": "neck_joint_pos_l2",
+     "weight": -0.5,
+     "final": -0.5
+    },
+    {
+     "name": "joint_torques_l2",
+     "func": "joint_torques_l2",
+     "weight": -0.001,
+     "final": -0.001
+    },
+    {
+     "name": "action_over_limit",
+     "func": "action_over_limit_penalty",
+     "weight": -0.5,
+     "final": -0.5
+    },
+    {
+     "name": "hip_roll_neutral",
+     "func": "joint_deviation_l1",
+     "weight": -2.0,
+     "final": -2.0
+    },
+    {
+     "name": "wheel_speed",
+     "func": "wheel_speed_reward",
+     "weight": 10.0,
+     "final": 10.0
+    },
+    {
+     "name": "braking",
+     "func": "braking_reward",
+     "weight": 1.0,
+     "final": 1.0
+    },
+    {
+     "name": "skating_air_time",
+     "func": "skating_air_time_reward",
+     "weight": 1.5,
+     "final": 1.5
+    },
+    {
+     "name": "glide",
+     "func": "glide_reward",
+     "weight": 4.0,
+     "final": 4.0
+    },
+    {
+     "name": "single_support",
+     "func": "single_support_reward",
+     "weight": 3.0,
+     "final": 3.0
+    },
+    {
+     "name": "gait_symmetry",
+     "func": "gait_symmetry_penalty",
+     "weight": -1.0,
+     "final": -1.0
+    },
+    {
+     "name": "forward_lean",
+     "func": "forward_lean_reward",
+     "weight": 1.5,
+     "final": 1.5
+    },
+    {
+     "name": "heading_hold",
+     "func": "heading_hold_reward",
+     "weight": 1.0,
+     "final": 1.0
+    }
+   ],
+   "commands": {
+    "twist": {
+     "type": "RelativeHeadingVelocityCommandCfg",
+     "ranges": {
+      "lin_vel_x": [
+       -0.5,
+       0.6
+      ],
+      "lin_vel_y": [
+       0.0,
+       0.0
+      ],
+      "ang_vel_z": [
+       0.0,
+       0.0
+      ]
+     }
+    }
+   },
+   "actor_obs": [
+    "base_ang_vel",
+    "projected_gravity",
+    "joint_pos",
+    "joint_vel",
+    "actions",
+    "command",
+    "head_command",
+    "body_command"
+   ],
+   "critic_obs": [
+    "base_lin_vel",
+    "base_ang_vel",
+    "projected_gravity",
+    "joint_pos",
+    "joint_vel",
+    "actions",
+    "command",
+    "foot_air_time",
+    "foot_contact",
+    "foot_contact_forces",
+    "wheel_vel",
+    "head_command",
+    "body_command"
+   ],
+   "terminations": [
+    "time_out",
+    "fell_over",
+    "out_of_terrain_bounds",
+    "nan_state"
+   ],
+   "events": [
+    "reset_base",
+    "reset_robot_joints",
+    "push_robot",
+    "encoder_bias",
+    "base_com",
+    "expand_bam_friction_fields",
+    "reset_action_history",
+    "randomize_wheel_friction",
+    "randomize_com",
+    "randomize_head_com",
+    "randomize_mass_inertia",
+    "randomize_joint_friction",
+    "randomize_armature"
+   ],
+   "curriculum": [
+    "action_rate_weight",
+    "wheel_friction",
+    "com_range",
+    "head_com_range"
+   ],
+   "ppo": {
+    "experiment": "velocity_rollers",
+    "max_iterations": 50000,
+    "steps_per_env": 24,
+    "hidden": [
+     512,
+     256,
+     128
+    ],
+    "learning_rate": 0.001,
+    "gamma": 0.99,
+    "lam": 0.95,
+    "entropy": 0.03,
+    "clip": 0.2,
+    "symmetry": false
+   }
+  },
+  {
+   "id": "Mjlab-Velocity-Rough-Backlash-MicroDuck",
+   "base": "Mjlab-Velocity-Rough-MicroDuck",
+   "robot_xml": "robot_walk_backlash.xml"
+  },
+  {
+   "id": "Mjlab-Velocity-Rough-MicroDuck",
+   "terrain": "rough",
+   "robot_xml": "robot_walk.xml",
+   "other_entities": [],
+   "episode_s": 20.0,
+   "control_hz": 50,
+   "rewards": [
+    {
+     "name": "track_linear_velocity",
+     "func": "track_linear_velocity",
+     "weight": 2.0,
+     "final": 2.0
+    },
+    {
+     "name": "track_angular_velocity",
+     "func": "track_angular_velocity",
+     "weight": 2.0,
+     "final": 2.0
+    },
+    {
+     "name": "upright",
+     "func": "upright",
+     "weight": 2.0,
+     "final": 2.0
+    },
+    {
+     "name": "pose",
+     "func": "variable_posture",
+     "weight": 1.0,
+     "final": 1.0
+    },
+    {
+     "name": "body_ang_vel",
+     "func": "body_angular_velocity_penalty",
+     "weight": -0.05,
+     "final": -0.05
+    },
+    {
+     "name": "angular_momentum",
+     "func": "angular_momentum_penalty",
+     "weight": -0.02,
+     "final": -0.02
+    },
+    {
+     "name": "dof_pos_limits",
+     "func": "joint_pos_limits",
+     "weight": -1.0,
+     "final": -1.0
+    },
+    {
+     "name": "action_rate_l2",
+     "func": "action_rate_l2",
+     "weight": -0.1,
+     "final": -1.0
+    },
+    {
+     "name": "air_time",
+     "func": "feet_air_time",
+     "weight": 3.0,
+     "final": 3.0
+    },
+    {
+     "name": "foot_clearance",
+     "func": "feet_clearance",
+     "weight": -2.0,
+     "final": -2.0
+    },
+    {
+     "name": "foot_swing_height",
+     "func": "feet_swing_height",
+     "weight": -0.25,
+     "final": -0.25
+    },
+    {
+     "name": "foot_slip",
+     "func": "feet_slip",
+     "weight": -0.1,
+     "final": -0.1
+    },
+    {
+     "name": "self_collisions",
+     "func": "self_collision_cost",
+     "weight": -1.0,
+     "final": -1.0
+    },
+    {
+     "name": "head_pose_tracking",
+     "func": "head_pose_tracking",
+     "weight": 2.0,
+     "final": 2.0
+    },
+    {
+     "name": "body_pose_tracking",
+     "func": "body_pose_tracking_6d",
+     "weight": 0.0,
+     "final": 0.0
+    },
+    {
+     "name": "head_pose_bias",
+     "func": "head_pose_bias_penalty",
+     "weight": 0.0,
+     "final": 3.0
+    }
+   ],
+   "commands": {
+    "twist": {
+     "type": "VelocityCommandCommandOnlyCfg",
+     "ranges": {
+      "lin_vel_x": [
+       -0.4,
+       0.4
+      ],
+      "lin_vel_y": [
+       -0.3,
+       0.3
+      ],
+      "ang_vel_z": [
+       -1.0,
+       1.0
+      ],
+      "heading": [
+       -3.141592653589793,
+       3.141592653589793
+      ]
+     }
+    },
+    "head_pose": {
+     "type": "UniformPoseCommandCfg",
+     "ranges": {
+      "range": [
+       [
+        -0.05,
+        0.05
+       ],
+       [
+        -0.05,
+        0.05
+       ],
+       [
+        -0.07,
+        0.07
+       ],
+       [
+        -0.015,
+        0.015
+       ]
+      ]
+     }
+    },
+    "body_pose": {
+     "type": "UniformPoseCommandCfg",
+     "ranges": {
+      "range": [
+       [
+        -0.005,
+        0.005
+       ],
+       [
+        -0.005,
+        0.005
+       ],
+       [
+        -0.005,
+        0.005
+       ],
+       [
+        -0.05,
+        0.05
+       ],
+       [
+        -0.05,
+        0.05
+       ],
+       [
+        -0.05,
+        0.05
+       ]
+      ]
+     }
+    }
+   },
+   "actor_obs": [
+    "base_ang_vel",
+    "projected_gravity",
+    "joint_pos",
+    "joint_vel",
+    "actions",
+    "command",
+    "head_command",
+    "body_command"
+   ],
+   "critic_obs": [
+    "base_lin_vel",
+    "base_ang_vel",
+    "projected_gravity",
+    "joint_pos",
+    "joint_vel",
+    "actions",
+    "command",
+    "foot_height",
+    "foot_air_time",
+    "foot_contact",
+    "foot_contact_forces",
+    "head_command",
+    "body_command"
+   ],
+   "terminations": [
+    "time_out",
+    "fell_over",
+    "out_of_terrain_bounds",
+    "nan_state"
+   ],
+   "events": [
+    "reset_base",
+    "reset_robot_joints",
+    "push_robot",
+    "foot_friction",
+    "encoder_bias",
+    "base_com",
+    "expand_bam_friction_fields",
+    "reset_action_history",
+    "randomize_com",
+    "randomize_head_com",
+    "randomize_mass_inertia",
+    "randomize_joint_friction",
+    "randomize_armature"
+   ],
+   "curriculum": [
+    "terrain_levels",
+    "action_rate_weight",
+    "standing_envs",
+    "head_pose_range",
+    "body_pose_range",
+    "com_range",
+    "head_com_range",
+    "head_pose_bias_weight"
+   ],
+   "ppo": {
+    "experiment": "velocity",
+    "max_iterations": 50000,
+    "steps_per_env": 24,
+    "hidden": [
+     512,
+     256,
+     128
+    ],
+    "learning_rate": 0.001,
+    "gamma": 0.99,
+    "lam": 0.95,
+    "entropy": 0.01,
+    "clip": 0.2,
+    "symmetry": false
+   }
+  },
+  {
+   "id": "Mjlab-Velocity-Swizzle-Backlash-MicroDuck",
+   "base": "Mjlab-Velocity-Swizzle-MicroDuck",
+   "robot_xml": "robot_groundcontact_rollers_backlash.xml"
+  },
+  {
+   "id": "Mjlab-Velocity-Swizzle-MicroDuck",
+   "terrain": "flat",
+   "robot_xml": "robot_groundcontact_rollers.xml",
+   "other_entities": [],
+   "episode_s": 20.0,
+   "control_hz": 50,
+   "rewards": [
+    {
+     "name": "upright",
+     "func": "upright",
+     "weight": 2.0,
+     "final": 2.0
+    },
+    {
+     "name": "pose",
+     "func": "variable_posture",
+     "weight": 2.0,
+     "final": 2.0
+    },
+    {
+     "name": "body_ang_vel",
+     "func": "body_angular_velocity_penalty",
+     "weight": -0.05,
+     "final": -0.05
+    },
+    {
+     "name": "angular_momentum",
+     "func": "angular_momentum_penalty",
+     "weight": -0.02,
+     "final": -0.02
+    },
+    {
+     "name": "action_rate_l2",
+     "func": "action_rate_l2",
+     "weight": -1.0,
+     "final": -2.0
+    },
+    {
+     "name": "com_height_target",
+     "func": "com_height_target",
+     "weight": 2.0,
+     "final": 2.0
+    },
+    {
+     "name": "self_collisions",
+     "func": "self_collision_cost",
+     "weight": -1.0,
+     "final": -1.0
+    },
+    {
+     "name": "feet_flat",
+     "func": "feet_flat_penalty",
+     "weight": -2.0,
+     "final": -2.0
+    },
+    {
+     "name": "neck_action_rate_l2",
+     "func": "neck_action_rate_l2",
+     "weight": -0.5,
+     "final": -0.5
+    },
+    {
+     "name": "joint_torques_l2",
+     "func": "joint_torques_l2",
+     "weight": -0.001,
+     "final": -0.001
+    },
+    {
+     "name": "action_over_limit",
+     "func": "action_over_limit_penalty",
+     "weight": -0.5,
+     "final": -0.5
+    },
+    {
+     "name": "wheel_speed",
+     "func": "wheel_speed_reward",
+     "weight": 10.0,
+     "final": 10.0
+    },
+    {
+     "name": "forward_lean",
+     "func": "forward_lean_reward",
+     "weight": 1.5,
+     "final": 1.5
+    },
+    {
+     "name": "heading_hold",
+     "func": "heading_hold_reward",
+     "weight": 1.0,
+     "final": 0.0
+    },
+    {
+     "name": "leg_symmetry",
+     "func": "leg_symmetry_reward",
+     "weight": 2.0,
+     "final": 2.0
+    },
+    {
+     "name": "grounded",
+     "func": "grounded_reward",
+     "weight": 1.0,
+     "final": 1.0
+    },
+    {
+     "name": "heading_tracking",
+     "func": "heading_tracking_reward",
+     "weight": 0.0,
+     "final": 3.0
+    },
+    {
+     "name": "head_pose_tracking",
+     "func": "head_pose_tracking",
+     "weight": 0.0,
+     "final": 4.0
+    }
+   ],
+   "commands": {
+    "twist": {
+     "type": "RelativeHeadingVelocityCommandCfg",
+     "ranges": {
+      "lin_vel_x": [
+       -0.6,
+       0.6
+      ],
+      "lin_vel_y": [
+       0.0,
+       0.0
+      ],
+      "ang_vel_z": [
+       -0.5,
+       0.5
+      ]
+     }
+    },
+    "head_pose": {
+     "type": "UniformPoseCommandCfg",
+     "ranges": {
+      "range": [
+       [
+        -0.05,
+        0.05
+       ],
+       [
+        -0.05,
+        0.05
+       ],
+       [
+        -0.07,
+        0.07
+       ],
+       [
+        -0.015,
+        0.015
+       ]
+      ]
+     }
+    }
+   },
+   "actor_obs": [
+    "base_ang_vel",
+    "projected_gravity",
+    "joint_pos",
+    "joint_vel",
+    "actions",
+    "command",
+    "head_command",
+    "body_command"
+   ],
+   "critic_obs": [
+    "base_lin_vel",
+    "base_ang_vel",
+    "projected_gravity",
+    "joint_pos",
+    "joint_vel",
+    "actions",
+    "command",
+    "foot_air_time",
+    "foot_contact",
+    "foot_contact_forces",
+    "wheel_vel",
+    "head_command",
+    "body_command"
+   ],
+   "terminations": [
+    "time_out",
+    "fell_over",
+    "out_of_terrain_bounds",
+    "nan_state"
+   ],
+   "events": [
+    "reset_base",
+    "reset_robot_joints",
+    "push_robot",
+    "encoder_bias",
+    "base_com",
+    "expand_bam_friction_fields",
+    "reset_action_history",
+    "randomize_wheel_friction",
+    "randomize_com",
+    "randomize_head_com",
+    "randomize_mass_inertia",
+    "randomize_joint_friction",
+    "randomize_armature"
+   ],
+   "curriculum": [
+    "action_rate_weight",
+    "wheel_friction",
+    "com_range",
+    "head_com_range",
+    "heading_hold_weight",
+    "heading_tracking_weight",
+    "head_pose_tracking_weight",
+    "head_pose_range"
+   ],
+   "ppo": {
+    "experiment": "velocity_swizzle",
+    "max_iterations": 50000,
+    "steps_per_env": 24,
+    "hidden": [
+     512,
+     256,
+     128
+    ],
+    "learning_rate": 0.001,
+    "gamma": 0.99,
+    "lam": 0.95,
+    "entropy": 0.03,
+    "clip": 0.2,
+    "symmetry": false
+   }
+  }
+ ]
+}
