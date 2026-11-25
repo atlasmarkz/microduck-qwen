@@ -208,16 +208,27 @@ def quantize_demo_frame(canvas, colors=128):
     return extended.quantize(colors=colors, dither=Image.Dither.NONE).crop((0, 0, w, h))
 
 
+def frame_durations(timestamps, speed, final_hold_ms=1500):
+    """Display time of each frame in milliseconds, scaled by the playback speed."""
+    return [max(40, round((b - a) * 1000 / speed / 10) * 10) for a, b in zip(timestamps, timestamps[1:])] + [final_hold_ms]
+
+
+def save_demo_webp(frames, timestamps, output_path, *, speed=5, final_hold_ms=1500, quality=55):
+    """The same clip as an animated WebP, about a tenth of the GIF, small enough to embed in a notebook."""
+    output = Path(output_path)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    frames[0].save(output, save_all=True, append_images=frames[1:], loop=0, quality=quality, method=4,
+                   duration=frame_durations(timestamps, speed, final_hold_ms))
+    return {"path": str(output), "frames": len(frames), "size_bytes": output.stat().st_size}
+
+
 def save_demo_gif(frames, timestamps, output_path, *, speed=5, final_hold_ms=1500):
     """Encode quantized PIL frames into an animated GIF with accurate speed-scaled timing."""
     if not frames:
         raise ValueError("No frames to save")
     output = Path(output_path)
     output.parent.mkdir(parents=True, exist_ok=True)
-    durations = [
-        max(40, round((b - a) * 1000 / speed / 10) * 10)
-        for a, b in zip(timestamps, timestamps[1:])
-    ] + [final_hold_ms]
+    durations = frame_durations(timestamps, speed, final_hold_ms)
     frames[0].save(
         output,
         save_all=True,

@@ -958,11 +958,11 @@ def record_colab_gif(
     drive_folder="microduck-qwen",
 ):
     """Run one clean episode and export the 1220x650 third-person + PiP trajectory README GIF."""
-    from IPython.display import Image as IPyImage, display
+    from IPython.display import HTML, display
     from PIL import Image
 
     from .agent import run_instruction
-    from .demo_gif import compose_demo_frame, quantize_demo_frame, save_demo_gif
+    from .demo_gif import compose_demo_frame, quantize_demo_frame, save_demo_gif, save_demo_webp
     from .navigation import Observer
 
     _close_previous_console()
@@ -1044,7 +1044,7 @@ def record_colab_gif(
         worker.shutdown(wait=False, cancel_futures=True)
 
     print(f"正在合成 {len(raw_frames)} 帧第三视角 README GIF…", flush=True)
-    composed, timestamps = [], []
+    composed, previews, timestamps = [], [], []
     for item in raw_frames:
         spec_img = Image.open(io.BytesIO(item["spectator_jpg"])).convert("RGB")
         cam_img = Image.open(io.BytesIO(item["camera_jpg"])).convert("RGB")
@@ -1054,6 +1054,7 @@ def record_colab_gif(
             speed=speed, done=item["done"],
         )
         composed.append(quantize_demo_frame(canvas, colors=128))
+        previews.append(canvas.convert("RGB").resize((canvas.width * 7 // 10, canvas.height * 7 // 10), Image.LANCZOS))
         timestamps.append(item["elapsed"])
 
     gif_info = save_demo_gif(composed, timestamps, output_path, speed=speed)
@@ -1069,8 +1070,11 @@ def record_colab_gif(
     print(f"GIF 导出完成：{gif_info['path']} ({gif_info['frames']} 帧, {size_mb:.2f} MB, {gif_info['duration_s']}s)")
     if drive_dest:
         print(f"已同步保存到 Google Drive：{drive_dest}")
-    display(IPyImage(filename=gif_info["path"]))
-    return {"report": report, "gif": gif_info}
+    # The GIF is tens of MB, more than Colab saves in a notebook; the output embeds a small WebP instead.
+    preview = save_demo_webp(previews, timestamps, Path(output_path).with_suffix(".webp"), speed=speed)
+    data = base64.b64encode(Path(preview["path"]).read_bytes()).decode()
+    display(HTML(f'<img alt="{html.escape(instruction)}" width="854" style="max-width:100%" src="data:image/webp;base64,{data}">'))
+    return {"report": report, "gif": gif_info, "preview": preview}
 
 
 def live_demo(planner, instruction=DEMO_INSTRUCTION, seed=DEMO_SEED):

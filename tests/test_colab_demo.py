@@ -106,6 +106,9 @@ class ColabDemoTests(unittest.TestCase):
                 self.assertTrue(gif.is_animated)
                 self.assertEqual(gif.size, (1220, 650))
                 self.assertEqual(gif.n_frames, 3)
+            preview = demo_gif.save_demo_webp([spec, cam.resize(spec.size), spec], [0.0, 1.0, 2.0], Path(tmp) / "demo.webp", speed=5)
+            with Image.open(preview["path"]) as clip:
+                self.assertEqual(clip.n_frames, 3)
 
 
 if __name__ == "__main__":
