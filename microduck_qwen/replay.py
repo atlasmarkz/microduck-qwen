@@ -336,7 +336,7 @@ def totals(scores, keys):
 
 
 IMAGES = "https://raw.githubusercontent.com/atlasmarkz/microduck-qwen/main/assets/replay/"
-NOTEBOOK = ROOT / "notebooks/microduck-live-demo.ipynb"
+NOTEBOOK = ROOT / "notebooks/microduck-qwen-live-demo.ipynb"
 CELL = "replay-results"
 
 

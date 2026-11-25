@@ -14,7 +14,7 @@ from microduck_qwen import ROOT, colab_demo, demo_gif, explore
 
 class ColabDemoTests(unittest.TestCase):
     def test_notebooks_are_valid_json_and_python_cells_parse(self):
-        for name in ("microduck-live-demo.ipynb", "microduck-baseline.ipynb"):
+        for name in ("microduck-qwen-live-demo.ipynb", "microduck-baseline.ipynb"):
             path = ROOT / "notebooks" / name
             notebook = json.loads(path.read_text(encoding="utf-8"))
             self.assertEqual(notebook["nbformat"], 4)
