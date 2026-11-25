@@ -26,7 +26,7 @@ Qwen3-VL 看图选择下一步技能，MuJoCo 中的规划器和官方步态负�
 | [官方 MicroDuck](https://colab.research.google.com/github/atlasmarkz/microduck-qwen/blob/main/notebooks/microduck-baseline.ipynb) | 只展示官方内容：原始仓库介绍、33 个 RL 任务的奖励与训练配置、在仿真里实跑 10 个官方策略，以及方向键试驾官方步态的遥控台 | Colab GPU 渲染（没有 GPU 时自动用 CPU），无需模型权重 |
 | [MicroDuck × Qwen-VL](https://colab.research.google.com/github/atlasmarkz/microduck-qwen/blob/main/notebooks/microduck-qwen-live-demo.ipynb) | 用自然语言控制机器人：打开就能看 8 个任务、四种控制方式的对照实录；再往下可实时用中文指挥，支持连续对话和中途追问，同屏看第三视角、模型第一视角与轨迹 | 对照实录无需运行；实时控制需 Colab GPU，首次下载约 9 GB |
 
-两份 Notebook 使用同一个 2×2 场景。2026-11-20 在全新的 Colab T4 运行时上从头运行：默认任务连续两轮完成 `explore → approach → return_home → done`，每步模型决策约 1.3–2.1 秒，安装与下载共约 5 分钟。基线版在 Colab CPU 上手动动作 10/10 完成。第 1 格会打印 OpenGL 渲染器，GPU 运行时应显示 `Tesla T4` 等显卡名，显示 `llvmpipe` 说明退回了软件渲染。会议演示前，先跑完预热，再执行一轮默认任务。
+两份 Notebook 使用同一个 2×2 场景。2026-11-20 在全新的 Colab T4 运行时上从头运行：默认任务连续两轮完成 `explore → approach → return_home → done`，每步模型决策约 1.3–2.1 秒，安装与下载共约 5 分钟。基线版在 Colab CPU 上手动动作 10/10 完成。2026-11-25 在新的 T4 会话上复查两份改版后的 Notebook：默认任务约 2 分钟完成，距起点 8 cm；10 个官方策略全部跑通；控制台在屏幕内约每秒刷新 6–7 次（3 路轮询时测得）。第 1 格会打印 OpenGL 渲染器，GPU 运行时应显示 `Tesla T4` 等显卡名，显示 `llvmpipe` 说明退回了软件渲染。会议演示前，先跑完预热，再执行一轮默认任务。
 
 ## 系统如何工作
 
