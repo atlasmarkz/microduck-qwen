@@ -145,7 +145,7 @@ def fetch_policy(name):
 class Stage:
     """One duck on an official scene with BAM motors, driven by whichever policy is active."""
 
-    def __init__(self, scene, rl=DEFAULT_RL):
+    def __init__(self, scene, rl=DEFAULT_RL, edit=None):
         import mujoco
         import numpy as np
         from bam.model import load_model
@@ -153,6 +153,8 @@ class Stage:
 
         self.mj, self.np = mujoco, np
         spec = mujoco.MjSpec.from_file(str(rl / SCENES / scene))
+        if edit is not None:
+            edit(spec)
         motor = load_model(motor_name="xl330", model="m6")
         motor.actuator.kp, motor.actuator.vin, motor.actuator.max_current = 200.0, 7.4, None
         limit = motor.actuator.vin * motor.kt.value / motor.R.value

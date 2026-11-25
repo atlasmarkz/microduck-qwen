@@ -132,8 +132,9 @@ class AudienceFeed:
 class SimSession:
     """Persistent headless MuJoCo simulator with async physics and 15 Hz spectator camera."""
 
-    def __init__(self, seed=DEMO_SEED):
+    def __init__(self, seed=DEMO_SEED, module="microduck_qwen.sim_native", extra=()):
         self.seed = int(seed)
+        self._module, self._extra = module, tuple(extra)
         self._lock = threading.Lock()
         self._tempdir = None
         self._process = None
@@ -157,7 +158,7 @@ class SimSession:
         log_path = directory / "simulator.log"
         port, control_port = _free_port_pair()
         command = [
-            sys.executable, "-u", "-m", "microduck_qwen.sim_native", "--vision",
+            sys.executable, "-u", "-m", self._module, *self._extra, "--vision",
             "--world", "2", "2", "--seed", str(seed), "--manifest", str(manifest),
             "--port", str(port), "--control-port", str(control_port),
             "--async-physics", "--spectator",
@@ -293,9 +294,9 @@ class SimSession:
 
 
 @contextmanager
-def simulation(seed):
+def simulation(seed, module="microduck_qwen.sim_native", extra=()):
     """Start the headless simulator, then stop it on success, failure or interruption."""
-    session = SimSession(seed=seed)
+    session = SimSession(seed=seed, module=module, extra=extra)
     try:
         yield session.info
     finally:
