@@ -1,0 +1,442 @@
+{
+ "uncut": false,
+ "tasks": 80,
+ "totals": {
+  "raw": {
+   "fail": 80
+  },
+  "frozen": {
+   "cut": 49,
+   "success": 27,
+   "fail": 4
+  },
+  "frozterm": {
+   "success": 68,
+   "cut": 11,
+   "fail": 1
+  },
+  "lora": {
+   "success": 74,
+   "cut": 3,
+   "fail": 3
+  }
+ },
+ "clips": [
+  {
+   "seed": 99200,
+   "task": 3,
+   "type": "走近并返回",
+   "instruction": "靠近照片里最左侧的球，之后返回起点",
+   "file": "task-1.webp",
+   "speed": 19.1,
+   "frames": 124,
+   "bytes": 1381920,
+   "arms": [
+    {
+     "label": "① 裸 Qwen：只有基本动作",
+     "outcome": "fail",
+     "badge": "失败：40 次决策用完，没有结束任务",
+     "decisions": 40,
+     "posed": false,
+     "motion_s": 61.0
+    },
+    {
+     "label": "② 加技能框架",
+     "outcome": "cut",
+     "badge": "评测在此截断：与参考动作不同",
+     "decisions": 3,
+     "posed": false,
+     "motion_s": 28.4
+    },
+    {
+     "label": "③ 再加结束规则",
+     "outcome": "success",
+     "badge": "成功：任务完成",
+     "decisions": 3,
+     "posed": false,
+     "motion_s": 21.5
+    },
+    {
+     "label": "④ 再加 LoRA（完整系统）",
+     "outcome": "success",
+     "badge": "成功：任务完成",
+     "decisions": 3,
+     "posed": false,
+     "motion_s": 21.4
+    }
+   ],
+   "pattern": [
+    "fail",
+    "cut",
+    "success",
+    "success"
+   ],
+   "pattern_count": 39,
+   "why": "该结果组合的第一题"
+  },
+  {
+   "seed": 99200,
+   "task": 4,
+   "type": "定距移动",
+   "instruction": "往前移动20厘米",
+   "file": "task-2.webp",
+   "speed": 3.2,
+   "frames": 124,
+   "bytes": 764548,
+   "arms": [
+    {
+     "label": "① 裸 Qwen：只有基本动作",
+     "outcome": "fail",
+     "badge": "失败：40 次决策用完，没有结束任务",
+     "decisions": 40,
+     "posed": false,
+     "motion_s": 6.8
+    },
+    {
+     "label": "② 加技能框架",
+     "outcome": "cut",
+     "badge": "评测在此截断：与参考动作不同",
+     "decisions": 2,
+     "posed": false,
+     "motion_s": 4.5
+    },
+    {
+     "label": "③ 再加结束规则",
+     "outcome": "success",
+     "badge": "成功：任务完成",
+     "decisions": 2,
+     "posed": false,
+     "motion_s": 2.3
+    },
+    {
+     "label": "④ 再加 LoRA（完整系统）",
+     "outcome": "success",
+     "badge": "成功：任务完成",
+     "decisions": 2,
+     "posed": false,
+     "motion_s": 2.2
+    }
+   ],
+   "pattern": [
+    "fail",
+    "cut",
+    "success",
+    "success"
+   ],
+   "pattern_count": 39,
+   "why": "最常见组合中的另一类任务"
+  },
+  {
+   "seed": 99200,
+   "task": 201,
+   "type": "跨房间找球",
+   "instruction": "在别处找到红球并靠近它，之后返回出发点",
+   "file": "task-3.webp",
+   "speed": 19.3,
+   "frames": 120,
+   "bytes": 1745792,
+   "arms": [
+    {
+     "label": "① 裸 Qwen：只有基本动作",
+     "outcome": "fail",
+     "badge": "失败：前方不安全，已停车",
+     "decisions": 12,
+     "posed": false,
+     "motion_s": 20.1
+    },
+    {
+     "label": "② 加技能框架",
+     "outcome": "cut",
+     "badge": "评测在此截断：与参考动作不同",
+     "decisions": 4,
+     "posed": false,
+     "motion_s": 212.3
+    },
+    {
+     "label": "③ 再加结束规则",
+     "outcome": "success",
+     "badge": "成功：任务完成",
+     "decisions": 4,
+     "posed": false,
+     "motion_s": 101.7
+    },
+    {
+     "label": "④ 再加 LoRA（完整系统）",
+     "outcome": "success",
+     "badge": "成功：任务完成",
+     "decisions": 4,
+     "posed": false,
+     "motion_s": 106.1
+    }
+   ],
+   "pattern": [
+    "fail",
+    "cut",
+    "success",
+    "success"
+   ],
+   "pattern_count": 39,
+   "why": "最常见组合中的另一类任务"
+  },
+  {
+   "seed": 99201,
+   "task": 200,
+   "type": "跨房间找球",
+   "instruction": "拜托你旁边房间里有那个绿色的球儿，过去，到了停下吧",
+   "file": "task-4.webp",
+   "speed": 3.8,
+   "frames": 112,
+   "bytes": 1541042,
+   "arms": [
+    {
+     "label": "① 裸 Qwen：只有基本动作",
+     "outcome": "fail",
+     "badge": "失败：输出无法执行",
+     "decisions": 1,
+     "posed": false,
+     "motion_s": 0
+    },
+    {
+     "label": "② 加技能框架",
+     "outcome": "success",
+     "badge": "成功：到位停下",
+     "decisions": 3,
+     "posed": false,
+     "motion_s": 41.8
+    },
+    {
+     "label": "③ 再加结束规则",
+     "outcome": "success",
+     "badge": "成功：到位停下",
+     "decisions": 3,
+     "posed": false,
+     "motion_s": 39.9
+    },
+    {
+     "label": "④ 再加 LoRA（完整系统）",
+     "outcome": "success",
+     "badge": "成功：到位停下",
+     "decisions": 3,
+     "posed": false,
+     "motion_s": 40.2
+    }
+   ],
+   "pattern": [
+    "fail",
+    "success",
+    "success",
+    "success"
+   ],
+   "pattern_count": 22,
+   "why": "该结果组合的第一题"
+  },
+  {
+   "seed": 99200,
+   "task": 200,
+   "type": "跨房间找球",
+   "instruction": "旁边房间里有那个红色的球儿，过去！",
+   "file": "task-5.webp",
+   "speed": 12.9,
+   "frames": 112,
+   "bytes": 1205442,
+   "arms": [
+    {
+     "label": "① 裸 Qwen：只有基本动作",
+     "outcome": "fail",
+     "badge": "失败：前方不安全，已停车",
+     "decisions": 11,
+     "posed": false,
+     "motion_s": 12.6
+    },
+    {
+     "label": "② 加技能框架",
+     "outcome": "cut",
+     "badge": "评测在此截断：与参考动作不同",
+     "decisions": 1,
+     "posed": false,
+     "motion_s": 0
+    },
+    {
+     "label": "③ 再加结束规则",
+     "outcome": "cut",
+     "badge": "评测在此截断：与参考动作不同",
+     "decisions": 1,
+     "posed": false,
+     "motion_s": 0
+    },
+    {
+     "label": "④ 再加 LoRA（完整系统）",
+     "outcome": "success",
+     "badge": "成功：任务完成",
+     "decisions": 3,
+     "posed": false,
+     "motion_s": 141.9
+    }
+   ],
+   "pattern": [
+    "fail",
+    "cut",
+    "cut",
+    "success"
+   ],
+   "pattern_count": 7,
+   "why": "该结果组合的第一题"
+  },
+  {
+   "seed": 99301,
+   "task": 3,
+   "type": "走近并返回",
+   "instruction": "靠近照片里最左侧的球，之后返回起点",
+   "file": "task-6.webp",
+   "speed": 3.9,
+   "frames": 124,
+   "bytes": 1673056,
+   "arms": [
+    {
+     "label": "① 裸 Qwen：只有基本动作",
+     "outcome": "fail",
+     "badge": "失败：输出无法执行",
+     "decisions": 12,
+     "posed": false,
+     "motion_s": 22.1
+    },
+    {
+     "label": "② 加技能框架",
+     "outcome": "fail",
+     "badge": "失败：技能没有执行成功",
+     "decisions": 1,
+     "posed": false,
+     "motion_s": 8.7
+    },
+    {
+     "label": "③ 再加结束规则",
+     "outcome": "success",
+     "badge": "成功：任务完成",
+     "decisions": 3,
+     "posed": false,
+     "motion_s": 34.0
+    },
+    {
+     "label": "④ 再加 LoRA（完整系统）",
+     "outcome": "success",
+     "badge": "成功：任务完成",
+     "decisions": 3,
+     "posed": false,
+     "motion_s": 33.5
+    }
+   ],
+   "pattern": [
+    "fail",
+    "fail",
+    "success",
+    "success"
+   ],
+   "pattern_count": 3,
+   "why": "该结果组合的第一题"
+  },
+  {
+   "seed": 99207,
+   "task": 200,
+   "type": "跨房间找球",
+   "instruction": "please the green ball is in another room, go next to it, and hold still after that",
+   "file": "task-7.webp",
+   "speed": 40.0,
+   "frames": 124,
+   "bytes": 1458506,
+   "arms": [
+    {
+     "label": "① 裸 Qwen：只有基本动作",
+     "outcome": "fail",
+     "badge": "失败：40 次决策用完，没有结束任务",
+     "decisions": 40,
+     "posed": false,
+     "motion_s": 89.4
+    },
+    {
+     "label": "② 加技能框架",
+     "outcome": "success",
+     "badge": "成功：到位停下",
+     "decisions": 3,
+     "posed": false,
+     "motion_s": 137.5
+    },
+    {
+     "label": "③ 再加结束规则",
+     "outcome": "success",
+     "badge": "成功：到位停下",
+     "decisions": 3,
+     "posed": false,
+     "motion_s": 126.1
+    },
+    {
+     "label": "④ 再加 LoRA（完整系统）",
+     "outcome": "fail",
+     "badge": "失败：反问用户，没有完成任务",
+     "decisions": 1,
+     "posed": false,
+     "motion_s": 0
+    }
+   ],
+   "pattern": [
+    "fail",
+    "success",
+    "success",
+    "fail"
+   ],
+   "pattern_count": 2,
+   "why": "该结果组合的第一题"
+  },
+  {
+   "seed": 99201,
+   "task": 201,
+   "type": "跨房间找球",
+   "instruction": "旁边房间里有那个绿色的球儿，过去吧",
+   "file": "task-8.webp",
+   "speed": 11.8,
+   "frames": 124,
+   "bytes": 1252582,
+   "arms": [
+    {
+     "label": "① 裸 Qwen：只有基本动作",
+     "outcome": "fail",
+     "badge": "失败：40 次决策用完，没有结束任务",
+     "decisions": 40,
+     "posed": false,
+     "motion_s": 37.6
+    },
+    {
+     "label": "② 加技能框架",
+     "outcome": "cut",
+     "badge": "评测在此截断：与参考动作不同",
+     "decisions": 1,
+     "posed": false,
+     "motion_s": 31.4
+    },
+    {
+     "label": "③ 再加结束规则",
+     "outcome": "cut",
+     "badge": "评测在此截断：参考动作无法给出",
+     "decisions": 1,
+     "posed": false,
+     "motion_s": 0
+    },
+    {
+     "label": "④ 再加 LoRA（完整系统）",
+     "outcome": "cut",
+     "badge": "评测在此截断：参考动作无法给出",
+     "decisions": 1,
+     "posed": false,
+     "motion_s": 0
+    }
+   ],
+   "pattern": [
+    "fail",
+    "cut",
+    "cut",
+    "cut"
+   ],
+   "pattern_count": 1,
+   "why": "完整系统没有成功的题"
+  }
+ ]
+}

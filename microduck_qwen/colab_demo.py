@@ -518,7 +518,7 @@ class InteractiveConsole:
         self._latest_bytes = {}
         self._next_map = 0.0
 
-        title_text = "MicroDuck × Qwen-VL · 交互式实时仿真" if planner is not None else "MicroDuck · 官方步态交互遥控"
+        title_text = "MicroDuck × Qwen-VL · 用中文指挥机器人" if planner is not None else "MicroDuck · 官方步态交互遥控"
         self.title_html = widgets.HTML(f"<h3 style='margin:4px 0 8px 0'>{html.escape(title_text)}</h3>")
         self.seed_input = widgets.IntText(value=int(seed), description="Seed:", layout=widgets.Layout(width="160px"))
         self.reset_btn = widgets.Button(description="重置场景", icon="refresh", button_style="info",
@@ -532,7 +532,7 @@ class InteractiveConsole:
         self.overview_img = widgets.Image(format="jpeg", layout=widgets.Layout(width="255px"))
         self.log_html = widgets.HTML()
 
-        # Manual control widgets (available in both baseline and Qwen modes)
+        # Manual control widgets (shown only in the official baseline console)
         self.dist_slider = widgets.FloatSlider(
             value=0.20, min=0.05, max=0.35, step=0.05, description="步长 (m):",
             readout_format=".2f", layout=widgets.Layout(width="320px"),
@@ -608,12 +608,9 @@ class InteractiveConsole:
                 widgets.HBox([self.prompt_input, self.send_btn], layout=widgets.Layout(gap="8px", margin="8px 0 4px 0")),
                 self.ask_box,
             ])
-            self.tabs = widgets.Tab(children=[qwen_panel, self.manual_panel])
-            self.tabs.set_title(0, "Qwen 中文指挥")
-            self.tabs.set_title(1, "手动遥控（官方步态）")
-            controls = self.tabs
+            language, manual = [qwen_panel], []
         else:
-            controls = self.manual_panel
+            language, manual = [], [self.manual_panel]
 
         header = widgets.HBox(
             [self.seed_input, self.reset_btn, self.stop_btn, self.status_html],
@@ -628,8 +625,9 @@ class InteractiveConsole:
         self.root = widgets.VBox([
             self.title_html,
             header,
+            *language,
             views,
-            controls,
+            *manual,
             widgets.HTML("<div style='font-weight:600;margin-top:8px'>运行日志</div>"),
             self.log_html,
         ], layout=widgets.Layout(max_width="1220px"))
@@ -932,7 +930,7 @@ def _close_previous_console():
 
 
 def interactive_demo(planner, seed=DEMO_SEED):
-    """Launch the interactive ipywidgets console with Qwen chat + manual control."""
+    """Launch the interactive ipywidgets console driven by Chinese instructions."""
     global _ACTIVE_CONSOLE
     _close_previous_console()
     _ACTIVE_CONSOLE = InteractiveConsole(planner=planner, seed=seed)
