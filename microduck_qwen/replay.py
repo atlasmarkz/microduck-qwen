@@ -20,12 +20,13 @@ from pathlib import Path
 from . import ROOT
 from .colab_demo import draw_overview
 from .sim_native import DEFAULT_RL
+from .compare_runs import compare
 from .truth_score import score_run
 
 SEEDS = (99200, 99300)
-# label, cut run, uncut run. The no-harness run never had a teacher cut.
+# label, cut run, uncut run. The no-harness run never had a teacher cut; `free-raw` repeats it with the full pose log.
 ARMS = (
-    ("raw", "① 裸 Qwen：只有基本动作", "raw", "raw"),
+    ("raw", "① 裸 Qwen：只有基本动作", "raw", "free-raw"),
     ("frozen", "② 加技能框架", "frozen", "free-frozen"),
     ("frozterm", "③ 再加结束规则", "frozterm", "free-frozterm"),
     ("lora", "④ 再加 LoRA（完整系统）", "mapoff-v2", "free-lora"),
@@ -330,6 +331,12 @@ def render(key, scores, uncut, path, runs=ROOT / "runs/lang"):
                       "decisions": a["decisions"], "posed": a["posed"], "motion_s": round(a["motion_s"], 1)} for a in arms]}
 
 
+def pair(scores, keys, a, b):
+    """Paired truth comparison of two arms (cuts count as failures)."""
+    r = compare({k: scores[a][k]["verdict"] == OK for k in keys}, {k: scores[b][k]["verdict"] == OK for k in keys})
+    return {"rule_only": r["only_a"], "lora_only": r["only_b"], "p": round(r["mcnemar_p"], 4)}
+
+
 def totals(scores, keys):
     """Success / fail / cut per arm over the tasks every arm was scored on."""
     return {arm[0]: dict(Counter(outcome(scores[arm[0]][k]["verdict"]) for k in keys)) for arm in ARMS}
@@ -362,8 +369,19 @@ def markdown(index):
                   f'![{clip["instruction"]}]({IMAGES}{clip["file"]})', ""]
     lines += ["<small>选题规则：出现不少于 2 次的每种结果组合各取编号最小的一题；再从最常见的组合里补上其他任务类型；最后补完整系统没有成功的题。没有手工挑选。"
               "录像里推理等待压缩为固定停顿，运动按同一倍数加速。</small>", "",
-              "<small>适用范围：仿真、单一 4B 模型、红绿蓝黄四色球的 2×2 房间。③ 的结束规则是看过同一批种子的失败后写的，它和 ④ 的差别在这 80 题上不显著（p=0.18，截断口径）。</small>"]
+              "<small>适用范围：仿真、单一 4B 模型、红绿蓝黄四色球的 2×2 房间。③ 的结束规则是看过同一批种子的失败后写的，尚未用新种子验证。"
+              + rule_vs_lora(index) + "</small>"]
     return "\n".join(lines)
+
+
+def rule_vs_lora(index):
+    pair = index.get("rule_vs_lora")
+    if not pair:
+        return ""
+    better = "④ 多" if pair["lora_only"] > pair["rule_only"] else "③ 多"
+    return (f'③ 和 ④ 逐题配对：只有 ③ 成功 {pair["rule_only"]} 题，只有 ④ 成功 {pair["lora_only"]} 题，'
+            f'差别不显著（McNemar p={pair["p"]:.2f}）。' + ("" if pair["lora_only"] == pair["rule_only"] else
+            f"这批数据里 {better}，但不能据此说哪一种更好。"))
 
 
 def update_notebook(index, path=NOTEBOOK):
@@ -391,7 +409,8 @@ def main():
         clip = render(item["key"], scores, args.uncut, args.out / f"task-{number}.webp")
         clips.append(dict(clip, pattern=item["pattern"], pattern_count=item["count"], why=item["why"]))
         print(json.dumps({k: clip[k] for k in ("file", "frames", "bytes", "speed")}), flush=True)
-    index = {"uncut": args.uncut, "tasks": len(keys), "totals": totals(scores, keys), "clips": clips}
+    index = {"uncut": args.uncut, "tasks": len(keys), "totals": totals(scores, keys), "clips": clips,
+             "rule_vs_lora": pair(scores, keys, "frozterm", "lora")}
     (args.out / "index.json").write_text(json.dumps(index, ensure_ascii=False, indent=1) + "\n", encoding="utf-8", newline="\n")
     update_notebook(index)
 

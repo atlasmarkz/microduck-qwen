@@ -638,3 +638,31 @@ a bounded move but cannot find a ball in another room, cannot navigate back to t
 With the harness the same frozen weights reach 27/80 (74/80 if stopped at the right time), a two-line termination rule gives
 68/80, and the LoRA adapter 74/80. Limits: one prompt and one 4B model; a stronger VLM, a tuned prompt or a longer budget could
 do better on the move and leftmost tasks, but not plausibly close the explore gap (0/48 even with an oracle stop).
+
+## Uncut re-run of all four arms (runs `free-*`, seeds 99200/99300, 2026-11-25)
+
+Question: the three harness arms above were cut at the first deviation from the teacher, so `frozen` (49 cuts) and partly
+`frozterm` (11) were lower bounds. Here every arm runs the deployed loop to its own end (`agent_eval --free-run`, at most 5
+decisions; `raw` keeps its 40), on the same 80 tasks, with a 10 Hz full pose log (`task-XX-states.jsonl`). Pipeline
+`scripts/pipelines/eval-free-run.sh`; same switches as before (`MICRODUCK_MAP_ESCAPE=0`, `MICRODUCK_LEGALITY=0`). No infrastructure
+failures. Scored by `truth_score` (strict equals truth here, since nothing is cut).
+
+| | truth | leftmost + home (16) | move 20 cm (16) | explore (48) | failures |
+|---|---|---|---|---|---|
+| no harness, frozen (`free-raw`) | 0/80 | 0 | 0 | 0 | 54 budget, 14 invalid output, 12 stopped by clearance |
+| harness, frozen (`free-frozen`) | 25/80 | 0 | 0 | 25 | 30 five decisions without `done`/`stop`, 21 skill failures, 4 invalid output |
+| + termination rule (`free-frozterm`) | **77/80** | 16 | 16 | 45 | 3 skill failures |
+| + LoRA (`free-lora`) | 73/80 | 16 | 16 | 41 | 5 skill failures (clearance stop), 2 `clarify` on an English instruction |
+
+Paired, truth: harness vs none 25 vs 0 (p = 6e-8); rule vs frozen 52 vs 0 (p < 1e-15, +65 pp); LoRA vs frozen 51 vs 3
+(p = 3e-12, +60 pp); **rule vs LoRA 5 vs 1, p = 0.22, -5 pp (95% -11..0)**.
+
+Against the cut runs: of the 49 `frozen` tasks cut before, 1 succeeds uncut, so 27 was close to its real level (25 now; 4 earlier
+successes failed this time, run-to-run noise). `frozterm`: 9 of 11 cut tasks succeed uncut. `mapoff-v2` -> `free-lora`: 74 -> 73,
+4 earlier successes now fail, all at a skill (clearance) or a clarify, none at termination.
+
+Reading: the earlier conclusion that the adapter adds about 7 points over the termination rule does not hold uncut. On these
+layouts the adapter's whole gain over the frozen base is a termination behaviour that the two-line rule also supplies, and the
+remaining differences are executor stops, not decisions. The rule was written after looking at failures on these same seeds,
+so this is a dev-seed result for the rule; a test on never-used seeds (and a LoRA + rule arm) is still missing.
+
